@@ -932,11 +932,50 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         foreach (var item in collection)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (item != null && tryAdd(item, 0))
+            ProcessRootObject(item, tryAdd, onRootObjectAdded, cancellationToken, 0);
+        }
+    }
+
+    private static void ProcessRootObject(
+        object? item,
+        TryAddObjectFunc tryAdd,
+        RootObjectCallback onRootObjectAdded,
+        CancellationToken cancellationToken,
+        int tupleDepth)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (item is null || !tryAdd(item, 0))
+        {
+            return;
+        }
+
+        onRootObjectAdded(item);
+
+        // A tuple is an argument container. Its elements retain the same lifecycle ownership
+        // as separate row arguments, including disposable objects without an initializer.
+        // Keep elements at root depth so wrapping a row does not alter initialization order.
+        if (tupleDepth >= MaxRecursionDepth)
+        {
+            return;
+        }
+
+#if NET
+        if (item is System.Runtime.CompilerServices.ITuple tuple)
+        {
+            for (var i = 0; i < tuple.Length; i++)
             {
-                onRootObjectAdded(item);
+                ProcessRootObject(tuple[i], tryAdd, onRootObjectAdded, cancellationToken, tupleDepth + 1);
             }
         }
+#else
+        if (Helpers.TupleHelper.IsTupleType(item))
+        {
+            foreach (var element in Helpers.DataSourceHelpers.UnwrapTupleAot(item))
+            {
+                ProcessRootObject(element, tryAdd, onRootObjectAdded, cancellationToken, tupleDepth + 1);
+            }
+        }
+#endif
     }
 
     #endregion
