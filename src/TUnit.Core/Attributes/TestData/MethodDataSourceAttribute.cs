@@ -95,9 +95,13 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// </remarks>
     public Func<DataGeneratorMetadata, IAsyncEnumerable<Func<Task<object?[]?>>>>? Factory { get; set; }
 
-    /// <summary>Preserves runtime filtering of all-null external generic class rows in generated code.</summary>
+    /// <summary>Suppresses empty inferred generic class sources and filters all-null external rows in generated code.</summary>
+    /// <remarks>
+    /// Set by generated consumer code, which lives in another assembly. Own-class sources retain
+    /// their valid null rows because their declared member types supply the class type arguments.
+    /// </remarks>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public bool FilterNullClassRows { get; set; }
+    public bool FilterClassRows { get; set; }
 
     /// <summary>
     /// Gets or sets the arguments to pass to the data source method.
@@ -165,7 +169,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             await foreach (var func in Factory(dataGeneratorMetadata))
             {
                 factoryYieldedAny = true;
-                if (FilterNullClassRows)
+                if (FilterClassRows)
                 {
                     var row = await func().ConfigureAwait(false);
                     if (row is null)
@@ -174,7 +178,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                     }
 
                     row = GenericClassRowPartition.EvaluateWrappedFactory(row);
-                    if (TestDataRowUnwrapper.UnwrapArray(row).Data.Any(value => value is not null))
+                    if (ClassProvidingDataSource is null || GenericClassRowPartition.HasNonNullValues(row))
                     {
                         // Reuse the value evaluated for filtering only once. Later method rows and
                         // repetitions must call the source factory for fresh constructor data.
@@ -194,7 +198,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
             // An empty source runs the test once with no arguments, like NoDataSource (#2862), unless
             // SkipIfEmpty is set. Same rule as the reflection path below, so both modes agree (#7092).
-            if (!factoryYieldedAny && !SkipIfEmpty && !FilterNullClassRows)
+            if (!factoryYieldedAny && !SkipIfEmpty && !FilterClassRows)
             {
                 yield return static () => Task.FromResult<object?[]?>([]);
             }

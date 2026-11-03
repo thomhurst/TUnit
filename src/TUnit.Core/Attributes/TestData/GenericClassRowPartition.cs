@@ -80,6 +80,10 @@ public static class GenericClassRowPartition
         return result;
     }
 
+    // External class rows need a runtime value to infer their type arguments in either mode.
+    internal static bool HasNonNullValues(object?[] row) =>
+        TestDataRowUnwrapper.UnwrapArray(row).Data.Any(value => value is not null);
+
     /// <summary>
     /// Invokes the factory of a row holding a <see cref="TestDataRow{T}"/> of <see cref="Func{TResult}"/> once, and
     /// returns a row that wraps its values with the same settings. Inferring the row's type arguments and building its

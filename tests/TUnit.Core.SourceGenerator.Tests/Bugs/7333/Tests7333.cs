@@ -7,7 +7,7 @@ internal class Tests7333 : TestsBase
         "TUnit.TestProject", "Bugs", "_7333", "ClassMethodDataSourceInferenceTests.cs"),
         async generatedFiles =>
         {
-            foreach (var className in new[] { "ExternalRows<int>", "OwnRows<int>", "AsyncFactoryRows<string>", "MultipleSources<int>", "GenericMethod<int>", "MethodRows<int>", "ClassAndMethodSources<int>", "PolymorphicExternalRows<int>", "ExternalArrayRows<int[]>", "ExternalSealedArrayRows<string[]>", "ExternalNestedArrayRows<int[][]>", "CovariantExternalArrayRows<string[]>", "NullableExternalRows<int>", "ExternalNullableArrayRows<int?[]>", "ExternalNullableArrayParameterRows<int?>", "ExternalFreshFactoryRows<global::TUnit.TestProject.Bugs._7333.FreshResource>", "ExternalEmptyValueRows<int>", "ExternalOverloadedConstructorRows<int>" })
+            foreach (var className in new[] { "ExternalRows<int>", "OwnRows<int>", "AsyncFactoryRows<string>", "MultipleSources<int>", "GenericMethod<int>", "MethodRows<int>", "ClassAndMethodSources<int>", "PolymorphicExternalRows<int>", "ExternalArrayRows<int[]>", "ExternalSealedArrayRows<string[]>", "ExternalNestedArrayRows<int[][]>", "CovariantExternalArrayRows<string[]>", "NullableExternalRows<int>", "ExternalNullableArrayRows<int?[]>", "ExternalNullableArrayParameterRows<int?>", "ExternalFreshFactoryRows<global::TUnit.TestProject.Bugs._7333.FreshResource>", "ExternalEmptyValueRows<int>", "ExternalOverloadedConstructorRows<int>", "OwnEmptyValueRows<int>", "OwnNullRows<string>", "UnsealedExternalRows<global::TUnit.TestProject.Bugs._7333.DerivedRow>" })
             {
                 await Assert.That(generatedFiles.Any(file => file.Contains($"global::TUnit.TestProject.Bugs._7333.{className}"))).IsTrue();
             }
@@ -15,6 +15,7 @@ internal class Tests7333 : TestsBase
             await Assert.That(generatedFiles.Any(file => file.Contains("global::TUnit.TestProject.Bugs._7333.PolymorphicExternalRows<global::System.IComparable>"))).IsFalse();
             await Assert.That(generatedFiles.Any(file => file.Contains("global::TUnit.TestProject.Bugs._7333.CovariantExternalArrayRows<object[]>"))).IsFalse();
             await Assert.That(generatedFiles.Any(file => file.Contains("global::TUnit.TestProject.Bugs._7333.NullableExternalRows<int?>"))).IsFalse();
+            await Assert.That(generatedFiles.Any(file => file.Contains("global::TUnit.TestProject.Bugs._7333.UnsealedExternalRows<global::TUnit.TestProject.Bugs._7333.BaseRow>"))).IsFalse();
             await Assert.That(generatedFiles.Any(file => file.Contains("Could not infer the type arguments of generic class 'UninferableOwnRows`1'"))).IsTrue();
         });
 }

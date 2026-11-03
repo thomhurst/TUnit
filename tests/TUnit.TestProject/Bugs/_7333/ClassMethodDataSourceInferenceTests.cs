@@ -334,3 +334,46 @@ public class ExternalOverloadedConstructorRows<T>
 }
 
 #pragma warning restore TUnit0052
+
+// Empty own-class sources add no fallback row, while valid null rows still run.
+[Arguments(1)]
+[MethodDataSource(nameof(Rows))]
+public class OwnEmptyValueRows<T>(T value)
+{
+    public static IEnumerable<int> Rows() => [];
+
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsEqualTo(1);
+}
+
+[MethodDataSource(nameof(Rows))]
+public class OwnNullRows<T>(T value)
+{
+    public static IEnumerable<string?> Rows() => [null];
+
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsNull();
+}
+
+public class BaseRow;
+public sealed class DerivedRow : BaseRow;
+
+public static class UnsealedRows
+{
+    public static IEnumerable<BaseRow> Rows() => [new DerivedRow()];
+}
+
+// An unsealed declared row type cannot replace the runtime type of the derived value.
+[MethodDataSource(nameof(Seeds))]
+[MethodDataSource(typeof(UnsealedRows), nameof(UnsealedRows.Rows))]
+public class UnsealedExternalRows<T>(T value)
+{
+    public static IEnumerable<DerivedRow> Seeds() => [new DerivedRow()];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(DerivedRow));
+        await Assert.That((object?)value).IsTypeOf<DerivedRow>();
+    }
+}
