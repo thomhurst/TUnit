@@ -26,7 +26,9 @@ using TUnit.Engine.Reporters.Aggregation;
 
 namespace TUnit.Engine.Reporters.Html;
 
-internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
+// Consume updates inline so session finishing sees every published result and exception.
+// A queued IDataConsumer can otherwise receive them only after its session state is removed.
+internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IBlockingDataConsumer, IDataProducer, ITestHostApplicationLifetime, ITestSessionLifetimeHandler, IFilterReceiver, IDisposable
 {
     private const int HtmlReportEnabledUnresolved = -1;
 
