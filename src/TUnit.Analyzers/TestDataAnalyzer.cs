@@ -509,7 +509,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
 
             var canBeInstanceMethod = context.Symbol is IPropertySymbol or IMethodSymbol
-                && testClassType.InstanceConstructors.First().Parameters.IsDefaultOrEmpty;
+                && testClassType.InstanceConstructors.Any(c => c.Parameters.IsDefaultOrEmpty);
 
             if (!canBeInstanceMethod && !dataSourceMethod.IsStatic && attribute.ConstructorArguments.Length != 1)
             {
