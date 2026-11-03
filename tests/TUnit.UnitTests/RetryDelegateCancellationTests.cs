@@ -6,9 +6,10 @@ namespace TUnit.UnitTests;
 public class RetryDelegateCancellationTests
 {
     [Test]
-    [Arguments(true)]
-    [Arguments(false)]
-    public async Task FailingRetryHandlerCompletesCancellation(bool requestCancellation)
+    [Arguments(true, true)]
+    [Arguments(false, true)]
+    [Arguments(true, false)]
+    public async Task RetryHandlerPreservesCancellation(bool requestCancellation, bool throwFromHandler)
     {
         var current = TestContext.Current!;
         var builder = new TestBuilderContext { TestMetadata = current.TestDetails.MethodMetadata };
@@ -31,7 +32,11 @@ public class RetryDelegateCancellationTests
             {
                 context.Cancel();
             }
-            throw failure;
+            if (throwFromHandler)
+            {
+                throw failure;
+            }
+            return default;
         };
         var attempts = 0;
         try

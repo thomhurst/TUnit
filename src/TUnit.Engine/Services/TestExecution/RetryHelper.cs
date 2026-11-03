@@ -130,6 +130,12 @@ internal static class RetryHelper
                         }
                     }
 
+                    if (testContext.IsTestCancellationRequested)
+                    {
+                        SetCancelledResult(testContext);
+                        return;
+                    }
+
                     continue;
                 }
 
