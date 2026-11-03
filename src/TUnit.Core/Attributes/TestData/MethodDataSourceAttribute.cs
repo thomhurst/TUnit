@@ -97,8 +97,24 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
     /// <summary>Suppresses empty inferred generic class sources and filters all-null external rows in generated code.</summary>
     /// <remarks>
-    /// Set by generated consumer code, which lives in another assembly. Own-class sources retain
-    /// their valid null rows because their declared member types supply the class type arguments.
+    /// <para>
+    /// Reserved for generated consumer code, which lives in another assembly. The default is
+    /// <see langword="false"/>. This property affects only rows supplied through <see cref="Factory"/>;
+    /// it does not change reflection-based source enumeration.
+    /// </para>
+    /// <para>
+    /// When enabled, an empty factory source produces no rows, regardless of <see cref="SkipIfEmpty"/>.
+    /// Each row factory is evaluated during enumeration, and null row arrays are discarded.
+    /// For external sources (<see cref="ClassProvidingDataSource"/> is non-null), rows whose
+    /// unwrapped constructor values are all null are also discarded. Own-class sources retain
+    /// valid null values because their declared member types supply the class type arguments.
+    /// Explicit generic instantiations must leave this property disabled to preserve their null rows.
+    /// </para>
+    /// <para>
+    /// For each retained row, the value evaluated during filtering is returned on the first fetch.
+    /// Subsequent fetches invoke the original row factory again, preserving fresh constructor data
+    /// for additional method rows and repetitions. Consumers should not set this property manually.
+    /// </para>
     /// </remarks>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public bool FilterClassRows { get; set; }
