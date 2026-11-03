@@ -69,6 +69,33 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    public async Task InterfaceAlternativeCanSatisfyLaterParameterBinding()
+    {
+        await Verifier.VerifyAnalyzerAsync("""
+            #pragma warning disable TUnit0046
+            using TUnit.Core;
+            public interface IInvariant<A, B> { }
+            public interface IPair<out A, out B> { }
+            public class Box<A> { }
+            public class Alternative : IInvariant<int, int>, IInvariant<string, string> { }
+            public class C
+            {
+                public static (string, IPair<Alternative, Box<string>>[], int) Row() => default;
+                [Test, MethodDataSource(nameof(Row))]
+                public void Test<T>(T seed, IPair<IInvariant<T, T>, Box<T>>[] values, int end) { }
+            }
+            """);
+    }
+
+    [Test]
+    [Arguments("IMixed<object, string>[]", "IMixed<T, T>[]", true)]
+    [Arguments("IMixed<string, object>[]", "IMixed<T, T>[]", false)]
+    [Arguments("IMixed<string, string>[]", "IMixed<T, T>[]", false)]
+    [Arguments("IReverse<string, object>[]", "IReverse<T, T>[]", true)]
+    [Arguments("IReverse<object, string>[]", "IReverse<T, T>[]", false)]
+    [Arguments("IPair<LaterAlternative, Box<string>>[]", "IPair<IInvariant<T, T>, Box<T>>[]", false)]
+    [Arguments("IPair<Box<string>, LaterAlternative>[]", "IPair<Box<T>, IInvariant<T, T>>[]", false)]
+    [Arguments("IPair<LaterAlternative, Box<object>>[]", "IPair<IInvariant<T, T>, Box<T>>[]", true)]
     [Arguments("int[][]", "IEnumerable<T>[]", false)]
     [Arguments("IEnumerable<int[]>[]", "IEnumerable<IEnumerable<T>>[]", false)]
     [Arguments("IPair<string, Box<int>>[]", "IPair<T, Box<T>>[]", true)]
@@ -112,6 +139,9 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
             using System.Threading.Tasks;
             using TUnit.Core;
             using TUnit.Core.Interfaces;
+            public interface IMixed<out A, in B> { }
+            public interface IReverse<in A, out B> { }
+            public class LaterAlternative : IInvariant<int, int>, IInvariant<string, string> { }
             public interface IPair<out A, out B> { }
             public interface IConsumer<A, in B> { }
             public interface IInvariant<A, B> { }
