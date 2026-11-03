@@ -1141,9 +1141,19 @@ internal sealed class TestBuilder : ITestBuilder
             if (_data is { } data)
             {
                 // Keep method-enumeration state, but replay constructor-factory updates
-                // to inherited keys as well as newly added constructor state.
+                // and removals of inherited keys as well as newly added constructor state.
                 if (_rowContext.HasStateBag)
                 {
+                    if (_constructorBaseline is not null && context.HasStateBag)
+                    {
+                        foreach (var key in _constructorBaseline.Keys)
+                        {
+                            if (!_rowContext.StateBag.ContainsKey(key))
+                            {
+                                context.StateBag.TryRemove(key, out _);
+                            }
+                        }
+                    }
                     foreach (var entry in _rowContext.StateBag)
                     {
                         if (_constructorBaseline is null

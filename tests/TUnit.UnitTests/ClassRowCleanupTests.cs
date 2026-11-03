@@ -301,6 +301,8 @@ public class ClassRowCleanupTests
             foreach (var test in tests)
             {
                 await Assert.That(test.Result?.Exception).IsNull();
+                await Assert.That(test.Context.StateBag.ContainsKey("removed")).IsFalse();
+                await Assert.That(test.Context.StateBag.ContainsKey("removed-after-method-update")).IsFalse();
                 await Assert.That(test.Context.StateBag.Items["method-overwrite"]).IsEqualTo(test.Context.StateBag.Items["method-enumeration"]);
                 await Assert.That(test.Context.StateBag.Items["overwritten"]).IsEqualTo(test.Context.StateBag.Items["class-factory"]);
                 if (classEnumeration)
@@ -337,9 +339,11 @@ public class ClassRowCleanupTests
                     metadata.TestBuilderContext.Current.StateBag[prefix + "-enumeration"] = value;
                 }
                 metadata.TestBuilderContext.Current.StateBag["method-overwrite"] = value;
+                metadata.TestBuilderContext.Current.StateBag["removed-after-method-update"] = value;
                 if (constructor)
                 {
                     metadata.TestBuilderContext.Current.StateBag["overwritten"] = new object();
+                    metadata.TestBuilderContext.Current.StateBag["removed"] = new object();
                 }
                 yield return () =>
                 {
@@ -355,6 +359,8 @@ public class ClassRowCleanupTests
                     if (constructor)
                     {
                         state["overwritten"] = value;
+                        state.TryRemove("removed", out _);
+                        state.TryRemove("removed-after-method-update", out _);
                     }
                     return Task.FromResult<object?[]?>([value]);
                 };
