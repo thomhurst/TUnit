@@ -3352,7 +3352,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return true;
     }
 
-    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol, Compilation compilation, bool? keepSingleElementTupleWhole)
+    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, IMethodSymbol? methodSymbol, Compilation compilation, bool? keepSingleElementTupleWhole)
     {
         // Extract method name and target type
         string? methodName = null;
@@ -3497,7 +3497,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
         // invocation is emitted, as a static lambda.
         writer.Append("Factory = static dataGeneratorMetadata => ");
-        keepSingleElementTupleWhole ??= HasSingleElementTupleParameter(methodSymbol.Parameters);
+        keepSingleElementTupleWhole ??= HasSingleElementTupleParameter(methodSymbol?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty);
         EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation, isDeclaredInstanceAttribute, keepSingleElementTupleWhole.Value);
         writer.AppendLine(",");
 
