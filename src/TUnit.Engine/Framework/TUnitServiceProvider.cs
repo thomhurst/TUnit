@@ -272,7 +272,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         var dynamicTestQueue = Register<IDynamicTestQueue>(new DynamicTestQueue(MessageBus));
 
-        var deferredTestExpander = Register(new DeferredTestExpander(TestBuilderPipeline, TestFilterService));
+        var deferredTestExpander = Register(new DeferredTestExpander(TestBuilderPipeline, TestFilterService, objectTracker));
 
         var testScheduler = Register<ITestScheduler>(new TestScheduler(
             Logger,
@@ -300,7 +300,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
             objectTracker,
             deferredTestExpander));
 
-        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, dynamicTestQueue, TestFilterService, TestSessionId, CancellationToken.Token));
+        Register<ITestRegistry>(new TestRegistry(TestBuilderPipeline, testCoordinator, dynamicTestQueue, TestFilterService, objectTracker, TestSessionId, CancellationToken.Token));
 
         InitializeConsoleInterceptors();
     }

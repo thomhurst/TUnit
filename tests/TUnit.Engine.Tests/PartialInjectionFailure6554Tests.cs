@@ -15,7 +15,7 @@ public class PartialInjectionFailure6554Tests(TestMode testMode) : InvokableTest
     public async Task Test()
     {
         await RunTestsWithFilter(
-            "/*/*/PartialInjectionFailure*/*",
+            "/*/TUnit.TestProject.Bugs._6554/PartialInjectionFailure*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(2),

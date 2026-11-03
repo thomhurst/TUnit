@@ -90,21 +90,31 @@ internal sealed class TestArgumentRegistrationService
         // (a ConcurrentDictionary) and events container for plain arguments such as [Arguments] values.
         if (HasInjectableArgument(classArguments) || HasInjectableArgument(methodArguments))
         {
-            // Register class arguments (property injection during registration)
-            await _objectLifecycleService.RegisterArgumentsAsync(
-                classArguments,
-                testContext.StateBag.Items,
-                testDetails.MethodMetadata,
-                testContext.InternalEvents,
-                cancellationToken).ConfigureAwait(false);
+            try
+            {
+                // Register class arguments (property injection during registration)
+                await _objectLifecycleService.RegisterArgumentsAsync(
+                    classArguments,
+                    testContext.StateBag.Items,
+                    testDetails.MethodMetadata,
+                    testContext.InternalEvents,
+                    cancellationToken).ConfigureAwait(false);
 
-            // Register method arguments
-            await _objectLifecycleService.RegisterArgumentsAsync(
-                methodArguments,
-                testContext.StateBag.Items,
-                testDetails.MethodMetadata,
-                testContext.InternalEvents,
-                cancellationToken).ConfigureAwait(false);
+                // Register method arguments
+                await _objectLifecycleService.RegisterArgumentsAsync(
+                    methodArguments,
+                    testContext.StateBag.Items,
+                    testDetails.MethodMetadata,
+                    testContext.InternalEvents,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Failed argument injection still leaves receivers visible to test-end callbacks.
+                // Keep their shared roots alive until the failed test has completed.
+                _objectLifecycleService.TrackObjectsAfterFailedResolution(testContext);
+                throw;
+            }
         }
 
         // Register the test for tracking (inject properties and track objects for disposal)
