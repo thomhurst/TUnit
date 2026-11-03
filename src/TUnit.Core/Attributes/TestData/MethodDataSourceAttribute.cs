@@ -321,12 +321,21 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// <see cref="System.Collections.IEnumerable"/> other than a string or tuple (one row per item), or a single row.
     /// Used by the reflection fallback above and by the source-generated factory for a field, or a private or protected
     /// property, whose declared type does not say which of these it holds, so both read such a member the same way.
+    /// Resultless Task and ValueTask sources are awaited and yield one row containing null.
     /// An empty source yields nothing; the caller decides whether that becomes an empty row.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
     internal static async IAsyncEnumerable<Func<Task<object?[]?>>> GetRowsFromRuntimeValueAsync(object methodResult, DataGeneratorMetadata dataGeneratorMetadata)
     {
+        // A resultless source still supplies one null-valued row, after completion.
+        if (methodResult is ValueTask valueTask)
+        {
+            await valueTask.ConfigureAwait(false);
+            yield return static () => Task.FromResult<object?[]?>([null]);
+            yield break;
+        }
+
         // ValueTask<T> is neither a Task nor an IEnumerable, so normalise it to Task<T> and let
         // the Task branch below await it, as the source-generated Factory does.
         if (TryConvertValueTaskToTask(methodResult) is { } valueTaskAsTask)
@@ -410,6 +419,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     internal static Type? GetDeclaredRowType(Type memberType)
     {
+        if (memberType == typeof(Task) || memberType == typeof(ValueTask))
+        {
+            return null;
+        }
+
         var awaited = false;
         if (memberType.IsGenericType
             && (memberType.GetGenericTypeDefinition() == typeof(Task<>) || memberType.GetGenericTypeDefinition() == typeof(ValueTask<>)))
@@ -909,6 +923,13 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     private static object? GetTaskResult(Task task)
     {
         var taskType = task.GetType();
+
+        // Async Task methods and Task.CompletedTask can use Task<VoidTaskResult> internally.
+        // That runtime implementation detail is not a data-source result.
+        if (GetTaskResultType(taskType)?.FullName == "System.Threading.Tasks.VoidTaskResult")
+        {
+            return null;
+        }
 
         if (taskType.IsGenericType)
         {
