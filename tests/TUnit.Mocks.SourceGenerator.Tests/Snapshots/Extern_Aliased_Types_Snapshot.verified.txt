@@ -83,9 +83,9 @@ namespace TUnit.Mocks.Generated
             return new Lib_Services_Handler_Handle_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Handle", matchers);
         }
 
-        public static Lib_Services_Handler_Handle_M0_MockCall Handle(this global::TUnit.Mocks.Mock<LibAlias::Lib.Services.Handler> mock, global::System.Func<LibAlias::Lib.Services.Message, bool> message)
+        public static Lib_Services_Handler_Handle_M0_MockCall Handle(this global::TUnit.Mocks.Mock<LibAlias::Lib.Services.Handler> mock, global::System.Func<LibAlias::Lib.Services.Message, bool>? message)
         {
-            global::TUnit.Mocks.Arguments.Arg<LibAlias::Lib.Services.Message> __fa_message = message;
+            global::TUnit.Mocks.Arguments.Arg<LibAlias::Lib.Services.Message> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<LibAlias::Lib.Services.Message>(default(LibAlias::Lib.Services.Message)!) : (global::TUnit.Mocks.Arguments.Arg<LibAlias::Lib.Services.Message>)message;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
             return new Lib_Services_Handler_Handle_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Handle", matchers);
         }
@@ -384,24 +384,24 @@ namespace TUnit.Mocks.Generated
             return new Lib_Services_IPublisher_PublishAsync_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "PublishAsync", matchers);
         }
 
-        public static Lib_Services_IPublisher_PublishAsync_M0_MockCall PublishAsync(this global::TUnit.Mocks.Mock<LibAlias::Lib.Services.IPublisher> mock, global::System.Func<global::System.Guid, bool> id, global::TUnit.Mocks.Arguments.Arg<global::System.Threading.CancellationToken> ct)
+        public static Lib_Services_IPublisher_PublishAsync_M0_MockCall PublishAsync(this global::TUnit.Mocks.Mock<LibAlias::Lib.Services.IPublisher> mock, global::System.Func<global::System.Guid, bool>? id, global::TUnit.Mocks.Arguments.Arg<global::System.Threading.CancellationToken> ct)
         {
-            global::TUnit.Mocks.Arguments.Arg<global::System.Guid> __fa_id = id;
+            global::TUnit.Mocks.Arguments.Arg<global::System.Guid> __fa_id = id is null ? global::TUnit.Mocks.Arguments.Arg.Is<global::System.Guid>(default(global::System.Guid)!) : (global::TUnit.Mocks.Arguments.Arg<global::System.Guid>)id;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher, ct.Matcher };
             return new Lib_Services_IPublisher_PublishAsync_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "PublishAsync", matchers);
         }
 
-        public static Lib_Services_IPublisher_PublishAsync_M0_MockCall PublishAsync(this global::TUnit.Mocks.Mock<LibAlias::Lib.Services.IPublisher> mock, global::TUnit.Mocks.Arguments.Arg<global::System.Guid> id, global::System.Func<global::System.Threading.CancellationToken, bool> ct)
+        public static Lib_Services_IPublisher_PublishAsync_M0_MockCall PublishAsync(this global::TUnit.Mocks.Mock<LibAlias::Lib.Services.IPublisher> mock, global::TUnit.Mocks.Arguments.Arg<global::System.Guid> id, global::System.Func<global::System.Threading.CancellationToken, bool>? ct)
         {
-            global::TUnit.Mocks.Arguments.Arg<global::System.Threading.CancellationToken> __fa_ct = ct;
+            global::TUnit.Mocks.Arguments.Arg<global::System.Threading.CancellationToken> __fa_ct = ct is null ? global::TUnit.Mocks.Arguments.Arg.Is<global::System.Threading.CancellationToken>(default(global::System.Threading.CancellationToken)!) : (global::TUnit.Mocks.Arguments.Arg<global::System.Threading.CancellationToken>)ct;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { id.Matcher, __fa_ct.Matcher };
             return new Lib_Services_IPublisher_PublishAsync_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "PublishAsync", matchers);
         }
 
-        public static Lib_Services_IPublisher_PublishAsync_M0_MockCall PublishAsync(this global::TUnit.Mocks.Mock<LibAlias::Lib.Services.IPublisher> mock, global::System.Func<global::System.Guid, bool> id, global::System.Func<global::System.Threading.CancellationToken, bool> ct)
+        public static Lib_Services_IPublisher_PublishAsync_M0_MockCall PublishAsync(this global::TUnit.Mocks.Mock<LibAlias::Lib.Services.IPublisher> mock, global::System.Func<global::System.Guid, bool>? id, global::System.Func<global::System.Threading.CancellationToken, bool>? ct)
         {
-            global::TUnit.Mocks.Arguments.Arg<global::System.Guid> __fa_id = id;
-            global::TUnit.Mocks.Arguments.Arg<global::System.Threading.CancellationToken> __fa_ct = ct;
+            global::TUnit.Mocks.Arguments.Arg<global::System.Guid> __fa_id = id is null ? global::TUnit.Mocks.Arguments.Arg.Is<global::System.Guid>(default(global::System.Guid)!) : (global::TUnit.Mocks.Arguments.Arg<global::System.Guid>)id;
+            global::TUnit.Mocks.Arguments.Arg<global::System.Threading.CancellationToken> __fa_ct = ct is null ? global::TUnit.Mocks.Arguments.Arg.Is<global::System.Threading.CancellationToken>(default(global::System.Threading.CancellationToken)!) : (global::TUnit.Mocks.Arguments.Arg<global::System.Threading.CancellationToken>)ct;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher, __fa_ct.Matcher };
             return new Lib_Services_IPublisher_PublishAsync_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "PublishAsync", matchers);
         }
@@ -635,9 +635,9 @@ namespace TUnit.Mocks.Generated
             return new Lib_Services_IRepository_T__Get_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Get", matchers);
         }
 
-        public static Lib_Services_IRepository_T__Get_M0_MockCall<T> Get<T>(this global::TUnit.Mocks.Mock<LibAlias::Lib.Services.IRepository<T>> mock, global::System.Func<int, bool> id)
+        public static Lib_Services_IRepository_T__Get_M0_MockCall<T> Get<T>(this global::TUnit.Mocks.Mock<LibAlias::Lib.Services.IRepository<T>> mock, global::System.Func<int, bool>? id)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)id;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher };
             return new Lib_Services_IRepository_T__Get_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Get", matchers);
         }
@@ -888,9 +888,9 @@ namespace TUnit.Mocks.Generated
             return new TestNamespace_ILocal_Echo_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Echo", matchers);
         }
 
-        public static TestNamespace_ILocal_Echo_M0_MockCall Echo(this global::TUnit.Mocks.Mock<global::TestNamespace.ILocal> mock, global::System.Func<LibAlias::Lib.Services.Message, bool> message)
+        public static TestNamespace_ILocal_Echo_M0_MockCall Echo(this global::TUnit.Mocks.Mock<global::TestNamespace.ILocal> mock, global::System.Func<LibAlias::Lib.Services.Message, bool>? message)
         {
-            global::TUnit.Mocks.Arguments.Arg<LibAlias::Lib.Services.Message> __fa_message = message;
+            global::TUnit.Mocks.Arguments.Arg<LibAlias::Lib.Services.Message> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<LibAlias::Lib.Services.Message>(default(LibAlias::Lib.Services.Message)!) : (global::TUnit.Mocks.Arguments.Arg<LibAlias::Lib.Services.Message>)message;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
             return new TestNamespace_ILocal_Echo_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Echo", matchers);
         }
