@@ -70,14 +70,37 @@ public class SharedObjectDisposeSpanTests
     public async Task Per_Test_Object_Disposal_Emits_No_Span()
     {
         var testContext = CreateContext();
-        var fixture = new SpanFixture();
+        var fixture = new PerTestSpanFixture();
         RegisterScope(fixture, SharedType.None);
 
-        using var scope = new StoppedActivityScope(testContext);
+        using var scope = new StoppedActivityScope(testContext, $"dispose {nameof(SharedObjectDisposeSpanTests)}.{nameof(PerTestSpanFixture)}");
         await TrackAndUntrack(testContext, fixture);
 
         await Assert.That(fixture.IsDisposed).IsTrue();
         await Assert.That(scope.Activities).IsEmpty();
+    }
+
+    [Test]
+    public async Task Per_Test_Listener_Captures_Unexpected_Spans_Regardless_Of_Parent()
+    {
+        var name = $"dispose synthetic-{Guid.NewGuid()}";
+        using var scope = new StoppedActivityScope(CreateContext(), name);
+        using var source = new ActivitySource(TUnitActivitySource.LifecycleSourceName);
+        var current = Activity.Current;
+        try
+        {
+            Activity.Current = null;
+            using var root = source.StartActivity(name);
+        }
+        finally
+        {
+            Activity.Current = current;
+        }
+        using (source.StartActivity(name, ActivityKind.Internal, TestContext.Current!.Activity!.Context))
+        {
+        }
+
+        await Assert.That(scope.Activities).HasCount(2);
     }
 
     [Test]
@@ -157,6 +180,17 @@ public class SharedObjectDisposeSpanTests
         return activity;
     }
 
+    public sealed class PerTestSpanFixture : IAsyncDisposable
+    {
+        public bool IsDisposed { get; private set; }
+
+        public ValueTask DisposeAsync()
+        {
+            IsDisposed = true;
+            return default;
+        }
+    }
+
     public sealed class SpanFixture : IAsyncDisposable
     {
         public bool Throw { get; init; }
@@ -199,8 +233,9 @@ public class SharedObjectDisposeSpanTests
         private readonly ActivityListener _listener;
         private readonly ConcurrentQueue<Activity> _activities = new();
 
-        public StoppedActivityScope(TestContext testContext)
+        public StoppedActivityScope(TestContext testContext, string? parentIndependentOperationName = null)
         {
+            // CreateContext always supplies explicit class and assembly activities.
             var classSpanId = testContext.ClassContext.Activity!.SpanId;
             var assemblySpanId = testContext.ClassContext.AssemblyContext.Activity!.SpanId;
             _listener = new ActivityListener
@@ -209,7 +244,8 @@ public class SharedObjectDisposeSpanTests
                 Sample = static (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
                 ActivityStopped = activity =>
                 {
-                    if ((activity.ParentSpanId == classSpanId || activity.ParentSpanId == assemblySpanId)
+                    if ((activity.OperationName == parentIndependentOperationName
+                         || activity.ParentSpanId == classSpanId || activity.ParentSpanId == assemblySpanId)
                         && activity.OperationName.StartsWith("dispose ", StringComparison.Ordinal))
                     {
                         _activities.Enqueue(activity);
