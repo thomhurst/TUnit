@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Analyzers.Helpers;
 
@@ -98,8 +99,45 @@ public static class CompilationExtensions
     private static bool MatchesArrayElement(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
         bool allowReferenceConversions = true)
     {
+        var bindings = ImmutableDictionary.Create<ITypeParameterSymbol, ITypeSymbol>(SymbolEqualityComparer.Default);
+        return MatchesArrayElement(compilation, argument, parameter, ref bindings, allowReferenceConversions);
+    }
+
+    private static bool MatchesArrayElement(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
+        ref ImmutableDictionary<ITypeParameterSymbol, ITypeSymbol> bindings, bool allowReferenceConversions = true)
+    {
+        // Interface/base candidates are alternatives. A failed candidate must not constrain the next one.
+        var originalBindings = bindings;
+        if (MatchesArrayElementCore(compilation, argument, parameter, ref bindings, allowReferenceConversions))
+        {
+            return true;
+        }
+
+        bindings = originalBindings;
+        return false;
+    }
+
+    private static bool MatchesArrayElementCore(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
+        ref ImmutableDictionary<ITypeParameterSymbol, ITypeSymbol> bindings, bool allowReferenceConversions)
+    {
+        if (parameter is ITypeParameterSymbol typeParameter)
+        {
+            // Invariant occurrences require the same substitution, including nested arrays and containing types.
+            if (!allowReferenceConversions)
+            {
+                if (bindings.TryGetValue(typeParameter, out var inferredType))
+                {
+                    return SymbolEqualityComparer.Default.Equals(inferredType, argument);
+                }
+
+                bindings = bindings.Add(typeParameter, argument);
+            }
+
+            return true;
+        }
+
         var conversion = compilation.ClassifyConversion(argument, parameter);
-        if (parameter is ITypeParameterSymbol || conversion.IsIdentity
+        if (conversion.IsIdentity
             || (allowReferenceConversions && conversion.IsImplicit && conversion.IsReference))
         {
             return true;
@@ -110,7 +148,7 @@ public static class CompilationExtensions
             return argumentArray.Rank == parameterArray.Rank
                 && argumentArray.IsSZArray == parameterArray.IsSZArray
                 && MatchesArrayElement(compilation, argumentArray.ElementType, parameterArray.ElementType,
-                    allowReferenceConversions);
+                    ref bindings, allowReferenceConversions);
         }
 
         if (argument is INamedTypeSymbol argumentNamed && parameter is INamedTypeSymbol parameterNamed
@@ -120,7 +158,7 @@ public static class CompilationExtensions
             if (parameterNamed.ContainingType is { } containingType
                 && (argumentNamed.ContainingType is not { } argumentContainingType
                     || !MatchesArrayElement(compilation, argumentContainingType, containingType,
-                        allowReferenceConversions: false)))
+                        ref bindings, allowReferenceConversions: false)))
             {
                 return false;
             }
@@ -133,6 +171,14 @@ public static class CompilationExtensions
                 // Otherwise IConsumer<string> to IConsumer<T> would compare T to string.
                 if (parameterType is ITypeParameterSymbol)
                 {
+                    if (!MatchesArrayElement(compilation, argumentType, parameterType, ref bindings,
+                            allowReferenceConversions: allowReferenceConversions
+                                && argumentType.IsReferenceType
+                                && parameterNamed.TypeParameters[i].Variance != VarianceKind.None))
+                    {
+                        return false;
+                    }
+
                     continue;
                 }
 
@@ -144,7 +190,7 @@ public static class CompilationExtensions
                 if (!MatchesArrayElement(compilation,
                         variance == VarianceKind.In ? parameterType : argumentType,
                         variance == VarianceKind.In ? argumentType : parameterType,
-                        allowReferenceConversions: variance != VarianceKind.None))
+                        ref bindings, allowReferenceConversions: variance != VarianceKind.None))
                 {
                     return false;
                 }
@@ -160,7 +206,7 @@ public static class CompilationExtensions
         {
             foreach (var interfaceType in referenceType.AllInterfaces)
             {
-                if (MatchesArrayElement(compilation, interfaceType, parameter))
+                if (MatchesArrayElement(compilation, interfaceType, parameter, ref bindings))
                 {
                     return true;
                 }
@@ -168,7 +214,7 @@ public static class CompilationExtensions
 
             if (referenceType.BaseType is { } baseType)
             {
-                return MatchesArrayElement(compilation, baseType, parameter);
+                return MatchesArrayElement(compilation, baseType, parameter, ref bindings);
             }
         }
 

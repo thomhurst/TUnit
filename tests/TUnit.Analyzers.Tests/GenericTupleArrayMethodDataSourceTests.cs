@@ -69,6 +69,13 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Alternative[]", "IInvariant<T, T>[]", false)]
+    [Arguments("Outer<string>.Inner<int>[]", "Outer<T>.Inner<T>[]", true)]
+    [Arguments("Outer<int>.Inner<int>[]", "Outer<T>.Inner<T>[]", false)]
+    [Arguments("Pair<int, string>[]", "Pair<T, T>[]", true)]
+    [Arguments("Pair<int, int>[]", "Pair<T, T>[]", false)]
+    [Arguments("Pair<int[], string[]>[]", "Pair<T[], T[]>[]", true)]
+    [Arguments("Pair<int[], int[]>[]", "Pair<T[], T[]>[]", false)]
     [Arguments("Outer<string>.Inner<int>[]", "Outer<object>.Inner<T>[]", true)]
     [Arguments("Outer<string>.Inner<int>[]", "Outer<string>.Inner<T>[]", false)]
     [Arguments("IPair<int, string[][]>[]", "IPair<T, object[][]>[]", false)]
@@ -98,6 +105,9 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
             using TUnit.Core.Interfaces;
             public interface IPair<out A, out B> { }
             public interface IConsumer<A, in B> { }
+            public interface IInvariant<A, B> { }
+            public class Alternative : IInvariant<int, string>, IInvariant<string, string> { }
+            public class Pair<A, B> { }
             public class Outer<A> { public class Inner<B> { } }
             public class C
             {
@@ -114,8 +124,8 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
         if (expectDiagnostic)
         {
             // Diagnostics display the nested type name without its containing construction.
-            var displayedSource = sourceElement.Replace("Outer<string>.", "");
-            var displayedTarget = targetElement.Replace("Outer<object>.", "").Replace("Outer<string>.", "");
+            var displayedSource = sourceElement.Replace("Outer<string>.", "").Replace("Outer<int>.", "");
+            var displayedTarget = targetElement.Replace("Outer<object>.", "").Replace("Outer<string>.", "").Replace("Outer<T>.", "");
             await Verifier.VerifyAnalyzerAsync(source,
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
                     .WithArguments($"Fixture, CancellationToken, {displayedSource}", $"(Fixture, CancellationToken, {displayedTarget})"));
