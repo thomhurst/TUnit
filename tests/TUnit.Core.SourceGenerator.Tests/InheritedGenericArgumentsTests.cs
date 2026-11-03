@@ -5,5 +5,6 @@ internal class InheritedGenericArgumentsTests : TestsBase
     [Test]
     public Task Test() => RunTest(Path.Combine(Git.TestsDirectory.FullName,
         "TUnit.TestProject", "Bugs", "_7490", "Tests.cs"),
-        _ => Task.CompletedTask);
+        async generatedFiles => await Assert.That(string.Join("\n", generatedFiles))
+            .Contains("InheritedGenericTestNullArguments<object>"));
 }

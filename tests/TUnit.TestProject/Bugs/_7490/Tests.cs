@@ -61,3 +61,19 @@ public class InheritedNullMethodArguments<T>(T value) : StringArgumentsBase
         }
     }
 }
+
+[GenerateGenericTest(typeof(string))]
+public abstract class GenericTestBase<T>;
+
+public class InheritedGenericTestNullArguments<T> : GenericTestBase<T>
+{
+    [Test]
+    [Arguments(null)]
+    public void Test(T? value)
+    {
+        if (typeof(T) != typeof(object) || value is not null)
+        {
+            throw new InvalidOperationException("Expected null method arguments to infer object independently of inherited generic test attributes.");
+        }
+    }
+}

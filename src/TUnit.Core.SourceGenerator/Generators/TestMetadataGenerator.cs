@@ -1322,11 +1322,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // it an [Arguments(null)] row still infers object, as without a class row, and a method row
             // that infers types breaking the class's constraints is reported. Reflection mode applies the
             // same rule.
-            var classTypeArgumentsSupplied = testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
-                a.AttributeClass is { } attributeClass
-                && (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute")
-                    || (DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
-                        && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a)))));
+            // GenerateGenericTest entries use only directly declared attributes, unlike inherited
+            // class data sources. An inherited GenerateGenericTest must not suppress null-row inference.
+            var classTypeArgumentsSupplied = testMethod.TypeSymbol.GetAttributes().Any(a =>
+                a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
+                || testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
+                    a.AttributeClass is { } attributeClass
+                    && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
+                    && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a)));
 
             // classTypeArgumentsSupplied already includes explicit [GenerateGenericTest] class types.
             foreach (var methodArgAttr in methodArgumentsAttributes)
