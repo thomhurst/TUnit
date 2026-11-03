@@ -1066,6 +1066,33 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Instance_Method_Data_Source_Allows_Parameterless_Constructor_In_Either_Order(bool parameterlessFirst)
+    {
+        var constructors = parameterlessFirst
+            ? "public MyClass() { } public MyClass(int value) { }"
+            : "public MyClass(int value) { } public MyClass() { }";
+
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using TUnit.Core;
+            using System.Collections.Generic;
+
+            public class MyClass
+            {
+                {{constructors}}
+
+                [Test]
+                [MethodDataSource(typeof(MyClass), nameof(Data))]
+                public void MyTest(int value) { }
+
+                public IEnumerable<int> Data() => [1];
+            }
+            """);
+    }
+
+    [Test]
     public async Task Method_Data_Source_Is_Flagged_When_Instance_Method_And_Wrong_Attribute()
     {
         await Verifier
