@@ -109,9 +109,14 @@ public class ExternallyOwnedSingletonTests
 
         // A later source balances its own reference without taking disposal ownership.
         var laterTest = CreateContext(singleton);
+        var secondLaterTest = CreateContext(singleton);
         tracker.TrackObjects(laterTest);
+        tracker.TrackObjects(secondLaterTest);
+        await Assert.That(ObjectTracker.IsShared(singleton)).IsTrue();
         await tracker.UntrackObjects(laterTest);
+        await tracker.UntrackObjects(secondLaterTest);
 
+        await Assert.That(IsCounted(singleton)).IsFalse();
         await Assert.That(singleton.DisposeCount).IsEqualTo(0);
     }
 

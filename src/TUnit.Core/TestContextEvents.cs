@@ -39,6 +39,8 @@ public class TestContextEvents : ITestEvents
         }
     }
 
+    // Source row/enumeration contexts have finished registering cleanup before transfer.
+    // Only the destination may be receiving concurrent factory registrations here.
     internal void AddCleanupFrom(TestContextEvents source)
     {
         if (source.DataRowScopes is { } scopes)
@@ -66,7 +68,13 @@ public class TestContextEvents : ITestEvents
     internal DataRowScopeCollection? DataRowScopes
     {
         get => Volatile.Read(ref _dataRowScopes);
-        set => Volatile.Write(ref _dataRowScopes, value);
+        set
+        {
+            lock (LazyInitializer.EnsureInitialized(ref _scopeLock)!)
+            {
+                Volatile.Write(ref _dataRowScopes, value);
+            }
+        }
     }
 
     public AsyncEvent<TestContext>? OnDispose { get; set; }

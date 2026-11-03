@@ -238,7 +238,8 @@ internal sealed class TestBuilder : ITestBuilder
                     // A new factory owns its own cleanup, even if it throws before producing a row.
                     activeClassRow = null;
                     // Keep constructor-factory state on its saved row, outside the enumeration baseline.
-                    var classRowEnumerationContext = contextAccessor.Current.CreateChild(classDataSource, null);
+                    var classFactoryContext = contextAccessor.Current;
+                    var classRowEnumerationContext = classFactoryContext.CreateChild(classDataSource, null);
                     var (classData, firstClassRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
 
                     // No test holds this first fetch yet. The first test built from this class row takes it
@@ -276,7 +277,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 classDataAttributeIndex,
                                 classDataLoopIndex,
                                 classData,
-                                testBuilderContext,
+                                classFactoryContext,
                                 cancellationToken);
 
                             if (!instanceResult.Success)
@@ -2329,7 +2330,8 @@ internal sealed class TestBuilder : ITestBuilder
                 contextAccessor.Current = classSourceContext.CreateChild(classDataSource, null);
 
                 // Keep constructor-factory state on its saved row, outside the enumeration baseline.
-                var classRowEnumerationContext = contextAccessor.Current.CreateChild(classDataSource, null);
+                var classFactoryContext = contextAccessor.Current;
+                var classRowEnumerationContext = classFactoryContext.CreateChild(classDataSource, null);
                 var (classData, firstClassRowMetadata) = DataUnwrapper.UnwrapWithMetadata(await classDataFactory() ?? []);
 
                 // The first test built from this class row takes this fetch instead of calling the factory
@@ -2358,7 +2360,7 @@ internal sealed class TestBuilder : ITestBuilder
                             classDataAttributeIndex,
                             classDataLoopIndex,
                             classData,
-                            contextAccessor.Current,
+                            classFactoryContext,
                             cancellationToken);
 
                         if (!instanceResult.Success)
