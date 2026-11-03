@@ -118,15 +118,51 @@ public class DataScopeRetryLifecycleTests
     public sealed class Scope : IDisposable
     {
         public int DisposeCount;
-        public void Dispose() => DisposeCount++;
+        public Service? Service;
+        public void Dispose()
+        {
+            DisposeCount++;
+            Service?.Dispose();
+        }
     }
 
-    public sealed record Service(Scope Scope);
+    public sealed record Service(Scope Scope) : IDisposable
+    {
+        public int DisposeCount;
+        public Dependency Dependency { get; } = new();
+
+        public void Dispose()
+        {
+            if (++DisposeCount != 1)
+            {
+                throw new InvalidOperationException("Scope-owned service disposed more than once");
+            }
+            Dependency.Dispose();
+        }
+    }
+
+    public sealed class Dependency : TUnit.Core.Interfaces.IAsyncInitializer, IDisposable
+    {
+        public bool Initialized { get; private set; }
+        public int DisposeCount;
+        public Task InitializeAsync()
+        {
+            Initialized = true;
+            return Task.CompletedTask;
+        }
+        public void Dispose()
+        {
+            if (++DisposeCount != 1)
+            {
+                throw new InvalidOperationException("Scope-owned dependency disposed more than once");
+            }
+        }
+    }
 
     public sealed class ScopeDataAttribute : DependencyInjectionDataSourceAttribute<Scope>
     {
         public override Scope CreateScope(DataGeneratorMetadata metadata) => new();
-        public override object Create(Scope scope, Type type) => new Service(scope);
+        public override object Create(Scope scope, Type type) => scope.Service = new Service(scope);
     }
 
     [Test, ScopeData, Retry(1), EngineTest(ExpectedResult.Pass)]
@@ -135,6 +171,9 @@ public class DataScopeRetryLifecycleTests
         var context = TestContext.Current!;
         context.StateBag.Items["scope"] = service.Scope;
         await Assert.That(service.Scope.DisposeCount).IsEqualTo(0);
+        await Assert.That(service.DisposeCount).IsEqualTo(0);
+        await Assert.That(service.Dependency.Initialized).IsTrue();
+        await Assert.That(service.Dependency.DisposeCount).IsEqualTo(0);
         if (context.StateBag.Items.TryAdd("firstAttempt", true))
         {
             throw new InvalidOperationException("Exercise scope lifetime across retries");
@@ -147,6 +186,41 @@ public class DataScopeRetryLifecycleTests
         foreach (var test in context.Tests)
         {
             await Assert.That(((Scope)test.StateBag.Items["scope"]!).DisposeCount).IsEqualTo(1);
+            await Assert.That(((Scope)test.StateBag.Items["scope"]!).Service!.DisposeCount).IsEqualTo(1);
+            await Assert.That(((Scope)test.StateBag.Items["scope"]!).Service!.Dependency.DisposeCount).IsEqualTo(1);
+        }
+    }
+}
+
+public class NonDisposableDataScopeLifecycleTests
+{
+    public sealed class Scope;
+
+    public sealed class Service : IDisposable
+    {
+        public int DisposeCount;
+        public void Dispose() => DisposeCount++;
+    }
+
+    public sealed class ScopeDataAttribute : DependencyInjectionDataSourceAttribute<Scope>
+    {
+        public override Scope CreateScope(DataGeneratorMetadata metadata) => new();
+        public override object Create(Scope scope, Type type) => new Service();
+    }
+
+    [Test, ScopeData, EngineTest(ExpectedResult.Pass)]
+    public async Task TrackerOwnsServicesWithoutDisposableScope(Service service)
+    {
+        TestContext.Current!.StateBag.Items["service"] = service;
+        await Assert.That(service.DisposeCount).IsEqualTo(0);
+    }
+
+    [After(Class)]
+    public static async Task Verify(ClassHookContext context)
+    {
+        foreach (var test in context.Tests)
+        {
+            await Assert.That(((Service)test.StateBag.Items["service"]!).DisposeCount).IsEqualTo(1);
         }
     }
 }

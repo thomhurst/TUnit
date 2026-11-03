@@ -66,6 +66,7 @@ public class MEDITest(MEDIClass mediClass)
         }
 
         await Assert.That(mediClass.IsDisposed).IsTrue();
+        await Assert.That(mediClass.DisposeCount).IsEqualTo(1);
     }
 }
 
@@ -73,6 +74,7 @@ public class MEDIClass : IAsyncInitializer, IAsyncDisposable
 {
     public bool IsInitialized { get; private set; }
     public bool IsDisposed { get; private set; }
+    public int DisposeCount { get; private set; }
 
     public Task InitializeAsync()
     {
@@ -82,6 +84,10 @@ public class MEDIClass : IAsyncInitializer, IAsyncDisposable
 
     public ValueTask DisposeAsync()
     {
+        if (++DisposeCount != 1)
+        {
+            throw new InvalidOperationException("Scope-owned service disposed more than once");
+        }
         IsDisposed = true;
         return default(ValueTask);
     }

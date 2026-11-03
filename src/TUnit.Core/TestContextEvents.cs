@@ -24,8 +24,10 @@ public class TestContextEvents : ITestEvents
     public AsyncEvent<TestContext>? OnDispose { get; set; }
     public AsyncEvent<TestContext>? OnTestRegistered { get; set; }
     public AsyncEvent<TestContext>? OnInitialize { get; set; }
+    // Delegate subscribers run once in the late stage, after early-stage receivers.
     public AsyncEvent<TestContext>? OnTestStart { get; set; }
     public AsyncEvent<TestContext>? OnTestEnd { get; set; }
     public AsyncEvent<TestContext>? OnTestSkipped { get; set; }
+    // A handler failure aborts retry processing, as a failure in retry policy does.
     public AsyncEvent<(TestContext TestContext, int RetryAttempt)>? OnTestRetry { get; set; }
 }
