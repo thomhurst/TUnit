@@ -115,6 +115,44 @@ public class DeferredDiscoveryCleanupTests
         await Assert.That(count).IsEqualTo(1);
     }
 
+    [Test]
+    public async Task Throwing_Session_Callback_Does_Not_Stop_Later_Callbacks()
+    {
+        var session = CreateSession();
+        var context = ContextWithOnDispose(() => throw new InvalidOperationException("cleanup failed"));
+        var count = 0;
+        context.Events.OnDispose += (_, testContext) =>
+        {
+            if (testContext is not null) throw new InvalidOperationException("Expected session cleanup without a test");
+            count++;
+            return default;
+        };
+        TestOnDisposeRaiser.DeferToSessionEnd(context);
+        var callbacks = session.TakeDeferredDiscoveryOnDispose()!;
+        var exceptions = new List<Exception>();
+
+        await TestOnDisposeRaiser.RaiseDetachedAsync(session, callbacks.InvocationList, exceptions);
+
+        await Assert.That(count).IsEqualTo(1);
+        await Assert.That(exceptions.Count).IsEqualTo(1);
+        await Assert.That(exceptions[0].Message).IsEqualTo("cleanup failed");
+    }
+
+    [Test]
+    public async Task Concurrent_Transfers_Of_The_Same_Events_Are_Drained_Once()
+    {
+        var session = CreateSession();
+        var count = 0;
+        var context = ContextWithOnDispose(() => count++);
+        await Task.WhenAll(Enumerable.Range(0, 512).Select(_ => Task.Run(() =>
+            TestOnDisposeRaiser.DeferToSessionEnd(context))));
+        var logger = new TUnitFrameworkLogger(null!, null!, null!, new LogLevelProvider(new NoOptions()));
+
+        await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(session, logger);
+
+        await Assert.That(count).IsEqualTo(1);
+    }
+
     private static TestSessionContext CreateSession()
     {
         var beforeDiscoveryContext = new BeforeTestDiscoveryContext { TestFilter = null };

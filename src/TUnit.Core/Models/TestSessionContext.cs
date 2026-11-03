@@ -103,15 +103,15 @@ public class TestSessionContext : Context
     /// </summary>
     internal static void DeferOnDisposeToSessionEnd(TestContextEvents? events)
     {
-        if (events is not { OnDispose: { } onDispose })
-        {
-            return;
-        }
-
-        events.OnDispose = null;
-
         lock (s_deferredOnDisposeLock)
         {
+            if (events is not { OnDispose: { } onDispose })
+            {
+                return;
+            }
+
+            events.OnDispose = null;
+
             AsyncEvent<TestContext> target;
             if (Current is { } session)
             {

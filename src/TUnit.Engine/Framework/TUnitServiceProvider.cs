@@ -337,7 +337,10 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
     {
         await TestOnDisposeRaiser.RaiseDeferredForSessionAsync(ContextProvider.TestSessionContext, Logger).ConfigureAwait(false);
         // Generated/reflection static initializers can fail before the scheduler starts.
-        await ((StaticPropertyHandler)_services[typeof(StaticPropertyHandler)]).ReleaseSessionCallbacksAfterFailedInitializationAsync().ConfigureAwait(false);
+        if (_services.TryGetValue(typeof(StaticPropertyHandler), out var staticPropertyHandler))
+        {
+            await ((StaticPropertyHandler)staticPropertyHandler).ReleaseSessionCallbacksAfterFailedInitializationAsync().ConfigureAwait(false);
+        }
 
         foreach (var service in _services.Values)
         {
