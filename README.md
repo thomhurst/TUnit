@@ -3,7 +3,7 @@
 
 # TUnit
 
-A modern .NET testing framework. Tests are discovered at compile time via source generators, run in parallel by default, and work under Native AOT — all built on [Microsoft.Testing.Platform](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-intro).
+A modern .NET testing framework. Tests are discovered at compile time via source generators, run in parallel by default, and work under Native AOT — all built on [Microsoft.Testing.Platform](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-intro). 
 
 <div align="center">
 
