@@ -1121,7 +1121,7 @@ internal sealed class TestBuilder : ITestBuilder
         private object?[]? _data = data;
         private TestDataRowMetadata? _metadata = metadata;
         private object?[]? _lent;
-        private AsyncEvent<(TestContext? Context, object? Object)>? _lentCleanup;
+
         private readonly TestBuilderContext _enumerationContext = enumerationContext ?? rowContext;
         // Method enumeration mutates _enumerationContext after this row is saved.
         // Compare constructor changes against its original state, never that live context.
@@ -1177,16 +1177,6 @@ internal sealed class TestBuilder : ITestBuilder
 
             async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> FetchAsync(Func<Task<object?[]?>> factory, TestBuilderContext target)
             {
-                // Transfer the temporary instance's scope before invoking a factory that may
-                // throw, so failed-row cleanup can still release that scope.
-                if (_lentCleanup is { } lentCleanup)
-                {
-                    foreach (var handler in lentCleanup.InvocationList)
-                    {
-                        target.Events.OnDataRowDispose += handler.InvokeAsync;
-                    }
-                    _lentCleanup = null;
-                }
                 var row = DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
                 _rowContext = target with { };
                 target.CopyStateBagTo(_rowContext);
@@ -1240,8 +1230,7 @@ internal sealed class TestBuilder : ITestBuilder
         {
             // A claimed row already belongs to a runnable test. Never copy its cleanup
             // to a later empty source, which may finish before that test.
-            var cleanup = _lentCleanup ?? (_data is not null ? _events?.OnDataRowDispose : null);
-            _lentCleanup = null;
+            var cleanup = _data is not null ? _events?.OnDataRowDispose : null;
             return cleanup;
         }
 
@@ -1257,10 +1246,20 @@ internal sealed class TestBuilder : ITestBuilder
         /// Marks the unclaimed objects as used by a temporary instance, so no test receives them, but the
         /// next test tracks them through <see cref="TakeLentObjects"/> or <see cref="WithLentObjects"/>.
         /// </summary>
-        public void LendToTemporaryInstance()
+        public void LendToTemporaryInstance(TestBuilderContext? lifetimeContext = null)
         {
             _lent = _data;
-            _lentCleanup = _events?.OnDataRowDispose?.Clone();
+            // Method rows can retain services from this temporary instance's scope.
+            // Keep that scope alive until session cleanup, rather than the first test's cleanup.
+            if (_events?.OnDataRowDispose is { } cleanup)
+            {
+                lifetimeContext ??= TestSessionContext.GlobalStaticPropertyContext;
+                foreach (var handler in cleanup.InvocationList)
+                {
+                    lifetimeContext.Events.OnDataRowDispose += handler.InvokeAsync;
+                }
+            }
+            _events = null;
             _data = null;
             _metadata = null;
         }

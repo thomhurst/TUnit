@@ -47,7 +47,7 @@ public class ClassRowCleanupTests
     }
 
     [Test]
-    public async Task LentRowTransfersCleanupEvenWhenNextFactoryThrows()
+    public async Task LentRowKeepsScopeUntilSessionCleanupEvenWhenNextFactoryThrows()
     {
         var original = CreateContext();
         var disposals = 0;
@@ -57,17 +57,20 @@ public class ClassRowCleanupTests
             return default;
         };
         var row = new TestBuilder.UnclaimedClassRow([new object()], null, original);
-        row.LendToTemporaryInstance();
+        var session = CreateContext();
+        row.LendToTemporaryInstance(session);
         var failed = CreateContext();
         await Assert.That(async () => await row.TakeOrFetchAsync(
                 () => throw new InvalidOperationException("Factory failure"), failed))
             .Throws<InvalidOperationException>();
 
         await DisposeRow(failed);
-        await Assert.That(disposals).IsEqualTo(1);
+        await Assert.That(disposals).IsEqualTo(0);
         var later = CreateContext();
         row.TransferCleanupTo(later);
         await DisposeRow(later);
+        await Assert.That(disposals).IsEqualTo(0);
+        await DisposeRow(session);
         await Assert.That(disposals).IsEqualTo(1);
     }
 

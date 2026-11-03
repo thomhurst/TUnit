@@ -13,4 +13,5 @@ internal static class MockTrackingNames
     public const string EmitResults = nameof(EmitResults);
     public const string ClosedGenericMockOfInvocations = nameof(ClosedGenericMockOfInvocations);
     public const string ClosedGenericEmissions = nameof(ClosedGenericEmissions);
+    public const string ClosedGenericMethodSetupEmissions = nameof(ClosedGenericMethodSetupEmissions);
 }

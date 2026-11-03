@@ -86,9 +86,20 @@ internal sealed class TestScheduler : ITestScheduler
             await _logger.LogDebugAsync($"Scheduling execution of {testList.Count} tests").ConfigureAwait(false);
 
         var hasDependencies = HasDependencies(testList);
-        var executableTests = hasDependencies
-            ? await RemoveCircularDependenciesAsync(testList, cancellationToken).ConfigureAwait(false)
-            : testList;
+        List<AbstractExecutableTest> executableTests;
+        try
+        {
+            executableTests = hasDependencies
+                ? await RemoveCircularDependenciesAsync(testList, cancellationToken).ConfigureAwait(false)
+                : testList;
+        }
+        catch
+        {
+            // Cancelled (or failed) before any test reaches TestCoordinator, so release what each
+            // test's data sources hold (a dependency injection scope, for example) now (#7205).
+            await RaiseOnDisposeForUnstartedTestsAsync(testList).ConfigureAwait(false);
+            throw;
+        }
 
         if (executableTests.Count == 0)
         {
@@ -101,27 +112,37 @@ internal sealed class TestScheduler : ITestScheduler
         using var starvationMonitor = ThreadPoolStarvationMonitor.Start(_maxParallelismLimiter.MaxParallelism, _logger);
 
         // Initialize static properties before tests run
-        await _staticPropertyHandler.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            await _staticPropertyHandler.InitializeStaticPropertiesAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            // The session ends here, before any test reaches TestCoordinator, so release what each test's
+            // data sources hold (a dependency injection scope, for example) now (#7205).
+            await RaiseOnDisposeForUnstartedTestsAsync(executableTests).ConfigureAwait(false);
+            throw;
+        }
 
         // Track static properties for disposal at session end
         _staticPropertyHandler.TrackStaticProperties();
 
-        // Group tests by their parallel constraints
-        var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
-
-        if (hasDependencies)
-        {
-            MarkDependencyRelatedTestsForExecutionDedup(executableTests);
-        }
-
-        // Suites with no global [NotInParallel] tests skip the runtime exclusion
-        // lock entirely. Once enabled, the flag is monotonic — dynamic batches
-        // that introduce NIP later (see ExecuteDynamicBatchAsync) keep it on.
-        MarkGlobalNotInParallelTests(groupedTests);
-
         bool sessionHooksSucceeded;
         try
         {
+            // Group tests by their parallel constraints
+            var groupedTests = await _groupingService.GroupTestsByConstraintsAsync(executableTests).ConfigureAwait(false);
+
+            if (hasDependencies)
+            {
+                MarkDependencyRelatedTestsForExecutionDedup(executableTests);
+            }
+
+            // Suites with no global [NotInParallel] tests skip the runtime exclusion
+            // lock entirely. Once enabled, the flag is monotonic — dynamic batches
+            // that introduce NIP later (see ExecuteDynamicBatchAsync) keep it on.
+            MarkGlobalNotInParallelTests(groupedTests);
+
             // Execute tests according to their grouping
             await ExecuteGroupedTestsAsync(groupedTests, cancellationToken).ConfigureAwait(false);
         }
@@ -132,6 +153,15 @@ internal sealed class TestScheduler : ITestScheduler
             if (cancellationToken.IsCancellationRequested)
             {
                 await ReportTestsNotStartedAsync(executableTests).ConfigureAwait(false);
+            }
+
+            // Independent of reporting, which can fail when the platform rejects a message: every test
+            // that never reached TestCoordinator still releases what its data sources hold (#7205).
+            await RaiseOnDisposeForUnstartedTestsAsync(executableTests).ConfigureAwait(false);
+
+            if (_dynamicTests is { } dynamicTests)
+            {
+                await RaiseOnDisposeForUnstartedTestsAsync(dynamicTests).ConfigureAwait(false);
             }
 
             // Also on the fail-fast path, where cancelled tests make the phases throw: the
@@ -156,35 +186,54 @@ internal sealed class TestScheduler : ITestScheduler
             ? "Test was not run because --fail-fast stopped the test run after a failure"
             : null;
 
+        foreach (var test in executableTests)
+        {
+            await TryReportIfNotStartedAsync(test, skipReason).ConfigureAwait(false);
+        }
+
+        if (_dynamicTests is { } dynamicTests)
+        {
+            foreach (var test in dynamicTests)
+            {
+                await TryReportIfNotStartedAsync(test, skipReason).ConfigureAwait(false);
+            }
+        }
+
+        // Dynamic tests still queued when the processor stopped on the cancelled token.
+        while (_dynamicTestQueue.TryDequeue(out var test))
+        {
+            if (test != null)
+            {
+                await TryReportIfNotStartedAsync(test, skipReason).ConfigureAwait(false);
+            }
+        }
+    }
+
+    // Best effort for each test: the platform can stop accepting messages once its own token is
+    // cancelled. That must neither replace the run's outcome nor stop the remaining tests from being
+    // reported and releasing what their data sources hold (#7205).
+    private async ValueTask TryReportIfNotStartedAsync(AbstractExecutableTest test, string? skipReason)
+    {
         try
         {
-            foreach (var test in executableTests)
-            {
-                await ReportIfNotStartedAsync(test, skipReason).ConfigureAwait(false);
-            }
-
-            if (_dynamicTests is { } dynamicTests)
-            {
-                foreach (var test in dynamicTests)
-                {
-                    await ReportIfNotStartedAsync(test, skipReason).ConfigureAwait(false);
-                }
-            }
-
-            // Dynamic tests still queued when the processor stopped on the cancelled token.
-            while (_dynamicTestQueue.TryDequeue(out var test))
-            {
-                if (test != null)
-                {
-                    await ReportIfNotStartedAsync(test, skipReason).ConfigureAwait(false);
-                }
-            }
+            await ReportIfNotStartedAsync(test, skipReason).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            // Best effort: the platform can stop accepting messages once its own token is
-            // cancelled, and that must not replace the run's outcome.
-            await _logger.LogDebugAsync($"Could not report tests that were not started: {ex}").ConfigureAwait(false);
+            await _logger.LogDebugAsync($"Could not report test {test.TestId}, which was not started: {ex}").ConfigureAwait(false);
+        }
+    }
+
+    // TestCoordinator raises OnDispose for every test that reaches it; this covers the rest. Raising is
+    // once per test, so tests already released on an earlier path are skipped.
+    private async ValueTask RaiseOnDisposeForUnstartedTestsAsync(List<AbstractExecutableTest> tests)
+    {
+        foreach (var test in tests)
+        {
+            if (!test.HasStartedExecution)
+            {
+                await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
+            }
         }
     }
 
@@ -193,6 +242,13 @@ internal sealed class TestScheduler : ITestScheduler
     // the success and the exception paths alike, so no test can still be moving between states.
     private async ValueTask ReportIfNotStartedAsync(AbstractExecutableTest test, string? skipReason)
     {
+        if (!test.HasStartedExecution)
+        {
+            // The test never reached TestCoordinator, which raises OnDispose for every test it runs, so
+            // release what its data sources hold here (a dependency injection scope, for example) (#7205).
+            await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
+        }
+
         if (test.State == TestState.Failed && !test.HasStartedExecution)
         {
             // Failed before execution (data source, argument registration or dependency
@@ -293,6 +349,11 @@ internal sealed class TestScheduler : ITestScheduler
                 {
                     _testStateManager.MarkCircularDependencyFailed(test, exception);
                     TestSessionContext.Current?.MarkFailure();
+
+                    // Removed before execution, so the test never reaches TestCoordinator. Release what its
+                    // data sources hold (a dependency injection scope, for example) before publishing, so a
+                    // rejected message cannot skip it (#7205).
+                    await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
                     await _messageBus.Failed(test.Context, exception, DateTimeOffset.UtcNow).ConfigureAwait(false);
                 }
             }

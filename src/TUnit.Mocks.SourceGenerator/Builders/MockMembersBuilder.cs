@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Mocks.SourceGenerator.Models;
 using static TUnit.Mocks.SourceGenerator.IdentifierEscaping;
 
@@ -900,19 +903,22 @@ internal static class MockMembersBuilder
         }
     }
 
-    private static void GenerateGenericMethodMembersInCurrentBlock(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
+    // GetClosedReceiverGenericMethods(model, typeArguments) parses this output to detect
+    // closed-signature collisions. Analysis emits all framework overloads together; the
+    // emission coverage regression verifies that no conditional signature is hidden.
+    internal static void GenerateGenericMethodMembersInCurrentBlock(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName, bool includeAllFrameworkOverloads = false)
     {
         if (method.HasRefStructParams)
         {
-            writer.AppendLine("#if NET9_0_OR_GREATER");
+            if (!includeAllFrameworkOverloads) writer.AppendLine("#if NET9_0_OR_GREATER");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
             EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: true, captureModelTypeParameters: true, receiverIsThis: false);
-            writer.AppendLine("#else");
+            if (!includeAllFrameworkOverloads) writer.AppendLine("#else");
             EmitMemberMethodBody(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
             EmitFuncOverloads(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
             EmitParamsExpandedOverload(writer, method, model, safeName, includeRefStructArgs: false, captureModelTypeParameters: true, receiverIsThis: false);
-            writer.AppendLine("#endif");
+            if (!includeAllFrameworkOverloads) writer.AppendLine("#endif");
         }
         else
         {
@@ -923,6 +929,209 @@ internal static class MockMembersBuilder
 
         EmitAnyArgsOverload(writer, method, model, safeName, captureModelTypeParameters: true, receiverIsThis: false);
     }
+
+    /// <summary>
+    /// The generic methods of a generic mocked type whose setups can be re-emitted on a closed
+    /// receiver (<c>extension(Mock&lt;IFoo&lt;int&gt;&gt; mock)</c>) where the model's type parameters are
+    /// file aliases for the closed type arguments. C# does not bind a member of a generic extension
+    /// block when the call supplies explicit method type arguments, so without these copies
+    /// <c>Mock.Of&lt;IFoo&lt;int&gt;&gt;().Invoke&lt;T&gt;()</c> fails with CS1061 (#7302).
+    /// </summary>
+    /// <remarks>
+    /// Methods are skipped where an alias would change the meaning of the emitted code: a
+    /// constraint naming a model type parameter (<c>where TOther : T</c> is invalid once <c>T</c>
+    /// is a struct or sealed class), or an unconstrained model type parameter written as
+    /// <c>T?</c> (which becomes <c>Nullable&lt;T&gt;</c> for a value-type argument). Those keep the
+    /// typed wrapper (<c>IFoo&lt;int&gt;.Mock()</c>) and inferred calls on <c>Mock&lt;T&gt;</c>.
+    /// </remarks>
+    internal static List<MockMemberModel> GetClosedReceiverGenericMethods(MockTypeModel model)
+    {
+        var result = new List<MockMemberModel>();
+        if (model.TypeParameters.Length == 0)
+        {
+            return result;
+        }
+
+        var instanceMethods = new EquatableArray<MockMemberModel>(
+            model.Methods.Where(IsConfigurableMethod).ToImmutableArray());
+        foreach (var method in ApplyOutDisambiguation(instanceMethods))
+        {
+            if (method.TypeParameters.Length > 0 && CanAliasModelTypeParameters(method, model))
+            {
+                result.Add(method);
+            }
+        }
+
+        return result;
+    }
+
+    // Compare the actual emitted signatures, including predicate and params-expanded overloads.
+    // A closed substitution can collapse distinct open overloads; omit both rather than choosing
+    // which underlying member an identical setup should configure.
+    // Model parameter types alone do not describe the generated matcher, predicate, expanded
+    // params and framework-specific ref-struct overloads. Parse the emitter's output so this
+    // check shares that signature definition instead of maintaining a second overload model.
+    // Only same-name, same-arity overload groups need parsing; resolution stores the filtered
+    // methods in the emission model so BuildMethodSetups does not repeat this analysis.
+    internal static List<MockMemberModel> GetClosedReceiverGenericMethods(MockTypeModel model, EquatableArray<string> typeArguments)
+    {
+        var methods = GetClosedReceiverGenericMethods(model);
+        var collisions = new HashSet<int>();
+        foreach (var group in methods.GroupBy(m => (m.Name, m.TypeParameters.Length)).Where(g => g.Count() > 1))
+        {
+            var signatures = new Dictionary<string, int>(System.StringComparer.Ordinal);
+            foreach (var method in group)
+            {
+                var writer = new CodeWriter();
+                GenerateGenericMethodMembersInCurrentBlock(writer, method, model, MockImplBuilder.GetCompositeSafeName(model), includeAllFrameworkOverloads: true);
+                var source = "class Signatures { " + writer + " }";
+                // The emitter includes every framework branch without directives, so one parse
+                // sees all signatures without a separate list of preprocessor configurations.
+                var declarations = CSharpSyntaxTree.ParseText(source).GetRoot()
+                    .DescendantNodes().OfType<MethodDeclarationSyntax>();
+                var rewriter = new ClosedSignatureRewriter(model, typeArguments, method);
+                foreach (var declaration in declarations)
+                {
+                    var key = declaration.Identifier.ValueText + "`" + (declaration.TypeParameterList?.Parameters.Count ?? 0).ToString(CultureInfo.InvariantCulture)
+                        + "(" + string.Join(",", declaration.ParameterList.Parameters.Select(p =>
+                            string.Concat(p.Modifiers.Select(t => t.ValueText)) + ":" + rewriter.Visit(p.Type!)!.WithoutTrivia().NormalizeWhitespace().ToFullString())) + ")";
+                    if (signatures.TryGetValue(key, out var other) && other != method.MemberId)
+                    {
+                        collisions.Add(other);
+                        collisions.Add(method.MemberId);
+                    }
+                    else
+                    {
+                        signatures[key] = method.MemberId;
+                    }
+                }
+            }
+        }
+
+        return methods.Where(m => !collisions.Contains(m.MemberId)).ToList();
+    }
+
+    private sealed class ClosedSignatureRewriter : CSharpSyntaxRewriter
+    {
+        private readonly Dictionary<string, TypeSyntax> _substitutions = new(System.StringComparer.Ordinal);
+
+        private ClosedSignatureRewriter() { }
+
+        public ClosedSignatureRewriter(MockTypeModel model, EquatableArray<string> arguments, MockMemberModel method)
+        {
+            // Closed arguments contain no model or method parameters. Normalize them separately
+            // so a canonical method name can never capture a name inside a replacement.
+            var normalizer = new ClosedSignatureRewriter();
+            for (var i = 0; i < model.TypeParameters.Length; i++)
+                _substitutions[model.TypeParameters[i].Name] = (TypeSyntax)normalizer.Visit(SyntaxFactory.ParseTypeName(arguments[i]))!;
+            for (var i = 0; i < method.TypeParameters.Length; i++)
+                _substitutions[method.TypeParameters[i].Name] = SyntaxFactory.IdentifierName("__MethodType" + i.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
+        {
+            if (node.Parent is QualifiedNameSyntax or AliasQualifiedNameSyntax)
+                return base.VisitIdentifierName(node);
+            if (_substitutions.TryGetValue(node.Identifier.ValueText, out var replacement))
+                return replacement;
+            return node.Identifier.ValueText switch
+            {
+                "dynamic" => SyntaxFactory.ParseTypeName("global::System.Object"),
+                "nint" => SyntaxFactory.ParseTypeName("global::System.IntPtr"),
+                "nuint" => SyntaxFactory.ParseTypeName("global::System.UIntPtr"),
+                _ => base.VisitIdentifierName(node)
+            };
+        }
+
+        public override SyntaxNode? VisitPredefinedType(PredefinedTypeSyntax node)
+            => SyntaxFactory.ParseTypeName("global::System." + (node.Keyword.ValueText switch
+            {
+                "bool" => "Boolean", "byte" => "Byte", "sbyte" => "SByte", "short" => "Int16",
+                "ushort" => "UInt16", "int" => "Int32", "uint" => "UInt32", "long" => "Int64",
+                "ulong" => "UInt64", "char" => "Char", "float" => "Single", "double" => "Double",
+                "decimal" => "Decimal", "string" => "String", "object" => "Object", _ => node.Keyword.ValueText
+            }));
+
+        // Nullability and tuple element names cannot distinguish overloads. Removing nullable
+        // value annotations too is conservative: it can only omit an additional closed copy.
+        public override SyntaxNode? VisitNullableType(NullableTypeSyntax node) => Visit(node.ElementType);
+        public override SyntaxNode? VisitTupleType(TupleTypeSyntax node)
+            => TupleType(node.Elements.Select(e => Visit(e.Type)!.NormalizeWhitespace().ToFullString()).ToArray());
+
+        private static TypeSyntax TupleType(string[] elements)
+        {
+            var arguments = elements.Length <= 7 ? elements
+                : elements.Take(7).Concat(new[] { TupleType(elements.Skip(7).ToArray()).ToFullString() }).ToArray();
+            return SyntaxFactory.ParseTypeName("global::System.ValueTuple<" + string.Join(",", arguments) + ">");
+        }
+    }
+
+    internal static void GenerateClosedReceiverGenericMethodMembers(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
+        => GenerateGenericMethodMembersInCurrentBlock(writer, method, model, safeName);
+
+    private static bool CanAliasModelTypeParameters(MockMemberModel method, MockTypeModel model)
+    {
+        foreach (var typeParameter in method.TypeParameters)
+        {
+            foreach (var modelTypeParameter in model.TypeParameters)
+            {
+                if (ContainsIdentifier(typeParameter.Constraints, modelTypeParameter.Name, requireNullableSuffix: false))
+                {
+                    return false;
+                }
+            }
+        }
+
+        foreach (var modelTypeParameter in model.TypeParameters)
+        {
+            if (modelTypeParameter.HasReferenceTypeConstraint || modelTypeParameter.HasValueTypeConstraint)
+            {
+                continue;
+            }
+
+            if (ContainsIdentifier(method.ReturnType, modelTypeParameter.Name, requireNullableSuffix: true)
+                || method.Parameters.Any(p => ContainsIdentifier(p.FullyQualifiedType, modelTypeParameter.Name, requireNullableSuffix: true)))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool ContainsIdentifier(string text, string identifier, bool requireNullableSuffix)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        for (var index = text.IndexOf(identifier, System.StringComparison.Ordinal); index >= 0; index = text.IndexOf(identifier, index + 1, System.StringComparison.Ordinal))
+        {
+            var end = index + identifier.Length;
+            if (index > 0 && IsIdentifierOrQualifierChar(text[index - 1]))
+            {
+                continue;
+            }
+
+            if (end < text.Length && IsIdentifierChar(text[end]))
+            {
+                continue;
+            }
+
+            if (!requireNullableSuffix || (end < text.Length && text[end] == '?'))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsIdentifierChar(char c) => char.IsLetterOrDigit(c) || c == '_';
+
+    // A '.' or ':' before the name means a member or namespace-qualified type that merely shares it.
+    private static bool IsIdentifierOrQualifierChar(char c) => IsIdentifierChar(c) || c == '.' || c == ':';
 
     internal static void GenerateGenericMethodMembersForWrapper(CodeWriter writer, MockMemberModel method, MockTypeModel model, string safeName)
     {

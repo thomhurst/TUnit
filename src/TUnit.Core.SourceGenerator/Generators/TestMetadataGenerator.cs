@@ -1530,6 +1530,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 if (instantiation.HasClassRows)
                 {
+                    // Typed class sources sharing these types contribute rows even when an
+                    // [Arguments] row already established the instantiation (#7335).
+                    foreach (var attribute in testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
+                    {
+                        if (attribute.AttributeClass is { } attributeClass
+                            && DataSourceAttributeHelper.IsTypedDataSourceAttribute(attributeClass)
+                            && InferClassTypesFromTypedClassDataSource(testMethod.TypeSymbol, attributeClass) is { } classTypes
+                            && InferredTypesMatch(classTypes, instantiation.ClassTypeArgs))
+                        {
+                            instantiation.AddRow(attribute, isClassRow: true);
+                        }
+                    }
+
                     foreach (var ownSource in GetOwnClassMethodDataSourcesForInstantiation(testMethod, instantiation.ClassTypeArgs, includeUninferred: false))
                     {
                         instantiation.AddRow(ownSource, isClassRow: true);

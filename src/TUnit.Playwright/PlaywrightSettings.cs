@@ -23,6 +23,12 @@ public class TUnitPlaywrightSettings
     /// Options used when launching the browser for tests inheriting <see cref="BrowserTest"/>
     /// or <see cref="BrowserFixture"/>. When non-null, this fully replaces the hardcoded defaults.
     /// </summary>
+    /// <remarks>
+    /// Leave <see cref="BrowserTypeLaunchOptions.Headless"/> unset so the <c>HEADED=1</c>
+    /// environment variable can open visible browsers; an explicit value wins over <c>HEADED</c>.
+    /// Playwright's <c>PWDEBUG=1</c> opens a visible browser even when <c>Headless</c> is
+    /// <c>true</c>.
+    /// </remarks>
     public BrowserTypeLaunchOptions? DefaultBrowserTypeLaunchOptions { get; set; } = null;
 
     /// <summary>

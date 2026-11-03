@@ -26,7 +26,14 @@ public static class Arg
     public static Arg<T> Is<T>(T value) => new(new ExactMatcher<T>(value));
 
     /// <summary>Matches when the predicate returns true for the actual argument.</summary>
-    public static Arg<T> Is<T>(Func<T?, bool> predicate) => new(new PredicateMatcher<T>(predicate));
+    /// <remarks>
+    /// For a non-nullable reference type, the predicate receives <typeparamref name="T"/>, so it can
+    /// dereference its argument without a null guard. Use <c>Is&lt;T?&gt;(...)</c> when the predicate
+    /// should handle a null argument itself. Both forms pass null to the predicate at runtime.
+    /// Predicate exceptions propagate, including when the argument is null. Use an explicit null
+    /// guard if null should be a non-match.
+    /// </remarks>
+    public static Arg<T> Is<T>(Func<T, bool> predicate) => new(new PredicateMatcher<T>(predicate));
 
     /// <summary>Matches only when the argument is null. Supports reference types and nullable value types.</summary>
     public static Arg<T> IsNull<T>() => new(NullMatcher<T>.Instance);

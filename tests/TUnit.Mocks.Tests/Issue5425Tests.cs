@@ -1,6 +1,6 @@
 #nullable enable
 
-// Promote the nullability warnings that #5424 / #5425 produced into errors so any
+// The project file promotes the nullability warnings that #5424 / #5425 produced into errors so any
 // regression in the source generator (where the generated mock loses nullability
 // information from the source event) breaks this project's build instead of
 // silently emitting warnings.
@@ -10,11 +10,6 @@
 //   CS8613 — Nullability mismatch in return type
 //   CS8614 — Nullability mismatch in parameter type
 //   CS8615 — Nullability mismatch in implemented member
-#pragma warning error CS8604
-#pragma warning error CS8612
-#pragma warning error CS8613
-#pragma warning error CS8614
-#pragma warning error CS8615
 
 namespace TUnit.Mocks.Tests;
 

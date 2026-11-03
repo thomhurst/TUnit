@@ -282,10 +282,13 @@ public class ScopeOwnedConstructorLifecycleTests(ScopeOwnedConstructorLifecycleT
     [After(Class)]
     public static async Task Verify()
     {
-        foreach (var scope in ScopeDataAttribute.Scopes)
+        // The temporary discovery instance can supply objects to later method rows. Its scope
+        // remains alive until session end; the two executable rows release their own scopes here.
+        await Assert.That(ScopeDataAttribute.Scopes.Count).IsEqualTo(3);
+        await Assert.That(ScopeDataAttribute.Scopes.Count(x => x.DisposeCount == 0)).IsEqualTo(1);
+        await Assert.That(ScopeDataAttribute.Scopes.Count(x => x.DisposeCount == 1)).IsEqualTo(2);
+        foreach (var scope in ScopeDataAttribute.Scopes.Where(x => x.DisposeCount == 1))
         {
-            await Assert.That(scope.DisposeCount).IsEqualTo(1);
-            // The initial instance is used only for discovery, so its properties may not be injected.
             if (scope.Service?.Dependency is { } dependency)
                 await Assert.That(dependency.Disposed).IsTrue();
         }

@@ -88,7 +88,7 @@ public class ObjectGraphDiscovererPreCheckTests
         var traversal = typeof(ObjectGraphDiscoverer).GetMethod("DiscoverNestedObjectsForTracking",
             BindingFlags.Instance | BindingFlags.NonPublic)!;
 
-        traversal.Invoke(new ObjectGraphDiscoverer(), [holder, tracked, 1, true, CancellationToken.None]);
+        traversal.Invoke(new ObjectGraphDiscoverer(), [holder, tracked, 1, true, null, CancellationToken.None]);
 
         await Assert.That(tracked.Values.SelectMany(x => x).Contains(shared)).IsTrue();
         await Assert.That(ObjectTracker.IsExternallyOwned(shared)).IsFalse();
