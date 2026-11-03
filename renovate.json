@@ -17,6 +17,11 @@
       "allowedVersions": "<18.10.0"
     },
     {
+      "description": "The internals-access task supports net8.0 and net472 hosts; keep its compile-time MSBuild APIs and in-process test runtime on the net8.0-compatible 17.11 servicing line.",
+      "matchPackageNames": ["Microsoft.Build.Utilities.Core"],
+      "allowedVersions": ">=17.11.0 <17.12.0"
+    },
+    {
       "description": "Roslyn versions are chosen deliberately: analyzers and generators must load in older compilers (SDKs/IDEs), so they and their tests reference old Roslyn APIs.",
       "matchPackageNames": [
         "Microsoft.CodeAnalysis.Common",
