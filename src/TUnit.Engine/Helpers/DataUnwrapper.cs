@@ -49,7 +49,7 @@ internal class DataUnwrapper
     {
         // First check for TestDataRow wrapper
         var (unwrapped, metadata) = TestDataRowUnwrapper.UnwrapArray(values,
-            values is [ITestDataRow] && HasSingleTupleDataParameter(expectedParameters));
+            values is [ITestDataRow] ? GetSingleTupleDataParameterType(expectedParameters) : null);
 
         // Then apply type-aware unwrapping
         var data = UnwrapWithTypesInternal(unwrapped, expectedParameters);
@@ -60,16 +60,16 @@ internal class DataUnwrapper
     {
         // First handle TestDataRow unwrapping
         var (unwrapped, _) = TestDataRowUnwrapper.UnwrapArray(values,
-            values is [ITestDataRow] && HasSingleTupleDataParameter(expectedParameters));
+            values is [ITestDataRow] ? GetSingleTupleDataParameterType(expectedParameters) : null);
         return UnwrapWithTypesInternal(unwrapped, expectedParameters);
     }
 
-    private static bool HasSingleTupleDataParameter(ParameterMetadata[]? parameters)
+    private static Type? GetSingleTupleDataParameterType(ParameterMetadata[]? parameters)
     {
         Type? dataType = null;
         if (parameters is null)
         {
-            return false;
+            return null;
         }
 
         foreach (var parameter in parameters)
@@ -81,13 +81,13 @@ internal class DataUnwrapper
 
             if (dataType is not null)
             {
-                return false;
+                return null;
             }
 
             dataType = parameter.Type;
         }
 
-        return TupleHelper.IsTupleType(dataType);
+        return TupleHelper.IsTupleType(dataType) ? dataType : null;
     }
 
     private static object?[] UnwrapWithTypesInternal(object?[] values, ParameterMetadata[]? expectedParameters)

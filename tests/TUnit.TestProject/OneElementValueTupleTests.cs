@@ -71,4 +71,19 @@ public class OneElementValueTupleTests
     [GenerateGenericTest(typeof(ValueTuple<object>))]
     [InstanceMethodDataSource(nameof(InstanceGenericNestedRow))]
     public Task GenericNestedElementFromInstance<T>(T value) => NestedElement((ValueTuple<object>)(object)value!);
+    public static IEnumerable<TestDataRow<ValueTuple<(int, int)>>> WrappedPairRows() =>
+        [new(new ValueTuple<(int, int)>((1, 2)))];
+
+    public IEnumerable<TestDataRow<ValueTuple<(int, int)>>> InstanceWrappedPairRows() => WrappedPairRows();
+
+    [Test]
+    [MethodDataSource(nameof(WrappedPairRows))]
+    public async Task WrappedPairExpandsOuterTuple((int, int) value)
+    {
+        await Assert.That(value).IsEqualTo((1, 2));
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(InstanceWrappedPairRows))]
+    public Task WrappedPairExpandsOuterTupleFromInstance((int, int) value) => WrappedPairExpandsOuterTuple(value);
 }
