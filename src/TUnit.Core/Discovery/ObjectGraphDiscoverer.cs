@@ -9,6 +9,7 @@ using TUnit.Core.Extensions;
 using TUnit.Core.Interfaces;
 using TUnit.Core.Interfaces.SourceGenerator;
 using TUnit.Core.PropertyInjection;
+using TUnit.Core.Tracking;
 
 namespace TUnit.Core.Discovery;
 
@@ -198,9 +199,25 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         }
 
         TryAddObjectFunc tryAdd = (obj, depth) => TryAddToHashSet(visitedObjects, depth, obj);
-        RootObjectCallback onRootObjectAdded = discoverNested
-            ? obj => DiscoverNestedObjectsForTracking(obj, visitedObjects, 1, cancellationToken)
-            : static _ => { };
+        HashSet<object>? injectedValues = null;
+        void DiscoverRoot(object obj)
+        {
+            if (ObjectTracker.IsExternallyOwned(obj) && injectedValues is null)
+            {
+                injectedValues = new HashSet<object>(ReferenceComparer);
+                foreach (var value in testDetails.TestClassInjectedPropertyArguments.Values)
+                {
+                    if (value is not null)
+                    {
+                        injectedValues.Add(value);
+                    }
+                }
+            }
+
+            DiscoverNestedObjectsForTracking(obj, visitedObjects, 1, heldByExternalOwner: false, injectedValues, cancellationToken);
+        }
+
+        RootObjectCallback onRootObjectAdded = discoverNested ? DiscoverRoot : static _ => { };
 
         // Collect root-level objects and discover nested objects for tracking
         CollectRootObjects(testDetails, tryAdd, onRootObjectAdded, cancellationToken);
@@ -318,10 +335,16 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// Discovers nested objects for tracking (uses HashSet pattern for compatibility with TestContext.TrackedObjects).
     /// Uses consolidated TraverseInjectableProperties and TraverseInitializerProperties methods.
     /// </summary>
+    /// <param name="heldByExternalOwner">
+    /// True when <paramref name="obj"/> was found beneath an object that another owner (a dependency
+    /// injection scope) disposes. Such an object is treated as externally owned even when it is not marked.
+    /// </param>
     private void DiscoverNestedObjectsForTracking(
         object obj,
         IDictionary<int, HashSet<object>> visitedObjects,
         int currentDepth,
+        bool heldByExternalOwner,
+        HashSet<object>? injectedValues,
         CancellationToken cancellationToken)
     {
         if (!CheckRecursionDepth(obj, currentDepth))
@@ -338,13 +361,21 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return;
         }
 
-        DiscoverNestedObjectsForTrackingCore(obj, visitedObjects, currentDepth, cancellationToken);
+        var externallyOwned = heldByExternalOwner || ObjectTracker.IsExternallyOwned(obj);
+        if (externallyOwned)
+        {
+            injectedValues ??= new HashSet<object>(ReferenceComparer);
+        }
+
+        DiscoverNestedObjectsForTrackingCore(obj, visitedObjects, currentDepth, externallyOwned, injectedValues, cancellationToken);
     }
 
     private void DiscoverNestedObjectsForTrackingCore(
         object obj,
         IDictionary<int, HashSet<object>> visitedObjects,
         int currentDepth,
+        bool externallyOwned,
+        HashSet<object>? injectedValues,
         CancellationToken cancellationToken)
     {
         // Tracking mode add callback: TryAddToHashSet only
@@ -353,17 +384,57 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return TryAddToHashSet(visitedObjects, depth, value);
         }
 
-        // Recursive callback
+        // Recursive callback. TUnit creates the values of injectable properties, so the tracker owns them.
         void Recurse(object value, int depth)
         {
-            DiscoverNestedObjectsForTracking(value, visitedObjects, depth, cancellationToken);
+            DiscoverNestedObjectsForTracking(value, visitedObjects, depth, heldByExternalOwner: false, injectedValues, cancellationToken);
         }
 
-        // Traverse injectable properties (useSourceRegistrarCheck = true for tracking mode)
-        TraverseInjectableProperties(obj, TryAddTracking, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true);
+        bool TryAddInjected(object value, int depth)
+        {
+            injectedValues?.Add(value);
+            return TryAddToHashSet(visitedObjects, depth, value);
+        }
 
-        // Also discover nested IAsyncInitializer objects from ALL properties
-        TraverseInitializerProperties(obj, TryAddTracking, Recurse, currentDepth, cancellationToken);
+        if (!externallyOwned)
+        {
+            // Traverse injectable properties (useSourceRegistrarCheck = true for tracking mode)
+            TraverseInjectableProperties(obj, TryAddInjected, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true);
+
+            // Also discover nested IAsyncInitializer objects from ALL properties
+            TraverseInitializerProperties(obj, TryAddTracking, Recurse, currentDepth, cancellationToken);
+            return;
+        }
+
+        // TUnit injected these values even though obj is externally owned, so the tracker still owns them.
+        // Keep this set across the whole traversal: a nested initializer may expose an alias of
+        // an injected fixture, and that alias must not transfer ownership to the scope.
+        TraverseInjectableProperties(obj, TryAddInjected, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true);
+
+        // The owner of obj (a dependency injection scope) created the rest of what obj holds and disposes
+        // it, so the tracker must not dispose it a second time (#7205). The objects are still tracked, so
+        // they are initialized.
+        bool TryAddOwned(object value, int depth)
+        {
+            if (injectedValues?.Contains(value) == true)
+            {
+                return false;
+            }
+
+            if (value is IDisposable or IAsyncDisposable)
+            {
+                ObjectTracker.MarkExternallyOwned(value);
+            }
+
+            return TryAddToHashSet(visitedObjects, depth, value);
+        }
+
+        void RecurseOwned(object value, int depth)
+        {
+            DiscoverNestedObjectsForTracking(value, visitedObjects, depth, heldByExternalOwner: true, injectedValues, cancellationToken);
+        }
+
+        TraverseInitializerProperties(obj, TryAddOwned, RecurseOwned, currentDepth, cancellationToken);
     }
 
     /// <summary>

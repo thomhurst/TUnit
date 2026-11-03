@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using TUnit.Core.Helpers;
 
 namespace TUnit.Core.Tracking;
@@ -49,8 +50,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         foreach (var kvp in s_trackedObjects)
         {
             // TryRemove guards against racing disposals (e.g. a late UntrackObject call)
-            if (!s_trackedObjects.TryRemove(kvp.Key, out _))
+            if (!s_trackedObjects.TryRemove(kvp.Key, out _) || IsExternallyOwned(kvp.Key))
             {
+                // An object marked after it was counted belongs to its external owner, which disposes it.
                 continue;
             }
 
@@ -335,7 +337,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     private async ValueTask UntrackObject(object? obj, TestContext? testContext)
     {
-        if (obj == null || ShouldSkipTracking(obj))
+        // Every disposable is counted, including externally owned objects. Ownership changes only
+        // who disposes it, so each test always releases exactly the reference it took.
+        if (obj is not IDisposable and not IAsyncDisposable)
         {
             return;
         }
@@ -361,7 +365,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             }
         }
 
-        if (shouldDispose)
+        if (shouldDispose && !IsExternallyOwned(obj))
         {
 #if NET
             if (TryGetSharedDisposeScope(obj, out var sharedType))
@@ -524,6 +528,46 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static bool ShouldSkipTracking(object? obj)
     {
         return obj is not IDisposable and not IAsyncDisposable;
+    }
+
+    /// <summary>
+    /// Whether <see cref="MarkExternallyOwned"/> marked <paramref name="obj"/>.
+    /// </summary>
+    internal static bool IsExternallyOwned(object obj)
+        => s_hasExternallyOwned && s_externallyOwned.TryGetValue(obj, out _);
+
+    // Objects whose lifetime another owner controls (a dependency injection scope, for example).
+    // The tracker counts references but leaves disposal to their owner.
+    private static readonly ConditionalWeakTable<object, object> s_externallyOwned = new();
+    private static readonly object s_externallyOwnedMarker = new();
+
+    // Skips the table lookup for every tracked object until something is marked.
+    private static volatile bool s_hasExternallyOwned;
+
+    /// <summary>
+    /// Marks <paramref name="obj"/> as disposed by another owner, so the tracker counts references without disposing it.
+    /// Dependency injection data sources mark the services they resolve, because the scope that created
+    /// them disposes them when the test ends (#7205). Existing tracker references are released
+    /// without disposing the object, regardless of which data source supplied it first.
+    /// </summary>
+    /// <remarks>
+    /// The mark lasts for the object's lifetime and applies to every data source that later supplies the
+    /// object, because the object still belongs to the container that resolved it: a root singleton is
+    /// disposed by its root container, not by a test. A non-owning source may already
+    /// have counted the object, or count it concurrently with the mark.
+    /// That count is still released, and the tracker leaves the object to its owner rather than disposing it
+    /// when the count reaches zero or at session end.
+    /// </remarks>
+    internal static void MarkExternallyOwned(object? obj)
+    {
+        // A non-disposable object is marked too: the initializer objects it holds belong to the same owner.
+        if (obj is null)
+        {
+            return;
+        }
+
+        s_externallyOwned.GetValue(obj, static _ => s_externallyOwnedMarker);
+        s_hasExternallyOwned = true;
     }
 
     /// <summary>

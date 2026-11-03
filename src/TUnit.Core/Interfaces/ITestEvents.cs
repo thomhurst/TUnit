@@ -9,6 +9,16 @@ public interface ITestEvents
     /// <summary>
     /// Gets the event that is raised when the test context is disposed.
     /// </summary>
+    /// <remarks>
+    /// Raised once per test, after its final attempt and after the test class instance is disposed, so a
+    /// handler must not use the instance. A retried test raises it once, after the last attempt, not once per
+    /// attempt. It is also raised for a test that never runs: one that is skipped, skipped because a
+    /// dependency failed, cancelled before it starts, or removed by circular-dependency detection.
+    /// <para>
+    /// Handlers that a data source subscribes through <see cref="TestBuilderContext.Events"/> while it builds a
+    /// test's row (a dependency injection scope's disposal, for example) are raised with that test's handlers.
+    /// </para>
+    /// </remarks>
     AsyncEvent<TestContext>? OnDispose { get; }
 
     /// <summary>

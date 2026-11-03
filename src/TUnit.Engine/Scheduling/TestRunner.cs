@@ -134,6 +134,11 @@ public sealed class TestRunner
                 if (dependency.Test.State != TestState.Passed && !dependency.ProceedOnFailure)
                 {
                     _testStateManager.MarkSkipped(test, "Skipped due to failed dependencies");
+
+                    // The test never reaches TestCoordinator, so release what its data sources hold here
+                    // (a dependency injection scope, for example) before publishing, so a rejected message
+                    // cannot skip it (#7205).
+                    await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
                     await _tunitMessageBus.Skipped(test.Context, "Skipped due to failed dependencies").ConfigureAwait(false);
                     return;
                 }
@@ -191,6 +196,12 @@ public sealed class TestRunner
             if (_logger.IsDebugEnabled)
             {
                 await _logger.LogDebugAsync($"Test {test.TestId} was not started because the test run was cancelled.").ConfigureAwait(false);
+            }
+
+            if (!test.HasStartedExecution)
+            {
+                // TestCoordinator raises OnDispose for tests that reached it (#7205).
+                await TestOnDisposeRaiser.RaiseOnceAsync(test, _logger).ConfigureAwait(false);
             }
         }
         catch (Exception ex)
