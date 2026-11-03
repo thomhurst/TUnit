@@ -27,6 +27,9 @@ internal static class ResourceStartupWaiter
         try
         {
             var completed = await Task.WhenAny(readyTask, anyFailureTask);
+            // Linked cancellation can let a losing wait fault before the cancelled wait
+            // wins the race. Preserve the caller cancellation instead of that cleanup fault.
+            cancellationToken.ThrowIfCancellationRequested();
             if (completed == anyFailureTask)
             {
                 return await await anyFailureTask;
