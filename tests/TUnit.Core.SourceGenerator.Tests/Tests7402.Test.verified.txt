@@ -125,6 +125,56 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
                 }
                 case 5:
                 {
+                    // Special handling for single reference tuple parameter
+                    if (args.Length == 1 && args[0] is not global::System.Tuple<decimal> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Reference_Tuple_Character_Can_Be_Converted_To_Decimal(new global::System.Tuple<decimal>(global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(null))));
+                    }
+                    else
+                    if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<decimal>)
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Reference_Tuple_Character_Can_Be_Converted_To_Decimal(new global::System.Tuple<decimal>(global::TUnit.Core.Helpers.CastHelper.Cast<decimal>(args[0]))));
+                    }
+                    else
+                    {
+                        switch (args.Length)
+                        {
+                            case 1:
+                                {
+                                    return new global::System.Threading.Tasks.ValueTask(instance.Reference_Tuple_Character_Can_Be_Converted_To_Decimal(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<decimal>>(args[0])));
+                                }
+                            default:
+                                throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        }
+                    }
+                }
+                case 6:
+                {
+                    // Special handling for single reference tuple parameter
+                    if (args.Length == 1 && args[0] is not global::System.Tuple<global::System.ValueTuple<int, int>?> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Reference_Tuple_Uses_Implicit_Conversion_To_Nullable_Tuple(new global::System.Tuple<global::System.ValueTuple<int, int>?>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>?>(null))));
+                    }
+                    else
+                    if (args.Length == 1 && args[0] is not null && args[0] is not global::System.Tuple<global::System.ValueTuple<int, int>?>)
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.Reference_Tuple_Uses_Implicit_Conversion_To_Nullable_Tuple(new global::System.Tuple<global::System.ValueTuple<int, int>?>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>?>(args[0]))));
+                    }
+                    else
+                    {
+                        switch (args.Length)
+                        {
+                            case 1:
+                                {
+                                    return new global::System.Threading.Tasks.ValueTask(instance.Reference_Tuple_Uses_Implicit_Conversion_To_Nullable_Tuple(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<global::System.ValueTuple<int, int>?>>(args[0])));
+                                }
+                            default:
+                                throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        }
+                    }
+                }
+                case 7:
+                {
                     // Special handling for single tuple parameter
                     if (args.Length == 2)
                     {
@@ -141,7 +191,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
                         throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
                     }
                 }
-                case 6:
+                case 8:
                 {
                     // Special handling for single tuple parameter
                     if (args.Length == 2)
@@ -159,7 +209,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
                         throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
                     }
                 }
-                case 7:
+                case 9:
                 {
                     // Special handling for single tuple parameter
                     if (args.Length == 2)
@@ -177,7 +227,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
                         throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
                     }
                 }
-                case 8:
+                case 10:
                 {
                     // Special handling for single tuple parameter
                     if (args.Length == 2)
@@ -195,7 +245,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
                         throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
                     }
                 }
-                case 9:
+                case 11:
                 {
                     // Special handling for single tuple parameter
                     if (args.Length == 2)
@@ -213,7 +263,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
                         throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
                     }
                 }
-                case 10:
+                case 12:
                 {
                     // Special handling for single reference tuple parameter
                     if (args.Length == 1 && args[0] is not global::System.Tuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])
@@ -238,7 +288,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
                         }
                     }
                 }
-                case 11:
+                case 13:
                 {
                     // Special handling for single tuple parameter
                     if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
@@ -256,7 +306,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
                         throw new global::System.ArgumentException($"Expected 1 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
                     }
                 }
-                case 12:
+                case 14:
                 {
                     // Special handling for single reference tuple parameter
                     if (args.Length == 1 && args[0] is not global::System.Tuple<string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]) is [null])
@@ -312,7 +362,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>[] Entries = __CreateEntries();
     private static global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>[] __CreateEntries()
     {
-        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>[13];
+        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>[15];
         __FillEntries0(entries);
         __FillEntries1(entries);
         return entries;
@@ -458,10 +508,62 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             createAttributes: __attributes,
             attributeGroupIndex: 0);
         entries[5] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+            methodName: "Reference_Tuple_Character_Can_Be_Converted_To_Decimal",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Reference_Tuple_Character_Can_Be_Converted_To_Decimal",
+            filePath: "",
+            lineNumber: 68,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("CharacterReferenceValue")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.CharacterReferenceValue()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests), "Reference_Tuple_Character_Can_Be_Converted_To_Decimal", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Tuple<decimal>), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<decimal>)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 5,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[6] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+            methodName: "Reference_Tuple_Uses_Implicit_Conversion_To_Nullable_Tuple",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Reference_Tuple_Uses_Implicit_Conversion_To_Nullable_Tuple",
+            filePath: "",
+            lineNumber: 108,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("NullableTupleOperatorRow")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.NullableTupleOperatorRow()),
+    },
+    new global::TUnit.Core.MethodDataSourceAttribute("NullableTupleOperatorRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.NullableTupleOperatorRows()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests), "Reference_Tuple_Uses_Implicit_Conversion_To_Nullable_Tuple", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Tuple<global::System.ValueTuple<int, int>?>), "value", new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<global::System.ValueTuple<int, int>?>)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 6,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[7] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
             methodName: "Nested_Tuple_Uses_Implicit_Conversion",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Nested_Tuple_Uses_Implicit_Conversion",
             filePath: "",
-            lineNumber: 99,
+            lineNumber: 126,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -478,14 +580,14 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 5,
+            methodIndex: 7,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[6] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+        entries[8] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
             methodName: "Nested_Tuple_Uses_Explicit_Conversion",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Nested_Tuple_Uses_Explicit_Conversion",
             filePath: "",
-            lineNumber: 106,
+            lineNumber: 133,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -502,14 +604,14 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 6,
+            methodIndex: 8,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[7] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+        entries[9] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
             methodName: "Null_Nested_Tuple_Uses_Default",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Null_Nested_Tuple_Uses_Default",
             filePath: "",
-            lineNumber: 117,
+            lineNumber: 144,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -526,14 +628,17 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 7,
+            methodIndex: 9,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[8] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+    }
+    private static void __FillEntries1(global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>[] entries)
+    {
+        entries[10] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
             methodName: "Nested_Tuple_Elements_Can_Be_Converted",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Nested_Tuple_Elements_Can_Be_Converted",
             filePath: "",
-            lineNumber: 128,
+            lineNumber: 155,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -550,14 +655,14 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 8,
+            methodIndex: 10,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[9] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+        entries[11] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
             methodName: "Nested_Long_Tuple_Elements_Can_Be_Converted",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Nested_Long_Tuple_Elements_Can_Be_Converted",
             filePath: "",
-            lineNumber: 138,
+            lineNumber: 165,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -574,17 +679,14 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 9,
+            methodIndex: 11,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-    }
-    private static void __FillEntries1(global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>[] entries)
-    {
-        entries[10] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+        entries[12] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
             methodName: "Converted_Tuple_Holding_Null_Stays_A_Tuple",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Converted_Tuple_Holding_Null_Stays_A_Tuple",
             filePath: "",
-            lineNumber: 145,
+            lineNumber: 172,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -601,14 +703,14 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 10,
+            methodIndex: 12,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[11] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+        entries[13] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
             methodName: "Converted_Value_Tuple_Holds_Null",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Converted_Value_Tuple_Holds_Null",
             filePath: "",
-            lineNumber: 157,
+            lineNumber: 182,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -625,14 +727,14 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 11,
+            methodIndex: 13,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[12] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
+        entries[14] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests>(
             methodName: "Tuple_Holding_Null_Stays_A_Tuple",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7402.StaticTupleDataSourceTests.Tuple_Holding_Null_Stays_A_Tuple",
             filePath: "",
-            lineNumber: 174,
+            lineNumber: 199,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -665,7 +767,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 12,
+            methodIndex: 14,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
     }

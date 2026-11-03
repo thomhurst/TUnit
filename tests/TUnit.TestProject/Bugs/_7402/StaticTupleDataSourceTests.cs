@@ -56,13 +56,20 @@ public class StaticTupleDataSourceTests
         => Tuple.Create(1, 2, 3, 4, 5, 6, 7, 8);
 
     [Test]
-#pragma warning disable TUnit0001 // Exercise runtime element conversion; reference-tuple widening is tracked in #7480.
     [MethodDataSource(nameof(LongReferenceValue))]
-#pragma warning restore TUnit0001
     public async Task Long_Reference_Tuple_Elements_Can_Be_Converted(
         Tuple<long, long, long, long, long, long, long, Tuple<long>> value)
     {
         await Assert.That(value).IsEqualTo(Tuple.Create(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
+    }
+
+    public static Tuple<char> CharacterReferenceValue() => Tuple.Create('A');
+
+    [Test]
+    [MethodDataSource(nameof(CharacterReferenceValue))]
+    public async Task Reference_Tuple_Character_Can_Be_Converted_To_Decimal(Tuple<decimal> value)
+    {
+        await Assert.That(value.Item1).IsEqualTo(65m);
     }
 
     public sealed class ImplicitTupleValue
@@ -84,6 +91,26 @@ public class StaticTupleDataSourceTests
         }
 
         return (new(), 3);
+    }
+
+    public static Tuple<ImplicitTupleValue> NullableTupleOperatorRow()
+    {
+        if (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported)
+        {
+            TUnit.Core.Converters.AotConverterRegistry.Register<ImplicitTupleValue, (int, int)>(value => value);
+        }
+
+        return Tuple.Create(new ImplicitTupleValue());
+    }
+
+    public static IEnumerable<Tuple<ImplicitTupleValue>> NullableTupleOperatorRows() => [NullableTupleOperatorRow()];
+
+    [Test]
+    [MethodDataSource(nameof(NullableTupleOperatorRow))]
+    [MethodDataSource(nameof(NullableTupleOperatorRows))]
+    public async Task Reference_Tuple_Uses_Implicit_Conversion_To_Nullable_Tuple(Tuple<(int, int)?> value)
+    {
+        await Assert.That(value.Item1).IsEqualTo(((int, int)?)(1, 2));
     }
 
     public static (ExplicitTupleValue, int) ExplicitNestedValue()
@@ -143,9 +170,7 @@ public class StaticTupleDataSourceTests
     }
 
     [Test]
-#pragma warning disable TUnit0001 // Reference-tuple widening analyzer limitation: #7480.
     [MethodDataSource(nameof(Value))]
-#pragma warning restore TUnit0001
     public async Task Converted_Tuple_Holding_Null_Stays_A_Tuple(Tuple<object?> value)
     {
         await Assert.That(value).IsNotNull();

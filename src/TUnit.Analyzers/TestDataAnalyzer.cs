@@ -644,7 +644,9 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     {
                         return true;
                     }
-                    return context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments);
+                    // Only a preserved whole row can use runtime tuple reconstruction.
+                    return (!isTuples && CanConvertReferenceTuple(argument, parameter, context))
+                        || context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments);
                 });
 
             if (!conversions.All(x => x))
@@ -687,8 +689,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (testParameterTypes.Length == 1
                 && unwrappedTypes.Length == 1
-                && context.Compilation.CanBindToTestParameter(unwrappedTypes[0],
-                    testParameterTypes[0]))
+                && ((!isTuples && CanConvertReferenceTuple(unwrappedTypes[0], testParameterTypes[0], context))
+                    || context.Compilation.CanBindToTestParameter(unwrappedTypes[0], testParameterTypes[0])))
             {
                 return;
             }
@@ -1024,10 +1026,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
         }
 
+        // Decide whole-row binding before marking the row as spread. A nested tuple Item
+        // is not reconstructed: CanConvertReferenceTuple checks only the outer row here.
         if (TryGetTupleElementTypes(type, context.Compilation, out var tupleElements))
         {
             if (testParameterTypes.Length == 1
-                && SymbolEqualityComparer.Default.Equals(type, testParameterTypes[0]))
+                && (SymbolEqualityComparer.Default.Equals(type, testParameterTypes[0])
+                    || CanConvertReferenceTuple(type, testParameterTypes[0], context)))
             {
                 return ImmutableArray.Create(type);
             }
@@ -1055,6 +1060,121 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         return ImmutableArray.Create(type);
     }
 
+    private static bool CanConvertReferenceTuple(ITypeSymbol? source, ITypeSymbol? target,
+        SymbolAnalysisContext context)
+    {
+        // Only test-method invocation reconstructs reference tuples. Constructor binding uses
+        // CastHelper directly and must retain the diagnostic for differing tuple types.
+        if (context.Symbol is not IMethodSymbol)
+        {
+            return false;
+        }
+
+        var compilation = context.Compilation;
+
+        // Reference tuples have no language-level element conversions. The runtime reconstructs
+        // them, so validate the logical elements, including the recursively flattened Rest.
+        // Nested reference-tuple Items still use CastHelper rather than reconstruction.
+        if (source is not INamedTypeSymbol sourceTuple
+            || target is not INamedTypeSymbol targetTuple
+            || !IsReferenceTuple(sourceTuple)
+            || !IsReferenceTuple(targetTuple)
+            || !TryGetTupleElementTypes(source, compilation, out var sourceElements)
+            || !TryGetTupleElementTypes(target, compilation, out var targetElements)
+            || sourceElements.Length != targetElements.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < sourceElements.Length; i++)
+        {
+            if (!CanConvertReferenceTupleElement(sourceElements[i], targetElements[i], compilation))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool CanConvertReferenceTupleElement(ITypeSymbol source, ITypeSymbol target,
+        Compilation compilation)
+    {
+        var conversion = compilation.ClassifyConversion(source, target);
+        if (!conversion.IsImplicit)
+        {
+            return false;
+        }
+
+        // CastHelper unwraps nullable targets, but cannot reconstruct their tuple elements.
+        var unwrappedSource = source is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableSource
+            ? nullableSource.TypeArguments[0] : source;
+        var unwrappedTarget = target is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableTarget
+            ? nullableTarget.TypeArguments[0] : target;
+        // CastHelper uses Convert.ChangeType for primitive targets, which rejects boxed
+        // char values for float/double (including nullable targets).
+        if (unwrappedSource.SpecialType == SpecialType.System_Char
+            && unwrappedTarget.SpecialType is SpecialType.System_Single or SpecialType.System_Double)
+        {
+            return false;
+        }
+
+        // Boxed native integers are not IConvertible and have no float/double/decimal operators.
+        // CastHelper therefore cannot execute these implicit C# numeric conversions.
+        if (unwrappedSource.SpecialType is SpecialType.System_IntPtr or SpecialType.System_UIntPtr
+            && unwrappedTarget.SpecialType is SpecialType.System_Single or SpecialType.System_Double or SpecialType.System_Decimal)
+        {
+            return false;
+        }
+
+        // Convert.ChangeType cannot produce native integers, and their operators require
+        // exact int/long or uint/ulong inputs rather than widening smaller integers first.
+        if (unwrappedTarget.SpecialType is SpecialType.System_IntPtr or SpecialType.System_UIntPtr
+            && unwrappedSource.SpecialType is SpecialType.System_Byte or SpecialType.System_SByte
+                or SpecialType.System_Int16 or SpecialType.System_UInt16 or SpecialType.System_Char)
+        {
+            return false;
+        }
+
+        if (!SymbolEqualityComparer.Default.Equals(target, unwrappedTarget)
+            && !conversion.IsUserDefined
+            && unwrappedTarget is INamedTypeSymbol { IsTupleType: true }
+            && !SymbolEqualityComparer.Default.Equals(unwrappedSource, unwrappedTarget))
+        {
+            return false;
+        }
+
+        // CastHelper and AOT registrations invoke exact operator pairs, without composing
+        // standard conversions before or after the user-defined operator.
+        if (conversion.IsUserDefined && conversion.MethodSymbol is { } method
+            && (!SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, unwrappedSource)
+                || !SymbolEqualityComparer.Default.Equals(method.ReturnType, unwrappedTarget)))
+        {
+            return false;
+        }
+
+        // Generated binding recursively reconstructs non-nullable value-tuple Items.
+        if (source is INamedTypeSymbol { IsTupleType: true } sourceTuple
+            && target is INamedTypeSymbol { IsTupleType: true } targetTuple)
+        {
+            for (var i = 0; i < sourceTuple.TupleElements.Length; i++)
+            {
+                if (!CanConvertReferenceTupleElement(sourceTuple.TupleElements[i].Type,
+                        targetTuple.TupleElements[i].Type, compilation))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static bool IsReferenceTuple(INamedTypeSymbol type)
+        => type.Arity is >= 1 and <= 8
+            && type.OriginalDefinition is { Name: "Tuple", ContainingType: null } definition
+            && definition.ContainingNamespace is { Name: "System", ContainingNamespace.IsGlobalNamespace: true };
+
     private static bool TryGetTupleElementTypes(ITypeSymbol type, Compilation compilation,
         out ImmutableArray<ITypeSymbol> elements)
     {
@@ -1064,9 +1184,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return true;
         }
 
-        if (type is INamedTypeSymbol { Arity: >= 1 and <= 8 } tuple
-            && SymbolEqualityComparer.Default.Equals(tuple.OriginalDefinition,
-                compilation.GetTypeByMetadataName(FormattableString.Invariant($"System.Tuple`{tuple.Arity}"))))
+        if (type is INamedTypeSymbol tuple && IsReferenceTuple(tuple))
         {
             // ITuple exposes Rest's elements as part of the same row for arities above seven.
             if (tuple.Arity == 8)
