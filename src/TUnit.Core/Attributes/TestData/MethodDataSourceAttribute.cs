@@ -579,10 +579,21 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 continue;
             }
 
-            var otherUnderlying = Nullable.GetUnderlyingType(otherType) ?? otherType;
+            var candidateNullable = Nullable.GetUnderlyingType(candidateType);
+            var otherNullable = Nullable.GetUnderlyingType(otherType);
+            var otherUnderlying = otherNullable ?? otherType;
+            // Specificity compares parameter types, not boxed argument conversions. Nullable numeric
+            // conversions are lifted, and decimal conversions count even though Invoke cannot widen to decimal.
+            var numericSource = candidateNullable ?? candidateType;
+            var hasNumericConversion = (candidateNullable is null || otherNullable is not null)
+                && (IsNumericWidening(numericSource, otherUnderlying)
+                    || (otherUnderlying == typeof(decimal) && !numericSource.IsEnum
+                        && Type.GetTypeCode(numericSource) is TypeCode.SByte or TypeCode.Byte
+                            or TypeCode.Int16 or TypeCode.UInt16 or TypeCode.Char or TypeCode.Int32
+                            or TypeCode.UInt32 or TypeCode.Int64 or TypeCode.UInt64));
             if (!otherType.IsAssignableFrom(candidateType)
                 && candidateType != otherUnderlying
-                && !IsNumericWidening(candidateType, otherUnderlying))
+                && !hasNumericConversion)
             {
                 return false;
             }

@@ -159,6 +159,36 @@ public class DataSourceOverloadParityTests
         yield return (expected, "NullToNullable(string, int?)");
     }
 
+    public static IEnumerable<(string, string)> NullableNumericTie(string expected, long? value)
+    {
+        yield return (expected, "NullableNumericTie(string, long?)");
+    }
+
+    public static IEnumerable<(string, string)> NullableNumericTie(string expected, int? value)
+    {
+        yield return (expected, "NullableNumericTie(string, int?)");
+    }
+
+    public static IEnumerable<(string, string)> NullableNumericTieNarrowFirst(string expected, int? value)
+    {
+        yield return (expected, "NullableNumericTieNarrowFirst(string, int?)");
+    }
+
+    public static IEnumerable<(string, string)> NullableNumericTieNarrowFirst(string expected, long? value)
+    {
+        yield return (expected, "NullableNumericTieNarrowFirst(string, long?)");
+    }
+
+    public static IEnumerable<(string, string)> NullableDecimalTie(string expected, decimal? value)
+    {
+        yield return (expected, "NullableDecimalTie(string, decimal?)");
+    }
+
+    public static IEnumerable<(string, string)> NullableDecimalTie(string expected, int? value)
+    {
+        yield return (expected, "NullableDecimalTie(string, int?)");
+    }
+
     // A generic overload is declared first: its T parameter cannot take an Arguments value in either mode
     public static IEnumerable<(string, string)> GenericOverload<T>(string expected, T value)
     {
@@ -291,6 +321,9 @@ public class DataSourceOverloadParityTests
     [MethodDataSource(nameof(NullToNullable), Arguments = new object?[] { "NullToNullable(string, int?)", null })]
     [MethodDataSource(nameof(NullTie), Arguments = new object?[] { "NullTie(string, string?, long)", null, 1 })]
     [MethodDataSource(nameof(NullObjectOrNullableLong), Arguments = new object?[] { "NullObjectOrNullableLong(string, string?, object)", null, 1 })]
+    [MethodDataSource(nameof(NullableNumericTie), Arguments = new object?[] { "NullableNumericTie(string, int?)", null })]
+    [MethodDataSource(nameof(NullableNumericTieNarrowFirst), Arguments = new object?[] { "NullableNumericTieNarrowFirst(string, int?)", null })]
+    [MethodDataSource(nameof(NullableDecimalTie), Arguments = new object?[] { "NullableDecimalTie(string, int?)", null })]
     [MethodDataSource(nameof(NullOptional), Arguments = new object?[] { "NullOptional(string, string?, int)", null })]
     [MethodDataSource(nameof(Optional), Arguments = new object[] { "Optional(string, string, int)", "a" })]
     [MethodDataSource(nameof(Token), Arguments = new object[] { "Token(string, int, CancellationToken)", 1 })]
