@@ -104,6 +104,7 @@ public class StaticTupleDataSourceTests
     [Test]
 #pragma warning disable TUnit0001 // Exercise the runtime explicit conversion fallback.
     [MethodDataSource(nameof(ExplicitNestedValue))]
+#pragma warning restore TUnit0001
     public async Task Nested_Tuple_Uses_Explicit_Conversion(((int, int), int) value)
     {
         await Assert.That(value).IsEqualTo(((4, 5), 6));
@@ -114,6 +115,7 @@ public class StaticTupleDataSourceTests
     [Test]
 #pragma warning disable TUnit0001 // Exercise runtime null-to-default conversion for a nested tuple.
     [MethodDataSource(nameof(NullNestedValue))]
+#pragma warning restore TUnit0001
     public async Task Null_Nested_Tuple_Uses_Default(((int, int), int) value)
     {
         await Assert.That(value).IsEqualTo(((0, 0), 3));
@@ -139,7 +141,6 @@ public class StaticTupleDataSourceTests
     }
 
     [Test]
-#pragma warning disable TUnit0001 // Reference-tuple widening analyzer limitation: #7480.
     [MethodDataSource(nameof(Value))]
     public async Task Converted_Tuple_Holding_Null_Stays_A_Tuple(Tuple<object?> value)
     {
