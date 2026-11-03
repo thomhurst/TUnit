@@ -21,8 +21,8 @@ internal class TypedRowParameterBindingTests
         yield return ["T[] seed, params int[][] rest", "(int[], int[])", "new int[] { 1 }, new int[] { 2, 3 }", "seed, rest", "int[];int[]", "[1];[[2,3]]", true, "int"];
         yield return ["T[] seed, long[] rest", "(int[], long[])", "new int[] { 1 }, new long[] { 2, 3 }", "seed, rest", "int[];long[]", "[1];[2,3]", true, "int"];
         yield return ["T[] seed, params long[] rest", "(int[], int, int)", "new int[] { 1 }, 2, 3", "seed, rest", "int[];long;long", "[1];[2,3]", false, "int"];
-        yield return ["CancellationToken token, T value, T[] seed", "(CancellationToken, CancellationToken[])", "CancellationToken.None, new CancellationToken[] { CancellationToken.None }", "token, value, seed", "System.Threading.CancellationToken;System.Threading.CancellationToken[]", "token;token;[token]", true, "System.Threading.CancellationToken"];
-        yield return ["T value, CancellationToken token, T[] seed", "(CancellationToken, CancellationToken[])", "CancellationToken.None, new CancellationToken[] { CancellationToken.None }", "value, token, seed", "System.Threading.CancellationToken;System.Threading.CancellationToken[]", "token;token;[token]", true, "System.Threading.CancellationToken"];
+        yield return ["CancellationToken token, T value, T[] seed", "(CancellationToken, CancellationToken[])", "RowToken, new CancellationToken[] { ElementToken }", "token, value, seed", "System.Threading.CancellationToken;System.Threading.CancellationToken[]", "injected;row;[element]", true, "System.Threading.CancellationToken"];
+        yield return ["T value, CancellationToken token, T[] seed", "(CancellationToken, CancellationToken[])", "RowToken, new CancellationToken[] { ElementToken }", "value, token, seed", "System.Threading.CancellationToken;System.Threading.CancellationToken[]", "row;injected;[element]", true, "System.Threading.CancellationToken"];
 #if NET9_0_OR_GREATER
         foreach (var collection in new[] { "IEnumerable", "ICollection", "IList", "IReadOnlyCollection", "IReadOnlyList" })
         {
@@ -45,6 +45,9 @@ internal class TypedRowParameterBindingTests
             public class Subject
             {
                 public static object[] Result;
+                public static readonly CancellationToken InjectedToken = new CancellationTokenSource().Token;
+                public static readonly CancellationToken RowToken = new CancellationTokenSource().Token;
+                public static readonly CancellationToken ElementToken = new CancellationTokenSource().Token;
                 public static void Run<T>({{parameters}}) { Result = new object[] { {{capture}} }; }
                 public static {{rowType}} Row() => throw new Exception();
                 public static object[] Data() => new object[] { {{data}} };
@@ -76,7 +79,7 @@ internal class TypedRowParameterBindingTests
         // Named arguments let injected tokens stay in their declared positions after omitted defaults.
         var invocation = calls.Select((a, i) => a.IsNamed ? a.ToString() : $"@{dataParameters[i].Name}: {a.Expression}")
             .Concat(method.Parameters.Where(p => p.Type.ToDisplayString() == "System.Threading.CancellationToken")
-                .Select(p => $"@{p.Name}: global::System.Threading.CancellationToken.None"));
+                .Select(p => $"@{p.Name}: Subject.InjectedToken"));
         var wrapper = $$"""
             public static class Generated
             {
@@ -109,7 +112,7 @@ internal class TypedRowParameterBindingTests
         var index = 0;
         foreach (var parameter in method.Parameters)
         {
-            if (parameter.Type.ToDisplayString() == "System.Threading.CancellationToken") withTokens.Add(CancellationToken.None);
+            if (parameter.Type.ToDisplayString() == "System.Threading.CancellationToken") withTokens.Add(runtimeSubject.GetField("InjectedToken")!.GetValue(null));
             else if (index < values.Length) withTokens.Add(values[index++]);
         }
         withTokens.AddRange(values.Skip(index));
@@ -154,12 +157,23 @@ internal class TypedRowParameterBindingTests
         [CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview))],
         ReferencesHelper.References, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-    private static string FormatResult(Type subject) => string.Join(";", ((object[])subject.GetField("Result")!.GetValue(null)!).Select(Format));
-    private static string Format(object? value) => value switch
+    private static string FormatResult(Type subject) => string.Join(";", ((object[])subject.GetField("Result")!.GetValue(null)!)
+        .Select(value => Format(value, subject)));
+
+    private static string FormatToken(CancellationToken token, Type subject)
     {
-        CancellationToken => "token",
+        foreach (var (field, label) in new[] { ("InjectedToken", "injected"), ("RowToken", "row"), ("ElementToken", "element") })
+        {
+            if (token == (CancellationToken)subject.GetField(field)!.GetValue(null)!) return label;
+        }
+        return "unexpected-token";
+    }
+
+    private static string Format(object? value, Type subject) => value switch
+    {
+        CancellationToken token => FormatToken(token, subject),
         string text => text,
-        IEnumerable values => "[" + string.Join(",", values.Cast<object?>().Select(Format)) + "]",
+        IEnumerable values => "[" + string.Join(",", values.Cast<object?>().Select(item => Format(item, subject))) + "]",
         _ => value?.ToString() ?? "null"
     };
 }
