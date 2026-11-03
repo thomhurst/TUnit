@@ -53,3 +53,24 @@ public class FilteredClassSource<T>(T value) where T : struct
     [Arguments("a")]
     public void Test(T arg) { }
 }
+
+[Arguments(1)]
+public class UninferredMethodWithInferredClass<T>(T value)
+{
+    [Test]
+    public void Test<U>() { }
+}
+
+[GenerateGenericTest(typeof(int))]
+public class UninferredMethodWithExplicitClass<T>
+{
+    [Test]
+    public void Test<U>() { }
+}
+
+[MethodDataSource(typeof(Sources), nameof(Sources.Counters))]
+public class UninferredMethodAndClass<T>(T value)
+{
+    [Test]
+    public void Test<U>() { }
+}

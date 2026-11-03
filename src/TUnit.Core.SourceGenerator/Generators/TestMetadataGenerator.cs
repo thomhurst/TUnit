@@ -496,7 +496,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         else
         {
             // Collect all concrete type instantiations for this generic test method
-            concreteInstantiations = CollectConcreteInstantiations(testMethod, className, out classConstraintViolations, out var hadConcreteInstantiations);
+            concreteInstantiations = CollectConcreteInstantiations(testMethod, className, out classConstraintViolations, out var hadConcreteInstantiations, out var hadClassTypeArguments);
 
             if (concreteInstantiations.Count == 0 && classConstraintViolations.Count == 0)
             {
@@ -508,16 +508,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 // An open generic template without data is not a runnable test. A class with data,
                 // however, must not silently disappear when only its runtime rows reveal the types.
-                if (!testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
+                if (!hadClassTypeArguments && !testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
                         a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)))
                 {
                     return;
                 }
 
-                classConstraintViolations.Add(
-                    "The generic test class type arguments cannot be inferred at compile time from its data sources. " +
+                classConstraintViolations.Add(hadClassTypeArguments && testMethod.IsGenericMethod
+                    ? $"The type arguments of generic test method '{testMethod.MethodSymbol.Name}' cannot be inferred at compile time from its data sources. " +
+                      "Use [GenerateGenericTest] on the method to specify its type arguments."
+                    : "The generic test class type arguments cannot be inferred at compile time from its data sources. " +
                     "Source-generated mode requires concrete types to preserve Native AOT compatibility. " +
-                    "Use [GenerateGenericTest] to specify the class type arguments, or a typed class data source.");
+                    "Use [GenerateGenericTest] to specify the class type arguments.");
             }
         }
 
@@ -831,11 +833,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// Collects all concrete type instantiations for this generic test method.
     /// </summary>
-    private static List<ConcreteInstantiation> CollectConcreteInstantiations(TestMethodMetadata testMethod, string className, out List<string> classConstraintViolations, out bool hadConcreteInstantiations)
+    private static List<ConcreteInstantiation> CollectConcreteInstantiations(TestMethodMetadata testMethod, string className, out List<string> classConstraintViolations, out bool hadConcreteInstantiations, out bool hadClassTypeArguments)
     {
         var compilation = testMethod.CompilationContext.Compilation;
         var methodName = testMethod.MethodSymbol.Name;
         var results = new List<ConcreteInstantiation>();
+        // A class source can determine its types even when missing method types prevent a full instantiation.
+        var classTypeArgumentsInferred = false;
         var processedTypeCombinations = new HashSet<string>();
 
         // Class type arguments that break the class's constraints, one per row or type (#7107).
@@ -1382,6 +1386,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var classInferredTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, argAttr, compilation);
                 if (classInferredTypes is { Length: > 0 })
                 {
+                    classTypeArgumentsInferred |= ValidateClassTypeConstraints(testMethod.TypeSymbol, classInferredTypes, compilation);
                     if (testMethod.IsGenericMethod)
                     {
                         foreach (var methodArgAttr in methodArgumentsAttributes)
@@ -1418,6 +1423,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     .Where(t => t.TypeArgs is { Length: > 0 })
                     .ToList()
                 : [];
+
+            classTypeArgumentsInferred |= classGenericTestAttrs.Any(t =>
+                t.TypeArgs!.Length == classTypeArgCount && ValidateClassTypeConstraints(testMethod.TypeSymbol, t.TypeArgs, compilation));
 
             if (testMethod is { IsGenericType: true, IsGenericMethod: true })
             {
@@ -1570,6 +1578,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         hadConcreteInstantiations = results.Count > 0;
+        hadClassTypeArguments = classTypeArgumentsInferred;
 
         // A method row runs only on the class instantiation its values infer, and reflection mode applies the
         // same rules (#7118). When the class has class-level [Arguments] rows:
