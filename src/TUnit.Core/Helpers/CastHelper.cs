@@ -32,8 +32,8 @@ public static class CastHelper
     /// <summary>
     /// Binds a single non-null argument to a trailing <c>T[]</c> parameter when the argument is not
     /// already a <c>T[]</c>. Applies C# params expansion first (a <typeparamref name="T"/> value becomes
-    /// a one-element array), then converts any other array element-wise, and otherwise wraps the
-    /// converted scalar.
+    /// a one-element array), then converts any other array element-wise. For other values, tries
+    /// a conversion to the declared array type before wrapping the converted scalar.
     /// </summary>
     /// <remarks>
     /// The element-wise branch exists because data sources often supply arrays whose runtime type is
@@ -64,7 +64,36 @@ public static class CastHelper
             return result;
         }
 
+        if (TryConvertTrailingArray(typeof(T[]), value, out var converted))
+        {
+            return (T[])converted!;
+        }
+
         return [Cast<T>(value)!];
+    }
+
+    // Shared by generated row binders and reflection constructor discovery. Try the declared
+    // array conversion before scalar packing, without treating a missing conversion as an error.
+    internal static bool TryConvertTrailingArray(Type arrayType, object value, out object? result)
+    {
+        var sourceType = value.GetType();
+        if (AotConverterRegistry.TryConvert(sourceType, arrayType, value, out result))
+        {
+            return true;
+        }
+
+        if (!IsAotMode())
+        {
+            var conversion = GetConversionMethodCached(sourceType, arrayType);
+            if (conversion != null)
+            {
+                result = conversion.Invoke(null, [value]);
+                return true;
+            }
+        }
+
+        result = null;
+        return false;
     }
 
     /// <summary>

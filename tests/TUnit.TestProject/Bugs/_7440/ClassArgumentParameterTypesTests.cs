@@ -187,3 +187,36 @@ public class SelectedConstructorArgumentTests<T>
         await Assert.That((int)(object)_value!).IsEqualTo(_text == "first" ? 1 : 2);
     }
 }
+
+public sealed class ConstructorArrayWrapper
+{
+    public static implicit operator int[](ConstructorArrayWrapper value) => [1, 2];
+}
+
+public sealed class ConstructorArrayRowsAttribute : UntypedDataSourceGeneratorAttribute
+{
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata metadata)
+    {
+        // Untyped sources hide their runtime types from converter generation. Register the
+        // conversion for Native AOT; JIT runs exercise reflection operator discovery instead.
+        if (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported)
+        {
+            TUnit.Core.Converters.AotConverterRegistry.Register<ConstructorArrayWrapper, int[]>(value => value);
+        }
+
+        return [() => [new ConstructorArrayWrapper()]];
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[ConstructorArrayRows]
+public class ConvertedArrayConstructorArgumentTests(int[] values)
+{
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That(values.Length).IsEqualTo(2);
+        await Assert.That(values[0]).IsEqualTo(1);
+        await Assert.That(values[1]).IsEqualTo(2);
+    }
+}

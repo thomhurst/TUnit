@@ -3461,6 +3461,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             }
                             castedArgs[regularParameterCount] = array;
                         }
+                        else if (!trailingElementType.IsInstanceOfType(value)
+                            && CastHelper.TryConvertTrailingArray(lastParameter!.ParameterType, value, out var converted))
+                        {
+                            castedArgs[regularParameterCount] = converted;
+                        }
                         else
                         {
                             var array = Array.CreateInstance(trailingElementType, 1);
