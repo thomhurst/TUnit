@@ -4431,8 +4431,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var construction = tuple.TupleElements.Length == 1
                 ? $"new {type.GloballyQualified()}({string.Join(", ", elements)})"
                 : $"({string.Join(", ", elements)})";
-            // Match CastHelper's null-to-default behavior before reading nested elements.
-            return $"({value} is null ? default({type.GloballyQualified()}) : {construction})";
+            // Only tuples can be recursively unpacked. Keep CastHelper's null-to-default
+            // and custom conversion behavior for other values.
+            return $"(global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple({value}) ? {construction} : global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({value}))";
         }
 
         return $"global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({value})";

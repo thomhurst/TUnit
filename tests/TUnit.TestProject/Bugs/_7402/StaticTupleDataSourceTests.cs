@@ -65,6 +65,53 @@ public class StaticTupleDataSourceTests
         await Assert.That(value).IsEqualTo(Tuple.Create(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L));
     }
 
+    public sealed class ImplicitTupleValue
+    {
+        public static implicit operator (int, int)(ImplicitTupleValue value) => (1, 2);
+    }
+
+    public sealed class ExplicitTupleValue
+    {
+        public static explicit operator (int, int)(ExplicitTupleValue value) => (4, 5);
+    }
+
+    public static (ImplicitTupleValue, int) ImplicitNestedValue()
+    {
+        if (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported)
+        {
+            // Method-source-only conversion types require explicit AOT registration (#7511).
+            TUnit.Core.Converters.AotConverterRegistry.Register<ImplicitTupleValue, (int, int)>(value => value);
+        }
+
+        return (new(), 3);
+    }
+
+    public static (ExplicitTupleValue, int) ExplicitNestedValue()
+    {
+        if (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported)
+        {
+            TUnit.Core.Converters.AotConverterRegistry.Register<ExplicitTupleValue, (int, int)>(value => ((int, int))value);
+        }
+
+        return (new(), 6);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ImplicitNestedValue))]
+    public async Task Nested_Tuple_Uses_Implicit_Conversion(((int, int), int) value)
+    {
+        await Assert.That(value).IsEqualTo(((1, 2), 3));
+    }
+
+    [Test]
+#pragma warning disable TUnit0001 // Exercise the runtime explicit conversion fallback.
+    [MethodDataSource(nameof(ExplicitNestedValue))]
+#pragma warning restore TUnit0001
+    public async Task Nested_Tuple_Uses_Explicit_Conversion(((int, int), int) value)
+    {
+        await Assert.That(value).IsEqualTo(((4, 5), 6));
+    }
+
     public static (object?, int) NullNestedValue() => (null, 3);
 
     [Test]
