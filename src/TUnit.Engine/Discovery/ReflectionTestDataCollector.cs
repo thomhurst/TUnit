@@ -4000,7 +4000,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         object? instance = null;
         if (!builderMethod.IsStatic)
         {
-            instance = Activator.CreateInstance(testClass);
+            // Generated wrappers can invoke assembly-accessible constructors.
+            instance = Activator.CreateInstance(testClass, nonPublic: true);
         }
 
         // Execute the builder method
