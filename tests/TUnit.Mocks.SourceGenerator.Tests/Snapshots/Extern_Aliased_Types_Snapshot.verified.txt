@@ -485,6 +485,11 @@ namespace TUnit.Mocks.Generated
         /// <summary>Return a Task from a factory, invoked on each call. The Task is returned as-is, so an async factory stays pending until it completes.</summary>
         public Lib_Services_IPublisher_PublishAsync_M0_MockCall Returns(global::System.Func<global::System.Threading.Tasks.Task> taskFactory) { EnsureSetup().ReturnsRaw(() => (object?)taskFactory()); return this; }
 
+        /// <summary>Configure a typed computed async return value using the actual method parameters.</summary>
+        public Lib_Services_IPublisher_PublishAsync_M0_MockCall ReturnsAsync(global::System.Func<global::System.Guid, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> factory) { EnsureSetup().ReturnsRaw(args => (object?)factory((global::System.Guid)args[0]!, (global::System.Threading.CancellationToken)args[1]!)); return this; }
+        /// <summary>Configure a typed computed async return value using the actual method parameters. The returned task is handed back as-is, so an async factory stays pending until it completes.</summary>
+        public Lib_Services_IPublisher_PublishAsync_M0_MockCall Returns(global::System.Func<global::System.Guid, global::System.Threading.CancellationToken, global::System.Threading.Tasks.Task> factory) { EnsureSetup().ReturnsRaw(args => (object?)factory((global::System.Guid)args[0]!, (global::System.Threading.CancellationToken)args[1]!)); return this; }
+
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
         public Lib_Services_IPublisher_PublishAsync_M0_MockCall Callback(global::System.Action<global::System.Guid, global::System.Threading.CancellationToken> callback)
         {

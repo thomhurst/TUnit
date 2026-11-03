@@ -29,18 +29,6 @@ internal static class IdentifierEscaping
         SyntaxFacts.GetKeywordKind(name) != SyntaxKind.None ? "@" + name : name;
 
     /// <summary>
-    /// Turns a type name (fully qualified, or a bare name with generic arguments) into a single
-    /// C# identifier, used for generated type names and <c>AddSource</c> hint names.
-    /// <para>
-    /// The mapping must be injective: a hint-name clash makes Roslyn drop the generated sources
-    /// for <em>both</em> types with no diagnostic, so the user only ever sees the downstream
-    /// CS1061/CS0117 from the missing surface. Every literal <c>_</c> is therefore doubled before
-    /// separators become <c>_</c>, so a single underscore in the result always came from a
-    /// separator. Without that, <c>A_B.IFoo</c> and <c>A.B.IFoo</c> both produced
-    /// <c>A_B_IFoo</c> — see issue #6505.
-    /// </para>
-    /// </summary>
-    /// <summary>
     /// Drops the leading alias qualifier of a fully qualified name: <c>global::</c>, or an extern
     /// alias such as <c>LibAlias::</c> (#7300), so generated names do not depend on how the mocked
     /// type's reference is aliased.
@@ -65,6 +53,18 @@ internal static class IdentifierEscaping
         return name.Substring(separator + 2);
     }
 
+    /// <summary>
+    /// Turns a type name (fully qualified, or a bare name with generic arguments) into a single
+    /// C# identifier, used for generated type names and <c>AddSource</c> hint names.
+    /// <para>
+    /// The mapping must be injective: a hint-name clash makes Roslyn drop the generated sources
+    /// for <em>both</em> types with no diagnostic, so the user only ever sees the downstream
+    /// CS1061/CS0117 from the missing surface. Every literal <c>_</c> is therefore doubled before
+    /// separators become <c>_</c>, so a single underscore in the result always came from a
+    /// separator. Without that, <c>A_B.IFoo</c> and <c>A.B.IFoo</c> both produced
+    /// <c>A_B_IFoo</c> — see issue #6505.
+    /// </para>
+    /// </summary>
     internal static string SanitizeIdentifier(string name)
     {
         name = StripAliasQualifier(name).Replace("global::", "");
