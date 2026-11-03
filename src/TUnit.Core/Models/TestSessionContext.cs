@@ -110,6 +110,18 @@ public class TestSessionContext : Context
     {
         lock (s_deferredOnDisposeLock)
         {
+            // Preserve session ownership for discovery rows now that DI cleanup is stored separately.
+            if (events?.DetachDataRowScopes() is { } scopes)
+            {
+                events.OnDispose += async (_, _) =>
+                {
+                    if (await scopes.CompleteAsync().ConfigureAwait(false) is { Count: > 0 } errors)
+                    {
+                        throw new AggregateException("Errors occurred while disposing discovery scopes", errors);
+                    }
+                };
+            }
+
             if (events is not { OnDispose: { } onDispose })
             {
                 return;

@@ -494,7 +494,7 @@ internal sealed class TestBuilder : ITestBuilder
                                 }
 
                                 // Resume enumeration against its own context, without factory-written row state.
-                                contextAccessor.Current = enumerationContext;
+                                contextAccessor.Current = enumerationContext.CreateChild(classDataSource, methodDataSource);
                             }
 
                             // If no data was yielded and SkipIfEmpty is true, create a skipped test
@@ -1225,11 +1225,18 @@ internal sealed class TestBuilder : ITestBuilder
         /// Marks the unclaimed objects as used by a temporary instance, so no test receives them, but the
         /// next test tracks them through <see cref="TakeLentObjects"/> or <see cref="WithLentObjects"/>.
         /// </summary>
-        public void LendToTemporaryInstance()
+        public void LendToTemporaryInstance(TestBuilderContext? lifetimeContext = null)
         {
             _lent = _data;
             // Method rows share this constructor row until session end.
-            TestSessionContext.DeferOnDisposeToSessionEnd(_events);
+            if (lifetimeContext is not null && _events is not null)
+            {
+                lifetimeContext.Events.AddCleanupFrom(_events);
+            }
+            else
+            {
+                TestSessionContext.DeferOnDisposeToSessionEnd(_events);
+            }
             _events = null;
             _data = null;
             _metadata = null;
@@ -2408,7 +2415,7 @@ internal sealed class TestBuilder : ITestBuilder
                             }
 
                             // Keep subsequent rows and repeats independent of each test's factory state.
-                            contextAccessor.Current = enumerationContext;
+                            contextAccessor.Current = enumerationContext.CreateChild(classDataSource, methodDataSource);
                         }
                     }
                 }

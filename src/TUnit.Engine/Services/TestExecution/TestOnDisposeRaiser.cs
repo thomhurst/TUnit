@@ -65,12 +65,16 @@ internal static class TestOnDisposeRaiser
     /// </summary>
     public static async ValueTask RaiseForSessionAsync(TestBuilderContext context, List<Exception> exceptions)
     {
-        if (TestSessionContext.TakeStaticOnDispose(context) is not { } onDispose)
+        if (TestSessionContext.TakeStaticOnDispose(context) is { } onDispose)
         {
-            return;
+            await RaiseDetachedAsync(context, onDispose.InvocationList, exceptions).ConfigureAwait(false);
         }
 
-        await RaiseDetachedAsync(context, onDispose.InvocationList, exceptions).ConfigureAwait(false);
+        // Session/static contexts also own scopes whose factories failed before returning a value.
+        if (context.EventsIfCreated?.DetachDataRowScopes() is { } scopes)
+        {
+            await scopes.CompleteAsync(exceptions).ConfigureAwait(false);
+        }
     }
 
     /// <summary>

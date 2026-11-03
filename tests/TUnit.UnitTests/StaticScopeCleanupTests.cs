@@ -1,7 +1,6 @@
 using TUnit.Core;
 using TUnit.Core.Enums;
-using TUnit.Core.Tracking;
-using TUnit.Engine.Services;
+using TUnit.Engine.Services.TestExecution;
 
 namespace TUnit.UnitTests;
 
@@ -13,20 +12,21 @@ public class StaticScopeCleanupTests
         var events = new TestContextEvents();
         var source = new ScopeSource();
         var service = source.Resolve(events);
-        var tracker = new ObjectTracker(new TrackableObjectGraphProvider(), GlobalContext.Current.Disposer);
+        var context = new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata, Events = events };
 
         await Assert.That(service.DisposeCount).IsEqualTo(0);
         await Assert.That(source.Scope.DisposeCount).IsEqualTo(0);
 
-        await StaticPropertyHandler.DisposeStaticPropertiesAsync([service], events, tracker, []);
-        // Matching-object notification and the final sweep must not dispose the same scope twice.
+        await TestOnDisposeRaiser.RaiseForSessionAsync(context, []);
+        // Session cleanup detaches the collection so repeated cleanup cannot dispose it twice.
+        await TestOnDisposeRaiser.RaiseForSessionAsync(context, []);
         await Assert.That(source.Scope.DisposeCount).IsEqualTo(1);
         await Assert.That(service.DisposeCount).IsEqualTo(1);
         await Assert.That(events.DataRowScopes).IsNull();
 
         var laterSource = new ScopeSource();
         var laterService = laterSource.Resolve(events);
-        await StaticPropertyHandler.DisposeStaticPropertiesAsync([laterService], events, tracker, []);
+        await TestOnDisposeRaiser.RaiseForSessionAsync(context, []);
         await Assert.That(laterSource.Scope.DisposeCount).IsEqualTo(1);
         await Assert.That(source.Scope.DisposeCount).IsEqualTo(1);
         await Assert.That(events.DataRowScopes).IsNull();
@@ -46,16 +46,10 @@ public class StaticScopeCleanupTests
         }
         var successful = new ScopeSource();
         var service = successful.Resolve(events);
-        var tracker = new ObjectTracker(new TrackableObjectGraphProvider(), GlobalContext.Current.Disposer);
+        var context = new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata, Events = events };
         var exceptions = new List<Exception>();
 
-        try
-        {
-            await StaticPropertyHandler.DisposeStaticPropertiesAsync([service], events, tracker, exceptions);
-        }
-        catch (AggregateException)
-        {
-        }
+        await TestOnDisposeRaiser.RaiseForSessionAsync(context, exceptions);
 
         await Assert.That(failed.Scope.DisposeCount).IsEqualTo(1);
         await Assert.That(successful.Scope.DisposeCount).IsEqualTo(1);
