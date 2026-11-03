@@ -1086,9 +1086,56 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         for (var i = 0; i < sourceElements.Length; i++)
         {
-            if (!compilation.ClassifyConversion(sourceElements[i], targetElements[i]).IsImplicit)
+            if (!CanConvertReferenceTupleElement(sourceElements[i], targetElements[i], compilation))
             {
                 return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool CanConvertReferenceTupleElement(ITypeSymbol source, ITypeSymbol target,
+        Compilation compilation)
+    {
+        var conversion = compilation.ClassifyConversion(source, target);
+        if (!conversion.IsImplicit)
+        {
+            return false;
+        }
+
+        // CastHelper unwraps nullable targets, but cannot reconstruct their tuple elements.
+        var unwrappedSource = source is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableSource
+            ? nullableSource.TypeArguments[0] : source;
+        var unwrappedTarget = target is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableTarget
+            ? nullableTarget.TypeArguments[0] : target;
+        if (!SymbolEqualityComparer.Default.Equals(target, unwrappedTarget)
+            && unwrappedTarget is INamedTypeSymbol { IsTupleType: true }
+            && !SymbolEqualityComparer.Default.Equals(unwrappedSource, unwrappedTarget))
+        {
+            return false;
+        }
+
+        // CastHelper and AOT registrations invoke exact operator pairs, without composing
+        // standard conversions before or after the user-defined operator.
+        if (conversion.IsUserDefined && conversion.MethodSymbol is { } method
+            && (!SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, unwrappedSource)
+                || !SymbolEqualityComparer.Default.Equals(method.ReturnType, unwrappedTarget)))
+        {
+            return false;
+        }
+
+        // Generated binding recursively reconstructs non-nullable value-tuple Items.
+        if (source is INamedTypeSymbol { IsTupleType: true } sourceTuple
+            && target is INamedTypeSymbol { IsTupleType: true } targetTuple)
+        {
+            for (var i = 0; i < sourceTuple.TupleElements.Length; i++)
+            {
+                if (!CanConvertReferenceTupleElement(sourceTuple.TupleElements[i].Type,
+                        targetTuple.TupleElements[i].Type, compilation))
+                {
+                    return false;
+                }
             }
         }
 

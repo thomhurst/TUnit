@@ -133,6 +133,8 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Tuple<(int, int)>", "Tuple<(int, int)?>")]
+    [Arguments("Tuple<int>", "Tuple<long?>")]
     [Arguments("Tuple<char>", "Tuple<decimal>")]
     [Arguments("Tuple<string>", "Tuple<object>")]
     [Arguments("Tuple<int>", "Tuple<object>")]
@@ -159,6 +161,8 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Tuple<((int, int), int)>", "Tuple<((long, long)?, long)>", "((int, int), int)")]
+    [Arguments("Tuple<(int, int)>", "Tuple<(long, long)?>", "(int, int)")]
     [Arguments("Tuple<Tuple<int, int>>", "Tuple<long, long>", "Tuple<int, int>")]
     [Arguments("Tuple<Tuple<int>>", "Tuple<long>", "Tuple<int>")]
     [Arguments("Tuple<Tuple<int>, int>", "Tuple<Tuple<long>, long>", "Tuple<int>, int")]
@@ -187,4 +191,31 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
             Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                 .WithLocation(1).WithArguments(sourceElements, targetType));
     }
+
+    [Test]
+    public async Task ComposedUserDefinedConversionIsReported()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Base {}
+            public class Derived : Base {}
+            public class Source { public static implicit operator Derived(Source value) => new(); }
+            public class C
+            {
+                [Test] [{|#0:MethodDataSource(nameof(Row))|}] public void Direct(Tuple<Base> row) {}
+                [Test] [{|#1:MethodDataSource(nameof(Rows))|}] public void Enumerable(Tuple<Base> row) {}
+                [Test] [MethodDataSource(nameof(Row))] public void Exact(Tuple<Derived> row) {}
+                public static Tuple<Source> Row() => Tuple.Create(new Source());
+                public static IEnumerable<Tuple<Source>> Rows() => [Row()];
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0).WithArguments("Source", "Tuple<Base>"),
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(1).WithArguments("Source", "Tuple<Base>"));
+    }
+
 }
