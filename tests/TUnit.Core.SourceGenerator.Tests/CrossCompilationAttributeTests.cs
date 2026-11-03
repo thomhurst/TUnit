@@ -64,6 +64,12 @@ public class CrossCompilationAttributeTests
 
         [Arguments<int>(3)]
         public abstract class GenericRows;
+
+        [Arguments<int[]>(new int[] { 1, 2 })]
+        public abstract class GenericArrayRows;
+
+        [Arguments<int[]>(null)]
+        public abstract class GenericNullArrayRows;
         """;
 
     private const string DerivedSource =
@@ -82,6 +88,16 @@ public class CrossCompilationAttributeTests
         }
 
         public class GenericDerived(decimal value) : GenericRows
+        {
+            [Test] public void Run() { }
+        }
+
+        public class GenericArrayDerived(int[] value) : GenericArrayRows
+        {
+            [Test] public void Run() { }
+        }
+
+        public class GenericNullArrayDerived(int[] value) : GenericNullArrayRows
         {
             [Test] public void Run() { }
         }

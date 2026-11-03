@@ -2166,20 +2166,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType)));
             }
         }
-        // Bake the row's values in only when it is the instantiation's only class row. When several
-        // class rows share it, each test's row reaches the constructor through args instead. A method
-        // row's values are never constructor arguments: an instantiation that only method rows infer
-        // takes them from the class-level data sources, as reflection mode does (#7161). Only the
-        // non-generic [Arguments(params object?[])] holds its values in an array: the array of an
-        // [Arguments<int[]>] row is the row's one value, so that row reaches the constructor through args.
-        else if (entry.HasParameterizedConstructor && entry.SpecificIsClassRow && entry.AdditionalClassArgumentsAttributes is null &&
-                 entry.SpecificArgumentsAttribute is { AttributeClass.IsGenericType: false, ConstructorArguments.Length: > 0 } specificAttr &&
-                 specificAttr.ConstructorArguments[0].Kind == TypedConstantKind.Array)
-        {
-            var argumentValues = specificAttr.ConstructorArguments[0].Values;
-            var constructorArgs = string.Join(", ", argumentValues.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)));
-            writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), new object[] {{ {constructorArgs} }})!;");
-        }
         else if (entry.HasParameterizedConstructor && !entry.HasClassRows && entry.ClassTypeArgs.Length > 0)
         {
             // No class row infers these types, so the constructor arguments come from class-level data
@@ -3232,14 +3218,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.Append($"new {attrTypeName}(");
 
-        if (attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array, IsNull: true }])
+        // Only the non-generic params object[] attribute stores the entire row in one array.
+        // An Arguments<T[]> attribute stores an array as its single row value.
+        var isParamsRow = attr.AttributeClass is { IsGenericType: false };
+        if (isParamsRow && attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array, IsNull: true }])
         {
             // [Arguments(null)] binds null to the params array itself; the constructor turns it into [null].
             writer.Append("null");
         }
         else
         {
-            var values = attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array } array]
+            var values = isParamsRow && attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array } array]
                 ? array.Values
                 : attr.ConstructorArguments;
 

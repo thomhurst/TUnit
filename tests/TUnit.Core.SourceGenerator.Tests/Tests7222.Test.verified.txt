@@ -1353,7 +1353,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "item", new g
 }));
     private static global::TUnit.TestProject.Bugs._7222.BroadSourceJoinsClassRowTests<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7222.BroadSourceJoinsClassRowTests<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7222.BroadSourceJoinsClassRowTests<int>), new object[] { 1 })!;
+        return new global::TUnit.TestProject.Bugs._7222.BroadSourceJoinsClassRowTests<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7222.BroadSourceJoinsClassRowTests<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {

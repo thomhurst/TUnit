@@ -279,3 +279,15 @@ public class GenericAttributeDecimalConstructorTests(decimal value)
     [Test]
     public async Task Run() => await Assert.That(value).IsEqualTo(3m);
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1, 42)]
+public class SingleGenericDecimalConstructorTests<T>(decimal amount, T value)
+{
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That(amount).IsEqualTo(1m);
+        await Assert.That((int)(object)value!).IsEqualTo(42);
+    }
+}

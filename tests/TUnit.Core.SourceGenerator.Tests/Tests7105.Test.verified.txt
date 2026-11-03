@@ -462,7 +462,7 @@ internal static class TUnit_TestProject_Bugs__7105_GenericClassNames_T_Plain_Tes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Plain", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7105.GenericClassNames<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7105.GenericClassNames<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7105.GenericClassNames<int>), new object[] { 5 })!;
+        return new global::TUnit.TestProject.Bugs._7105.GenericClassNames<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7105.GenericClassNames<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
