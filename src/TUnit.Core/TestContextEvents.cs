@@ -44,7 +44,12 @@ public class TestContextEvents : ITestEvents
         if (source.DataRowScopes is { } scopes)
             AddDataRowScopes(scopes);
         if (source.OnDispose is { } onDispose)
-            (OnDispose ??= new()).AddMissingFrom(onDispose);
+        {
+            lock (LazyInitializer.EnsureInitialized(ref _scopeLock)!)
+            {
+                (OnDispose ??= new()).AddMissingFrom(onDispose);
+            }
+        }
     }
 
     private DataRowScopeCollection? _dataRowScopes;
