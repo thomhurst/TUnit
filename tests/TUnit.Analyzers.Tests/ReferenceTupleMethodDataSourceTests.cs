@@ -159,6 +159,8 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Tuple<Tuple<int, int>>", "Tuple<long, long>", "Tuple<int, int>")]
+    [Arguments("Tuple<Tuple<int>>", "Tuple<long>", "Tuple<int>")]
     [Arguments("Tuple<Tuple<int>, int>", "Tuple<Tuple<long>, long>", "Tuple<int>, int")]
     [Arguments("Tuple<long, long>", "Tuple<int, int>", "long, long")]
     [Arguments("Tuple<int, string>", "Tuple<long, long>", "int, string")]

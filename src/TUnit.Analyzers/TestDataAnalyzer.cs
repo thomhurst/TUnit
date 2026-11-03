@@ -644,7 +644,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     {
                         return true;
                     }
-                    return CanConvertReferenceTuple(argument, parameter, context)
+                    // Only a preserved whole row can use runtime tuple reconstruction.
+                    return (!isTuples && CanConvertReferenceTuple(argument, parameter, context))
                         || context.Compilation.CanBindToTestParameter(argument, parameter, inferredTypeArguments);
                 });
 
@@ -688,7 +689,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
             if (testParameterTypes.Length == 1
                 && unwrappedTypes.Length == 1
-                && (CanConvertReferenceTuple(unwrappedTypes[0], testParameterTypes[0], context)
+                && ((!isTuples && CanConvertReferenceTuple(unwrappedTypes[0], testParameterTypes[0], context))
                     || context.Compilation.CanBindToTestParameter(unwrappedTypes[0], testParameterTypes[0])))
             {
                 return;
