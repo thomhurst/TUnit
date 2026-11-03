@@ -263,7 +263,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         foreach (var obj in bucket)
         {
-            if (testContext.InternalEventsIfCreated?.DataRowScopes is { } scopes)
+            if (testContext?.InternalEventsIfCreated?.DataRowScopes is { } scopes)
             {
                 cleanupExceptions = await scopes.ReleaseAsync(obj, cleanupExceptions).ConfigureAwait(false);
             }
