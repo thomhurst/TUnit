@@ -150,6 +150,42 @@ public class ArgumentsAnalyzerTests
     }
 
     [Test]
+    [Arguments("params long[]", "int[]")]
+    [Arguments("long[]", "int[]")]
+    [Arguments("params object[]", "int[]")]
+    [Arguments("params int[][]", "int[]")]
+    [Arguments("params long[]", "string[]", true)]
+    public async Task Typed_Array_Source_Validates_Trailing_Array_Elements(string trailingType, string suppliedType, bool invalid = false)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : TypedDataSourceAttribute<(int[], int, {{suppliedType}})>
+            {
+                public override async IAsyncEnumerable<Func<Task<(int[], int, {{suppliedType}})>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                {
+                    await Task.Yield();
+                    yield break;
+                }
+            }
+
+            public class MyClass
+            {
+                [Test, {{(invalid ? "{|#0:ArrayRow|}" : "ArrayRow")}}]
+                public void Run<T>(T[] values, T value, {{trailingType}} rest) { }
+            }
+            """,
+            invalid
+                ? [Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                    .WithArguments("int[], int, string[]", "int[], int, long")]
+                : []);
+    }
+
+    [Test]
     [Arguments("params string[]", "string")]
     [Arguments("string[]", "string")]
     [Arguments("params string[]", "int", true)]

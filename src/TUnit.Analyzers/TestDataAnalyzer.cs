@@ -1058,6 +1058,17 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     && (typeArguments.Length > closedParameters.Length
                         || !context.Compilation.HasImplicitConversionOrGenericParameter(typeArguments[i], parameter.Type)))
                 {
+                    // A single supplied array is converted element-wise by ToTrailingArray unless
+                    // the whole array itself binds as one element (for example params object[]).
+                    if (typeArguments.Length == closedParameters.Length
+                        && typeArguments[i] is IArrayTypeSymbol { Rank: 1 } suppliedArray
+                        && !context.Compilation.HasImplicitConversionOrGenericParameter(suppliedArray, elementType)
+                        && context.Compilation.HasImplicitConversionOrGenericParameter(suppliedArray.ElementType, elementType))
+                    {
+                        expectedTypes.Add(suppliedArray);
+                        continue;
+                    }
+
                     // Every loose value binds to the original trailing parameter's element type.
                     for (var argumentIndex = i; argumentIndex < typeArguments.Length; argumentIndex++)
                     {
