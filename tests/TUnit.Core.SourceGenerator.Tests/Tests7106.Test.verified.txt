@@ -25,7 +25,7 @@ internal static class TUnit_TestProject_Bugs__7106_GenericClassSameTypeRows_T_Ru
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Run", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7106.GenericClassSameTypeRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7106.GenericClassSameTypeRows<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7106.GenericClassSameTypeRows<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7106.GenericClassSameTypeRows<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7106.GenericClassSameTypeRows<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -106,7 +106,7 @@ internal static class TUnit_TestProject_Bugs__7106_GenericClassMixedTypeRows_T_R
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Run", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7106.GenericClassMixedTypeRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7106.GenericClassMixedTypeRows<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7106.GenericClassMixedTypeRows<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7106.GenericClassMixedTypeRows<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7106.GenericClassMixedTypeRows<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -153,7 +153,7 @@ internal static class TUnit_TestProject_Bugs__7106_GenericClassMixedTypeRows_T_R
     };
     private static global::TUnit.TestProject.Bugs._7106.GenericClassMixedTypeRows<string> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7106.GenericClassMixedTypeRows<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7106.GenericClassMixedTypeRows<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7106.GenericClassMixedTypeRows<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7106.GenericClassMixedTypeRows<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -442,7 +442,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "other", new 
 }));
     private static global::TUnit.TestProject.Bugs._7106.GenericClassRowsTimesGenericMethodRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7106.GenericClassRowsTimesGenericMethodRows<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7106.GenericClassRowsTimesGenericMethodRows<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7106.GenericClassRowsTimesGenericMethodRows<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7106.GenericClassRowsTimesGenericMethodRows<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -530,7 +530,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "other", new glo
 }));
     private static global::TUnit.TestProject.Bugs._7106.GenericClassRowsTimesMethodRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7106.GenericClassRowsTimesMethodRows<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7106.GenericClassRowsTimesMethodRows<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7106.GenericClassRowsTimesMethodRows<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7106.GenericClassRowsTimesMethodRows<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -617,7 +617,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "other", new glo
 }));
     private static global::TUnit.TestProject.Bugs._7106.GenericClassRowWithMethodRow<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7106.GenericClassRowWithMethodRow<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7106.GenericClassRowWithMethodRow<int>), new object[] { 5 })!;
+        return new global::TUnit.TestProject.Bugs._7106.GenericClassRowWithMethodRow<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7106.GenericClassRowWithMethodRow<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {

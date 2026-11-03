@@ -2055,7 +2055,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }));
     private static global::TUnit.TestProject.GenericConstraintClassAndMethodArgumentsTests<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.GenericConstraintClassAndMethodArgumentsTests<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.GenericConstraintClassAndMethodArgumentsTests<int>), new object[] { 1 })!;
+        return new global::TUnit.TestProject.GenericConstraintClassAndMethodArgumentsTests<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.GenericConstraintClassAndMethodArgumentsTests<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -2188,7 +2188,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }));
     private static global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>), new object[] { 1 })!;
+        return new global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.GenericConstraintMethodReferencesClassTests<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {

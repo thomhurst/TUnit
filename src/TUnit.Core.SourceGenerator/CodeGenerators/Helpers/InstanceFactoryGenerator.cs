@@ -199,7 +199,7 @@ public static class InstanceFactoryGenerator
     /// Used by the per-class helper pipeline where ISymbol is available during the transform step
     /// but not during source output.
     /// </summary>
-    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol)
+    public static string GenerateInstanceFactoryBody(ITypeSymbol typeSymbol, IMethodSymbol? constructor = null, string? requiredConstructorCache = null)
     {
         var bodyWriter = new CodeWriter(includeHeader: false);
         var className = typeSymbol.GloballyQualified();
@@ -210,10 +210,10 @@ public static class InstanceFactoryGenerator
         }
         else if (typeSymbol.HasParameterizedConstructor())
         {
-            var constructor = GetPrimaryConstructor(typeSymbol);
+            constructor ??= GetPrimaryConstructor(typeSymbol);
             if (constructor != null)
             {
-                GenerateTypedConstructorCallBody(bodyWriter, className, constructor);
+                GenerateTypedConstructorCallBody(bodyWriter, className, constructor, requiredConstructorCache);
             }
             else
             {
@@ -278,6 +278,30 @@ public static class InstanceFactoryGenerator
         return publicConstructors.Length == 1 ? publicConstructors[0] : publicConstructors.FirstOrDefault();
     }
 
+    public static void GenerateRequiredConstructorCache(CodeWriter writer, ITypeSymbol type, IMethodSymbol? constructor, string cacheName)
+    {
+        if (constructor == null ||
+            constructor.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute") ||
+            (!RequiredPropertyHelper.GetAllRequiredProperties(type).Any() && !RequiredPropertyHelper.GetAllRequiredFields(type).Any()))
+        {
+            return;
+        }
+
+        // A direct C# new expression must assign every required member, which overwrites values
+        // initialized by the class. Cache the exact selected constructor instead, preserving those
+        // values and retaining the same argument conversions as the ordinary typed factory.
+        // Closed generic overloads can have identical parameter types (C<T>(T) and C<T>(int)
+        // when T is int). Preserve the selected declaration's ordinal instead of rebinding its
+        // closed signature. GetConstructors returns public instance constructors in metadata
+        // order, matching the declaration order used by GetClassRowConstructor.
+        var publicConstructors = constructor.ContainingType.InstanceConstructors
+            .Where(static c => c.DeclaredAccessibility == Accessibility.Public)
+            .ToArray();
+        var constructorIndex = Array.FindIndex(publicConstructors,
+            candidate => SymbolEqualityComparer.Default.Equals(candidate, constructor));
+        writer.AppendLine($"private static readonly global::System.Reflection.ConstructorInfo {cacheName} = typeof({type.GloballyQualified()}).GetConstructors()[{constructorIndex.ToString(CultureInfo.InvariantCulture)}];");
+    }
+
     private static void GenerateTypedConstructorCall(CodeWriter writer, string className, IMethodSymbol constructor)
     {
         writer.AppendLine("InstanceFactory = static (typeArgs, args) =>");
@@ -288,40 +312,65 @@ public static class InstanceFactoryGenerator
         writer.AppendLine("},");
     }
 
-    private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor)
+    private static void GenerateTypedConstructorCallBody(CodeWriter writer, string className, IMethodSymbol constructor, string? requiredConstructorCache = null)
     {
-        // Check for required properties
-        var requiredProperties = RequiredPropertyHelper.GetAllRequiredProperties(constructor.ContainingType);
+        // Constructors that promise to initialize required members must retain their values.
+        var setsRequiredMembers = constructor.GetAttributes().Any(attribute =>
+            attribute.AttributeClass?.ToDisplayString() == "System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute");
+        var requiredProperties = setsRequiredMembers
+            ? []
+            : RequiredPropertyHelper.GetAllRequiredProperties(constructor.ContainingType).ToArray();
 
-        if (constructor.Parameters.Length == 0 && !requiredProperties.Any())
+        var requiredFields = setsRequiredMembers
+            ? []
+            : RequiredPropertyHelper.GetAllRequiredFields(constructor.ContainingType).ToArray();
+
+        if (constructor.Parameters.Length == 0 && !requiredProperties.Any() && !requiredFields.Any())
         {
             writer.AppendLine($"return new {className}();");
         }
         else
         {
-            writer.Append($"return new {className}(");
-
-            // Generate constructor arguments
-            var parameterTypes = constructor.Parameters.Select(p => p.Type).ToList();
-
-            for (var i = 0; i < parameterTypes.Count; i++)
+            var useCachedConstructor = requiredConstructorCache != null && (requiredProperties.Any() || requiredFields.Any());
+            // Preserve an explicitly supplied trailing array, while packing loose row values.
+            var parameters = constructor.Parameters.ToArray();
+            var arguments = TupleArgumentHelper.GenerateArgumentAccessWithParams(parameters, "args", "args.Length");
+            if (parameters.Length > 0 && parameters[parameters.Length - 1].CollectsTrailingArguments())
             {
-                if (i > 0)
+                var singleValueArguments = TupleArgumentHelper.GenerateArgumentAccessWithParams(parameters, "args", parameters.Length);
+                var trailingArgument = arguments[arguments.Count - 1];
+                var trailingExpression = $"(args.Length == {parameters.Length.ToString(CultureInfo.InvariantCulture)} ? {singleValueArguments[singleValueArguments.Count - 1].Expression} : {trailingArgument.Expression})";
+                var lastParameter = parameters[parameters.Length - 1];
+                if (!lastParameter.IsParams && lastParameter.HasExplicitDefaultValue)
                 {
-                    writer.Append(", ");
+                    // Runtime class rows can omit an optional plain array just like statically bound rows.
+                    trailingExpression = $"(args.Length < {parameters.Length.ToString(CultureInfo.InvariantCulture)} ? default({lastParameter.Type.GloballyQualified()}) : {trailingExpression})";
                 }
-
-                var parameterType = parameterTypes[i];
-                var argAccess = $"args[{i.ToString(CultureInfo.InvariantCulture)}]";
-
-                // Use CastHelper which now has AOT converter registry support
-                writer.Append($"global::TUnit.Core.Helpers.CastHelper.Cast<{parameterType.GloballyQualified()}>({argAccess})");
+                arguments[arguments.Count - 1] = new InvocationArgument(trailingExpression);
+            }
+            if (!useCachedConstructor && parameters.Any(static parameter => parameter.RefKind != RefKind.None))
+            {
+                // By-reference arguments need assignable locals. Evaluate all conversions in
+                // parameter order before invoking the constructor, as a direct call would.
+                for (var i = 0; i < parameters.Length; i++)
+                {
+                    var refKind = parameters[i].RefKind;
+                    var localName = $"__constructorArgument_{i.ToString(CultureInfo.InvariantCulture)}";
+                    writer.AppendLine($"var {localName} = {arguments[i].Expression};");
+                    var modifier = refKind == RefKind.None ? "" : refKind == RefKind.Out ? "out " : refKind == RefKind.Ref ? "ref " : "in ";
+                    arguments[i] = arguments[i] with { Expression = $"{modifier}{localName}" };
+                }
             }
 
-            writer.Append(")");
+            writer.Append(useCachedConstructor
+                ? $"return ({className}){requiredConstructorCache}!.Invoke(new object?[] {{ "
+                : $"return new {className}(");
+            writer.Append(string.Join(", ", arguments));
 
-            // Add object initializer for required properties
-            if (requiredProperties.Any())
+            writer.Append(useCachedConstructor ? " })" : ")");
+
+            // Satisfy required properties and fields unless the constructor initializes them.
+            if (!useCachedConstructor && (requiredProperties.Any() || requiredFields.Any()))
             {
                 writer.AppendLine();
                 writer.AppendLine("{");
@@ -331,6 +380,12 @@ public static class InstanceFactoryGenerator
                 {
                     var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(property.Type);
                     writer.AppendLine($"{property.Name} = {defaultValue},");
+                }
+
+                foreach (var field in requiredFields)
+                {
+                    var defaultValue = RequiredPropertyHelper.GetDefaultValueForType(field.Type);
+                    writer.AppendLine($"@{field.Name} = {defaultValue},");
                 }
 
                 writer.Unindent();

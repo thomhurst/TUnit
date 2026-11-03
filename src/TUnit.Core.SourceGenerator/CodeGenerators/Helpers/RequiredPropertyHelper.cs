@@ -26,6 +26,22 @@ public static class RequiredPropertyHelper
         return requiredProperties;
     }
 
+    public static IEnumerable<IFieldSymbol> GetAllRequiredFields(ITypeSymbol typeSymbol)
+    {
+        for (var currentType = typeSymbol;
+             currentType != null && currentType.SpecialType != SpecialType.System_Object;
+             currentType = currentType.BaseType)
+        {
+            foreach (var field in currentType.GetMembers().OfType<IFieldSymbol>())
+            {
+                if (field.IsRequired)
+                {
+                    yield return field;
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Generates a default value expression for a type
     /// </summary>

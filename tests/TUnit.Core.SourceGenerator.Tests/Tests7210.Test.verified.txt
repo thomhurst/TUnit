@@ -529,7 +529,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 }));
     private static global::TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -582,7 +582,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
     private static global::TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<string> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
         if (args.Length == 0) throw new global::System.InvalidOperationException("This method-level [Arguments] row infers class type arguments that none of the class-level data rows infer, so no class row supplies the constructor arguments for this instantiation. Add a class-level row with matching types, or change the method row to match an existing class row.");
-        return (global::TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7210.ArgumentsRowAndMixedSource<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -970,7 +970,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 }));
     private static global::TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -1023,7 +1023,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
     private static global::TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<double> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
         if (args.Length == 0) throw new global::System.InvalidOperationException("This method-level [Arguments] row infers class type arguments that none of the class-level data rows infer, so no class row supplies the constructor arguments for this instantiation. Add a class-level row with matching types, or change the method row to match an existing class row.");
-        return (global::TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<double>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<double>), args)!;
+        return new global::TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<double>(global::TUnit.Core.Helpers.CastHelper.Cast<double>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7210.MethodRowTypeNoClassRowInfers<double> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {

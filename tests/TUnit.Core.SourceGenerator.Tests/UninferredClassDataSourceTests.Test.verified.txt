@@ -154,7 +154,7 @@ internal static class TUnit_TestProject_Bugs__7355_ArgumentsClassSource_T_Test_T
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata);
     private static global::TUnit.TestProject.Bugs._7355.ArgumentsClassSource<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7355.ArgumentsClassSource<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7355.ArgumentsClassSource<int>), new object[] { 1 })!;
+        return new global::TUnit.TestProject.Bugs._7355.ArgumentsClassSource<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7355.ArgumentsClassSource<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {

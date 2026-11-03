@@ -551,11 +551,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var entries = group.ToList();
             var groupIndex = registrationIndex;
 
+            // Required members must keep their constructor/initializer values. Cache reflection once
+            // per concrete class, rather than overwriting members in a C# object initializer.
+            var constructedType = entries[0].ClassTypeArgs.Length > 0
+                ? testMethod.TypeSymbol.Construct(entries[0].ClassTypeArgs)
+                : testMethod.TypeSymbol;
+            var requiredConstructorCache = $"__requiredConstructor_{groupIndex.ToString(CultureInfo.InvariantCulture)}";
+            if (testMethod.IsGenericType && entries[0].HasParameterizedConstructor &&
+                !InstanceFactoryGenerator.HasClassConstructorAttribute(testMethod.TypeSymbol))
+            {
+                InstanceFactoryGenerator.GenerateRequiredConstructorCache(writer, constructedType,
+                    GetClassRowConstructor(constructedType), requiredConstructorCache);
+            }
+
             // CreateInstance for this concrete type
             writer.AppendLine($"private static {concreteClassName} __CreateInstance_{groupIndex.ToString(CultureInfo.InvariantCulture)}(global::System.Type[] typeArgs, object?[] args)");
             writer.AppendLine("{");
             writer.Indent();
-            EmitConcreteInstanceCreation(writer, testMethod, concreteClassName, entries[0]);
+            EmitConcreteInstanceCreation(writer, testMethod, concreteClassName, entries[0], requiredConstructorCache);
             writer.Unindent();
             writer.AppendLine("}");
 
@@ -2136,7 +2149,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// Emits instance creation code for a concrete type.
     /// </summary>
-    private static void EmitConcreteInstanceCreation(CodeWriter writer, TestMethodMetadata testMethod, string concreteClassName, ConcreteInstantiation entry)
+    private static void EmitConcreteInstanceCreation(CodeWriter writer, TestMethodMetadata testMethod, string concreteClassName, ConcreteInstantiation entry, string requiredConstructorCache)
     {
         if (InstanceFactoryGenerator.HasClassConstructorAttribute(testMethod.TypeSymbol))
         {
@@ -2159,37 +2172,30 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (partition.Fallback == GenericClassInferencePolicy.RowFallback.AllRows || !entry.HasClassRows)
             {
                 // Rows of other types may build the instance, converted to the parameter types (#7161)
-                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol.Construct(entry.ClassTypeArgs)));
+                var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType), requiredConstructorCache));
             }
             else
             {
-                writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+                var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+                writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType), requiredConstructorCache));
             }
-        }
-        // Bake the row's values in only when it is the instantiation's only class row. When several
-        // class rows share it, each test's row reaches the constructor through args instead. A method
-        // row's values are never constructor arguments: an instantiation that only method rows infer
-        // takes them from the class-level data sources, as reflection mode does (#7161). Only the
-        // non-generic [Arguments(params object?[])] holds its values in an array: the array of an
-        // [Arguments<int[]>] row is the row's one value, so that row reaches the constructor through args.
-        else if (entry.HasParameterizedConstructor && entry.SpecificIsClassRow && entry.AdditionalClassArgumentsAttributes is null &&
-                 entry.SpecificArgumentsAttribute is { AttributeClass.IsGenericType: false, ConstructorArguments.Length: > 0 } specificAttr &&
-                 specificAttr.ConstructorArguments[0].Kind == TypedConstantKind.Array)
-        {
-            var argumentValues = specificAttr.ConstructorArguments[0].Values;
-            var constructorArgs = string.Join(", ", argumentValues.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg)));
-            writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), new object[] {{ {constructorArgs} }})!;");
         }
         else if (entry.HasParameterizedConstructor && !entry.HasClassRows && entry.ClassTypeArgs.Length > 0)
         {
             // No class row infers these types, so the constructor arguments come from class-level data
             // sources of any type, such as a [MethodDataSource] or a class row of another type under a
             // [GenerateGenericTest]. Convert them to the parameter types, as reflection mode does (#7161).
-            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(testMethod.TypeSymbol.Construct(entry.ClassTypeArgs)));
+            var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType), requiredConstructorCache));
         }
         else if (entry.HasParameterizedConstructor)
         {
-            writer.AppendLine($"return ({concreteClassName})global::System.Activator.CreateInstance(typeof({concreteClassName}), args)!;");
+            // Multiple rows can carry boxed numeric or string values that the default binder cannot
+            // convert (notably to decimal). Use the same CastHelper conversions as ordinary factories,
+            // with the constructor used to bind and infer the class rows.
+            var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
+            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, GetClassRowConstructor(constructedType), requiredConstructorCache));
         }
         else if (!testMethod.IsGenericType)
         {
@@ -2709,7 +2715,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.Indent();
             foreach (var attr in classDataSources)
             {
-                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol);
+                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, GetClassRowConstructor(concreteTypeSymbol), concreteTypeSymbol);
             }
             dsWriter.Unindent();
             dsWriter.Append("}");
@@ -3024,7 +3030,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in classDataSources)
             {
-                GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, methodSymbol, typeSymbol);
+                GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, GetClassRowConstructor(typeSymbol), typeSymbol);
             }
 
             writer.Unindent();
@@ -3035,7 +3041,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GeneratePropertyDataSources(writer, testMethod);
     }
 
-    private static void GenerateDataSourceAttribute(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol methodSymbol, INamedTypeSymbol typeSymbol, bool? keepSingleElementTupleWhole = null)
+    private static void GenerateDataSourceAttribute(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol? methodSymbol, INamedTypeSymbol typeSymbol, bool? keepSingleElementTupleWhole = null)
     {
         var attrClass = attr.AttributeClass;
         if (attrClass == null)
@@ -3072,7 +3078,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
-    private static void GenerateArgumentsAttributeWithParameterTypes(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol methodSymbol)
+    private static void GenerateArgumentsAttributeWithParameterTypes(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol? methodSymbol)
     {
         var compilation = compilationContext.Compilation;
 
@@ -3082,7 +3088,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         var attrTypeName = attr.AttributeClass.GloballyQualified();
-        var testMethodParameters = methodSymbol.Parameters;
+        // Generic Arguments attributes must retain their own constructor argument types.
+        var targetParameters = attr.AttributeClass.IsGenericType
+            ? ImmutableArray<IParameterSymbol>.Empty
+            : methodSymbol?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty;
 
         // The application syntax is null for metadata references. For CompilationReferences to other
         // projects (IDE workspaces) it exists but lives in a tree this compilation does not own: its source
@@ -3095,7 +3104,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (semanticModel is null)
         {
-            GenerateArgumentsAttributeFromTypedConstants(writer, attrTypeName, attr, testMethodParameters, attributeSyntax);
+            GenerateArgumentsAttributeFromTypedConstants(writer, attrTypeName, attr, targetParameters, attributeSyntax);
             return;
         }
 
@@ -3111,25 +3120,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Only process positional arguments (exclude named arguments)
         var positionalArgs = argumentList.Arguments.Where(a => a.NameEquals == null).ToArray();
-
         for (var i = 0; i < positionalArgs.Length; i++)
         {
             var argumentSyntax = positionalArgs[i];
             var expression = argumentSyntax.Expression;
 
             // Get target parameter type
-            var targetParameterType = i < testMethodParameters.Length
-                ? testMethodParameters[i].Type
+            var targetParameterType = i < targetParameters.Length
+                ? targetParameters[i].Type
                 : null;
 
-            // For decimal parameters, preserve source text and add 'm' suffix (only for numeric literals)
-            if (expression is not IdentifierNameSyntax
-                && targetParameterType?.SpecialType == SpecialType.System_Decimal
-                && expression.Kind() != SyntaxKind.StringLiteralExpression
-                && expression.Kind() != SyntaxKind.NullLiteralExpression)
+            // Preserve exact decimal digits only for supported numeric literal syntax.
+            // Keep other expressions on the runtime conversion path, including floating-point
+            // and string constants, so they behave identically to reflection discovery.
+            if (targetParameterType?.SpecialType == SpecialType.System_Decimal
+                && TryGetDecimalLiteralText(expression, methodSymbol?.MethodKind == MethodKind.Constructor, out var decimalLiteral))
             {
-                var sourceText = expression.ToString().TrimEnd('d', 'D', 'f', 'F', 'm', 'M').Trim();
-                writer.Append($"{sourceText}m");
+                writer.Append(decimalLiteral);
             }
             else
             {
@@ -3214,14 +3221,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         writer.Append($"new {attrTypeName}(");
 
-        if (attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array, IsNull: true }])
+        // Only the non-generic params object[] attribute stores the entire row in one array.
+        // An Arguments<T[]> attribute stores an array as its single row value.
+        var isParamsRow = attr.AttributeClass is { IsGenericType: false };
+        if (isParamsRow && attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array, IsNull: true }])
         {
             // [Arguments(null)] binds null to the params array itself; the constructor turns it into [null].
             writer.Append("null");
         }
         else
         {
-            var values = attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array } array]
+            var values = isParamsRow && attr.ConstructorArguments is [{ Kind: TypedConstantKind.Array } array]
                 ? array.Values
                 : attr.ConstructorArguments;
 
@@ -3239,13 +3249,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                 if (syntaxAligned
                     && targetType?.SpecialType == SpecialType.System_Decimal
-                    && TryGetDecimalLiteralText(positionalSyntax![i].Expression, out var decimalLiteral))
+                    && TryGetDecimalLiteralText(positionalSyntax![i].Expression, testMethodParameters[i].ContainingSymbol is IMethodSymbol { MethodKind: MethodKind.Constructor }, out var decimalLiteral))
                 {
                     writer.Append(decimalLiteral);
                 }
                 else
                 {
-                    writer.Append(formatter.FormatForCode(values[i], targetType));
+                    // Class row conversions belong to CastHelper at binding time. Formatting
+                    // against the constructor type can truncate floating values or alter rounding.
+                    var isConstructorArgument = i < testMethodParameters.Length
+                        && testMethodParameters[i].ContainingSymbol is IMethodSymbol { MethodKind: MethodKind.Constructor };
+                    writer.Append(formatter.FormatForCode(values[i], isConstructorArgument ? null : targetType));
                 }
 
                 if (i < values.Length - 1)
@@ -3292,8 +3306,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// literals qualify: plain digits with optional separators, fraction, exponent and a real suffix
     /// (<c>d</c>/<c>f</c>/<c>m</c>). Hex and binary prefixes and integral suffixes (<c>L</c>, <c>U</c>,
     /// <c>UL</c>) have no decimal form and must be formatted from their typed constant instead.
+    /// Constructor arguments additionally retain floating-point values for reflection-compatible conversion.
     /// </summary>
-    private static bool TryGetDecimalLiteralText(ExpressionSyntax expression, out string decimalLiteral)
+    private static bool TryGetDecimalLiteralText(ExpressionSyntax expression, bool isConstructorArgument, out string decimalLiteral)
     {
         decimalLiteral = string.Empty;
         var sign = string.Empty;
@@ -3313,6 +3328,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         if (expression is not LiteralExpressionSyntax literal || !literal.IsKind(SyntaxKind.NumericLiteralExpression))
+        {
+            return false;
+        }
+
+        // Class rows must retain the rounded attribute value that reflection converts at runtime.
+        // Method rows retain their established exact-decimal literal behavior.
+        if (isConstructorArgument && literal.Token.Value is double or float)
         {
             return false;
         }
@@ -3339,7 +3361,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return true;
     }
 
-    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol, Compilation compilation, bool? keepSingleElementTupleWhole)
+    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, IMethodSymbol? methodSymbol, Compilation compilation, bool? keepSingleElementTupleWhole)
     {
         // Extract method name and target type
         string? methodName = null;
@@ -3484,7 +3506,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
         // invocation is emitted, as a static lambda.
         writer.Append("Factory = static dataGeneratorMetadata => ");
-        keepSingleElementTupleWhole ??= HasSingleElementTupleParameter(methodSymbol.Parameters);
+        keepSingleElementTupleWhole ??= HasSingleElementTupleParameter(methodSymbol?.Parameters ?? ImmutableArray<IParameterSymbol>.Empty);
         EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation, isDeclaredInstanceAttribute, keepSingleElementTupleWhole.Value);
         writer.AppendLine(",");
 
@@ -5330,7 +5352,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.Indent();
         foreach (var attr in classDataSources)
         {
-            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, GetClassRowConstructor(testMethod.TypeSymbol), testMethod.TypeSymbol);
         }
         writer.Unindent();
         writer.Append("}");
@@ -9415,7 +9437,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var attr in classDataSources)
             {
-                GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol);
+                GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, GetClassRowConstructor(concreteTypeSymbol), concreteTypeSymbol);
             }
 
             writer.Unindent();
@@ -9824,7 +9846,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
             writer.AppendLine("{");
             writer.Indent();
-            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, classDataSourceAttribute, testMethod.MethodSymbol, testMethod.TypeSymbol);
+            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, classDataSourceAttribute, GetClassRowConstructor(testMethod.TypeSymbol), testMethod.TypeSymbol);
             writer.Unindent();
             writer.AppendLine("},");
         }

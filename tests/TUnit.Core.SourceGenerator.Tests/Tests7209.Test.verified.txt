@@ -28,7 +28,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }));
     private static global::TUnit.TestProject.Bugs._7209.ClassRowInfersNoTypeArgument<object> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.ClassRowInfersNoTypeArgument<object>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.ClassRowInfersNoTypeArgument<object>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.ClassRowInfersNoTypeArgument<object>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.ClassRowInfersNoTypeArgument<object> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -75,7 +75,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     };
     private static global::TUnit.TestProject.Bugs._7209.ClassRowInfersNoTypeArgument<int> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.ClassRowInfersNoTypeArgument<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.ClassRowInfersNoTypeArgument<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.ClassRowInfersNoTypeArgument<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7209.ClassRowInfersNoTypeArgument<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -163,7 +163,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }));
     private static global::TUnit.TestProject.Bugs._7209.ClassRowInfersTypeArgument<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.ClassRowInfersTypeArgument<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.ClassRowInfersTypeArgument<string>), new object[] { "class" })!;
+        return new global::TUnit.TestProject.Bugs._7209.ClassRowInfersTypeArgument<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.ClassRowInfersTypeArgument<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -247,7 +247,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }));
     private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowOverloadedConstructors<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowOverloadedConstructors<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowOverloadedConstructors<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowOverloadedConstructors<string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowOverloadedConstructors<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -294,7 +294,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     };
     private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowOverloadedConstructors<int> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowOverloadedConstructors<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowOverloadedConstructors<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowOverloadedConstructors<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowOverloadedConstructors<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -382,7 +382,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }));
     private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -429,7 +429,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     };
     private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<int> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowPrimaryConstructorBesideTypedConstructor<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -517,7 +517,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }));
     private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesTypeParameter<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesTypeParameter<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesTypeParameter<int>), new object[] { 42 })!;
+        return new global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesTypeParameter<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesTypeParameter<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -601,7 +601,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }));
     private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesNoTypeParameter<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesNoTypeParameter<string>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesNoTypeParameter<string>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesNoTypeParameter<string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesNoTypeParameter<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -648,7 +648,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
     };
     private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesNoTypeParameter<bool> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesNoTypeParameter<bool>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesNoTypeParameter<bool>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesNoTypeParameter<bool>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowTestConstructorTakesNoTypeParameter<bool> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -736,7 +736,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }));
     private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithUninferredMethodSource<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithUninferredMethodSource<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithUninferredMethodSource<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithUninferredMethodSource<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowWithUninferredMethodSource<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -957,7 +957,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }));
     private static global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRow<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRow<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRow<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRow<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.ConstrainedClassWithTypeFreeClassRow<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
@@ -1057,7 +1057,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "extra", new 
 }));
     private static global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
-        return (global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int>)global::System.Activator.CreateInstance(typeof(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int>), args)!;
+        return new global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7209.TypeFreeClassRowConstrainedWithLeadingToken<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
