@@ -1062,6 +1062,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
     {
         // Reference tuples have no language-level element conversions. The runtime reconstructs
         // them, so validate the logical elements, including the recursively flattened Rest.
+        // Nested reference-tuple Items still use CastHelper rather than reconstruction.
         if (source is not INamedTypeSymbol sourceTuple
             || target is not INamedTypeSymbol targetTuple
             || !IsReferenceTuple(sourceTuple)
@@ -1075,8 +1076,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         for (var i = 0; i < sourceElements.Length; i++)
         {
-            if (!compilation.ClassifyConversion(sourceElements[i], targetElements[i]).IsImplicit
-                && !CanConvertReferenceTuple(sourceElements[i], targetElements[i], compilation))
+            if (!compilation.ClassifyConversion(sourceElements[i], targetElements[i]).IsImplicit)
             {
                 return false;
             }

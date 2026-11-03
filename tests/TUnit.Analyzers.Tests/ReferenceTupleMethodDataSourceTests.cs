@@ -85,7 +85,7 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     [Arguments("Tuple<int>", "Tuple<object>")]
     [Arguments("Tuple<int>", "Tuple<long>")]
     [Arguments("Tuple<int, int>", "Tuple<long, long>")]
-    [Arguments("Tuple<Tuple<int>, int>", "Tuple<Tuple<long>, long>")]
+    [Arguments("Tuple<Tuple<int>, int>", "Tuple<Tuple<int>, long>")]
     [Arguments("Tuple<int, int, int, int, int, int, int, Tuple<int>>", "Tuple<long, long, long, long, long, long, long, Tuple<long>>")]
     [Arguments("Tuple<int, int, int, int, int, int, int, Tuple<int, int, int, int, int, int, int, Tuple<int>>>", "Tuple<long, long, long, long, long, long, long, Tuple<long, long, long, long, long, long, long, Tuple<long>>>")]
     public async Task WholeTupleWithNumericWidening(string sourceType, string targetType)
@@ -106,6 +106,7 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Tuple<Tuple<int>, int>", "Tuple<Tuple<long>, long>", "Tuple<int>, int")]
     [Arguments("Tuple<long, long>", "Tuple<int, int>", "long, long")]
     [Arguments("Tuple<int, string>", "Tuple<long, long>", "int, string")]
     [Arguments("Tuple<int, int>", "Tuple<long, long, long>", "int, int")]
@@ -116,14 +117,19 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
         await Verifier.VerifyAnalyzerAsync(
             $$"""
             using System;
+            using System.Collections.Generic;
             using TUnit.Core;
             public class C
             {
                 [Test] [{|#0:MethodDataSource(nameof(Row))|}] public void Test({{targetType}} row) {}
+                [Test] [{|#1:MethodDataSource(nameof(Rows))|}] public void Enumerable({{targetType}} row) {}
                 public static {{sourceType}} Row() => default!;
+                public static IEnumerable<{{sourceType}}> Rows() => [];
             }
             """,
             Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
-                .WithLocation(0).WithArguments(sourceElements, targetType));
+                .WithLocation(0).WithArguments(sourceElements, targetType),
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(1).WithArguments(sourceElements, targetType));
     }
 }
