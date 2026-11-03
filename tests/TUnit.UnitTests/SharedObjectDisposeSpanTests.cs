@@ -96,7 +96,7 @@ public class SharedObjectDisposeSpanTests
         {
             Activity.Current = current;
         }
-        using (source.StartActivity(name, ActivityKind.Internal, TestContext.Current!.Activity!.Context))
+        using (source.StartActivity(name, ActivityKind.Internal, CreateStoppedActivity("unrelated parent").Context))
         {
         }
 
