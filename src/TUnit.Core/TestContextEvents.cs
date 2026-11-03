@@ -3,7 +3,8 @@ using TUnit.Core.Interfaces;
 namespace TUnit.Core;
 
 /// <summary>
-/// Test context events container
+/// Test context events container. Registration, start and skipped handler failures propagate
+/// and stop the remaining handlers. End handler failures are collected with teardown failures.
 /// </summary>
 public class TestContextEvents : ITestEvents
 {
@@ -80,8 +81,14 @@ public class TestContextEvents : ITestEvents
     public AsyncEvent<TestContext>? OnDispose { get; set; }
     public AsyncEvent<TestContext>? OnTestRegistered { get; set; }
     public AsyncEvent<TestContext>? OnInitialize { get; set; }
+    // Delegate subscribers run once in the late stage, after early-stage receivers.
     public AsyncEvent<TestContext>? OnTestStart { get; set; }
     public AsyncEvent<TestContext>? OnTestEnd { get; set; }
     public AsyncEvent<TestContext>? OnTestSkipped { get; set; }
+    /// <summary>
+    /// Gets or sets handlers invoked before a retry, after backoff and cancellation checks.
+    /// The retry attempt is one-based. A handler failure aborts retry processing;
+    /// an accepted cancellation is preserved as a cancelled result.
+    /// </summary>
     public AsyncEvent<(TestContext TestContext, int RetryAttempt)>? OnTestRetry { get; set; }
 }
