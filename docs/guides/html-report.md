@@ -20,6 +20,10 @@ A machine-readable JSON sidecar (`{AssemblyName}-{os}-{tfm}.tunit-report.json`) 
 
 Running many test projects and want **one combined report instead of one per project**? See [Aggregated Reports](/docs/guides/report-aggregation.md).
 
+### Overlapping Sessions[​](#overlapping-sessions "Direct link to Overlapping Sessions")
+
+The HTML report assumes test sessions in the same process do not overlap when collecting traces and writing output files. In MTP server mode, overlapping sessions keep their test results and unobserved task exceptions separate, but share an activity listener, the resolved reporting setting, and the output path. A report's trace view can include spans from another session, and the last report written replaces the previous file. Run sessions sequentially when you need isolated trace views. Sequential sessions also reuse the output path, so copy each report before starting the next session to retain a report file for each one. Alternatively, run sessions in separate processes with distinct output paths.
+
 ## Features[​](#features "Direct link to Features")
 
 * **Summary Dashboard** — Total, passed, failed, skipped, and cancelled counts with a visual pass-rate donut chart
