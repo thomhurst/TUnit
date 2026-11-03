@@ -295,12 +295,14 @@ public class StaticPropertyHandlerCleanupTests
             }
         };
         var first = CreateSession();
-        var firstHandler = CreateInitializingHandler(first);
+        var firstTracker = new ObjectTracker(new(), GlobalContext.Current.Disposer);
+        var firstHandler = CreateInitializingHandler(first, firstTracker);
         await firstHandler.InitializeStaticPropertiesAsync([metadata], default);
         var resource = value!;
         await Assert.That(ObjectTracker.IsExternallyOwned(resource)).IsFalse();
         var second = CreateSession();
-        var secondHandler = CreateInitializingHandler(second);
+        var secondTracker = new ObjectTracker(new(), GlobalContext.Current.Disposer);
+        var secondHandler = CreateInitializingHandler(second, secondTracker);
         await secondHandler.InitializeStaticPropertiesAsync([metadata], default);
         await secondHandler.InitializeStaticPropertiesAsync([metadata], default);
         await Assert.That(initializations).IsEqualTo(1);
@@ -316,6 +318,7 @@ public class StaticPropertyHandlerCleanupTests
         var earlier = finishFirstSessionFirst ? firstHandler : secondHandler;
         var later = finishFirstSessionFirst ? secondHandler : firstHandler;
         await earlier.DisposeStaticPropertiesAsync([], []);
+        await (finishFirstSessionFirst ? firstTracker : secondTracker).DisposeAndClearStaticTrackingAsync();
         await tracker.UntrackObjects(context);
         // Exercise the same sweep operation on these fixtures without touching other tests' trackers.
         await tracker.DisposeUnleasedTrackedObjectAsync(resource);
@@ -594,8 +597,8 @@ public class StaticPropertyHandlerCleanupTests
             CancellationToken cancellationToken = default) where T : notnull => new(obj);
     }
 
-    private static StaticPropertyHandler CreateInitializingHandler(TestSessionContext session)
-        => new(null!, new ObjectTracker(new(), GlobalContext.Current.Disposer), null!, new Lazy<PropertyInjector>(() => new PropertyInjector(new Lazy<IInitializationCallback>(() => new PassthroughInitializationCallback()), session.Id)),
+    private static StaticPropertyHandler CreateInitializingHandler(TestSessionContext session, ObjectTracker? tracker = null)
+        => new(null!, tracker ?? new ObjectTracker(new(), GlobalContext.Current.Disposer), null!, new Lazy<PropertyInjector>(() => new PropertyInjector(new Lazy<IInitializationCallback>(() => new PassthroughInitializationCallback()), session.Id)),
             new ObjectGraphDiscoveryService(), session);
 
     internal sealed class ThrowingReflectionFixture
