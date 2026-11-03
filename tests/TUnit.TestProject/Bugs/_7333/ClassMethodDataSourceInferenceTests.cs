@@ -439,3 +439,12 @@ public sealed class GenericExternalProvider
 {
     public static IEnumerable<string?> NullRows() => [null];
 }
+
+// Explicit types retain null rows even when source inference creates the entry first.
+[GenerateGenericTest(typeof(string))]
+[MethodDataSource(typeof(GenericExternalProvider), nameof(GenericExternalProvider.NullRows))]
+public class ExplicitExternalNullRows<T>(T value)
+{
+    [Test]
+    public async Task Test() => await Assert.That((object?)value).IsNull();
+}

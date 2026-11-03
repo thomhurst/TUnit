@@ -2003,9 +2003,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // InferClassTypesFromOwnMemberRowType always selects a public constructor from
             // testMethod.TypeSymbol.InstanceConstructors when it returns type arguments, so both
             // the cached source and its constructor exist here. Construct preserves that constructor's
-            // OriginalDefinition and public accessibility; the final First below must find its
+            // OriginalDefinition and public accessibility; the final lookup below should find its
             // closed counterpart, even when no explicit or parameterless constructor takes precedence.
-            var inferredConstructor = entry.FindClassMethodDataSource(entry.SpecificArgumentsAttribute)!.Constructor!;
+            var inferredConstructor = entry.FindClassMethodDataSource(entry.SpecificArgumentsAttribute)?.Constructor;
 
             // Inference can use a value overload only to determine the class types. Match reflection's
             // explicit/parameterless construction preference before falling back to that overload.
@@ -2014,9 +2014,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var closedConstructor = publicConstructors.FirstOrDefault(constructor => constructor.GetAttributes().Any(attribute =>
                     attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix))
                 ?? publicConstructors.FirstOrDefault(constructor => constructor.Parameters.Length == 0)
-                ?? publicConstructors.First(constructor =>
-                    SymbolEqualityComparer.Default.Equals(constructor.OriginalDefinition, inferredConstructor.OriginalDefinition));
-            writer.AppendRaw(InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, closedConstructor));
+                ?? publicConstructors.FirstOrDefault(constructor =>
+                    inferredConstructor is not null && SymbolEqualityComparer.Default.Equals(constructor.OriginalDefinition, inferredConstructor.OriginalDefinition));
+            // Preserve the existing construction fallback if symbol mapping ever fails.
+            writer.AppendRaw(closedConstructor is null
+                ? InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType)
+                : InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, closedConstructor));
         }
         else if (entry.HasParameterizedConstructor)
         {
@@ -2497,11 +2500,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.AppendLine("new global::TUnit.Core.IDataSourceAttribute[]");
             dsWriter.AppendLine("{");
             dsWriter.Indent();
+            // Explicit class types do not depend on the source row for inference, even when
+            // their entry was first created by an inferred source. Keep null and empty rows.
+            var hasExplicitClassTypes = testMethod.TypeSymbol.GetAttributes().Any(attribute =>
+                attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true
+                && ExtractTypeArgsFromGenerateGenericTestAttribute(attribute) is { } explicitTypes
+                && explicitTypes.SequenceEqual(entry.ClassTypeArgs, SymbolEqualityComparer.Default));
             foreach (var attr in classDataSources)
             {
                 // Inferred sources bypass runtime partitioning. Suppress its empty fallback here;
                 // the attribute also preserves the external-source rule for all-null rows.
-                var filterClassRows = entry.FindClassMethodDataSource(attr)?.TypeArguments is not null;
+                var filterClassRows = !hasExplicitClassTypes && entry.FindClassMethodDataSource(attr)?.TypeArguments is not null;
                 GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, methodSymbol, concreteTypeSymbol, filterClassRows);
             }
             dsWriter.Unindent();
