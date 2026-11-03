@@ -16,6 +16,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <TfmSpecificPackageFile Include="TUnit.Core.FSharp.xml" Pack="true" PackagePath="$(BuildTransitivePath)" />
+        <None Include="TUnit.Core.FSharp.xml" Pack="true" PackagePath="$(BuildPath)" />
+
         <TfmSpecificPackageFile Include="TUnit.Core.props">
             <Pack>true</Pack>
             <PackagePath>$(BuildTransitivePath)</PackagePath>

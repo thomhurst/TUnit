@@ -112,8 +112,8 @@ public static class AsyncConvert
         }
     }
 
-    // Native AOT is only supported for C# test projects, so FSharp.Core members are deliberately not preserved.
-    // Naming FSharp.Core in a DynamicDependency would warn (IL2035) in every AOT app that does not reference it.
+    // TUnit.Core.targets preserves StartAsTask for trimmed JIT applications when FSharp.Core is referenced.
+    // A DynamicDependency would warn (IL2035) in C# AOT applications that do not reference FSharp.Core.
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
     [UnconditionalSuppressMessage("Trimming", "IL2060:Call to \'System.Reflection.MethodInfo.MakeGenericMethod\' can not be statically analyzed. It\'s not possible to guarantee the availability of requirements of the generic method.")]
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
