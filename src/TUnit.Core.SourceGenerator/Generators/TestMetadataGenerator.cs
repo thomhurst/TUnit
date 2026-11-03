@@ -1985,12 +1985,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine($"if (args.Length == 0) throw new global::System.InvalidOperationException(\"{EscapeString(NoClassRowForMethodRowMessage)}\");");
             }
 
-            if (partition.Fallback == ClassRowFallback.AllRows || !entry.HasClassRows)
+            var inferredConstructor = entry.ClassMethodDataSources
+                .FirstOrDefault(source => entry.IsSpecificClassDataSource(source.Source))?.Constructor;
+            if (inferredConstructor is not null || partition.Fallback == ClassRowFallback.AllRows || !entry.HasClassRows)
             {
-                // Rows of other types may build the instance, converted to the parameter types (#7161)
+                // Preserve the constructor selected for inferred source rows, including guarded groups.
+                // Rows of other types may build the instance, converted to the parameter types (#7161).
                 var constructedType = testMethod.TypeSymbol.Construct(entry.ClassTypeArgs);
-                var inferredConstructor = entry.ClassMethodDataSources
-                    .FirstOrDefault(source => entry.IsSpecificClassDataSource(source.Source))?.Constructor;
                 writer.AppendRaw(inferredConstructor is null
                     ? InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType)
                     : InstanceFactoryGenerator.GenerateInstanceFactoryBody(constructedType, inferredConstructor));

@@ -11,8 +11,8 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7333/*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-            result => result.ResultSummary.Counters.Total.ShouldBe(61),
-            result => result.ResultSummary.Counters.Passed.ShouldBe(57),
+            result => result.ResultSummary.Counters.Total.ShouldBe(63),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(59),
             result => result.ResultSummary.Counters.Failed.ShouldBe(4),
             result => result.Results.Where(test => test.Outcome == "Failed" && !test.TestName!.StartsWith("ReportsMissingConstructorValue", StringComparison.Ordinal))
                 .ShouldAllBe(test => test.Output!.ErrorInfo!.Message!.Contains("type arguments"))
@@ -53,6 +53,7 @@ public class Issue7333Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    [Arguments("GroupedRowsWithMarkedConstructor", 2)]
     [Arguments("MixedPartitionNullRows", 1)]
     [Arguments("MixedPartitionArgumentsRows", 2)]
     [Arguments("MixedPartitionEmptyRows", 1)]

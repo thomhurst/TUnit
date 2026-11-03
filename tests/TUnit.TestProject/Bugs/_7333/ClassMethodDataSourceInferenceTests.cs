@@ -645,3 +645,26 @@ public class UnmatchedClassArgumentsWithEmptySource<T>(T value)
     [Arguments(1)]
     public void ReportsMissingConstructorValue(T argument) { }
 }
+
+// Missing-row guards must preserve the constructor selected for valid grouped rows.
+[Arguments("class", 1)]
+[MethodDataSource(typeof(MarkedConstructorRowsProvider), nameof(MarkedConstructorRowsProvider.Rows))]
+public class GroupedRowsWithMarkedConstructor<T>
+{
+    private readonly T _value;
+
+    [TestConstructor]
+    public GroupedRowsWithMarkedConstructor(object tag, T value) => _value = value;
+
+    public GroupedRowsWithMarkedConstructor(string tag, T value)
+        => throw new InvalidOperationException("The unmarked overload must not run.");
+
+    [Test]
+    [Arguments(1)]
+    public async Task Test(T argument) => await Assert.That(_value).IsEqualTo(argument);
+}
+
+public static class MarkedConstructorRowsProvider
+{
+    public static IEnumerable<(string, int)> Rows() => [("source", 1)];
+}
