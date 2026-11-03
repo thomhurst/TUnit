@@ -105,7 +105,7 @@ namespace TUnit.Mocks.Generated
 
         public static Sandbox_IService_T__Apply_M1_MockCall<T> Apply<T>(this global::TUnit.Mocks.Mock<global::Sandbox.IService<T>> mock, global::System.Func<T, bool>? config)
         {
-            global::TUnit.Mocks.Arguments.Arg<T> __fa_config = config is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<T>() : (global::TUnit.Mocks.Arguments.Arg<T>)config;
+            global::TUnit.Mocks.Arguments.Arg<T> __fa_config = config is null ? global::TUnit.Mocks.Arguments.Arg.Is<T>(default(T)!) : (global::TUnit.Mocks.Arguments.Arg<T>)config;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_config.Matcher };
             return new Sandbox_IService_T__Apply_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Apply", matchers);
         }

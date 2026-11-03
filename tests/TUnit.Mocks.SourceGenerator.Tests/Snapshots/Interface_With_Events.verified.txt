@@ -149,7 +149,7 @@ namespace TUnit.Mocks.Generated
 
         public static INotifier_Notify_M0_MockCall Notify(this global::TUnit.Mocks.Mock<global::INotifier> mock, global::System.Func<string, bool>? message)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)message;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<string>(default(string)!) : (global::TUnit.Mocks.Arguments.Arg<string>)message;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_message.Matcher };
             return new INotifier_Notify_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Notify", matchers);
         }

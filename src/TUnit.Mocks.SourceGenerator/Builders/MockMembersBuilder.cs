@@ -1300,13 +1300,14 @@ internal static class MockMembersBuilder
 
             EmitOutParamDefaults(writer, method);
 
-            // A null predicate (including null/default literals) means an exact-null matcher.
+            // A null predicate (including null/default literals) matches the parameter type’s default.
+            // This also handles value-type instantiations of unconstrained generic parameters.
             // Keep non-null predicates on the existing implicit-conversion path.
             foreach (var idx in funcIndices.OrderBy(i => i))
             {
                 var p = method.Parameters[idx];
                 var rawName = p.Name.StartsWith("@", StringComparison.Ordinal) ? p.Name[1..] : p.Name;
-                writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> __fa_{rawName} = {p.Name} is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<{p.FullyQualifiedType}>() : (global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}>){p.Name};");
+                writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> __fa_{rawName} = {p.Name} is null ? global::TUnit.Mocks.Arguments.Arg.Is<{p.FullyQualifiedType}>(default({p.FullyQualifiedType})!) : (global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}>){p.Name};");
             }
 
             // Build matchers array

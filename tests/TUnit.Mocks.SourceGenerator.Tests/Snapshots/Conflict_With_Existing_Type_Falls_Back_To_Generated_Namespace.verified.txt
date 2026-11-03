@@ -95,7 +95,7 @@ namespace TUnit.Mocks.Generated
 
         public static MyApp_IGreeter_Greet_M0_MockCall Greet(this global::TUnit.Mocks.Mock<global::MyApp.IGreeter> mock, global::System.Func<string, bool>? name)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_name = name is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)name;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_name = name is null ? global::TUnit.Mocks.Arguments.Arg.Is<string>(default(string)!) : (global::TUnit.Mocks.Arguments.Arg<string>)name;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_name.Matcher };
             return new MyApp_IGreeter_Greet_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Greet", matchers);
         }

@@ -129,7 +129,7 @@ namespace TUnit.Mocks.Generated
 
         public static TestNamespace_IPair_TKey_TValue__Get_M0_MockCall<TKey, TValue> Get<TKey, TValue>(this global::TUnit.Mocks.Mock<global::TestNamespace.IPair<TKey, TValue>> mock, global::System.Func<TKey, bool>? key)
         {
-            global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<TKey>() : (global::TUnit.Mocks.Arguments.Arg<TKey>)key;
+            global::TUnit.Mocks.Arguments.Arg<TKey> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<TKey>(default(TKey)!) : (global::TUnit.Mocks.Arguments.Arg<TKey>)key;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
             return new TestNamespace_IPair_TKey_TValue__Get_M0_MockCall<TKey, TValue>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Get", matchers);
         }
@@ -331,7 +331,7 @@ namespace TUnit.Mocks.Generated
 
         public static TestNamespace_IRepository_T__Find_M0_MockCall<T> Find<T>(this global::TUnit.Mocks.Mock<global::TestNamespace.IRepository<T>> mock, global::System.Func<int, bool>? id)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)id;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)id;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher };
             return new TestNamespace_IRepository_T__Find_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Find", matchers);
         }

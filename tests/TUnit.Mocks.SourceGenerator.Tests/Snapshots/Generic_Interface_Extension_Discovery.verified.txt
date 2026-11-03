@@ -93,7 +93,7 @@ namespace TUnit.Mocks.Generated
 
         public static IRepository_T__GetById_M0_MockCall<T> GetById<T>(this global::TUnit.Mocks.Mock<global::IRepository<T>> mock, global::System.Func<int, bool>? id)
         {
-            global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<int>() : (global::TUnit.Mocks.Arguments.Arg<int>)id;
+            global::TUnit.Mocks.Arguments.Arg<int> __fa_id = id is null ? global::TUnit.Mocks.Arguments.Arg.Is<int>(default(int)!) : (global::TUnit.Mocks.Arguments.Arg<int>)id;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_id.Matcher };
             return new IRepository_T__GetById_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetById", matchers);
         }
@@ -106,7 +106,7 @@ namespace TUnit.Mocks.Generated
 
         public static IRepository_T__Save_M1_MockCall<T> Save<T>(this global::TUnit.Mocks.Mock<global::IRepository<T>> mock, global::System.Func<T, bool>? entity)
         {
-            global::TUnit.Mocks.Arguments.Arg<T> __fa_entity = entity is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<T>() : (global::TUnit.Mocks.Arguments.Arg<T>)entity;
+            global::TUnit.Mocks.Arguments.Arg<T> __fa_entity = entity is null ? global::TUnit.Mocks.Arguments.Arg.Is<T>(default(T)!) : (global::TUnit.Mocks.Arguments.Arg<T>)entity;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_entity.Matcher };
             return new IRepository_T__Save_M1_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Save", matchers);
         }

@@ -83,7 +83,7 @@ namespace TUnit.Mocks.Generated
 
         public static BaseDialog_Compute_M0_MockCall Compute(this global::TUnit.Mocks.Mock<global::BaseDialog> mock, global::System.Func<string?, bool>? input)
         {
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_input = input is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)input;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_input = input is null ? global::TUnit.Mocks.Arguments.Arg.Is<string?>(default(string?)!) : (global::TUnit.Mocks.Arguments.Arg<string?>)input;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_input.Matcher };
             return new BaseDialog_Compute_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Compute", matchers);
         }
@@ -411,22 +411,22 @@ namespace TUnit.Mocks.Generated
 
         public static IDialogService_Show_M0_MockCall Show(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<string?, bool>? title, global::TUnit.Mocks.Arguments.Arg<string?> message)
         {
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_title = title is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)title;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_title = title is null ? global::TUnit.Mocks.Arguments.Arg.Is<string?>(default(string?)!) : (global::TUnit.Mocks.Arguments.Arg<string?>)title;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_title.Matcher, message.Matcher };
             return new IDialogService_Show_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Show", matchers);
         }
 
         public static IDialogService_Show_M0_MockCall Show(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::TUnit.Mocks.Arguments.Arg<string?> title, global::System.Func<string?, bool>? message)
         {
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)message;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<string?>(default(string?)!) : (global::TUnit.Mocks.Arguments.Arg<string?>)message;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { title.Matcher, __fa_message.Matcher };
             return new IDialogService_Show_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Show", matchers);
         }
 
         public static IDialogService_Show_M0_MockCall Show(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<string?, bool>? title, global::System.Func<string?, bool>? message)
         {
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_title = title is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)title;
-            global::TUnit.Mocks.Arguments.Arg<string?> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string?>() : (global::TUnit.Mocks.Arguments.Arg<string?>)message;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_title = title is null ? global::TUnit.Mocks.Arguments.Arg.Is<string?>(default(string?)!) : (global::TUnit.Mocks.Arguments.Arg<string?>)title;
+            global::TUnit.Mocks.Arguments.Arg<string?> __fa_message = message is null ? global::TUnit.Mocks.Arguments.Arg.Is<string?>(default(string?)!) : (global::TUnit.Mocks.Arguments.Arg<string?>)message;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_title.Matcher, __fa_message.Matcher };
             return new IDialogService_Show_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Show", matchers);
         }
@@ -446,7 +446,7 @@ namespace TUnit.Mocks.Generated
 
         public static IDialogService_ShowPanel_M1_MockCall<TData> ShowPanel<TData>(this global::TUnit.Mocks.Mock<global::IDialogService> mock, global::System.Func<TData?, bool>? data) where TData : class
         {
-            global::TUnit.Mocks.Arguments.Arg<TData?> __fa_data = data is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<TData?>() : (global::TUnit.Mocks.Arguments.Arg<TData?>)data;
+            global::TUnit.Mocks.Arguments.Arg<TData?> __fa_data = data is null ? global::TUnit.Mocks.Arguments.Arg.Is<TData?>(default(TData?)!) : (global::TUnit.Mocks.Arguments.Arg<TData?>)data;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_data.Matcher };
             return new IDialogService_ShowPanel_M1_MockCall<TData>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "ShowPanel", matchers, global::TUnit.Mocks.TypeArguments.Of<TData>.Value);
         }

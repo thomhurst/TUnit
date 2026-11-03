@@ -122,7 +122,7 @@ namespace TUnit.Mocks.Generated
 
         public static Sandbox_ICursorParser_TryRead_M0_MockCall TryRead(this global::TUnit.Mocks.Mock<global::Sandbox.ICursorParser> mock, global::System.Func<string, bool>? input)
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_input = input is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)input;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_input = input is null ? global::TUnit.Mocks.Arguments.Arg.Is<string>(default(string)!) : (global::TUnit.Mocks.Arguments.Arg<string>)input;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_input.Matcher };
             return new Sandbox_ICursorParser_TryRead_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "TryRead", matchers);
         }

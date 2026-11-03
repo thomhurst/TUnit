@@ -89,7 +89,7 @@ namespace TUnit.Mocks.Generated
 
         public static Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut> Map<TIn, TOut>(this global::TUnit.Mocks.Mock<global::Sandbox.IMapper<TIn, TOut>> mock, global::System.Func<TIn, bool>? input)
         {
-            global::TUnit.Mocks.Arguments.Arg<TIn> __fa_input = input is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<TIn>() : (global::TUnit.Mocks.Arguments.Arg<TIn>)input;
+            global::TUnit.Mocks.Arguments.Arg<TIn> __fa_input = input is null ? global::TUnit.Mocks.Arguments.Arg.Is<TIn>(default(TIn)!) : (global::TUnit.Mocks.Arguments.Arg<TIn>)input;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_input.Matcher };
             return new Sandbox_IMapper_TIn_TOut__Map_M0_MockCall<TIn, TOut>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "Map", matchers);
         }

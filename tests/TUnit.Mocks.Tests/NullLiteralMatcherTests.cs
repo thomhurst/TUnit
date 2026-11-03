@@ -7,28 +7,38 @@ public interface INullLiteralService
     void Notify(string? value);
     string NullableNumber(int? value);
     string Number(int value);
+    string GenericNumber<T>(T value);
 }
 
 public class NullLiteralMatcherTests
 {
     [Test]
-    public async Task Default_Literal_For_NonNullable_Number_Is_A_Null_Predicate()
+    public async Task Default_Literal_For_NonNullable_Number_Matches_Zero()
     {
         var mock = Mock.Of<INullLiteralService>();
-        // An untyped default selects the nullable predicate overload. Null cannot
-        // match an int; use a typed default to request the exact value zero.
-        mock.Number(default).Returns("null predicate");
-
-        await Assert.That(mock.Object.Number(0)).IsEqualTo("");
-        mock.Number(default).WasNeverCalled();
-
-        mock.Number(default(int)).Returns("zero");
+        mock.Number(default).Returns("zero");
 
         await Assert.That(mock.Object.Number(0)).IsEqualTo("zero");
         await Assert.That(mock.Object.Number(1)).IsEqualTo("");
 
-        mock.Number(default(int)).WasCalled(Times.Exactly(2));
-        mock.Number(default).WasNeverCalled();
+        mock.Number(default).WasCalled(Times.Once);
+        mock.Number(default(int)).WasCalled(Times.Once);
+    }
+
+    [Test]
+    public async Task Default_Literal_For_Generic_Parameter_Matches_Its_Default_Value()
+    {
+        var mock = Mock.Of<INullLiteralService>();
+        mock.GenericNumber<int>(default).Returns("zero");
+        mock.GenericNumber<string?>(default).Returns("null");
+
+        await Assert.That(mock.Object.GenericNumber(0)).IsEqualTo("zero");
+        await Assert.That(mock.Object.GenericNumber(1)).IsEqualTo("");
+        await Assert.That(mock.Object.GenericNumber<string?>(null)).IsEqualTo("null");
+        await Assert.That(mock.Object.GenericNumber<string?>("value")).IsEqualTo("");
+
+        mock.GenericNumber<int>(default).WasCalled(Times.Once);
+        mock.GenericNumber<string?>(default).WasCalled(Times.Once);
     }
 
     [Test]

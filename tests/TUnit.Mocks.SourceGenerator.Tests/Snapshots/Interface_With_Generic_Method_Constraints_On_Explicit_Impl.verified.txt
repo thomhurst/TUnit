@@ -124,7 +124,7 @@ namespace TUnit.Mocks.Generated
 
         public static IConstrained_GetNotnull_M0_MockCall<T> GetNotnull<T>(this global::TUnit.Mocks.Mock<global::IConstrained> mock, global::System.Func<string, bool>? key) where T : notnull
         {
-            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.IsNull<string>() : (global::TUnit.Mocks.Arguments.Arg<string>)key;
+            global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<string>(default(string)!) : (global::TUnit.Mocks.Arguments.Arg<string>)key;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
             return new IConstrained_GetNotnull_M0_MockCall<T>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetNotnull", matchers, global::TUnit.Mocks.TypeArguments.Of<T>.Value);
         }
