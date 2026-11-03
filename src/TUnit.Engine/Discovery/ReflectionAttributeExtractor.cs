@@ -173,7 +173,9 @@ internal static class ReflectionAttributeExtractor
     {
         var dataSources = new List<IDataSourceAttribute>();
 
-        foreach (var attr in attributeProvider.GetCustomAttributes(inherit: false))
+        // Constructor data follows class inheritance, including when inferring an open generic class.
+        // Method data is extracted from the selected declaration, as before.
+        foreach (var attr in attributeProvider.GetCustomAttributes(inherit: attributeProvider is Type))
         {
             if (attr is IDataSourceAttribute dataSourceAttr)
             {
