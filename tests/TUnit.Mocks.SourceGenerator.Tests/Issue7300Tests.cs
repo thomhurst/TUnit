@@ -146,6 +146,18 @@ public class Issue7300Tests : SnapshotTestBase
     }
 
     [Test]
+    public async Task Closed_Generic_Method_Setups_Declare_Extern_Alias()
+    {
+        var library = LibrarySource.Replace("T Get(int id);", "T Get(int id); TResult Map<TResult>(T value);");
+        var sources = RunGenerator(Source,
+            [CreateExternalAssemblyReference(library, "Lib").WithAliases(["LibAlias"])]);
+        var setups = sources.Single(source => source.Contains("_ClosedMockMemberExtensions_"));
+
+        await Assert.That(setups.Contains("extern alias LibAlias;")).IsTrue();
+        await Assert.That(setups.Contains("LibAlias::Lib.Services.IRepository<")).IsTrue();
+    }
+
+    [Test]
     public async Task Extern_Aliased_Types_Resolve_In_Generated_Code()
     {
         var errors = GetGeneratedCompilationErrors(Source, AliasedLibrary());
