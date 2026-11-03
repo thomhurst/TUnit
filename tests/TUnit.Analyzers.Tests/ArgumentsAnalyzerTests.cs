@@ -95,6 +95,10 @@ public class ArgumentsAnalyzerTests
                 public void RunOptional<T>(T[] values, T value, int count = 0) { }
 
                 [Test]
+                [ArrayRow]
+                public void RunCount<T>(T[] values, int count) { }
+
+                [Test]
                 [{|#0:ArrayRow|}]
                 public void RunInvalid<T>(T[] values, string value) { }
             }
@@ -102,6 +106,42 @@ public class ArgumentsAnalyzerTests
             Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                 .WithLocation(0)
                 .WithArguments("int[], int", "int[], string"));
+    }
+
+    [Test]
+    [Arguments("(int[], int)", "T[] values, System.Threading.CancellationToken token, T value")]
+    [Arguments("(int[], int, string)", "T[] values, T value, params string[] rest")]
+    [Arguments("(int[], int, string[])", "T[] values, T value, params string[] rest")]
+    [Arguments("(int[], int, int)", "T[] values, T value, params string[] rest", true)]
+    public async Task Typed_Array_Source_Validates_Injected_Tokens_And_Params(string rowType, string parameters, bool invalid = false)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+
+            public class ArrayRowAttribute : TypedDataSourceAttribute<{{rowType}}>
+            {
+                public override async IAsyncEnumerable<Func<Task<{{rowType}}>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                {
+                    await Task.Yield();
+                    yield break;
+                }
+            }
+
+            public class MyClass
+            {
+                [Test]
+                [{{(invalid ? "{|#0:ArrayRow|}" : "ArrayRow")}}]
+                public void Run<T>({{parameters}}) { }
+            }
+            """,
+            invalid
+                ? [Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                    .WithArguments("int[], int, int", "int[], int, string")]
+                : []);
     }
 
     [Test]

@@ -1036,7 +1036,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             CheckInferredTypeArgumentConstraints(context, attribute, typeArguments, testDataTypes);
 
             var closedParameters = method.Construct(inferred).Parameters
-                .WithoutCancellationTokenParameter().ToArray();
+                .WithoutTestMethodCancellationTokens().ToArray();
             // A shorter row leaves trailing optional parameters at their defaults.
             var suppliedParameterCount = typeArguments.Length;
             if (suppliedParameterCount < closedParameters.Length
@@ -1045,7 +1045,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 closedParameters = closedParameters.Take(suppliedParameterCount).ToArray();
             }
 
-            testDataTypes = closedParameters.Select(p => p.Type).ToImmutableArray();
+            testDataTypes = closedParameters.Select((p, i) =>
+                p.IsParams && p.Type is IArrayTypeSymbol array && i < typeArguments.Length
+                    && !context.Compilation.HasImplicitConversionOrGenericParameter(typeArguments[i], p.Type)
+                    ? array.ElementType
+                    : p.Type).ToImmutableArray();
         }
 
         if (testDataTypes.Any(x => x.IsGenericDefinition()))
