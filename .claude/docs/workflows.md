@@ -24,7 +24,7 @@ dotnet test --framework net10.0 --treenode-filter "/*/*/ClassName/*"
 
 A single-method filter has the form `/Assembly/Namespace/ClassName/TestMethodName`. Run one filter per command; do not join paths with `|`.
 
-For AOT validation, publish the affected test application in Release with `-p:PublishAot=true --use-current-runtime`, selecting a target framework with `-f` when it multi-targets.
+For AOT validation of `tests/TUnit.TestProject`, publish in Release with `-p:Aot=true --use-current-runtime`, selecting a target framework with `-f` when it multi-targets. This project switch scopes `PublishAot` to supported target frameworks; passing `-p:PublishAot=true` globally also applies it to `netstandard2.0` analyzer project references and fails with NETSDK1207.
 
 ## Performance
 
