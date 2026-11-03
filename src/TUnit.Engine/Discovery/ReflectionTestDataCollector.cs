@@ -1292,8 +1292,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         GenerateGenericTestAttribute[] generateGenericTestAttributes)
     {
         List<TestMetadata>? tests = null;
-        var fallback = GenericClassInferencePolicy.SelectRowFallback(hasMatchingClassRow: typeFreeClassRows is not null, hasClassArgumentsRows: allClassRows is null);
-        var allClassRowSources = fallback == GenericClassInferencePolicy.RowFallback.NoClassRow ? null : allClassRows?.ToArray() ?? typeFreeClassRows;
+        // Discovery has already selected these rows. A null allClassRows means literal class
+        // arguments exist; only type-free rows can then supply this unmatched instantiation.
+        var allClassRowSources = allClassRows?.ToArray() ?? typeFreeClassRows;
 
         for (var methodIndex = 0; methodIndex < testMethods.Length; methodIndex++)
         {
@@ -1451,7 +1452,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             hasClassTypeParameter |= parameters[i].ParameterType.ContainsGenericParameters;
         }
 
-        return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(valueCount, boundCount, hasClassTypeParameter);
+        return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(
+            valueCount: valueCount, boundCount: boundCount, hasClassTypeParameter: hasClassTypeParameter);
     }
 
     /// <summary>

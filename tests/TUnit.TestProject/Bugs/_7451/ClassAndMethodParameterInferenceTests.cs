@@ -2,6 +2,9 @@ using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7451;
 
+// Mixed-source type-free-row parity is tracked separately by #7390; see the shared
+// inference matrix in docs/internal/generic-method-inference.md.
+
 // Parameter inference owns all method rows on every class-row instantiation. The explicit method
 // type repeats the inferred type, so it must not multiply the two class rows by two matrix values.
 [EngineTest(ExpectedResult.Pass)]

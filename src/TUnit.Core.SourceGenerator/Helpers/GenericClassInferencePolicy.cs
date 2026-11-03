@@ -6,8 +6,11 @@ internal static class GenericClassInferencePolicy
 {
     internal enum RowFallback
     {
+        // Keep the matching constructor-row partition selected by the adapter.
         None,
+        // No compile-time match exists; use every class data source at runtime.
         AllRows,
+        // Literal class rows exist but none match; emit the missing-class-row diagnostic.
         NoClassRow,
     }
 

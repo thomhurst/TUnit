@@ -7239,7 +7239,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             hasClassTypeParameter |= ContainsClassTypeParameter(primaryConstructor.Parameters[i].Type, classSymbol);
         }
 
-        return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(valueCount, boundCount, hasClassTypeParameter);
+        return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(
+            valueCount: valueCount, boundCount: boundCount, hasClassTypeParameter: hasClassTypeParameter);
     }
 
     /// <param name="nullArgumentsArrayInfersObject">
