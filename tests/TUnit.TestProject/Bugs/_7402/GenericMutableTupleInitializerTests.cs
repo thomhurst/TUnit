@@ -60,6 +60,39 @@ public class GenericMutableTupleInitializerTests
         await Assert.That((object?)row.Item3).IsEqualTo(1);
     }
 
+    public static (object?, object?, Fixture) NullRow() => (1, null, new());
+    public static Tuple<object?, object?, Fixture> NullReferenceRow() => Tuple.Create<object?, object?, Fixture>(1, null, new());
+
+    [Test, MethodDataSource(nameof(NullRow))]
+    public async Task Null_Element_Keeps_Generic_Reference_Type<T>((T, T, Fixture) row)
+        => await CheckNullElement(row.Item1, row.Item2, row.Item3);
+
+    [Test, MethodDataSource(nameof(NullReferenceRow))]
+    public async Task Reference_Null_Element_Keeps_Generic_Reference_Type<T>(Tuple<T, T, Fixture> row)
+        => await CheckNullElement(row.Item1, row.Item2, row.Item3);
+
+    [Test, MethodDataSource(nameof(NullRow))]
+    public async Task Null_Element_With_Leading_Token<T>(CancellationToken token, (T, T, Fixture) row)
+    {
+        await CheckNullElement(row.Item1, row.Item2, row.Item3);
+        await Assert.That(token.IsCancellationRequested).IsFalse();
+    }
+
+    [Test, MethodDataSource(nameof(NullRow))]
+    public async Task Null_Element_With_Trailing_Token<T>((T, T, Fixture) row, CancellationToken token)
+    {
+        await CheckNullElement(row.Item1, row.Item2, row.Item3);
+        await Assert.That(token.IsCancellationRequested).IsFalse();
+    }
+
+    private static async Task CheckNullElement<T>(T first, T second, Fixture fixture)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(object));
+        await Assert.That((object?)first).IsEqualTo(1);
+        await Assert.That((object?)second).IsNull();
+        await Assert.That(fixture.Initialized).IsTrue();
+    }
+
     public struct Fixture : IAsyncInitializer
     {
         public bool Initialized;

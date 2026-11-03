@@ -3617,11 +3617,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
-    private static bool ReceivesNullArgument(Type genericParameter, ParameterInfo[] methodParams, object?[] args)
+    private static bool ReceivesNullArgument(Type genericParameter, ParameterInfo[] methodParams,
+        object?[] args, Type[]? flattenedTupleTypes, int tupleOffset)
     {
-        for (var j = 0; j < methodParams.Length && j < args.Length; j++)
+        var parameterCount = flattenedTupleTypes?.Length ?? methodParams.Length;
+        for (var j = 0; j < parameterCount && j + tupleOffset < args.Length; j++)
         {
-            if (args[j] is null && methodParams[j].ParameterType == genericParameter)
+            var parameterType = flattenedTupleTypes?[j] ?? methodParams[j].ParameterType;
+            if (args[j + tupleOffset] is null && parameterType == genericParameter)
             {
                 return true;
             }
@@ -3768,7 +3771,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             // infers object, as in TestGenericTypeResolver and the source generator (#7155).
                             // A Nullable<T> inferred from a nested type, such as List<int?>, holds the null.
                             typeArguments[i] = TestGenericTypeResolver.CannotHoldNull(inferredType)
-                                && ReceivesNullArgument(genericParams[i], methodParams, args)
+                                && ReceivesNullArgument(genericParams[i], methodParams, args, flattenedTupleTypes, tupleOffset)
                                 ? typeof(object)
                                 : inferredType;
                         }
