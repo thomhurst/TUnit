@@ -23,4 +23,25 @@ public class OneElementValueTupleTests
     {
         await Assert.That(value.Item1 is null or "a").IsTrue();
     }
+
+    public static IEnumerable<ValueTuple<object>> NestedRows() =>
+        [new(new ValueTuple<object>("x"))];
+
+    public IEnumerable<ValueTuple<object>> InstanceNestedRows() => NestedRows();
+
+    [Test]
+    [MethodDataSource(nameof(NestedRows))]
+    public async Task NestedElement(ValueTuple<object> value)
+    {
+        await Assert.That(value.Item1).IsTypeOf<ValueTuple<object>>();
+        await Assert.That(((ValueTuple<object>)value.Item1).Item1).IsEqualTo("x");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(InstanceNestedRows))]
+    public async Task NestedElementFromInstance(ValueTuple<object> value)
+    {
+        await Assert.That(value.Item1).IsTypeOf<ValueTuple<object>>();
+        await Assert.That(((ValueTuple<object>)value.Item1).Item1).IsEqualTo("x");
+    }
 }

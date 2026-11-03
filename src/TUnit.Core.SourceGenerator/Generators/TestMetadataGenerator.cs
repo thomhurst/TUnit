@@ -3029,7 +3029,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // finds no trimmed field or property metadata (#7225).
         if (attrName is "global::TUnit.Core.MethodDataSourceAttribute" or InstanceMethodDataSourceAttributeName)
         {
-            GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, compilationContext.Compilation);
+            GenerateMethodDataSourceAttribute(writer, attr, typeSymbol, methodSymbol, compilationContext.Compilation);
         }
         else if (attrName == "global::TUnit.Core.ArgumentsAttribute")
         {
@@ -3318,7 +3318,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return true;
     }
 
-    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, Compilation compilation)
+    private static void GenerateMethodDataSourceAttribute(CodeWriter writer, AttributeData attr, INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol, Compilation compilation)
     {
         // Extract method name and target type
         string? methodName = null;
@@ -3463,7 +3463,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // a per-data-source compiler-generated state machine class (#6227). Only the per-test-unique
         // invocation is emitted, as a static lambda.
         writer.Append("Factory = static dataGeneratorMetadata => ");
-        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation, isDeclaredInstanceAttribute);
+        var keepSingleElementTupleWhole = methodSymbol.Parameters.Where(p => !p.Type.IsCancellationToken()).ToArray() is
+            [{ Type: INamedTypeSymbol { IsTupleType: true, TupleElements.Length: 1 } }];
+        EmitDataSourceFactoryInvocation(writer, dataSourceMember, targetType, usesTestClassInstance, hasArguments ? argumentsProperty.Value : (TypedConstant?)null, compilation, isDeclaredInstanceAttribute, keepSingleElementTupleWhole);
         writer.AppendLine(",");
 
         writer.Unindent();
@@ -3476,7 +3478,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// member's declared return type (mirroring the previous inline-iterator branch order)
     /// and whether the member is static or instance-based.
     /// </summary>
-    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments, Compilation compilation, bool decidesRowsFromRuntimeValue)
+    private static void EmitDataSourceFactoryInvocation(CodeWriter writer, ISymbol dataSourceMember, ITypeSymbol targetType, bool usesTestClassInstance, TypedConstant? arguments, Compilation compilation, bool decidesRowsFromRuntimeValue, bool keepSingleElementTupleWhole)
     {
         var dataSourceMethod = dataSourceMember as IMethodSymbol;
 
@@ -3561,7 +3563,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // The instance helpers take the metadata anyway. [InstanceMethodDataSource] read its member by reflection before
         // #7225, and that path keeps a tuple row whole when the test takes a single tuple, so its static helpers get the
         // metadata too: without the parameter types, a one-element tuple holding null would reach the test as null.
-        var metadataArgument = usesTestClassInstance || decidesRowsFromRuntimeValue ? "dataGeneratorMetadata, " : "";
+        // Preserve one-element rows before unwrapping: their element can itself have the expected tuple type.
+        var metadataArgument = usesTestClassInstance || decidesRowsFromRuntimeValue || keepSingleElementTupleWhole ? "dataGeneratorMetadata, " : "";
 
         // A declared type such as object does not say whether the value is one row or many. Reflection mode, and the
         // attribute's reflection fallback that read every field and every private or protected property before the
@@ -4420,7 +4423,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ])
         {
             writer.AppendLine("// Special handling for single tuple parameter");
-            // A one-element row can be either its element or the whole expected tuple.
+            // Factories preserve one-element tuple rows, so a matching tuple is the whole row,
+            // even when its element is another tuple of the same type.
             var unwrappedCheck = singleTupleParam.TupleElements.Length == 1
                 ? $" && args[0] is not {singleTupleParam.GloballyQualified()}"
                 : "";
