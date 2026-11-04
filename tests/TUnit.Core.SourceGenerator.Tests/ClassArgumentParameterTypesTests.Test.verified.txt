@@ -200,7 +200,7 @@ internal static class TUnit_TestProject_Bugs__7440_RequiredConstructorArgumentTe
                 Name = "Value",
                 IsStatic = false,
                 IsNullable = false,
-                Getter = o => ((dynamic)o).Value,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7440.RequiredConstructorArgumentTests<>), "Value"),
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
             },
@@ -211,7 +211,7 @@ internal static class TUnit_TestProject_Bugs__7440_RequiredConstructorArgumentTe
                 Name = "Number",
                 IsStatic = false,
                 IsNullable = false,
-                Getter = o => ((dynamic)o).Number,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7440.RequiredConstructorArgumentTests<>), "Number"),
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
             }
@@ -933,7 +933,7 @@ internal static class TUnit_TestProject_Bugs__7440_SingleGenericRequiredFieldTes
                 Name = "Property",
                 IsStatic = false,
                 IsNullable = false,
-                Getter = o => ((dynamic)o).Property,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7440.SingleGenericRequiredFieldTests<>), "Property"),
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
             }
