@@ -16,6 +16,11 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+    inputs:
+      analyze_windows_dump_run:
+        description: 'Also analyze the Windows engine hang dump from this AOT run ID (optional)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -204,3 +209,42 @@ jobs:
         with:
           name: HangDump-engine-tests-${{ matrix.os }}
           path: '**/hangdump*'
+
+  analyze-windows-dump:
+    if: github.event_name == 'workflow_dispatch' && inputs.analyze_windows_dump_run != ''
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Download captured Windows engine dump
+        uses: actions/download-artifact@v5
+        with:
+          name: HangDump-engine-tests-windows-latest
+          run-id: ${{ inputs.analyze_windows_dump_run }}
+          github-token: ${{ github.token }}
+          path: captured-dump
+
+      - name: Extract managed stacks and async waits
+        shell: pwsh
+        run: |
+          dotnet tool install --global dotnet-dump --version 10.0.750501
+          if ($LASTEXITCODE -ne 0) { throw 'dotnet-dump installation failed' }
+          $dumps = @(Get-ChildItem captured-dump -Recurse -Filter '*.dmp')
+          if ($dumps.Count -ne 1) { throw "Expected one dump, found $($dumps.Count)" }
+          New-Item -ItemType Directory -Path analysis | Out-Null
+          dotnet-dump analyze $dumps[0].FullName -c 'clrthreads' -c 'clrstack -all' -c 'dumpasync -stacks' -c 'exit' *> analysis/managed-stacks.txt
+          if ($LASTEXITCODE -ne 0) { throw 'Dump analysis failed; see managed-stacks.txt' }
+
+      - name: Upload managed dump analysis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-engine-dump-analysis
+          path: analysis/
+          if-no-files-found: warn
