@@ -16,6 +16,69 @@ public class GenericClassSourceRuntimeTests
 
     public sealed class ScalarCollectingConstructor<T, U>(T first, params U[] rest);
 
+    public sealed class OnlyCollectingConstructor<T, U>(params T[] items);
+
+    private sealed class DeferredParse : IParsable<DeferredParse>
+    {
+        public static DeferredParse Parse(string value, IFormatProvider? provider) => throw new InvalidOperationException("Partitioning must not invoke Parse");
+        public static bool TryParse(string? value, IFormatProvider? provider, out DeferredParse result) => throw new InvalidOperationException("Partitioning must not invoke TryParse");
+    }
+
+    [Test]
+    public async Task Parseable_Candidates_Do_Not_Invoke_User_Parsing()
+    {
+        IMemberMetadata[] parameters = [new ParameterMetadata(typeof(DeferredParse))
+        {
+            Name = "value", TypeInfo = new GenericParameter(0, false), CachedIsOptional = false
+        }];
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow(["value"], parameters, [typeof(DeferredParse)])).IsTrue();
+    }
+
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(false, true)]
+    [Arguments(true, false)]
+    [Arguments(true, true)]
+    public async Task Partition_Retains_Empty_And_Parseable_Rows(bool generated, bool collecting)
+    {
+        Type[] arguments = collecting ? [typeof(int), typeof(string)] : [typeof(Guid), typeof(int)];
+        IMemberMetadata[] parameters = collecting
+            ? generated
+                ? ParameterMetadataFactory.ForConstructor(typeof(OnlyCollectingConstructor<,>), true,
+                    new ParameterMetadata(typeof(object)) { Name = "items", TypeInfo = new ConcreteType(typeof(object)), CachedIsOptional = false, CachedIsParams = true })
+                : [new ParameterMetadata(typeof(int[])) { Name = "items", TypeInfo = new ConcreteType(typeof(int[])), CachedIsOptional = false, CachedIsParams = true }]
+            : [new ParameterMetadata(typeof(Guid)) { Name = "first", TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(typeof(Guid)), CachedIsOptional = false },
+               new ParameterMetadata(typeof(int)) { Name = "second", TypeInfo = generated ? new GenericParameter(1, false) : new ConcreteType(typeof(int)), CachedIsOptional = true }];
+        object?[][] original = collecting ? [[], [new int[] { 1 }]] : [[Guid.Empty], ["00112233-4455-6677-8899-aabbccddeeff"]];
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create(arguments, GenericClassRowFallback.AllRows, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata)) rows.Add(await factory());
+        await Assert.That(rows.Count).IsEqualTo(original.Length);
+        for (var i = 0; i < rows.Count; i++) await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+        if (collecting)
+        {
+            IMemberMetadata[] required = [new ParameterMetadata(typeof(int)) { Name = "first", TypeInfo = new ConcreteType(typeof(int)), CachedIsOptional = false }];
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([], required, arguments)).IsFalse();
+        }
+        else
+        {
+            await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<Guid>(original[1][0])).IsEqualTo(Guid.Parse((string)original[1][0]!));
+        }
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
+    }
+
     [Test]
     [Arguments(false)]
     [Arguments(true)]

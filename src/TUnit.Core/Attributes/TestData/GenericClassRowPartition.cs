@@ -330,7 +330,7 @@ public static class GenericClassRowPartition
         var trailing = parameters.LastOrDefault() is ParameterMetadata last
             ? GetTrailingConstructorElement(last) : null;
         var regularCount = parameters.Length - (trailing is null ? 0 : 1);
-        if (values.Length == 0 || (trailing is null && values.Length > parameters.Length))
+        if (trailing is null && values.Length > parameters.Length)
         {
             return false;
         }
@@ -444,6 +444,21 @@ public static class GenericClassRowPartition
 
         target = Nullable.GetUnderlyingType(target) ?? target;
         if (Converters.AotConverterRegistry.TryGetConverter(value.GetType(), target, out _))
+        {
+            return true;
+        }
+
+        // Parsing belongs to the binder, especially for user-defined IParsable implementations.
+        // Compare cached interface identities only; do not invoke Parse or close generic types here.
+        if (value is string && (target == typeof(Guid) || target == typeof(DateTime)
+            || target == typeof(DateTimeOffset) || target == typeof(TimeSpan)
+#if NET
+            || (!target.IsPrimitive && target != typeof(decimal)
+                && GetConstructorRowInterfaces(target).Any(candidate => candidate.IsGenericType
+                && candidate.GetGenericTypeDefinition() == typeof(IParsable<>)
+                && candidate.GenericTypeArguments[0] == target))
+#endif
+            ))
         {
             return true;
         }
