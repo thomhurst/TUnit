@@ -102,10 +102,10 @@ public class AotConverterGenerator : IIncrementalGenerator
             foreach (var parameter in methodSymbol.Parameters)
             {
                 AddType(parameter.Type, methodTypes, orderedMethodTypes);
-                ScanAttributesForTypes(parameter.GetAttributes(), methodTypes, orderedMethodTypes);
+                ScanAttributesForTypes(parameter.GetAttributes(), methodTypes, orderedMethodTypes, methodSymbol.ContainingType, compilation);
             }
 
-            ScanAttributesForTypes(methodSymbol.GetAttributes(), methodTypes, orderedMethodTypes);
+            ScanAttributesForTypes(methodSymbol.GetAttributes(), methodTypes, orderedMethodTypes, methodSymbol.ContainingType, compilation);
 
             var classConversions = methodSymbol.ContainingType is { } containingType
                 ? caches.GetClassConversions(containingType, cancellationToken)
@@ -180,7 +180,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
     }
 
-    private static void ScanAttributesForTypes(ImmutableArray<AttributeData> attributes, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes)
+    private static void ScanAttributesForTypes(ImmutableArray<AttributeData> attributes, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes, INamedTypeSymbol containingType, Compilation compilation)
     {
         foreach (var attribute in attributes)
         {
@@ -193,6 +193,8 @@ public class AotConverterGenerator : IIncrementalGenerator
             {
                 continue;
             }
+
+            ScanMethodDataSourceReturnType(attribute, containingType, compilation, typesToScan, orderedTypes);
 
             if (attribute.AttributeClass.IsGenericType)
             {
@@ -211,6 +213,58 @@ public class AotConverterGenerator : IIncrementalGenerator
             {
                 ScanTypedConstantForTypes(namedArg.Value, typesToScan, orderedTypes);
             }
+        }
+    }
+
+    private static void ScanMethodDataSourceReturnType(AttributeData attribute, INamedTypeSymbol containingType,
+        Compilation compilation, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes)
+    {
+        // Include derived attributes such as InstanceMethodDataSourceAttribute.
+        var sourceAttribute = attribute.AttributeClass;
+        while (sourceAttribute is not null &&
+               sourceAttribute.GloballyQualifiedNonGeneric() != "global::TUnit.Core.MethodDataSourceAttribute")
+        {
+            sourceAttribute = sourceAttribute.BaseType;
+        }
+
+        if (sourceAttribute is null || attribute.ConstructorArguments.Length == 0)
+        {
+            return;
+        }
+
+        ITypeSymbol providerType = containingType;
+        string? memberName = null;
+        if (attribute.ConstructorArguments is [{ Value: ITypeSymbol explicitType }, { Value: string explicitName }, ..])
+        {
+            providerType = explicitType;
+            memberName = explicitName;
+        }
+        else if (attribute.ConstructorArguments[0].Value is string name)
+        {
+            memberName = name;
+            if (sourceAttribute is { IsGenericType: true, TypeArguments: [var genericProvider] })
+            {
+                providerType = genericProvider;
+            }
+        }
+
+        if (memberName is null)
+        {
+            return;
+        }
+
+        // Reuse the factory resolver, including overload selection, inherited members, properties and fields.
+        var member = TestMetadataGenerator.ResolveMethodDataSourceMember(providerType, memberName, attribute, compilation);
+        var returnType = member switch
+        {
+            IMethodSymbol method => method.ReturnType,
+            IPropertySymbol property => property.Type,
+            IFieldSymbol field => field.Type,
+            _ => null
+        };
+        if (returnType is not null)
+        {
+            AddType(returnType, typesToScan, orderedTypes);
         }
     }
 
@@ -241,6 +295,12 @@ public class AotConverterGenerator : IIncrementalGenerator
 
     private static void CollectConversionsForType(ITypeSymbol type, List<ConversionEntry> conversions, Compilation compilation)
     {
+        if (type is IArrayTypeSymbol arrayType)
+        {
+            CollectConversionsForType(arrayType.ElementType, conversions, compilation);
+            return;
+        }
+
         if (type is not INamedTypeSymbol namedType)
         {
             return;
@@ -787,7 +847,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             var typesToScan = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             var orderedTypes = new List<ITypeSymbol>();
 
-            ScanAttributesForTypes(classSymbol.GetAttributes(), typesToScan, orderedTypes);
+            ScanAttributesForTypes(classSymbol.GetAttributes(), typesToScan, orderedTypes, classSymbol, compilation);
 
             foreach (var constructor in classSymbol.Constructors)
             {
@@ -799,7 +859,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                 foreach (var parameter in constructor.Parameters)
                 {
                     AddType(parameter.Type, typesToScan, orderedTypes);
-                    ScanAttributesForTypes(parameter.GetAttributes(), typesToScan, orderedTypes);
+                    ScanAttributesForTypes(parameter.GetAttributes(), typesToScan, orderedTypes, classSymbol, compilation);
                 }
             }
 

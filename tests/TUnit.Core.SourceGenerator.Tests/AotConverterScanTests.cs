@@ -7,6 +7,70 @@ namespace TUnit.Core.SourceGenerator.Tests;
 public class AotConverterScanTests
 {
     [Test]
+    public async Task FindsMethodSourceOnlyConversions()
+    {
+        const string source = """
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+            using TUnit.Core;
+            public struct ScalarValue { public static implicit operator int(ScalarValue value) => 42; }
+            public struct TupleValue { public static explicit operator (int, int)(TupleValue value) => (42, 43); }
+            public struct ArrayValue { public static implicit operator int(ArrayValue value) => 42; }
+            public struct AsyncValue { public static explicit operator int(AsyncValue value) => 42; }
+            public struct ClassValue { public static implicit operator int(ClassValue value) => 42; }
+            public struct ParameterValue { public static implicit operator int(ParameterValue value) => 42; }
+            public struct UnusedValue { public static implicit operator int(UnusedValue value) => 42; }
+            public class ProviderBase
+            {
+                public static ScalarValue Rows(int count) => new();
+                public static UnusedValue Rows(string count) => new();
+            }
+            public class Provider : ProviderBase
+            {
+                public static Task<IEnumerable<(TupleValue, int)>> Tuples() => null;
+                public static ArrayValue[] Array => null;
+                public static ValueTask<IAsyncEnumerable<AsyncValue>> AsyncRows = default;
+                public static ClassValue ClassRows() => new();
+                public static ParameterValue ParameterRows() => new();
+            }
+            [MethodDataSource(typeof(Provider), nameof(Provider.ClassRows))]
+            public class Tests
+            {
+                public Tests(int value) { }
+                [Test, MethodDataSource<Provider>(nameof(Provider.Rows), Arguments = new object[] { 1 })]
+                public void Scalar(int value) { }
+                [Test, MethodDataSource(typeof(Provider), nameof(Provider.Tuples))]
+                public void Tuples((int, int) value, int other) { }
+                [Test, MethodDataSource(typeof(Provider), nameof(Provider.Array))]
+                public void Array(int value) { }
+                [Test, MethodDataSource(typeof(Provider), nameof(Provider.AsyncRows))]
+                public void Async(int value) { }
+                [Test]
+                public void Parameter([MethodDataSource(typeof(Provider), nameof(Provider.ParameterRows))] int value) { }
+            }
+            """;
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var compilation = CSharpCompilation.Create(
+            "MethodSourceConverters",
+            [CSharpSyntaxTree.ParseText(source, parseOptions)],
+            ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new AotConverterGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
+        foreach (var type in new[] { "ScalarValue", "TupleValue", "ArrayValue", "AsyncValue", "ClassValue", "ParameterValue" })
+        {
+            await Assert.That(generated).Contains("typeof(global::" + type + ")");
+        }
+        await Assert.That(generated).DoesNotContain("global::UnusedValue");
+        await Verify(generated);
+    }
+
+    [Test]
     public async Task FindsConversionsInNestedAndPartialDeclarations()
     {
         const string source = """
