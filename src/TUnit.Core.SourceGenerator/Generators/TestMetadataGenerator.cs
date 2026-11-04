@@ -8914,7 +8914,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var inferredTypes = new ITypeSymbol[classTypeParams.Length];
         for (var i = 0; i < classTypeParams.Length; i++)
         {
-            if (!genericParamMap.TryGetValue(classTypeParams[i].Name, out var inferredType))
+            // Inherited members can still refer to the open class's type parameters.
+            // They cannot establish a concrete instantiation; explicit class types will close them.
+            if (!genericParamMap.TryGetValue(classTypeParams[i].Name, out var inferredType)
+                || CodeGenerationHelpers.ContainsTypeParameter(inferredType))
             {
                 return null;
             }

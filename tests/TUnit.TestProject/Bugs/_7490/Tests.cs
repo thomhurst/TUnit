@@ -282,3 +282,22 @@ public class InheritedMemberMethodRows<T>(T constructorValue) : InheritedMemberM
         }
     }
 }
+
+public abstract class InheritedOpenMethodRowsBase<U>
+{
+    public static IEnumerable<List<U>> Rows() => [new()];
+}
+
+[GenerateGenericTest(typeof(int))]
+public class InheritedOpenMethodRows<T> : InheritedOpenMethodRowsBase<T>
+{
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void Test(List<T> values)
+    {
+        if (typeof(T) != typeof(int) || values.Count != 0)
+        {
+            throw new InvalidOperationException("Expected the explicit closed class type to supply inherited method rows.");
+        }
+    }
+}
