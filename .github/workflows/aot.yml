@@ -226,11 +226,40 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Download captured Windows engine dump
-        uses: actions/download-artifact@v5
+      # download-artifact filters out earlier attempts, even when given an exact ID.
+      - name: Download exact captured Windows engine dump
+        if: inputs.analyze_windows_dump_artifact != ''
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DUMP_RUN_ID: ${{ inputs.analyze_windows_dump_run }}
+          DUMP_ARTIFACT_ID: ${{ inputs.analyze_windows_dump_artifact }}
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          try {
+            if ($env:DUMP_RUN_ID -notmatch '^\d+$' -or $env:DUMP_ARTIFACT_ID -notmatch '^\d+$') {
+              throw 'Run and artifact IDs must be numeric'
+            }
+            $artifactJson = gh api "repos/$env:GITHUB_REPOSITORY/actions/artifacts/$env:DUMP_ARTIFACT_ID"
+            if ($LASTEXITCODE -ne 0) { throw 'Could not read dump artifact metadata' }
+            $artifact = $artifactJson | ConvertFrom-Json
+            if ([string]$artifact.workflow_run.id -ne $env:DUMP_RUN_ID) {
+              throw 'The selected artifact does not belong to the requested run'
+            }
+            if ($artifact.expired) { throw 'The selected dump artifact has expired' }
+            $headers = @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' }
+            Invoke-WebRequest -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/actions/artifacts/$env:DUMP_ARTIFACT_ID/zip" -Headers $headers -OutFile captured-dump.zip
+            Expand-Archive captured-dump.zip -DestinationPath captured-dump
+          } catch {
+            $_ | Out-String | Set-Content analysis/download-error.txt
+            throw
+          }
+
+      - name: Download latest captured Windows engine dump
+        if: inputs.analyze_windows_dump_artifact == ''
+        uses: actions/download-artifact@v8.0.2
         with:
-          name: ${{ inputs.analyze_windows_dump_artifact == '' && 'HangDump-engine-tests-windows-latest' || '' }}
-          artifact-ids: ${{ inputs.analyze_windows_dump_artifact }}
+          name: HangDump-engine-tests-windows-latest
           run-id: ${{ inputs.analyze_windows_dump_run }}
           github-token: ${{ github.token }}
           path: captured-dump
@@ -242,13 +271,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'dotnet-dump installation failed' }
           $dumps = @(Get-ChildItem captured-dump -Recurse -Filter 'hangdump.windows-reflection-pass.dmp')
           if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
-          New-Item -ItemType Directory -Path analysis | Out-Null
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
           dotnet-dump analyze $dumps[0].FullName -c 'clrthreads' -c 'clrstack -all' -c 'dumpasync' -c 'exit' *> analysis/managed-stacks.txt
           if ($LASTEXITCODE -ne 0) { throw 'Dump analysis failed; see managed-stacks.txt' }
 
       - name: Upload managed dump analysis
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: Windows-engine-dump-analysis
           path: analysis/
