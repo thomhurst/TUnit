@@ -112,27 +112,67 @@ public class WrappedArrayConstructorOmittedOptionalTests<T, U>(T first, U second
 [EngineTest(ExpectedResult.Pass)]
 [GenerateGenericTest(typeof(string), typeof(int))]
 [Arguments("literal", 1)]
+[GenerateGenericTest(typeof(string), typeof(string))]
 [Arguments("first", "second")]
 [MethodDataSource(nameof(Rows))]
 public class WrappedArrayConstructorSuppliedOptionalTests<T, U>(T first, U second = default!)
 {
-    public static IEnumerable<TestDataRow<string[]>> Rows() => [new(new[] { "first", "second" })];
+    private static int _omittedRows;
+
+    [After(Class)]
+    public static async Task OmittedOptionalRowRunsOnEachClass()
+    {
+        await Assert.That(_omittedRows).IsEqualTo(1);
+    }
+
+    public static IEnumerable<TestDataRow<string[]>> Rows() => [new(new[] { "first", "second" }), new(new[] { "omitted" })];
 
     [Test, GenerateGenericTest(typeof(bool))]
     public async Task SuppliedOptionalKeepsInferredTypes<V>()
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(string));
         await Assert.That(typeof(V)).IsEqualTo(typeof(bool));
+        if (first!.Equals("omitted"))
+        {
+            Interlocked.Increment(ref _omittedRows);
+        }
         if (typeof(U) == typeof(int))
         {
-            await Assert.That(first).IsEqualTo((T)(object)"literal");
-            await Assert.That(second).IsEqualTo((U)(object)1);
+            await Assert.That(first).IsIn((T)(object)"literal", (T)(object)"omitted");
+            await Assert.That(second).IsEqualTo((U)(object)(first!.Equals("literal") ? 1 : 0));
         }
         else
         {
             await Assert.That(typeof(U)).IsEqualTo(typeof(string));
-            await Assert.That(first).IsEqualTo((T)(object)"first");
-            await Assert.That(second).IsEqualTo((U)(object)"second");
+            await Assert.That(first).IsIn((T)(object)"first", (T)(object)"omitted");
+            await Assert.That(second).IsEqualTo(first!.Equals("first") ? (U)(object)"second" : default!);
         }
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(string), typeof(int))]
+[GenerateGenericTest(typeof(string), typeof(IEnumerable<string>))]
+[MethodDataSource(nameof(Rows))]
+public class WrappedArrayConstructorNestedOptionalTests<T, U>(IEnumerable<T> first, U second = default!)
+{
+    private static int _omittedRows;
+
+    public static IEnumerable<TestDataRow<IEnumerable<string>[]>> Rows() => [new([new[] { "omitted" }])];
+
+    [After(Class)]
+    public static async Task OmittedNestedRowRunsOnEachClass()
+    {
+        await Assert.That(_omittedRows).IsEqualTo(1);
+    }
+
+    [Test, GenerateGenericTest(typeof(bool))]
+    public async Task OptionalRowMatchesConstructedParameter<V>()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(typeof(V)).IsEqualTo(typeof(bool));
+        await Assert.That(first.Single()).IsEqualTo((T)(object)"omitted");
+        await Assert.That(second).IsEqualTo(default!);
+        Interlocked.Increment(ref _omittedRows);
     }
 }

@@ -8307,7 +8307,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var spreadsReferenceArray = false;
         var rowType = dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember,
             testMethod.CompilationContext.MethodDataSourceRowTypes, compilation, out spreadsReferenceArray,
-            unwrapBareTupleRow: !(testMethodParams.Length == 1 && GetTupleElementTypes(testMethodParams[0].Type) != null));
+            unwrapBareTupleRow: !(testMethodParams.Length == 1 && testMethodParams[0].Type.IsTupleType));
         if (rowType == null)
         {
             return null;

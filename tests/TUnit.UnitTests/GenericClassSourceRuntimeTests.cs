@@ -5,6 +5,44 @@ namespace TUnit.UnitTests;
 public class GenericClassSourceRuntimeTests
 {
     [Test]
+    [Arguments(true, false, false)]
+    [Arguments(false, false, true)]
+    [Arguments(false, true, false)]
+    public async Task Omitted_Optional_Rows_Use_Reference_Type_Variance_Only(bool valueTypeElement, bool invariant, bool expectedMatch)
+    {
+        object first = valueTypeElement ? new List<int>() : new List<string>();
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(typeof(object))
+            {
+                Name = "first",
+                TypeInfo = new ConstructedGeneric(invariant ? typeof(List<>) : typeof(IEnumerable<>), [new ConcreteType(typeof(object))]),
+                CachedIsOptional = false
+            },
+            new ParameterMetadata(typeof(int))
+            {
+                Name = "second",
+                TypeInfo = new ConcreteType(typeof(int)),
+                CachedIsOptional = true
+            }
+        ];
+
+        var matches = GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([first], parameters, []);
+        await Assert.That(matches).IsEqualTo(expectedMatch);
+
+        // Reflection metadata contains the closed type, while generated metadata describes its structure.
+        var closedType = invariant ? typeof(List<object>) : typeof(IEnumerable<object>);
+        parameters[0] = new ParameterMetadata(closedType)
+        {
+            Name = "first",
+            TypeInfo = new ConcreteType(closedType),
+            CachedIsOptional = false
+        };
+        var reflectionMatches = GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([first], parameters, []);
+        await Assert.That(reflectionMatches).IsEqualTo(expectedMatch);
+    }
+
+    [Test]
     public async Task Null_Evaluated_Row_Uses_Original_Factory()
     {
         var calls = 0;

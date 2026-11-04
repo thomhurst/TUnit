@@ -572,7 +572,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // them all as discovery read them rather than reading the sources again (#7161)
         var allClassRows = methodRowClassTypeArguments != null && typeFreeClassRows == null && !HasClassArgumentsRows(classDataSources) ? new List<IDataSourceAttribute>(classDataSources.Length) : null;
         // Own-class sources whose types only [GenerateGenericTest] supplies, read on its instantiations (#7208)
-        var deferredOwnSources = generateGenericTestAttributes.Length > 0 ? new List<IDataSourceAttribute>() : null;
+        var deferredOwnSources = generateGenericTestAttributes.Length > 0 ? new List<DeferredOwnSource>() : null;
         var classRowGroups = methodRowTests == null
             ? await GroupClassRowsByTypeArgumentsAsync(genericTypeDefinition, classDataSources, constraintViolations, allClassRows, deferredOwnSources).ConfigureAwait(false)
             : null;
@@ -758,6 +758,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// </summary>
     private readonly record struct ClassRowGroup(Type[] TypeArguments, IDataSourceAttribute[] ClassDataSources, int RowCount);
 
+    private readonly record struct DeferredOwnSource(IDataSourceAttribute Source, bool PartitionOptionalRows);
+
     /// <summary>
     /// Evaluates the class-level data sources of a generic type definition and groups their rows by the
     /// type arguments each row infers. Each group keeps one static data source per original source, so
@@ -771,7 +773,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         IDataSourceAttribute[] classDataSources,
         ReflectionGenericConstraintViolations constraintViolations,
         List<IDataSourceAttribute>? allClassRows,
-        List<IDataSourceAttribute>? deferredOwnSources)
+        List<DeferredOwnSource>? deferredOwnSources)
     {
         var typeArgumentGroups = new List<Type[]>();
         var sourcesByGroup = new List<List<IDataSourceAttribute>>();
@@ -786,12 +788,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             Type[]? memberTypeArguments = null;
             if (ReadsMemberOfOpenClass(dataSource))
             {
-                memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, (MethodDataSourceAttribute)dataSource, out var inferenceConstructor, hasExplicitTypes: deferredOwnSources != null);
+                memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, (MethodDataSourceAttribute)dataSource, out var inferenceConstructor, out var spreadsReferenceArray, hasExplicitTypes: deferredOwnSources != null);
                 if (memberTypeArguments == null && deferredOwnSources != null)
                 {
                     // [GenerateGenericTest] supplies the types, and its instantiations read this source on the
                     // closed class at run time
-                    deferredOwnSources.Add(dataSource);
+                    deferredOwnSources.Add(new DeferredOwnSource(dataSource, PartitionOptionalRows: false));
                     allClassRows?.Add(dataSource);
                     continue;
                 }
@@ -810,6 +812,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 if (constraintViolations.TryAddClassViolation(memberTypeArguments))
                 {
                     continue;
+                }
+
+                // A wrapped reference-array declaration can infer optional values that a row omits.
+                // Keep those rows available to explicit instantiations, with per-row compatibility filtering.
+                if (deferredOwnSources is not null && spreadsReferenceArray
+                    && inferenceConstructor!.GetParameters().Any(static parameter => parameter.IsOptional))
+                {
+                    deferredOwnSources.Add(new DeferredOwnSource(dataSource, PartitionOptionalRows: true));
                 }
 
                 var closedType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, memberTypeArguments);
@@ -1519,7 +1529,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// the class-row group of <paramref name="typeArguments"/>, when that group stands for the [GenerateGenericTest]
     /// instantiation of the same types (#7208).
     /// </summary>
-    private static void AddDeferredOwnSources(List<ClassRowGroup> classRowGroups, Type[] typeArguments, List<IDataSourceAttribute>? deferredOwnSources)
+    private static void AddDeferredOwnSources(List<ClassRowGroup> classRowGroups, Type[] typeArguments, List<DeferredOwnSource>? deferredOwnSources)
     {
         if (deferredOwnSources is not { Count: > 0 })
         {
@@ -1531,11 +1541,26 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var group = classRowGroups[i];
             if (AreSameTypeArguments(group.TypeArguments, typeArguments))
             {
-                // Repeated [GenerateGenericTest] attributes for the same types read the sources once. The sources
-                // are only ever added together, here, so the first one marks the whole set as present.
-                if (Array.IndexOf(group.ClassDataSources, deferredOwnSources[0]) < 0)
+                // A matching inferred group may already own some sources. Repeated explicit attributes
+                // must not add those sources, or sources deferred by an earlier attribute, a second time.
+                List<IDataSourceAttribute>? additionalSources = null;
+                foreach (var deferred in deferredOwnSources)
                 {
-                    classRowGroups[i] = group with { ClassDataSources = [.. group.ClassDataSources, .. deferredOwnSources] };
+                    if (group.ClassDataSources.Any(source => ReferenceEquals(source, deferred.Source)
+                        || source is StaticDataSourceAttribute existing && ReferenceEquals(existing.PartitionOf, deferred.Source)
+                        || source is GenericClassRowPartitionDataSource partition && ReferenceEquals(partition.InnerDataSource, deferred.Source)))
+                    {
+                        continue;
+                    }
+
+                    (additionalSources ??= []).Add(deferred.PartitionOptionalRows
+                        ? GenericClassRowPartition.Create(typeArguments, GenericClassRowFallback.None, [deferred.Source], 0)[0]
+                        : deferred.Source);
+                }
+
+                if (additionalSources is not null)
+                {
+                    classRowGroups[i] = group with { ClassDataSources = [.. group.ClassDataSources, .. additionalSources] };
                 }
 
                 return;
@@ -2184,11 +2209,31 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         if (typeArguments is null
             && dataSource is MethodDataSourceAttribute methodSource
             && methodSource.GetDeclaredMemberType(methodSource.ClassProvidingDataSource ?? concreteClassType) is { } memberType
-            && MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is { } rowType
-            && spreadsReferenceArray)
+            && MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is { } rowType)
         {
-            typeArguments = InferTypesFromDeclaredRow(method, rowType, method.GetGenericArguments().Length,
-                GenericParameterScope.Method, spreadsReferenceArray: true);
+            if (spreadsReferenceArray)
+            {
+                typeArguments = InferTypesFromDeclaredRow(method, rowType, method.GetGenericArguments().Length,
+                    GenericParameterScope.Method, spreadsReferenceArray: true);
+            }
+            else if (GetSingleDataParameter(method.GetParameters()) is { ParameterType: var parameterType }
+                && GetValueTupleElementTypes(parameterType) is null && GetTupleElementTypes(parameterType) is not null)
+            {
+                // A bare singleton value tuple spreads before its TestDataRow is removed. Its reference-tuple
+                // payload then fills the parameter whole, just as the generated method-source adapter binds it.
+                if (GetValueTupleElementTypes(rowType) is [var wrapped]
+                    && FindTestDataRowType(wrapped) is { } wrapper)
+                {
+                    rowType = UnwrapFunc(wrapper.GetGenericArguments()[0]);
+                }
+
+                var inferred = new Type?[method.GetGenericArguments().Length];
+                if (MapTypedRowParameters(parameterType, rowType, inferred, GenericParameterScope.Method)
+                    && Array.TrueForAll(inferred, static type => type is not null))
+                {
+                    typeArguments = inferred!;
+                }
+            }
         }
 
         if (typeArguments is null)
@@ -2623,8 +2668,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return null;
             }
         }
-        else if (!spreadsReferenceArray && GetValueTupleElementTypes(rowType) is { } tupleElements)
+        else if ((scope == GenericParameterScope.Class ? GetTupleElementTypes(rowType) : GetValueTupleElementTypes(rowType)) is { } tupleElements)
         {
+            // Class inference handles both reference and value tuples; method inference retains its existing value-tuple policy.
             // ToObjectArray always spreads a tuple row, a one-element tuple included, so the tuple spreads
             // over the leading data parameters; omitted trailing ones take their defaults.
             // UnwrapArray runs after ToObjectArray, so the TestDataRow<T> element of a one-element tuple
@@ -2915,11 +2961,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// types, whose parameters the rows are read against.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
-    private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor, bool hasExplicitTypes)
+    private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor, out bool spreadsReferenceArray, bool hasExplicitTypes)
     {
         constructor = null;
+        spreadsReferenceArray = false;
         if (methodDataSource.GetDeclaredMemberType(genericTypeDefinition) is not { } memberType
-            || MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is not { } rowType)
+            || MethodDataSourceAttribute.GetDeclaredRowType(memberType, out spreadsReferenceArray) is not { } rowType)
         {
             return null;
         }

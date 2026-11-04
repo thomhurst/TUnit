@@ -487,6 +487,14 @@ public static class DataSourceHelpers
                 // and the item is a tuple, don't unwrap
                 if (expectedTypes.Length == 1 && TupleHelper.IsTupleType(expectedTypes[0]))
                 {
+                    // A bare singleton value-tuple row exposes its TestDataRow before wrapper removal.
+                    // Preserve the reference-tuple payload, rather than its outer row container.
+                    if (!expectedTypes[0].IsValueType && item.GetType().IsValueType
+                        && UnwrapTupleAot(item) is [ITestDataRow wrapped])
+                    {
+                        return [wrapped];
+                    }
+
                     return RequiresFlattenedTupleBinding(item)
                         ? UnwrapTupleAot(item)
                         : [item];

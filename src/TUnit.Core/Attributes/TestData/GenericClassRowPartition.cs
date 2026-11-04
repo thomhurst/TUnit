@@ -290,7 +290,9 @@ public static class GenericClassRowPartition
                     {
                         var row = await rowFactory().ConfigureAwait(false) is { } fetched ? EvaluateWrappedFactory(fetched) : null;
                         // Retain declared constructor-position and own-class null inference.
-                        var infers = RowInfers(dataSources[index], row, ClassTypeArguments);
+                        var infers = RowInfers(dataSources[index], row, ClassTypeArguments)
+                            || dataSources[index] is MethodDataSourceAttribute { ClassProvidingDataSource: null }
+                            && MatchesOmittedOptionalConstructorRow(row, dataGeneratorMetadata.MembersToGenerate, ClassTypeArguments);
                         anyRowInfers |= infers;
                         rows.Add(new EvaluatedRow(new EvaluatedDataRow(row, rowFactory), infers));
                     }
@@ -310,6 +312,139 @@ public static class GenericClassRowPartition
             return new Evaluation(rowsByIndex, anyRowInfers);
         }
     }
+
+    // A declared reference-array row cannot tell us whether optional constructor values are present.
+    // An explicit instantiation may supply their types, but every supplied value must still fit it.
+    internal static bool MatchesOmittedOptionalConstructorRow(object?[]? row, IMemberMetadata[] parameters, Type[] classTypeArguments)
+    {
+        if (row is null)
+        {
+            return false;
+        }
+
+        var (values, _) = TestDataRowUnwrapper.UnwrapArray(row);
+        if (values.Length == 0 || values.Length >= parameters.Length)
+        {
+            return false;
+        }
+
+        for (var i = values.Length; i < parameters.Length; i++)
+        {
+            if (parameters[i] is not ParameterMetadata { IsOptional: true })
+            {
+                return false;
+            }
+        }
+
+        for (var i = 0; i < values.Length; i++)
+        {
+            if (parameters[i] is not ParameterMetadata parameter)
+            {
+                return false;
+            }
+
+            if (values[i] is { } value)
+            {
+                if (!MatchesConstructorParameterType(parameter.TypeInfo, value.GetType(), classTypeArguments, direction: 1))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                var type = parameter.TypeInfo switch
+                {
+                    GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
+                    ConstructedGeneric constructed => constructed.GenericDefinition,
+                    _ => parameter.Type
+                };
+                if (type.IsValueType && Nullable.GetUnderlyingType(type) is null
+                    && type != typeof(Nullable<>))
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    // Compare generated type descriptions without MakeGenericType, which cannot close arbitrary types in AOT.
+    // direction: 1 = expected accepts actual, -1 = actual accepts expected, 0 = invariant equality.
+    private static bool MatchesConstructorParameterType(TypeInfo expected, Type actual, Type[] classTypeArguments, int direction)
+    {
+        if (expected is not ConstructedGeneric constructed)
+        {
+            var expectedType = expected switch
+            {
+                GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
+                ConcreteType concrete => concrete.Type,
+                _ => null
+            };
+            return expectedType is not null && (direction == 0 ? expectedType == actual
+                : direction > 0 ? expectedType.IsAssignableFrom(actual) : actual.IsAssignableFrom(expectedType));
+        }
+
+        if (MatchesConstructed(actual))
+        {
+            return true;
+        }
+        if (direction > 0)
+        {
+            for (var candidate = actual.BaseType; candidate is not null; candidate = candidate.BaseType)
+            {
+                if (MatchesConstructed(candidate))
+                {
+                    return true;
+                }
+            }
+            foreach (var candidate in GetConstructorRowInterfaces(actual))
+            {
+                if (MatchesConstructed(candidate))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+
+        bool MatchesConstructed(Type candidate)
+        {
+            if (!candidate.IsGenericType || candidate.GetGenericTypeDefinition() != constructed.GenericDefinition)
+            {
+                return false;
+            }
+            var actualArguments = candidate.GetGenericArguments();
+            var parameters = constructed.GenericDefinition.GetGenericArguments();
+            for (var i = 0; i < actualArguments.Length; i++)
+            {
+                var variance = parameters[i].GenericParameterAttributes & System.Reflection.GenericParameterAttributes.VarianceMask;
+                var expectedArgumentIsValueType = constructed.TypeArguments[i] switch
+                {
+                    GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position].IsValueType,
+                    ConcreteType concrete => concrete.Type.IsValueType,
+                    ConstructedGeneric nested => nested.GenericDefinition.IsValueType,
+                    _ => false
+                };
+                // CLR variance applies only to reference-type arguments; boxing is not covariance.
+                var argumentDirection = direction == 0 || variance == System.Reflection.GenericParameterAttributes.None
+                    || actualArguments[i].IsValueType || expectedArgumentIsValueType ? 0
+                    : variance == System.Reflection.GenericParameterAttributes.Covariant ? direction : -direction;
+                if (!MatchesConstructorParameterType(constructed.TypeArguments[i], actualArguments[i], classTypeArguments, argumentDirection))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    private static readonly ConditionalWeakTable<Type, Type[]> ConstructorRowInterfaces = new();
+
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2070",
+        Justification = "Only implemented interface identities and generic type arguments are compared for constructor assignability. No interface members are reflected or invoked; the constructor references the target interface.")]
+    private static Type[] GetConstructorRowInterfaces(Type type)
+        => ConstructorRowInterfaces.GetValue(type, static candidate => candidate.GetInterfaces());
 
     private static bool RowInfers(IDataSourceAttribute source, object?[]? row, Type[] classTypeArguments)
     {

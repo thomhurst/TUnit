@@ -367,3 +367,34 @@ public class ReferenceTupleSpreadClassInferenceTests<T>
         await Assert.That(label).IsEqualTo("one");
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+public class InferredReferenceTupleSpreadClassTests<T>
+{
+    public static IEnumerable<Tuple<int, string>> Rows() => [System.Tuple.Create(1, "one")];
+    public static IEnumerable<TestDataRow<Tuple<int, string>>> WrappedRows() => [new(System.Tuple.Create(1, "one"))];
+
+    [Test, MethodDataSource(nameof(Rows))]
+    [MethodDataSource(nameof(WrappedRows))]
+    public async Task ReferenceTupleColumnsWithoutExplicitTypes(T value, string label)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)1);
+        await Assert.That(label).IsEqualTo("one");
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class BareWrappedReferenceTupleMethodTests
+{
+    public static IEnumerable<ValueTuple<TestDataRow<Tuple<int>>>> Rows() => [new(new(System.Tuple.Create(1)))];
+
+    #pragma warning disable TUnit0001 // Bare singleton row wrapper normalization: analyzer follow-up #7587.
+    [Test, MethodDataSource(nameof(Rows))]
+    #pragma warning restore TUnit0001
+    public async Task WrappedReferenceTuple<T>(Tuple<T> value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value.Item1).IsEqualTo((T)(object)1);
+    }
+}

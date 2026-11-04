@@ -10,6 +10,8 @@ internal class Tests7224 : TestsBase
             var generated = string.Join(Environment.NewLine, files);
             await Assert.That(generated).Contains("MethodSourceClassInferenceTests<int>");
             await Assert.That(generated).Contains("NullableMethodSourceClassInferenceTests<int>");
+            await Assert.That(generated).Contains("InferredReferenceTupleSpreadClassTests<int>");
+            await Assert.That(generated).Contains("instance.WrappedReferenceTuple<int>(");
             await Assert.That(generated).Contains("instance.NullableValue(");
             await Assert.That(generated).Contains("instance.WrappedJaggedArray<object[]>(");
             await Assert.That(generated).Contains("instance.WrappedDelegateArray<global::System.Func<int>>(");
