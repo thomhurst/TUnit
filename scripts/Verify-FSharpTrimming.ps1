@@ -137,3 +137,6 @@ Console.WriteLine("SMOKE_PASSED");
     }
     Write-Host "Passed: $scenario"
 }
+
+# The negative control intentionally leaves a nonzero native exit code.
+exit 0
