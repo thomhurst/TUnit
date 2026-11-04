@@ -413,3 +413,56 @@ public class ExplicitCompatibleTypedMethodRows<T>(T constructorValue)
         }
     }
 }
+
+[MethodDataSource(nameof(ConstructorRows))]
+public class InferredCompatibleMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<IComparable> ConstructorRows() => [42];
+    public static IEnumerable<int> MethodRows() => [43];
+
+    [Test]
+    [MethodDataSource(nameof(MethodRows))]
+    public void Test(T methodValue)
+    {
+        if (constructorValue is not 42 || methodValue is not 43)
+        {
+            throw new InvalidOperationException("Expected compatible method rows on the inferred interface instantiation.");
+        }
+    }
+}
+
+[MethodDataSource(nameof(ConstructorRows))]
+public class InferredConstructorLiteralMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<IComparable> ConstructorRows() => [42];
+
+    [Test]
+    [Arguments(43)]
+    public void Test(T methodValue)
+    {
+        if (typeof(T) != typeof(int) || constructorValue is not 42 || methodValue is not 43)
+        {
+            throw new InvalidOperationException("Only the class inferred from the literal method row should run.");
+        }
+    }
+}
+
+[MethodDataSource(nameof(IntegerConstructorRows))]
+[MethodDataSource(nameof(StringConstructorRows))]
+public class MultipleConstructorTypesExternalMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<int> IntegerConstructorRows() => [42];
+    public static IEnumerable<string> StringConstructorRows() => ["constructor"];
+
+    [Test]
+    [MethodDataSource(typeof(ExternalMethodRowsProvider), nameof(ExternalMethodRowsProvider.Rows))]
+    public void Test(int methodValue)
+    {
+        if (methodValue != 43
+            || (typeof(T) == typeof(int) ? constructorValue is not 42
+                : typeof(T) != typeof(string) || constructorValue is not "constructor"))
+        {
+            throw new InvalidOperationException("Expected each constructor type to retain its own row and the external method provider.");
+        }
+    }
+}

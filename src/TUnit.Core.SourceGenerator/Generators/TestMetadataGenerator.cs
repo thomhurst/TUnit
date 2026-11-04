@@ -1753,14 +1753,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Explicit class types accept compatible method values even when those values infer
-        // different class types. Constructor inference can create their scoped entry before
-        // explicit-type processing, so retain the method providers after that deduplication.
+        // Constructor-scoped types accept compatible method provider values even when those
+        // values infer different class types. Retain providers for inferred and explicit entries;
+        // runtime argument binding checks their values against each closed method's parameters.
         if (testMethod is { IsGenericType: true, IsGenericMethod: false } && rowInstantiations is not null)
         {
             foreach (var instantiation in rowInstantiations.Values)
             {
-                if (instantiation.HasExplicitClassTypes && instantiation.HasClassRows)
+                if (instantiation.HasClassRows)
                 {
                     foreach (var attribute in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
                     {
@@ -1915,10 +1915,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         && (generateGenericTestTypes is null
                             || !generateGenericTestTypes.Any(types => InferredTypesMatch(types, instantiation.ClassTypeArgs)));
                 }
-                else if (instantiation.HasClassRows && !instantiation.HasMethodRows)
-                {
-                    results.Remove(instantiation);
-                }
             }
 
             // An instantiation that no row made, inferred from the declared type of a method data source
@@ -1930,6 +1926,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 instantiation is { SpecificArgumentsAttribute: null, MethodConstraintViolations: null, ClassTypeArgs.Length: > 0 }
                 && (generateGenericTestTypes is null || !generateGenericTestTypes.Any(types => InferredTypesMatch(types, instantiation.ClassTypeArgs)))
                 && (otherClassDataSources is null || !otherClassDataSources.Any(source => source.ClassTypes is null || InferredTypesMatch(source.ClassTypes, instantiation.ClassTypeArgs))));
+        }
+
+        // Literal method rows run only on the class types they infer. Constructor-source entries
+        // without a matching method row yield no test, whether or not the class also has [Arguments].
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && inferringRows is not null)
+        {
+            results.RemoveAll(instantiation => instantiation.HasClassRows && !instantiation.HasMethodRows);
         }
 
         // Reflection mode (ReflectionGenericConstraintViolations in TUnit.Engine) reports class-level
