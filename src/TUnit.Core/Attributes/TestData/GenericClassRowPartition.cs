@@ -375,6 +375,7 @@ public static class GenericClassRowPartition
 
     // Array descriptions emitted outside a generic class erase T[] to object. The existing lazy
     // constructor lookup preserves the original shape (including nested arrays inside generics).
+    // Genuine object arguments also trigger recovery once; the cached description remains object.
     // Cache the recovered description per parameter, without closing arbitrary types under Native AOT.
     private static readonly ConditionalWeakTable<ParameterMetadata, TypeInfo> ConstructorTypes = new();
 
@@ -447,6 +448,13 @@ public static class GenericClassRowPartition
             _ => false
         };
 
+        // Nullable<T> boxes as T when it has a value. Only assignment may unwrap it;
+        // generic argument equality must still distinguish T from Nullable<T>.
+        if (direction > 0 && constructed.GenericDefinition == typeof(Nullable<>))
+        {
+            return MatchesConstructorParameterType(constructed.TypeArguments[0], actual, classTypeArguments, direction: 0);
+        }
+
         if (MatchesConstructed(actual))
         {
             return true;
@@ -468,7 +476,44 @@ public static class GenericClassRowPartition
                 }
             }
         }
+        else if (direction < 0)
+        {
+            // Compare the expected type's open supertypes after substituting its arguments.
+            // This includes object accepting an interface, and inherited generic interfaces,
+            // without constructing closed types that may be unavailable under Native AOT.
+            if (actual == typeof(object))
+            {
+                return true;
+            }
+            if (constructed.GenericDefinition.BaseType is { } baseType
+                && MatchesConstructorParameterType(Substitute(baseType), actual, classTypeArguments, direction))
+            {
+                return true;
+            }
+            foreach (var candidate in GetConstructorRowInterfaces(constructed.GenericDefinition))
+            {
+                if (MatchesConstructorParameterType(Substitute(candidate), actual, classTypeArguments, direction))
+                {
+                    return true;
+                }
+            }
+        }
         return false;
+
+        TypeInfo Substitute(Type type)
+        {
+            if (type.IsGenericParameter)
+            {
+                return constructed.TypeArguments[type.GenericParameterPosition];
+            }
+            if (type.IsArray)
+            {
+                return new ConstructorArray(Substitute(type.GetElementType()!), type.GetArrayRank(), type.Name.EndsWith("[]", StringComparison.Ordinal));
+            }
+            return type.IsGenericType && type.ContainsGenericParameters
+                ? new ConstructedGeneric(type.GetGenericTypeDefinition(), type.GetGenericArguments().Select(Substitute).ToArray())
+                : new ConcreteType(type);
+        }
 
         bool MatchesConstructed(Type candidate)
         {
@@ -481,13 +526,7 @@ public static class GenericClassRowPartition
             for (var i = 0; i < actualArguments.Length; i++)
             {
                 var variance = parameters[i].GenericParameterAttributes & System.Reflection.GenericParameterAttributes.VarianceMask;
-                var expectedArgumentIsValueType = constructed.TypeArguments[i] switch
-                {
-                    GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position].IsValueType,
-                    ConcreteType concrete => concrete.Type.IsValueType,
-                    ConstructedGeneric nested => nested.GenericDefinition.IsValueType,
-                    _ => false
-                };
+                var expectedArgumentIsValueType = IsValueType(constructed.TypeArguments[i]);
                 // CLR variance applies only to reference-type arguments; boxing is not covariance.
                 var argumentDirection = direction == 0 || variance == System.Reflection.GenericParameterAttributes.None
                     || actualArguments[i].IsValueType || expectedArgumentIsValueType ? 0

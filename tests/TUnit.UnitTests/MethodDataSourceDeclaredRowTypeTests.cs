@@ -40,6 +40,15 @@ public class MethodDataSourceDeclaredRowTypeTests
     {
         var source = new MethodDataSourceAttribute(nameof(AmbiguousSource.Rows));
         await Assert.That(source.GetDeclaredMemberType(typeof(AmbiguousSource))).IsNull();
+
+        // Declared inference may ignore an ambiguous member, but reading it must report the error.
+        var runtimeSource = new MethodDataSourceAttribute(typeof(AmbiguousSource), nameof(AmbiguousSource.Rows));
+        await Assert.That(async () =>
+        {
+            await foreach (var _ in runtimeSource.GetDataRowsAsync(CreateMetadata()))
+            {
+            }
+        }).Throws<System.Reflection.AmbiguousMatchException>();
     }
 
     [Test]

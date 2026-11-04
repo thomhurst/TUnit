@@ -127,6 +127,74 @@ public class GenericClassSourceRuntimeTests
     }
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Optional_Partition_Preserves_Boxed_Nullable_And_Contravariant_Rows(bool nullable)
+    {
+        TypeInfo generated = nullable
+            ? new ConstructedGeneric(typeof(Nullable<>), [new GenericParameter(0, false)])
+            : new ConstructedGeneric(typeof(IComparer<>),
+                [new ConstructedGeneric(typeof(IEnumerable<>), [new GenericParameter(0, false)])]);
+        var closed = nullable ? typeof(int?) : typeof(IComparer<IEnumerable<int>>);
+        object valid = nullable ? 1 : Comparer<object>.Default;
+        object invalid = nullable ? "wrong" : Comparer<string>.Default;
+        foreach (var description in new[] { generated, new ConcreteType(closed) })
+        {
+            IMemberMetadata[] parameters =
+            [
+                new ParameterMetadata(closed) { Name = "first", TypeInfo = description, CachedIsOptional = false },
+                new ParameterMetadata(typeof(int)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true }
+            ];
+            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([valid], parameters, [typeof(int), typeof(int)])).IsTrue();
+            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([invalid], parameters, [typeof(int), typeof(int)])).IsFalse();
+            var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+            var partition = GenericClassRowPartition.Create([typeof(int), typeof(int)], GenericClassRowFallback.AllRows, [source], 0);
+            var metadata = new DataGeneratorMetadata
+            {
+                TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+                Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+                TestClassInstance = null, ClassInstanceArguments = null
+            };
+            var rows = new List<object?[]?>();
+            await foreach (var factory in partition[0].GetDataRowsAsync(metadata))
+            {
+                rows.Add(await factory());
+            }
+            await Assert.That(rows.Count).IsEqualTo(2);
+            await Assert.That(rows[0]![0]).IsNull();
+            await Assert.That(ReferenceEquals(rows[1]![0], valid)).IsTrue();
+        }
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            yield return () => Task.FromResult<object?[]?>([null]);
+            yield return () => Task.FromResult<object?[]?>([valid]);
+            yield return () => Task.FromResult<object?[]?>([invalid]);
+            await Task.CompletedTask;
+        }
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Contravariance_Substitutes_Generic_Supertypes(bool inheritedInterface)
+    {
+        TypeInfo element = new GenericParameter(0, false);
+        TypeInfo nested = new ConstructedGeneric(inheritedInterface ? typeof(IReadOnlyList<>) : typeof(List<>), [element]);
+        var closed = inheritedInterface ? typeof(IComparer<IReadOnlyList<string>>) : typeof(IComparer<List<string>>);
+        foreach (var description in new TypeInfo[] { new ConstructedGeneric(typeof(IComparer<>), [nested]), new ConcreteType(closed) })
+        {
+            IMemberMetadata[] parameters =
+            [
+                new ParameterMetadata(closed) { Name = "first", TypeInfo = description, CachedIsOptional = false },
+                new ParameterMetadata(typeof(int)) { Name = "second", TypeInfo = new ConcreteType(typeof(int)), CachedIsOptional = true }
+            ];
+            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([Comparer<IEnumerable<object>>.Default], parameters, [typeof(string)])).IsTrue();
+            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([Comparer<IEnumerable<int>>.Default], parameters, [typeof(string)])).IsFalse();
+        }
+    }
+
+    [Test]
     public async Task Null_Evaluated_Row_Uses_Original_Factory()
     {
         var calls = 0;
