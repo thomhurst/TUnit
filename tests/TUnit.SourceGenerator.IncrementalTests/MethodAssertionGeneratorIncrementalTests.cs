@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using TUnit.Assertions.SourceGenerator.Generators;
 
@@ -180,7 +180,7 @@ public class MethodAssertionGeneratorIncrementalTests
             brokenTree);
 
         var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
-        await Assert.That(driver1.GetRunResult().Diagnostics).Contains(d => d.Id == "TUNITGEN001");
+        await Assert.That(driver1.GetRunResult().Diagnostics).Contains(d => d.Id == "TUNITGEN006");
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
@@ -197,7 +197,7 @@ public class MethodAssertionGeneratorIncrementalTests
             .ToArray();
         await Assert.That(sourceOutputReasons).HasSingleItem(reason => reason != IncrementalStepRunReason.Cached);
 
-        var diagnostic = await Assert.That(runResult.Diagnostics).HasSingleItem(d => d.Id == "TUNITGEN001");
+        var diagnostic = await Assert.That(runResult.Diagnostics).HasSingleItem(d => d.Id == "TUNITGEN006");
         await Assert.That(diagnostic.Location.GetLineSpan().StartLinePosition.Line).IsEqualTo(4);
 
         // The location must stay tied to the syntax tree so #pragma and per-file severities apply.
@@ -222,13 +222,13 @@ public class MethodAssertionGeneratorIncrementalTests
         var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(DefaultAssertion), brokenTree);
 
         var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
-        var firstDiagnostic = await Assert.That(driver1.GetRunResult().Diagnostics).HasSingleItem(d => d.Id == "TUNITGEN001");
+        var firstDiagnostic = await Assert.That(driver1.GetRunResult().Diagnostics).HasSingleItem(d => d.Id == "TUNITGEN006");
         await Assert.That(firstDiagnostic.Location.SourceTree).IsSameReferenceAs(brokenTree);
 
         var compilation2 = compilation1.AddSyntaxTrees(CSharpSyntaxTree.ParseText("struct MyValue {}"));
         var driver2 = driver1.RunGenerators(compilation2);
 
-        var diagnostic = await Assert.That(driver2.GetRunResult().Diagnostics).HasSingleItem(d => d.Id == "TUNITGEN001");
+        var diagnostic = await Assert.That(driver2.GetRunResult().Diagnostics).HasSingleItem(d => d.Id == "TUNITGEN006");
         await Assert.That(diagnostic.Location.IsInSource).IsTrue();
         await Assert.That(diagnostic.Location.SourceTree).IsSameReferenceAs(brokenTree);
     }

@@ -1,3 +1,4 @@
+using TUnit.SourceGeneration;
 using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -19,7 +20,7 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators;
 public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 {
     private static readonly DiagnosticDescriptor InaccessibleContainingType = new(
-        "TUNITGEN005",
+        GeneratorDiagnosticIds.InaccessibleStaticPropertyContainingType,
         "Static data-source property has an inaccessible containing type",
         "Static data-source property '{0}' cannot be initialized because its containing type is inaccessible. Make the type and all containing types internal or public.",
         "TUnit",

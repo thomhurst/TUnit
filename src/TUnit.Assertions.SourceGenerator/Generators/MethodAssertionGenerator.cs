@@ -1,3 +1,4 @@
+using TUnit.SourceGeneration;
 using TUnit.Core.SourceGenerator.Extensions;
 using System.Collections.Immutable;
 using System.Text;
@@ -23,7 +24,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     public const string BuildAssertionGroup = "MethodAssertionGroup";
 
     private static readonly DiagnosticDescriptor MethodMustBeStaticRule = new DiagnosticDescriptor(
-        id: "TUNITGEN001",
+        id: GeneratorDiagnosticIds.AssertionMethodMustBeStatic,
         title: "Method must be static",
         messageFormat: "Method '{0}' decorated with [GenerateAssertion] must be static",
         category: "TUnit.Assertions.SourceGenerator",
@@ -32,7 +33,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         description: "Methods decorated with [GenerateAssertion] must be static to be used in generated assertions.");
 
     private static readonly DiagnosticDescriptor MethodMustHaveParametersRule = new DiagnosticDescriptor(
-        id: "TUNITGEN002",
+        id: GeneratorDiagnosticIds.AssertionMethodMustHaveParameters,
         title: "Method must have at least one parameter",
         messageFormat: "Method '{0}' decorated with [GenerateAssertion] must have at least one parameter (the value to assert)",
         category: "TUnit.Assertions.SourceGenerator",
@@ -41,7 +42,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         description: "Methods decorated with [GenerateAssertion] must have at least one parameter representing the value being asserted.");
 
     private static readonly DiagnosticDescriptor UnsupportedReturnTypeRule = new DiagnosticDescriptor(
-        id: "TUNITGEN003",
+        id: GeneratorDiagnosticIds.AssertionUnsupportedReturnType,
         title: "Unsupported return type",
         messageFormat: "Method '{0}' decorated with [GenerateAssertion] has unsupported return type '{1}'. Supported types are: bool, AssertionResult, AssertionResult<T>, Task<bool>, Task<AssertionResult>, Task<AssertionResult<T>>",
         category: "TUnit.Assertions.SourceGenerator",
@@ -50,7 +51,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         description: "Methods decorated with [GenerateAssertion] must return bool, AssertionResult, Task<bool>, or Task<AssertionResult>.");
 
     private static readonly DiagnosticDescriptor RefStructRequiresInliningRule = new DiagnosticDescriptor(
-        id: "TUNITGEN004",
+        id: GeneratorDiagnosticIds.RefStructRequiresInlining,
         title: "Ref struct parameter requires method body inlining",
         messageFormat: "Method '{0}' has ref struct parameter '{1}' of type '{2}'. Use InlineMethodBody = true and ensure the method has a single-expression or single-return-statement body",
         category: "TUnit.Assertions.SourceGenerator",

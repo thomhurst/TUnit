@@ -1,5 +1,7 @@
 # Troubleshooting & FAQ
 
+See [Generator diagnostics](reference/generator-diagnostics.md) for source-generator IDs and their meanings.
+
 ## FAQ
 
 ### Why do I have to await assertions?

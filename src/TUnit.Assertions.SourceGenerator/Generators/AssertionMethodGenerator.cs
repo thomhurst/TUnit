@@ -1,3 +1,4 @@
+using TUnit.SourceGeneration;
 using TUnit.Core.SourceGenerator.Extensions;
 using System.Globalization;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ public sealed class AssertionMethodGenerator : IIncrementalGenerator
     public const string GenericAssertionFromStep = "GenericAssertionFrom";
 
     private static readonly DiagnosticDescriptor MethodNotFound = new(
-        "TU0001",
+        GeneratorDiagnosticIds.AssertionMethodNotFound,
         "Method not found",
         "{0}",
         "TUnit.Assertions",
