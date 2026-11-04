@@ -40,6 +40,9 @@
         <ProjectReference Include="..\TUnit.TestProject.VB.NET\TUnit.TestProject.VB.NET.vbproj" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
-    <Import Project="..\..\eng\TestProject.targets" />
+    <ItemGroup>
+        <Compile Include="..\SharedTestHelpers\TupleConversionMatrix.cs" Link="Shared\TupleConversionMatrix.cs" />
+    </ItemGroup>
 
+    <Import Project="..\..\eng\TestProject.targets" />
 </Project>

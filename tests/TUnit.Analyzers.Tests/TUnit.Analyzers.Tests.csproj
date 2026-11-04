@@ -109,5 +109,10 @@
     <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" Analyzer="false" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\SharedTestHelpers\TupleConversionMatrix.cs" Link="Shared\TupleConversionMatrix.cs" />
+    <None Include="..\TUnit.TestProject\TupleConversions\ConversionFixtures.cs" Link="ConversionFixtures.cs.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <Import Project="..\..\eng\TestProject.targets" />
 </Project>
