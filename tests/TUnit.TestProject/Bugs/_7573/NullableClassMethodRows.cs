@@ -339,3 +339,22 @@ public class NullableConstructedStructArrayRows<T>
         await Assert.That(values).IsNull();
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(new int[] { 1 }, 42)]
+public class PartialConstructorInvalidFallback<T, U>(T[] seed, int count) where T : struct
+{
+    public static IEnumerable<(int, string)> Rows() => [(2, "label")];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task IgnoresConstraintInvalidConstructorFallback(T? value, U label)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(typeof(U)).IsEqualTo(typeof(string));
+        await Assert.That(seed[0]).IsEqualTo((T)(object)1);
+        await Assert.That(count).IsEqualTo(42);
+        await Assert.That(value).IsEqualTo((T)(object)2);
+        await Assert.That(label!.ToString()).IsEqualTo("label");
+    }
+}

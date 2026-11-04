@@ -898,7 +898,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var scopesClassMethodSources = testMethod is { IsGenericType: true, IsGenericMethod: false }
             && !testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
                 a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
-                && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a, includePartialRows: true)));
+                && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a, testMethod.CompilationContext.Compilation, includePartialRows: true)));
 
         // A generic class whose widest public constructor takes arguments
         var hasParameterizedConstructor = testMethod.IsGenericType
@@ -1337,7 +1337,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 || testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
                     a.AttributeClass is { } attributeClass
                     && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
-                    && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a)));
+                    && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a, testMethod.CompilationContext.Compilation)));
 
             // classTypeArgumentsSupplied already includes explicit [GenerateGenericTest] class types.
             foreach (var methodArgAttr in methodArgumentsAttributes)
@@ -1834,7 +1834,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             List<AttributeData>? typeFreeClassRows = null;
             foreach (var classAttr in classArgumentsAttributes)
             {
-                if (ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, classAttr, includePartialRows: true))
+                if (ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, classAttr, testMethod.CompilationContext.Compilation, includePartialRows: true))
                 {
                     (typeFreeClassRows ??= []).Add(classAttr);
                 }
@@ -7034,7 +7034,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <param name="includePartialRows">Also return true when a bound constructor parameter leaves
     /// any class type parameter unmentioned. Such rows supply constructor values on method-inferred
     /// classes; only complete constructor sets take precedence over method-source inference.</param>
-    private static bool ClassRowSuppliesNoTypeArguments(INamedTypeSymbol classSymbol, AttributeData argAttr, bool includePartialRows = false)
+    private static bool ClassRowSuppliesNoTypeArguments(INamedTypeSymbol classSymbol, AttributeData argAttr, Compilation compilation, bool includePartialRows = false)
     {
         int valueCount;
         if (argAttr.AttributeClass is { IsGenericType: true, TypeArguments.Length: 1 })
@@ -7068,7 +7068,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (includePartialRows && classSymbol.TypeParameters.Any(typeParameter =>
                 !primaryConstructor.Parameters.Take(boundCount).Any(parameter => ContainsTypeParameter(parameter.Type, typeParameter))))
         {
-            return !hasClassTypeParameter || !ClassRowHasValueTypeFallback(classSymbol, argAttr);
+            return !hasClassTypeParameter || !ClassRowHasValueTypeFallback(classSymbol, argAttr, compilation);
         }
 
         return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(
@@ -7076,13 +7076,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     // Reflection's row-value fallback can close a partial constructor row when each class
-    // parameter has a corresponding non-null value. Type-free rows retain their existing policy.
-    private static bool ClassRowHasValueTypeFallback(INamedTypeSymbol classSymbol, AttributeData attribute)
+    // parameter has a corresponding non-null value and the resulting class satisfies its constraints.
+    // Type-free rows retain their existing policy.
+    private static bool ClassRowHasValueTypeFallback(INamedTypeSymbol classSymbol, AttributeData attribute, Compilation compilation)
     {
         return HasArgumentsArray(attribute) && !IsNullArgumentsArray(attribute)
             && attribute.ConstructorArguments[0].Values.Length >= classSymbol.TypeParameters.Length
             && attribute.ConstructorArguments[0].Values.Take(classSymbol.TypeParameters.Length)
-                .All(value => !value.IsNull && value.Type is not null);
+                .All(value => !value.IsNull && value.Type is not null)
+            && ValidateClassTypeConstraints(classSymbol, attribute.ConstructorArguments[0].Values
+                .Take(classSymbol.TypeParameters.Length).Select(value => value.Type!).ToArray(), compilation);
     }
 
     private static bool ContainsTypeParameter(ITypeSymbol type, ITypeParameterSymbol parameter) => type switch
@@ -7454,7 +7457,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Match reflection's row-value fallback for partial constructor inference. Rows that
         // bind no class parameter still rely on method rows, as before.
-        if (inferredTypes.Count > 0 && ClassRowHasValueTypeFallback(classSymbol, argAttr))
+        if (inferredTypes.Count > 0 && ClassRowHasValueTypeFallback(classSymbol, argAttr, compilation))
         {
             return argumentValues.Take(typeParameters.Length).Select(value => value.Type!).ToArray();
         }
@@ -8555,7 +8558,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (GetDataParameters(testMethod.MethodSymbol).Any(p => ContainsNullableClassParameter(p.Type))
             && testClass.GetAttributesIncludingBaseTypes().Any(a =>
                 a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
-                && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testClass, a, includePartialRows: true))))
+                && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testClass, a, testMethod.CompilationContext.Compilation, includePartialRows: true))))
         {
             return null;
         }

@@ -17,6 +17,7 @@ internal class NullableClassMethodRowsTests : TestsBase
                      ("ConstructorType", "ConstructorNullableClassRows<double>"),
                      ("NestedConstructorType", "ConstructorNestedNullableClassRows<double>"),
                      ("RetainsConstructorValueFallback", "PartialConstructorValueFallback<string, int>"),
+                     ("IgnoresConstraintInvalidConstructorFallback", "PartialConstructorInvalidFallback<int, string>"),
                      ("LastOccurrenceInfersClassType", "RepeatedNullableClassParameter<long>"),
                      ("InfersThroughNullableConstructedStruct", "NullableConstructedStructArrayRows<string>"),
                      ("PartialConstructorTypes", "PartialConstructorNullableClassRows<int, string>"),

@@ -1479,13 +1479,32 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     // Preserve the row-value fallback used by DetermineGenericTypeArguments before
                     // treating a partial constructor row as needing method inference.
                     return !hasClassTypeParameter || dataSource is not ArgumentsAttribute row
-                        || GenericClassRowPartition.InferClassTypeArguments(row.Values, genericTypeDefinition.GetGenericArguments().Length) is null;
+                        || !ClassRowHasValidValueTypeFallback(genericTypeDefinition, row.Values);
                 }
             }
         }
 
         return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(
             valueCount: valueCount, boundCount: boundCount, hasClassTypeParameter: hasClassTypeParameter);
+    }
+
+    private static bool ClassRowHasValidValueTypeFallback(Type genericTypeDefinition, object?[] values)
+    {
+        var types = GenericClassRowPartition.InferClassTypeArguments(values, genericTypeDefinition.GetGenericArguments().Length);
+        if (types is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            _ = genericTypeDefinition.MakeGenericType(types);
+            return true;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
     }
 
     private static bool ContainsTypeParameter(Type type, Type parameter)
