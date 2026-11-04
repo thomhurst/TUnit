@@ -1433,6 +1433,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
 
+            // Sources without declared row types still run on explicitly supplied class types,
+            // and beside constructor rows that provide values without inferring class types.
+            foreach (var source in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+            {
+                if (source.AttributeClass?.Name is not ("ArgumentsAttribute" or "MethodDataSourceAttribute")
+                    && (uninferredMethodDataSources is null || !uninferredMethodDataSources.Contains(source)))
+                {
+                    (uninferredMethodDataSources ??= []).Add(source);
+                }
+            }
+
             if (InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol) is { Length: > 0 } parameterTypes)
             {
                 TryAddInstantiation(parameterTypes);
@@ -1783,7 +1794,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         //   has no method row to run, so it yields no test instead of one called without arguments.
         if (testMethod is { IsGenericType: true, IsGenericMethod: false }
             && classArgumentsAttributes.Length > 0
-            && inferringRows is not null
+            && (inferringRows is not null || scopesClassMethodSources)
             && rowInstantiations is not null)
         {
             List<ITypeSymbol[]>? generateGenericTestTypes = null;

@@ -8,6 +8,8 @@ internal class NullableClassMethodRowsTests : TestsBase
     {
         foreach (var (method, closedType) in new[]
                  {
+                     ("RetainsInstanceBesideConstructor", "TypeFreeConstructorUninferredRows<int>"),
+                     ("RetainsUntypedSource", "ExplicitUntypedClassRows<int>"),
                      ("InfersBesideConstructor", "TypeFreeConstructorNullableRows<int>"),
                      ("UsesExternalProvider", "GenericProviderNullableRows<double>"),
                      ("OpenRow", "OpenClassMethodRows<int>"),
@@ -20,6 +22,11 @@ internal class NullableClassMethodRowsTests : TestsBase
             await Assert.That(generated.Contains(closedType)).IsTrue();
             await Assert.That(generated.Contains("__mm_1")).IsFalse();
         }
+
+        var constructorSources = generatedFiles.Single(file => file.Contains("\"RetainsInstanceBesideConstructor\""));
+        await Assert.That(constructorSources.Contains(".InstanceRows()")).IsTrue();
+        var untypedSources = generatedFiles.Single(file => file.Contains("\"RetainsUntypedSource\""));
+        await Assert.That(untypedSources.Split("testDataSources:")[1].Split("classDataSources:")[0].Contains("new global::TUnit.TestProject.Bugs._7573.AdditionalUntypedRowAttribute()")).IsTrue();
 
         foreach (var method in new[] { "DirectArray", "FactoryArray" })
         {

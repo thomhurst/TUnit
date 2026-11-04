@@ -198,3 +198,43 @@ public class DoubleNullableRowsProvider
 {
     public static IEnumerable<double> Rows() => [42d];
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments("seed")]
+public class TypeFreeConstructorUninferredRows<T>(string seed)
+{
+    public static IEnumerable<int> Rows() => [1];
+    public IEnumerable<int> InstanceRows() => [2];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    public async Task RetainsInstanceBesideConstructor(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(seed).IsEqualTo("seed");
+        await Assert.That(value!.Equals(1) || value.Equals(2)).IsTrue();
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+public class ExplicitUntypedClassRows<T>
+{
+    public static IEnumerable<int> Rows() => [1];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    [AdditionalUntypedRow]
+    public async Task RetainsUntypedSource(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value!.Equals(1) || value.Equals(2)).IsTrue();
+    }
+}
+
+public class AdditionalUntypedRowAttribute : UntypedDataSourceGeneratorAttribute
+{
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata metadata)
+        => [() => [2]];
+}
