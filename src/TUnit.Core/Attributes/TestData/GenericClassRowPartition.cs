@@ -437,6 +437,16 @@ public static class GenericClassRowPartition
                 },
             _ => null
         };
+        // CastHelper unwraps the first item of non-array enumerables for scalar targets.
+        // Keep the candidate without enumerating: user data may be lazy or have side effects.
+        var enumerableTarget = target ?? (description as ConstructedGeneric)?.GenericDefinition;
+        if (value is System.Collections.IEnumerable and not string && !value.GetType().IsArray
+            && enumerableTarget is not null
+            && !typeof(System.Collections.IEnumerable).IsAssignableFrom(enumerableTarget))
+        {
+            return true;
+        }
+
         if (target is null)
         {
             return Converters.AotConverterRegistry.HasConverter(value.GetType(), (description, classTypeArguments),

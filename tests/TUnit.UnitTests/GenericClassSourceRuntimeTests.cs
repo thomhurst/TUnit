@@ -26,6 +26,48 @@ public class GenericClassSourceRuntimeTests
 
     private sealed class ConvertedRowValue;
 
+    private sealed class DeferredEnumerable : System.Collections.IEnumerable
+    {
+        public System.Collections.IEnumerator GetEnumerator()
+            => throw new InvalidOperationException("Partitioning must not enumerate user data");
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Partition_Retains_Enumerable_Scalar_Rows_Without_Enumeration(bool generated)
+    {
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(typeof(int)) { Name = "first", TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(typeof(int)), CachedIsOptional = false },
+            new ParameterMetadata(typeof(string)) { Name = "second", TypeInfo = generated ? new GenericParameter(1, false) : new ConcreteType(typeof(string)), CachedIsOptional = true }
+        ];
+        object?[][] original = [[1], [new List<int> { 2 }], [new DeferredEnumerable()]];
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create([typeof(int), typeof(string)], GenericClassRowFallback.AllRows, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata)) rows.Add(await factory());
+        await Assert.That(rows.Count).IsEqualTo(original.Length);
+        for (var i = 0; i < rows.Count; i++) await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+        await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<int>(original[1][0])).IsEqualTo(2);
+        // CastHelper does not unwrap arrays, and does not unwrap into enumerable targets.
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new int[] { 2 }], parameters, [typeof(int), typeof(string)])).IsFalse();
+        parameters[0] = new ParameterMetadata(typeof(List<int>)) { Name = "first", TypeInfo = new ConcreteType(typeof(List<int>)), CachedIsOptional = false };
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new DeferredEnumerable()], parameters, [typeof(int), typeof(string)])).IsFalse();
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
+    }
+
     [Test]
     [Arguments(false)]
     [Arguments(true)]
