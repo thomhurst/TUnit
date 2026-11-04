@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -79,8 +80,8 @@ public class CrashedExecutableLogTests
             ResourceLogNames = [ProbeName],
         };
 
-        // Only the crashing executable: no Docker container and no project build needed.
-        protected override IEnumerable<string> ResourcesToRemove() => ["nginx-no-healthcheck", "api-service"];
+        // Only the crashing executable: no Docker container, project build, or unresolved parameter.
+        protected override IEnumerable<string> ResourcesToRemove() => ["nginx-no-healthcheck", "api-service", "my-secret"];
 
         protected override void ConfigureBuilder(IDistributedApplicationTestingBuilder builder)
         {
@@ -89,6 +90,9 @@ public class CrashedExecutableLogTests
             builder.Services.AddHealthChecks().AddCheck("probe-never-healthy", () => HealthCheckResult.Unhealthy());
 
             builder.AddExecutable(ProbeName, "dotnet", Environment.CurrentDirectory, "--" + ProbeMarker)
+                // This process makes no TLS connections. Avoid certificate preparation before DCP
+                // launches it, so the startup timeout measures the crashing process rather than TLS setup.
+                .WithCertificateTrustScope(CertificateTrustScope.None)
                 .WithHealthCheck("probe-never-healthy");
         }
 
