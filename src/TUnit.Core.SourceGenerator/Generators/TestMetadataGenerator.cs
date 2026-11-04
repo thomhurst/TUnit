@@ -1041,7 +1041,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // The name also matches [Arguments<T>], a literal row that joins as well (#7214).
                     if (specificAttr is not null && GenericMethodInferencePolicy.JoinsDuplicate(
                         isLiteralRow: specificAttr.AttributeClass?.Name == "ArgumentsAttribute",
-                        joinsInferredSources: joinsDuplicateMethodSources && !isClassRow))
+                        joinsInferredSources: (joinsDuplicateMethodSources || testMethod is { IsGenericType: true, IsGenericMethod: false }) && !isClassRow))
                     {
                         existing.AddRow(specificAttr, isClassRow);
                     }
@@ -1413,7 +1413,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 if (InferClassTypesFromMethodDataSource(testMethod, mdsAttr) is { Length: > 0 } inferredTypes)
                 {
-                    TryAddInstantiation(inferredTypes);
+                    TryAddInstantiation(inferredTypes, mdsAttr);
+                }
+                else
+                {
+                    (uninferredMethodDataSources ??= []).Add(mdsAttr);
                 }
             }
 
@@ -1872,6 +1876,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (testMethod is { IsGenericMethod: true, IsGenericType: false })
         {
             AddUninferredTypeArgumentFailures(testMethod, className, results);
+        }
+
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false }
+            && !testMethod.TypeSymbol.GetAttributes().Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
+            && !testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)))
+        {
+            foreach (var attribute in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+            {
+                if (InferClassTypesFromMethodDataSource(testMethod, attribute) is null)
+                {
+                    var memberName = attribute.ConstructorArguments.FirstOrDefault(a => a.Value is string).Value as string ?? "unknown";
+                    classConstraintViolations.Add($"Cannot infer generic class type arguments from method data source '{memberName}'. Use a source with a concrete declared row type or add [GenerateGenericTest].");
+                }
+            }
         }
 
         return results;
@@ -8205,6 +8223,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
+        return InferTypesFromMethodDataSourceRowType(testMethod, mdsAttr, testMethod.MethodSymbol.TypeParameters);
+    }
+
+    private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr, ImmutableArray<ITypeParameterSymbol> genericParams)
+    {
         if (mdsAttr.ConstructorArguments.Length == 0)
         {
             return null;
@@ -8240,7 +8263,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Row values bind to the data parameters only; the engine supplies the CancellationToken.
         var testMethodParams = GetDataParameters(testMethod.MethodSymbol);
-        var genericParams = testMethod.MethodSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
         if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType
@@ -8770,99 +8792,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static ITypeSymbol[]? InferClassTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
-        if (mdsAttr.ConstructorArguments.Length == 0)
-        {
-            return null;
-        }
-
-        // Get the method name from the attribute
-        if (mdsAttr.ConstructorArguments[0].Value is not string methodName)
-        {
-            return null;
-        }
-
-        // Find the method in the test class
-        var testClass = testMethod.TypeSymbol;
-        var dataMethod = testClass.GetMembers(methodName)
-            .OfType<IMethodSymbol>()
-            .FirstOrDefault(m => m.IsStatic && m.Parameters.Length == 0);
-
-        if (dataMethod == null)
-        {
-            return null;
-        }
-
-        // Check if the method returns IEnumerable<Func<T>> where T is a tuple or a single type
-        var returnType = dataMethod.ReturnType;
-        if (returnType is not INamedTypeSymbol namedReturnType)
-        {
-            return null;
-        }
-
-        // Navigate through IEnumerable<Func<...>> or IEnumerable<...>
-        if (!namedReturnType.IsGenericType || namedReturnType.Name != "IEnumerable")
-        {
-            return null;
-        }
-
-        var innerType = namedReturnType.TypeArguments[0];
-        INamedTypeSymbol? dataType = null;
-
-        // Check if it's IEnumerable<Func<T>>
-        if (innerType is INamedTypeSymbol { Name: "Func", TypeArguments.Length: 1 } funcType)
-        {
-            dataType = funcType.TypeArguments[0] as INamedTypeSymbol;
-        }
-        // Or direct IEnumerable<T>
-        else if (innerType is INamedTypeSymbol directType)
-        {
-            dataType = directType;
-        }
-
-        if (dataType == null)
-        {
-            return null;
-        }
-
-        // Get class type parameters
-        var classTypeParams = testMethod.TypeSymbol.TypeParameters;
-        var genericParamMap = new Dictionary<string, ITypeSymbol>();
-        // CancellationToken parameters are supplied by the engine, not by the row.
-        var testMethodParams = GetDataParameters(testMethod.MethodSymbol);
-
-        // If it's a tuple, map tuple elements to method parameters
-        if (dataType.IsTupleType)
-        {
-            var tupleElements = dataType.TupleElements;
-
-            for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
-            {
-                var paramType = testMethodParams[i].Type;
-                var tupleElementType = tupleElements[i].Type;
-
-                // Process the parameter type to find class generic references
-                ProcessTypeForGenerics(paramType, tupleElementType, classTypeParams, genericParamMap);
-            }
-        }
-        // If it's a single type that matches a class type parameter
-        else if (testMethodParams.Length == 1)
-        {
-            var paramType = testMethodParams[0].Type;
-            ProcessTypeForGenerics(paramType, dataType, classTypeParams, genericParamMap);
-        }
-
-        // Build the result array in the correct order
-        var inferredTypes = new ITypeSymbol[classTypeParams.Length];
-        for (var i = 0; i < classTypeParams.Length; i++)
-        {
-            if (!genericParamMap.TryGetValue(classTypeParams[i].Name, out var inferredType))
-            {
-                return null;
-            }
-            inferredTypes[i] = inferredType;
-        }
-
-        return inferredTypes;
+        var inferredTypes = InferTypesFromMethodDataSourceRowType(testMethod, mdsAttr, testMethod.TypeSymbol.TypeParameters);
+        return inferredTypes != null
+            && !inferredTypes.Any(CodeGenerationHelpers.ContainsTypeParameter)
+            && FindInaccessibleType(inferredTypes, testMethod.CompilationContext.Compilation) == null
+            ? inferredTypes
+            : null;
     }
 
     private static void ProcessTypeForGenerics(ITypeSymbol paramType, ITypeSymbol actualType, ImmutableArray<ITypeParameterSymbol> genericParams, Dictionary<string, ITypeSymbol> genericParamMap)
