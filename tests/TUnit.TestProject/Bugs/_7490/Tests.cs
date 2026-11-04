@@ -97,3 +97,22 @@ public class InheritedMixedSources<T>(T value) : InheritedMixedSourcesBase
         }
     }
 }
+
+[MethodDataSource(typeof(InheritedNullSourceBase), nameof(Rows))]
+public abstract class InheritedNullSourceBase
+{
+    public static IEnumerable<string> Rows() => ["constructor"];
+}
+
+public class InheritedSourceNullArguments<T>(T value) : InheritedNullSourceBase
+{
+    [Test]
+    [Arguments(null)]
+    public void Test(T? methodValue)
+    {
+        if (typeof(T) != typeof(string) || value is not "constructor" || methodValue is not null)
+        {
+            throw new InvalidOperationException("Expected the inherited source to infer string and supply the constructor row.");
+        }
+    }
+}

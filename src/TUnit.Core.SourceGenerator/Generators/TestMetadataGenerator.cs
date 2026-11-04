@@ -1309,6 +1309,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // Inherited member sources must establish their constructor types before a null method row
+        // defers inference to them. Reflection discovery groups these sources by their rows as well.
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false })
+        {
+            foreach (var baseType in testMethod.TypeSymbol.GetBaseTypes())
+            {
+                foreach (var attribute in baseType.GetAttributes())
+                {
+                    if (attribute.AttributeClass?.Name == "MethodDataSourceAttribute"
+                        && GetMethodDataSourceDeclaredRowType(testMethod, attribute) is { } rowType
+                        && InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType) is { Length: > 0 } classTypes)
+                    {
+                        TryAddInstantiation(classTypes, attribute, reportClassViolationAs: ClassViolationSource.ClassArguments, isClassRow: true);
+                    }
+                }
+            }
+        }
+
         // Method-level [Arguments] rows of a non-generic method that infer the generic class's type arguments
         List<AttributeData>? inferringRows = null;
 
@@ -8202,7 +8220,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             : null;
     }
 
-    private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
+    private static ITypeSymbol? GetMethodDataSourceDeclaredRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
         if (mdsAttr.ConstructorArguments.Length == 0)
         {
@@ -8231,7 +8249,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var compilation = testMethod.CompilationContext.Compilation;
         var dataSourceMember = ResolveMethodDataSourceMember(providerType, methodName, mdsAttr, compilation);
-        var rowType = dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
+        return dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
+    }
+
+    private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
+    {
+        var rowType = GetMethodDataSourceDeclaredRowType(testMethod, mdsAttr);
         if (rowType == null)
         {
             return null;
