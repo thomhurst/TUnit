@@ -35,11 +35,12 @@ internal static class TupleConversionMatrix
         new("NullableValueWiden", "(int, int)", "(long, long)?", "(1, 2)", "((long, long)?)(1L, 2L)", false, false, false, BindsReflection: true),
         new("NestedReferenceIdentity", "Tuple<int>", "Tuple<int>", "Tuple.Create(42)", "Tuple.Create(42)"),
         new("NestedReferenceWiden", "Tuple<int>", "Tuple<long>", "Tuple.Create(42)", "Tuple.Create(42L)", false, false, false, BindsReflection: true),
-        // Source-only operators are not automatically registered in AOT (#7511).
-        new("ExactOperator", "ImplicitSource", "Converted", "new ImplicitSource()", "new Converted(42)", BindsAot: false),
-        new("TupleOperator", "TupleSource", "(int, int)", "new TupleSource()", "(1, 2)", BindsAot: false),
-        new("NullableTupleOperator", "TupleSource", "(int, int)?", "new TupleSource()", "((int, int)?)(1, 2)", BindsAot: false),
-        new("ExplicitOperator", "ExplicitSource", "Converted", "new ExplicitSource()", "new Converted(42)", Accepted: false, BindsAot: false),
+        // AOT binds source-only operators through converters discovered from the method data
+        // source's return type (#7511), so these rows bind in every mode.
+        new("ExactOperator", "ImplicitSource", "Converted", "new ImplicitSource()", "new Converted(42)"),
+        new("TupleOperator", "TupleSource", "(int, int)", "new TupleSource()", "(1, 2)"),
+        new("NullableTupleOperator", "TupleSource", "(int, int)?", "new TupleSource()", "((int, int)?)(1, 2)"),
+        new("ExplicitOperator", "ExplicitSource", "Converted", "new ExplicitSource()", "new Converted(42)", Accepted: false),
         new("ComposedOperator", "ImplicitSource", "Base", "new ImplicitSource()", "new Converted(42)", false, false, false),
         // A distinct source type prevents registry/cache state from changing default-case results.
         new("RegisteredOperator", "RegisteredSource", "Converted", "new RegisteredSource()", "new Converted(42)",
