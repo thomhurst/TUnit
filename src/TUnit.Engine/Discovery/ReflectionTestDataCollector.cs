@@ -702,7 +702,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         : null;
                     if (typedSourceRemainder)
                     {
-                        methodRows = methodRows == null ? methodArguments : ExcludeDeclaredTypedSources(resolvedMethod, methodRows);
+                        methodRows = methodRows == null ? methodArguments : ExcludeDeclaredTypedSources(concreteType, resolvedMethod, methodRows);
                     }
                 }
                 else if (methodRows == null)
@@ -710,7 +710,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     methodRows = ScopeMethodRowsToClassTypeArguments(concreteType, resolvedMethod, rowTypeArguments, typeArguments);
                     if (typedSourceRemainder)
                     {
-                        methodRows = methodRows == null ? methodArguments : ExcludeDeclaredTypedSources(resolvedMethod, methodRows);
+                        methodRows = methodRows == null ? methodArguments : ExcludeDeclaredTypedSources(concreteType, resolvedMethod, methodRows);
                     }
 
                     if (methodRows is [])
@@ -2116,7 +2116,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         foreach (var dataSource in dataSources)
         {
-            if (CloseOverDeclaredTypedSourceTypes(method, dataSource) is not { } closedMethod)
+            if (CloseOverDeclaredTypedSourceTypes(concreteClassType, method, dataSource) is not { } closedMethod)
             {
                 (remaining ??= []).Add(dataSource);
                 continue;
@@ -2157,8 +2157,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <paramref name="dataSources"/> without the typed sources whose declared types close
     /// <paramref name="method"/>: those run on their own instantiation (#7206).
     /// </summary>
-    private static IDataSourceAttribute[] ExcludeDeclaredTypedSources(MethodInfo method, IDataSourceAttribute[] dataSources)
-        => Array.FindAll(dataSources, dataSource => CloseOverDeclaredTypedSourceTypes(method, dataSource) is null);
+    private static IDataSourceAttribute[] ExcludeDeclaredTypedSources(Type concreteClassType, MethodInfo method, IDataSourceAttribute[] dataSources)
+        => Array.FindAll(dataSources, dataSource => CloseOverDeclaredTypedSourceTypes(concreteClassType, method, dataSource) is null);
 
     /// <summary>
     /// The generic method <paramref name="method"/> closed over the declared type arguments of the typed data
@@ -2166,7 +2166,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// method's constraints.
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT; MakeGenericMethod over a data source's declared type arguments")]
-    private static MethodInfo? CloseOverDeclaredTypedSourceTypes(MethodInfo method, IDataSourceAttribute dataSource)
+    private static MethodInfo? CloseOverDeclaredTypedSourceTypes(
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+        Type concreteClassType, MethodInfo method, IDataSourceAttribute dataSource)
     {
         if (dataSource is ArgumentsAttribute)
         {
@@ -2176,7 +2178,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var classGenericParameterCount = method.DeclaringType is { IsGenericType: true } declaringType
             ? declaringType.GetGenericArguments().Length
             : 0;
-        if (InferTypesFromTypedDataSource(dataSource, method, method.GetGenericArguments().Length, classGenericParameterCount) is not { } typeArguments)
+        var typeArguments = InferTypesFromTypedDataSource(dataSource, method, method.GetGenericArguments().Length, classGenericParameterCount);
+        // Wrapped reference arrays spread into loose values. Close the method here so a trailing
+        // params array can infer from the declared element type before runtime argument binding.
+        if (typeArguments is null
+            && dataSource is MethodDataSourceAttribute methodSource
+            && methodSource.GetDeclaredMemberType(concreteClassType) is { } memberType
+            && MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is { } rowType
+            && spreadsReferenceArray)
+        {
+            typeArguments = InferTypesFromTypedRowCore(method, rowType, method.GetGenericArguments().Length,
+                GenericParameterScope.Method, spreadsReferenceArray: true);
+        }
+
+        if (typeArguments is null)
         {
             return null;
         }
@@ -2557,7 +2572,44 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var typeArguments = new Type?[genericParameterCount];
 
-        if (scope == GenericParameterScope.Class && dataParameters.Length == 1 && GetTupleElementTypes(dataParameters[0].ParameterType) is not null)
+        if (spreadsReferenceArray)
+        {
+            // Required bindings take precedence because the declared array type cannot tell us
+            // whether optional arguments were supplied. Optional arguments can fill missing types.
+            for (var pass = 0; pass < 2; pass++)
+            {
+                foreach (var parameter in dataParameters)
+                {
+                    var optional = parameter.IsOptional || parameter.HasDefaultValue;
+                    if (optional != (pass == 1))
+                    {
+                        continue;
+                    }
+
+                    var parameterType = parameter.IsDefined(typeof(ParamArrayAttribute), false) && parameter.ParameterType.IsArray
+                        ? parameter.ParameterType.GetElementType()!
+                        : parameter.ParameterType;
+                    if (optional)
+                    {
+                        if (Array.TrueForAll(typeArguments, static type => type is not null))
+                        {
+                            continue;
+                        }
+
+                        var candidate = (Type?[])typeArguments.Clone();
+                        if (MapTypedRowParameters(parameterType, rowType, candidate, scope))
+                        {
+                            typeArguments = candidate;
+                        }
+                    }
+                    else if (!MapTypedRowParameters(parameterType, rowType, typeArguments, scope))
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+        else if (scope == GenericParameterScope.Class && dataParameters.Length == 1 && GetTupleElementTypes(dataParameters[0].ParameterType) is not null)
         {
             if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, scope))
             {
@@ -2606,23 +2658,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return null;
             }
         }
-        else if (dataParameters.Length > 1 && (spreadsReferenceArray || requiredCount <= 1))
+        else if (dataParameters.Length > 1 && requiredCount <= 1)
         {
-            // A scalar binds only to the first parameter. A wrapped reference array spreads its
-            // elements across required data parameters, including generic parameters after the first.
-            // Its declared type does not reveal its length, so trailing optional values may be omitted.
-            var suppliedParameterCount = spreadsReferenceArray ? dataParameters.Length : 1;
-            for (var i = 0; i < suppliedParameterCount; i++)
+            // A scalar supplies only the first data parameter.
+            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, scope))
             {
-                if (i > 0 && (dataParameters[i].IsOptional || dataParameters[i].HasDefaultValue))
-                {
-                    continue;
-                }
-
-                if (!MapTypedRowParameters(dataParameters[i].ParameterType, rowType, typeArguments, scope))
-                {
-                    return null;
-                }
+                return null;
             }
         }
         else

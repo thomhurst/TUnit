@@ -50,6 +50,28 @@ public class MethodSourceClassInferenceTests<T>
         await Assert.That(rest).IsNull();
     }
 
+    [Test, MethodDataSource(nameof(WrappedPairRows))]
+    public async Task WrappedArraySuppliedOptional(string label, T value = default!)
+    {
+        await Assert.That(label).IsEqualTo("one");
+        await Assert.That(value).IsEqualTo((T)(object)"two");
+    }
+
+    [Test, MethodDataSource(nameof(WrappedPairRows))]
+    public async Task WrappedArrayParams(params T[] values)
+    {
+        await Assert.That(values.Length).IsEqualTo(2);
+        await Assert.That(values[0]).IsEqualTo((T)(object)"one");
+        await Assert.That(values[1]).IsEqualTo((T)(object)"two");
+    }
+
+    [Test, MethodDataSource(nameof(WrappedPairRows))]
+    public async Task WrappedArrayLaterParams(string label, params T[] values)
+    {
+        await Assert.That(label).IsEqualTo("one");
+        await Assert.That(values.Single()).IsEqualTo((T)(object)"two");
+    }
+
     [Test, MethodDataSource(nameof(ReferenceTupleRows))]
     public async Task ReferenceTuple(Tuple<T, int> value)
     {
@@ -130,4 +152,34 @@ public class NullableMethodSourceClassInferenceTests<T> where T : struct
     [Test, MethodDataSource(nameof(Rows))]
     #pragma warning restore TUnit0001
     public async Task NullableValue(T? value) => await Assert.That(value).IsEqualTo((T)(object)1);
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class MethodSourceMethodInferenceTests
+{
+    public static IEnumerable<TestDataRow<string[]>> Rows() => [new(new[] { "one", "two" })];
+
+    [Test, MethodDataSource(nameof(Rows))]
+    public async Task WrappedArrayParams<T>(params T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(values.Length).IsEqualTo(2);
+        await Assert.That(values[1]).IsEqualTo((T)(object)"two");
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class WrappedArrayPartialOptionalInferenceTests<T, U>
+{
+    public static IEnumerable<TestDataRow<string[]>> Rows() => [new(new[] { "one", "two" })];
+
+    [Test, MethodDataSource(nameof(Rows))]
+    public async Task OptionalFillsMissingType(T first, U second = default!, IEnumerable<T>? omitted = null)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(typeof(U)).IsEqualTo(typeof(string));
+        await Assert.That(first).IsEqualTo((T)(object)"one");
+        await Assert.That(second).IsEqualTo((U)(object)"two");
+        await Assert.That(omitted).IsNull();
+    }
 }

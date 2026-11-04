@@ -8293,20 +8293,40 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (testMethodParams.Length > 0)
         {
-            // Wrapped reference arrays spread over required data parameters. Their declared type
-            // does not reveal whether trailing optional values are supplied. Other rows bind whole
-            // to the first parameter, including bare typed arrays such as int[].
+            // Array length is unknown: required parameters establish bindings first. Optional
+            // parameters may fill missing bindings, but an omitted value must not invalidate them.
             var suppliedParameterCount = spreadsReferenceArray ? testMethodParams.Length : 1;
-            for (var i = 0; i < suppliedParameterCount; i++)
+            for (var pass = 0; pass < 2; pass++)
             {
-                if (i > 0 && testMethodParams[i].IsOptional)
+                for (var i = 0; i < suppliedParameterCount; i++)
                 {
-                    continue;
-                }
+                    var parameter = testMethodParams[i];
+                    var optional = spreadsReferenceArray && parameter.IsOptional;
+                    if (optional != (pass == 1))
+                    {
+                        continue;
+                    }
 
-                if (!ProcessTypeForGenerics(testMethodParams[i].Type, rowType, genericParams, genericParamMap))
-                {
-                    return null;
+                    var parameterType = spreadsReferenceArray && parameter.IsParams && parameter.Type is IArrayTypeSymbol array
+                        ? array.ElementType
+                        : parameter.Type;
+                    if (optional)
+                    {
+                        if (genericParamMap.Count == genericParams.Length)
+                        {
+                            continue;
+                        }
+
+                        var candidate = new Dictionary<string, ITypeSymbol>(genericParamMap);
+                        if (ProcessTypeForGenerics(parameterType, rowType, genericParams, candidate))
+                        {
+                            genericParamMap = candidate;
+                        }
+                    }
+                    else if (!ProcessTypeForGenerics(parameterType, rowType, genericParams, genericParamMap))
+                    {
+                        return null;
+                    }
                 }
             }
         }
