@@ -16,6 +16,15 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+    inputs:
+      analyze_windows_dump_run:
+        description: 'Also analyze the Windows engine hang dump from this AOT run ID (optional)'
+        required: false
+        type: string
+      analyze_windows_dump_artifact:
+        description: 'Exact dump artifact ID (optional; disambiguates artifacts from rerun attempts)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -204,3 +213,177 @@ jobs:
         with:
           name: HangDump-engine-tests-${{ matrix.os }}
           path: '**/hangdump*'
+
+  analyze-windows-dump:
+    if: github.event_name == 'workflow_dispatch' && inputs.analyze_windows_dump_run != ''
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: '10.0.x'
+
+      # download-artifact filters out earlier attempts, even when given an exact ID.
+      - name: Download exact captured Windows engine dump
+        id: download_exact
+        if: inputs.analyze_windows_dump_artifact != ''
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DUMP_RUN_ID: ${{ inputs.analyze_windows_dump_run }}
+          DUMP_ARTIFACT_ID: ${{ inputs.analyze_windows_dump_artifact }}
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          try {
+            if ($env:DUMP_RUN_ID -notmatch '^\d+$' -or $env:DUMP_ARTIFACT_ID -notmatch '^\d+$') {
+              throw 'Run and artifact IDs must be numeric'
+            }
+            $artifactJson = gh api "repos/$env:GITHUB_REPOSITORY/actions/artifacts/$env:DUMP_ARTIFACT_ID"
+            if ($LASTEXITCODE -ne 0) { throw 'Could not read dump artifact metadata' }
+            $artifact = $artifactJson | ConvertFrom-Json
+            if ([string]$artifact.workflow_run.id -ne $env:DUMP_RUN_ID) {
+              throw 'The selected artifact does not belong to the requested run'
+            }
+            if ($artifact.expired) { throw 'The selected dump artifact has expired' }
+            $headers = @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' }
+            Invoke-WebRequest -Uri "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/actions/artifacts/$env:DUMP_ARTIFACT_ID/zip" -Headers $headers -OutFile captured-dump.zip
+            Expand-Archive captured-dump.zip -DestinationPath captured-dump
+          } catch {
+            $_ | Out-String | Set-Content analysis/download-error.txt
+            throw
+          }
+
+      - name: Download latest captured Windows engine dump
+        id: download_name_based
+        if: inputs.analyze_windows_dump_artifact == ''
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: HangDump-engine-tests-windows-latest
+          run-id: ${{ inputs.analyze_windows_dump_run }}
+          github-token: ${{ github.token }}
+          path: captured-dump
+
+      - name: Record name-based dump download failure
+        if: ${{ always() && steps.download_name_based.outcome == 'failure' }}
+        shell: pwsh
+        env:
+          DUMP_RUN_ID: ${{ inputs.analyze_windows_dump_run }}
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          "Name-based Windows dump download failed for run $env:DUMP_RUN_ID" | Set-Content analysis/download-error.txt
+          throw 'Name-based Windows dump download failed'
+
+      - name: Extract managed stacks and async waits
+        id: managed_analysis
+        if: ${{ !cancelled() && (steps.download_exact.outcome == 'success' || steps.download_name_based.outcome == 'success') }}
+        timeout-minutes: 5
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          try {
+            dotnet tool install --global dotnet-dump --version 10.0.750501
+            if ($LASTEXITCODE -ne 0) { throw 'dotnet-dump installation failed' }
+            $dumps = @(Get-ChildItem captured-dump -Recurse -Filter 'hangdump.windows-reflection-pass.dmp')
+            if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
+            dotnet-dump analyze $dumps[0].FullName -c 'eeversion' -c 'clrthreads' -c 'threadpool' -c 'syncblk' -c 'clrstack -all' -c 'dumpasync' -c 'exit' *> analysis/managed-stacks.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Dump analysis failed; see managed-stacks.txt' }
+            # Map Thread object monitors to their native thread pointers and IDs (#7554).
+            $threadCommands = @('-c', 'eeversion')
+            foreach ($line in Get-Content analysis/managed-stacks.txt) {
+              if ($line.Trim() -match '([0-9a-fA-F]{16}) System\.Threading\.Thread$') {
+                $threadCommands += @('-c', "dumpobj $($Matches[1])")
+              }
+            }
+            $threadCommands += @('-c', 'exit')
+            dotnet-dump analyze $dumps[0].FullName @threadCommands *> analysis/thread-objects.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Thread object analysis failed; see thread-objects.txt' }
+          } catch {
+            $_ | Out-String | Set-Content analysis/managed-analysis-error.txt
+            throw
+          }
+
+      - name: Record interrupted managed analysis
+        if: ${{ !cancelled() && steps.managed_analysis.outcome == 'failure' }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          if (!(Test-Path analysis/managed-analysis-error.txt)) {
+            'Managed analysis failed or timed out before its error handler completed; inspect any partial output.' | Set-Content analysis/managed-analysis-error.txt
+          }
+
+      # dotnet-dump cannot show the native wait inside Thread.StartInternal (#7554).
+      - name: Extract native thread waits
+        id: native_analysis
+        if: ${{ !cancelled() && (steps.download_exact.outcome == 'success' || steps.download_name_based.outcome == 'success') }}
+        timeout-minutes: 5
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          try {
+            $cdb = "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe"
+            if (!(Test-Path $cdb)) {
+              # Windows SDK 10.0.26100.9457; install only its debugging tools.
+              Invoke-WebRequest 'https://go.microsoft.com/fwlink/?linkid=2382321' -OutFile winsdksetup.exe
+              $installer = Start-Process -FilePath .\winsdksetup.exe -ArgumentList '/features OptionId.WindowsDesktopDebuggers /quiet /norestart' -Wait -PassThru
+              if ($installer.ExitCode -notin @(0, 3010)) { throw "Debugger installation failed: $($installer.ExitCode)" }
+            }
+            if (!(Test-Path $cdb)) { throw 'Windows SDK did not install x64 cdb.exe' }
+            $dumps = @(Get-ChildItem captured-dump -Recurse -Filter 'hangdump.windows-reflection-pass.dmp')
+            if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
+            $symbolCache = Join-Path $env:RUNNER_TEMP 'engine-dump-symbols'
+            New-Item -ItemType Directory -Path $symbolCache -Force | Out-Null
+            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c '.reload; lmvm coreclr; uf coreclr!ThreadNative_Start; ~* r; ~* kn; !locks; q' *> analysis/native-stacks.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Native dump analysis failed; see native-stacks.txt' }
+            # Top-frame registers belong to SleepEx/SwitchToThread, not ThreadNative_Start.
+            # Unwind each starter before reading its preserved RBX (the target native Thread).
+            $targetCommands = @('.reload')
+            $threadIndex = $null
+            foreach ($line in Get-Content analysis/native-stacks.txt) {
+              if ($line -match '^\s*[.#]?\s*(\d+)\s+Id:') {
+                $threadIndex = $Matches[1]
+              } elseif ($null -ne $threadIndex -and $line -match '^\s*([0-9a-fA-F]+)\s+.*coreclr!ThreadNative_Start\+') {
+                $frameIndex = $Matches[1]
+                $targetCommands += "~$($threadIndex)s; .frame /r 0x$frameIndex"
+              }
+            }
+            if ($targetCommands.Count -eq 1) { throw 'No numbered ThreadNative_Start frames found; see native-stacks.txt' }
+            $targetCommands += 'q'
+            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c ($targetCommands -join '; ') *> analysis/start-targets.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Starter target analysis failed; see start-targets.txt' }
+            # .frame /r prints unwound registers, but @rbx still evaluates in the top frame.
+            # Read explicit addresses from that output rather than debugger register expressions.
+            $targetAddresses = @(Get-Content analysis/start-targets.txt | ForEach-Object {
+              if ($_ -match '^rax=[0-9a-fA-F]+\s+rbx=([0-9a-fA-F]+)\s+rcx=') { $Matches[1] }
+            } | Select-Object -Unique)
+            if ($targetAddresses.Count -eq 0) { throw 'No unwound RBX addresses found; see start-targets.txt' }
+            $stateCommands = @('.reload')
+            foreach ($address in $targetAddresses) {
+              $stateCommands += "dd 0x$address L4; dq 0x$address+0x110 L1"
+            }
+            $stateCommands += 'q'
+            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c ($stateCommands -join '; ') *> analysis/start-target-states.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Starter state analysis failed; see start-target-states.txt' }
+          } catch {
+            $_ | Out-String | Set-Content analysis/native-analysis-error.txt
+            throw
+          }
+
+      - name: Record interrupted native analysis
+        if: ${{ always() && steps.native_analysis.outcome == 'failure' }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          if (!(Test-Path analysis/native-analysis-error.txt)) {
+            'Native analysis failed or timed out before its error handler completed; inspect any partial output.' | Set-Content analysis/native-analysis-error.txt
+          }
+
+      - name: Upload managed dump analysis
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: Windows-engine-dump-analysis
+          path: analysis/
+          if-no-files-found: warn
