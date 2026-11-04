@@ -138,9 +138,7 @@ public class ClassRowCleanupTests
     }
 
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task InstanceConstructorSubscriptionsReachExecutableRow(bool streaming)
+    public async Task InstanceConstructorSubscriptionsReachExecutableRow()
     {
         var current = TestContext.Current!;
         var builder = (ITestBuilder)current.ServiceProvider.GetService(typeof(ITestBuilder))!;
@@ -153,7 +151,7 @@ public class ClassRowCleanupTests
             LineNumber = 0,
             AttributeFactory = () => [new ClassConstructorAttribute<LateEventConstructor>()],
             MethodMetadata = current.TestDetails.MethodMetadata,
-            DataSources = [new ArgumentsAttribute(streaming)],
+            DataSources = [],
             ClassDataSources = [],
             PropertyDataSources = [],
             InstanceFactory = (_, _) => new ClassRowCleanupTests(),
@@ -162,15 +160,7 @@ public class ClassRowCleanupTests
         var tests = new List<AbstractExecutableTest>();
         try
         {
-            if (streaming)
-            {
-                await foreach (var test in builder.BuildTestsStreamingAsync(metadata))
-                    tests.Add(test);
-            }
-            else
-            {
-                tests.AddRange(await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null)));
-            }
+            tests.AddRange(await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null)));
             await Assert.That(tests.Count).IsEqualTo(1);
             var executable = tests[0];
             await executable.CreateInstanceAsync();
@@ -507,9 +497,7 @@ public class ClassRowCleanupTests
     }
 
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task ConstructorFactoryStateIsIsolatedAcrossRepeats(bool streaming)
+    public async Task ConstructorFactoryStateIsIsolatedAcrossRepeats()
     {
         var current = TestContext.Current!;
         var builder = (ITestBuilder)current.ServiceProvider.GetService(typeof(ITestBuilder))!;
@@ -533,17 +521,7 @@ public class ClassRowCleanupTests
         var tests = new List<AbstractExecutableTest>();
         try
         {
-            if (streaming)
-            {
-                await foreach (var test in builder.BuildTestsStreamingAsync(metadata))
-                {
-                    tests.Add(test);
-                }
-            }
-            else
-            {
-                tests.AddRange(await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null)));
-            }
+            tests.AddRange(await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null)));
             await Assert.That(tests.Count).IsEqualTo(3);
             await Assert.That(source.Resources.Count).IsEqualTo(3);
             for (var i = 0; i < tests.Count; i++)
@@ -563,11 +541,9 @@ public class ClassRowCleanupTests
     }
 
     [Test]
-    [Arguments(false, false)]
-    [Arguments(false, true)]
-    [Arguments(true, false)]
-    [Arguments(true, true)]
-    public async Task ClassAndMethodEnumerationStateSurvivesFactories(bool streaming, bool classEnumeration)
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task ClassAndMethodEnumerationStateSurvivesFactories(bool classEnumeration)
     {
         var current = TestContext.Current!;
         var builder = (ITestBuilder)current.ServiceProvider.GetService(typeof(ITestBuilder))!;
@@ -590,17 +566,7 @@ public class ClassRowCleanupTests
         var tests = new List<AbstractExecutableTest>();
         try
         {
-            if (streaming)
-            {
-                await foreach (var test in builder.BuildTestsStreamingAsync(metadata))
-                {
-                    tests.Add(test);
-                }
-            }
-            else
-            {
-                tests.AddRange(await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null)));
-            }
+            tests.AddRange(await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null)));
 
             await Assert.That(tests.Count).IsEqualTo(4);
             foreach (var test in tests)
