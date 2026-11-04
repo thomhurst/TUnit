@@ -244,3 +244,41 @@ public class DirectEmptyDeclaredRowPartition<T>(T value)
         }
     }
 }
+
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(ConstructorRows))]
+public class DirectMemberMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<int> ConstructorRows() => [42];
+    public static IEnumerable<int> MethodRows() => [43];
+
+    [Test]
+    [MethodDataSource(nameof(MethodRows))]
+    public void Test(T methodValue)
+    {
+        if (constructorValue is not 42 || methodValue is not 43)
+        {
+            throw new InvalidOperationException("Expected separate constructor and method rows.");
+        }
+    }
+}
+
+[MethodDataSource(nameof(ConstructorRows))]
+public abstract class InheritedMemberMethodRowsBase
+{
+    public static IEnumerable<string> ConstructorRows() => ["constructor"];
+    public static IEnumerable<string> MethodRows() => ["method"];
+}
+
+public class InheritedMemberMethodRows<T>(T constructorValue) : InheritedMemberMethodRowsBase
+{
+    [Test]
+    [MethodDataSource(nameof(MethodRows))]
+    public void Test(T methodValue)
+    {
+        if (constructorValue is not "constructor" || methodValue is not "method")
+        {
+            throw new InvalidOperationException("Expected inherited constructor and method providers to remain separate.");
+        }
+    }
+}

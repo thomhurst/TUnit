@@ -1428,6 +1428,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (InferClassTypesFromMethodDataSource(testMethod, mdsAttr) is { Length: > 0 } inferredTypes)
                 {
                     TryAddInstantiation(inferredTypes);
+
+                    // A constructor source may have already scoped this class instantiation.
+                    // Keep its matching method provider as well, rather than losing it when the
+                    // inferred types deduplicate against that constructor row.
+                    if (rowInstantiations is not null
+                        && rowInstantiations.TryGetValue(BuildTypeKey(inferredTypes), out var existing)
+                        && existing.HasClassRows)
+                    {
+                        existing.AddRow(mdsAttr, isClassRow: false);
+                    }
                 }
             }
 
@@ -8833,11 +8843,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Find the method in the test class
         var testClass = testMethod.TypeSymbol;
-        var dataMethod = testClass.GetMembers(methodName)
-            .OfType<IMethodSymbol>()
-            .FirstOrDefault(m => m.IsStatic && m.Parameters.Length == 0);
+        var dataMethod = ResolveMethodDataSourceMember(testClass, methodName, mdsAttr,
+            testMethod.CompilationContext.Compilation) as IMethodSymbol;
 
-        if (dataMethod == null)
+        if (dataMethod is not { IsStatic: true, Parameters.Length: 0 })
         {
             return null;
         }
