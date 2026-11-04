@@ -64,6 +64,27 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("int")]
+    [Arguments("int?")]
+    public async Task Nullable_Generic_Class_Parameter_With_Inherited_Constructor_Data_Accepts_Convertible_Data(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [Arguments(1d)]
+            public abstract class Base { }
+            public class Tests<T>(T seed) : Base where T : struct, IComparable<double>
+            {
+                public static IEnumerable<Func<{{rowType}}>> Rows() { yield return () => 1; }
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run(T? value) { }
+            }
+            """);
+    }
+
+    [Test]
     [Arguments("int", false)]
     [Arguments("int?", false)]
     [Arguments("int", true)]

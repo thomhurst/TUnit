@@ -8543,6 +8543,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
+        // A non-nullable value row can bind to Nullable<T>, inferring its underlying T.
+        if (paramType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableParameter
+            && nullableParameter.TypeArguments[0] is ITypeParameterSymbol { TypeParameterKind: TypeParameterKind.Type }
+            && actualType.IsValueType
+            && actualType is not INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T })
+        {
+            ProcessTypeForGenerics(nullableParameter.TypeArguments[0], actualType, genericParams, genericParamMap);
+            return;
+        }
+
         // Arrays such as T[] fed an int[]
         if (paramType is IArrayTypeSymbol paramArray
             && actualType is IArrayTypeSymbol actualArray

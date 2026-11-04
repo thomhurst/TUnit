@@ -312,7 +312,8 @@ public static class CompilationExtensions
     private static bool HasIndependentlySuppliedClassType(Compilation compilation, ITypeParameterSymbol typeParameter)
     {
         return HasGenerateGenericTestAttribute(typeParameter)
-            || typeParameter.DeclaringType?.GetAttributes()
+            || typeParameter.DeclaringType?.GetSelfAndBaseTypes()
+                .SelectMany(type => type.GetAttributes())
                 .Any(attribute => attribute.IsDataSourceAttribute(compilation)) == true;
     }
 

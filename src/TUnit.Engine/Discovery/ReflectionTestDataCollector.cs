@@ -1024,7 +1024,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     /// <summary>
     /// For a generic class without class-level data sources, infers the class's type arguments from the
-    /// method-level [Arguments] rows of each non-generic test method whose parameters use them, and builds
+    /// method-level [Arguments] rows and declared method source row types of each non-generic test method whose parameters use them, and builds
     /// one test per inferred instantiation carrying only the rows that inferred it, mirroring the source
     /// generator (#7106). An instantiation that a [GenerateGenericTest] also lists stands for that attribute's
     /// instantiation too, so it carries every method data source except rows inferring other type arguments:
@@ -1066,12 +1066,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 groupOfSource[i] = -1;
 
-                if (methodDataSources[i] is not ArgumentsAttribute arguments)
+                var typeArguments = methodDataSources[i] switch
                 {
-                    continue;
-                }
-
-                var typeArguments = InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject);
+                    ArgumentsAttribute arguments => InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject),
+                    MethodDataSourceAttribute methodDataSource => InferClassTypesFromMethodDataSource(genericTypeDefinition, methodDataSource, parameters, classGenericParameters),
+                    _ => null
+                };
                 if (typeArguments == null)
                 {
                     continue;
@@ -2723,6 +2723,86 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 #else
         return type.IsArray && type.Name.EndsWith("[]", StringComparison.Ordinal);
 #endif
+    }
+
+    /// <summary>Infers class type arguments from a method source's declared row shape, like the generator.</summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source methods")]
+    private static Type[]? InferClassTypesFromMethodDataSource(Type testClass, MethodDataSourceAttribute source, ParameterInfo[] parameters, Type[] classParameters)
+    {
+        // Only infer from sources declared on the test class; an external provider must never
+        // accidentally select a same-named member of the test class.
+        if (source.ClassProvidingDataSource is not null)
+        {
+            return null;
+        }
+
+        var dataMethod = testClass.GetMethod(source.MethodNameProvidingDataSource,
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly,
+            binder: null, Type.EmptyTypes, modifiers: null);
+        if (dataMethod?.ReturnType is not { IsGenericType: true } returnType
+            || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>))
+        {
+            return null;
+        }
+
+        var rowType = UnwrapFunc(returnType.GetGenericArguments()[0]);
+        var rowTypes = GetValueTupleElementTypes(rowType) ?? [rowType];
+        var dataParameters = parameters.Where(static p => p.ParameterType != typeof(CancellationToken)).ToArray();
+        var inferred = new Type[classParameters.Length];
+        for (var i = 0; i < classParameters.Length; i++)
+        {
+            Type? match = null;
+            for (var j = 0; j < dataParameters.Length && j < rowTypes.Length; j++)
+            {
+                if (MatchClassRowType(dataParameters[j].ParameterType, rowTypes[j], classParameters[i]) is { } candidate)
+                {
+                    match = candidate;
+                }
+            }
+
+            if (match == null || match.ContainsGenericParameters)
+            {
+                return null;
+            }
+
+            inferred[i] = match;
+        }
+
+        return inferred;
+    }
+
+    private static Type? MatchClassRowType(Type parameterType, Type actualType, Type classParameter)
+    {
+        if (Nullable.GetUnderlyingType(parameterType) is { } underlyingParameter)
+        {
+            var underlyingActual = Nullable.GetUnderlyingType(actualType);
+            return actualType.IsValueType
+                ? MatchClassRowType(underlyingParameter, underlyingActual ?? actualType, classParameter)
+                : null;
+        }
+
+        if (parameterType == classParameter)
+        {
+            return actualType;
+        }
+
+        if (parameterType.IsGenericType && actualType.IsGenericType
+            && parameterType.GetGenericTypeDefinition() == actualType.GetGenericTypeDefinition())
+        {
+            var parameterArguments = parameterType.GetGenericArguments();
+            var actualArguments = actualType.GetGenericArguments();
+            Type? match = null;
+            for (var i = 0; i < parameterArguments.Length; i++)
+            {
+                match = MatchClassRowType(parameterArguments[i], actualArguments[i], classParameter) ?? match;
+            }
+
+            return match;
+        }
+
+        return parameterType.IsArray && actualType.IsArray && parameterType.GetArrayRank() == actualType.GetArrayRank()
+            ? MatchClassRowType(parameterType.GetElementType()!, actualType.GetElementType()!, classParameter)
+            : null;
     }
 
     /// <summary>
