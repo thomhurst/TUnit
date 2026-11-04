@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace TUnit.SourceGenerator.IncrementalTests;
@@ -39,6 +38,17 @@ public class GeneratorDiagnosticRegistryTests
         }
     }
 
-    private static string GetRepositoryRoot([CallerFilePath] string sourcePath = "") =>
-        Path.GetFullPath(Path.Combine(Path.GetDirectoryName(sourcePath)!, "..", ".."));
+    private static string GetRepositoryRoot()
+    {
+        // Runtime paths are not remapped by deterministic CI builds like CallerFilePath is.
+        for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
+        {
+            if (File.Exists(Path.Combine(directory.FullName, "src", "TUnit.Core.SourceGenerator", "GeneratorDiagnosticIds.cs")))
+            {
+                return directory.FullName;
+            }
+        }
+
+        throw new DirectoryNotFoundException($"Could not find the generator sources above {AppContext.BaseDirectory}.");
+    }
 }
