@@ -10,6 +10,7 @@ using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
 
+[ModuleCategory(PipelineCategories.PlatformNeutral)]
 [NotInParallel("SnapshotTests")]
 public class RunTemplateTestsModule : Module<CommandResult>
 {

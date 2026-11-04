@@ -156,7 +156,13 @@ jobs:
           # Framework TFM they no longer compete with the engine tests for this runner's CPUs.
           # macOS skips them: the packages are platform-neutral, and packing and testing them took
           # CPU from the test modules on the smallest runner.
-          ignore-categories: ${{ matrix.os == 'ubuntu-latest' && 'Aot EngineTests' || 'Aot EngineTests Packaging NuGetPackageTests' }}
+          # On pull requests macOS also skips the PlatformNeutral suites, which Ubuntu and Windows
+          # already run, and runs the Reflection-mode engine tests here instead: aot.yml leaves
+          # macOS out of pull requests, so this is the only general macOS job a PR push queues.
+          ignore-categories: >-
+            ${{ matrix.os == 'ubuntu-latest' && 'Aot EngineTests'
+            || (matrix.os == 'macos-latest' && github.event_name == 'pull_request') && 'Aot Packaging NuGetPackageTests PlatformNeutral'
+            || 'Aot EngineTests Packaging NuGetPackageTests' }}
 
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.2
