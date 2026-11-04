@@ -108,3 +108,31 @@ public class WrappedArrayConstructorOmittedOptionalTests<T, U>(T first, U second
         await Assert.That(second).IsEqualTo(default(U));
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(string), typeof(int))]
+[Arguments("literal", 1)]
+[Arguments("first", "second")]
+[MethodDataSource(nameof(Rows))]
+public class WrappedArrayConstructorSuppliedOptionalTests<T, U>(T first, U second = default!)
+{
+    public static IEnumerable<TestDataRow<string[]>> Rows() => [new(new[] { "first", "second" })];
+
+    [Test, GenerateGenericTest(typeof(bool))]
+    public async Task SuppliedOptionalKeepsInferredTypes<V>()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(typeof(V)).IsEqualTo(typeof(bool));
+        if (typeof(U) == typeof(int))
+        {
+            await Assert.That(first).IsEqualTo((T)(object)"literal");
+            await Assert.That(second).IsEqualTo((U)(object)1);
+        }
+        else
+        {
+            await Assert.That(typeof(U)).IsEqualTo(typeof(string));
+            await Assert.That(first).IsEqualTo((T)(object)"first");
+            await Assert.That(second).IsEqualTo((U)(object)"second");
+        }
+    }
+}

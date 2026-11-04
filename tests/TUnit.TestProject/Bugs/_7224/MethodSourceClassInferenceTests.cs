@@ -352,3 +352,18 @@ public class WrappedArrayConstructorInferenceTests<T>(params T[] values)
         await Assert.That(values[1]).IsEqualTo((T)(object)"two");
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+public class ReferenceTupleSpreadClassInferenceTests<T>
+{
+    public static IEnumerable<Tuple<int, string>> Rows() => [System.Tuple.Create(1, "one")];
+
+    [Test, MethodDataSource(nameof(Rows))]
+    public async Task ReferenceTupleColumns(T value, string label)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)1);
+        await Assert.That(label).IsEqualTo("one");
+    }
+}

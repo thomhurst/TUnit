@@ -15,7 +15,7 @@ internal class Tests7224 : TestsBase
             await Assert.That(generated).Contains("instance.WrappedDelegateArray<global::System.Func<int>>(");
             await Assert.That(generated).Contains("instance.WrappedDelegateArrayWithFirst<global::System.Func<int>>(");
             await Assert.That(generated).Contains("instance.ExternalWrappedArray<global::System.Uri>(");
-            foreach (var method in new[] { "TupleExcessParams", "TupleExcessPlainArray", "TupleExcessParamsCollection", "ScalarEmptyPlainTrailing", "TupleEmptyPlainTrailing", "ConstructorArray", "WrappedArrayPlainTrailing", "WrappedArrayEmptyPlainTrailing", "NestedWrappedTuple", "BareWrappedTuple", "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "WrappedArrayPair", "WrappedArrayLaterParameter", "WrappedArrayOptional", "WrappedArraySuppliedOptional", "WrappedArrayEmptyParams", "WrappedArrayParamsCollection", "WrappedArrayLaterParamsCollection", "WrappedArrayParams", "WrappedArrayLaterParams", "OptionalFillsMissingType", "ReferenceTuple", "Interface", "BaseType", "MixedSources" })
+            foreach (var method in new[] { "ReferenceTupleColumns", "TupleExcessParams", "TupleExcessPlainArray", "TupleExcessParamsCollection", "ScalarEmptyPlainTrailing", "TupleEmptyPlainTrailing", "ConstructorArray", "WrappedArrayPlainTrailing", "WrappedArrayEmptyPlainTrailing", "NestedWrappedTuple", "BareWrappedTuple", "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "WrappedArrayPair", "WrappedArrayLaterParameter", "WrappedArrayOptional", "WrappedArraySuppliedOptional", "WrappedArrayEmptyParams", "WrappedArrayParamsCollection", "WrappedArrayLaterParamsCollection", "WrappedArrayParams", "WrappedArrayLaterParams", "OptionalFillsMissingType", "ReferenceTuple", "Interface", "BaseType", "MixedSources" })
             {
                 await Assert.That(generated).Contains($"instance.{method}(");
             }
@@ -27,6 +27,7 @@ internal class Tests7224 : TestsBase
         async files =>
         {
             var generated = string.Join(Environment.NewLine, files);
+            await Assert.That(generated).Contains("WrappedArrayConstructorSuppliedOptionalTests<string, string>");
             await Assert.That(generated).Contains("WrappedArrayConstructorOmittedOptionalTests<string, int>");
             await Assert.That(generated).Contains("instance.ExplicitTypesPreserveOmittedOptional(");
             await Assert.That(generated).Contains("ExplicitClassDeferredRowTests<string, int>");

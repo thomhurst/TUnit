@@ -8145,7 +8145,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var rowType = GetMethodDataSourceRowType(member, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation, out var spreadsReferenceArray);
             var inferred = rowType == null
                 ? null
-                : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType, spreadsReferenceArray, hasExplicitTypes: explicitClassTypes.Length > 0);
+                : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType, spreadsReferenceArray, testMethod.CompilationContext.Compilation, hasExplicitTypes: explicitClassTypes.Length > 0);
             if (GenericClassInferencePolicy.IncludesRow(inferred is null ? null : inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default), includeUninferred || matchesExplicitClassTypes))
             {
                 yield return attribute;
@@ -8161,7 +8161,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// constructor's single tuple parameter whole. Null when a type argument stays unknown or would be
     /// <c>object</c>. Mirrors reflection mode's <c>InferClassTypeArgumentsFromOwnMemberRowType</c> (#7208).
     /// </summary>
-    private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType, bool spreadsReferenceArray, bool hasExplicitTypes)
+    private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType, bool spreadsReferenceArray, Compilation compilation, bool hasExplicitTypes)
     {
         var constructors = classSymbol.InstanceConstructors
             .Where(constructor => constructor.DeclaredAccessibility == Accessibility.Public)
@@ -8172,17 +8172,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix));
         if (testConstructor != null)
         {
-            return InferClassTypesFromConstructorRow(testConstructor, rowType, classSymbol.TypeParameters, spreadsReferenceArray, hasExplicitTypes);
+            return InferClassTypesFromConstructorRow(testConstructor, rowType, classSymbol.TypeParameters, spreadsReferenceArray, compilation, hasExplicitTypes);
         }
 
         if (constructors.Length > 0 && !constructors.Any(constructor => constructor.Parameters.Length == 0))
         {
-            return InferClassTypesFromConstructorRow(constructors[0], rowType, classSymbol.TypeParameters, spreadsReferenceArray, hasExplicitTypes);
+            return InferClassTypesFromConstructorRow(constructors[0], rowType, classSymbol.TypeParameters, spreadsReferenceArray, compilation, hasExplicitTypes);
         }
 
         foreach (var constructor in constructors)
         {
-            if (InferClassTypesFromConstructorRow(constructor, rowType, classSymbol.TypeParameters, spreadsReferenceArray, hasExplicitTypes) is { } typeArguments)
+            if (InferClassTypesFromConstructorRow(constructor, rowType, classSymbol.TypeParameters, spreadsReferenceArray, compilation, hasExplicitTypes) is { } typeArguments)
             {
                 return typeArguments;
             }
@@ -8191,7 +8191,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol rowType, ImmutableArray<ITypeParameterSymbol> typeParameters, bool spreadsReferenceArray, bool hasExplicitTypes)
+    private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol rowType, ImmutableArray<ITypeParameterSymbol> typeParameters, bool spreadsReferenceArray, Compilation compilation, bool hasExplicitTypes)
     {
         // A tuple row fills one tuple parameter whole, as the runtime passes it, and otherwise spreads one column
         // per parameter. Like the runtime, which unwraps any ITuple, this treats a System.Tuple row as a value tuple one.
@@ -8202,19 +8202,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? tupleElements
             : [rowType];
         var typeArguments = new ITypeSymbol[typeParameters.Length];
+        var inferredFromPossiblyOmittedValue = false;
 
         for (var i = 0; i < typeParameters.Length; i++)
         {
             for (var j = 0; j < constructor.Parameters.Length && (spreadsReferenceArray || j < rowElements.Length) && typeArguments[i] == null; j++)
             {
-                // A spread array may omit optional or trailing collecting parameters. Explicit class types
-                // remain available when only a potentially absent value would infer a type argument.
-                if (spreadsReferenceArray && hasExplicitTypes && (constructor.Parameters[j].IsOptional
-                    || j == constructor.Parameters.Length - 1 && constructor.Parameters[j].Type is IArrayTypeSymbol { IsSZArray: true }))
-                {
-                    continue;
-                }
-
                 var elementType = spreadsReferenceArray ? rowType : rowElements[j];
                 if (elementType.SpecialType != SpecialType.System_Object
                     && MatchTypeParameter(
@@ -8225,6 +8218,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     && typeArgument.SpecialType != SpecialType.System_Object)
                 {
                     typeArguments[i] = typeArgument;
+                    inferredFromPossiblyOmittedValue |= spreadsReferenceArray && (constructor.Parameters[j].IsOptional
+                        || j == constructor.Parameters.Length - 1 && constructor.Parameters[j].Type is IArrayTypeSymbol { IsSZArray: true });
                 }
             }
 
@@ -8234,7 +8229,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        return typeArguments;
+        // Keep valid supplied optional bindings; only rejected candidates defer to explicit types.
+        return hasExplicitTypes && inferredFromPossiblyOmittedValue
+            && !ValidateClassTypeConstraints(constructor.ContainingType, typeArguments, compilation)
+                ? null
+                : typeArguments;
     }
 
     /// <summary>
@@ -8308,7 +8307,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var spreadsReferenceArray = false;
         var rowType = dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember,
             testMethod.CompilationContext.MethodDataSourceRowTypes, compilation, out spreadsReferenceArray,
-            unwrapBareTupleRow: !(testMethodParams.Length == 1 && testMethodParams[0].Type.IsTupleType));
+            unwrapBareTupleRow: !(testMethodParams.Length == 1 && GetTupleElementTypes(testMethodParams[0].Type) != null));
         if (rowType == null)
         {
             return null;
@@ -8316,11 +8315,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
-        if (!spreadsReferenceArray && rowType is INamedTypeSymbol { IsTupleType: true } tupleType
-            && !(testMethodParams.Length == 1 && testMethodParams[0].Type.IsTupleType))
+        if (!spreadsReferenceArray && GetTupleElementTypes(rowType) is { } tupleElements
+            && !(testMethodParams.Length == 1 && GetTupleElementTypes(testMethodParams[0].Type) != null))
         {
-            // A tuple row is spread across the test method's parameters
-            var tupleElements = tupleType.TupleElements;
+            // Value and reference tuple rows spread across the test method's parameters.
             var inferringClassTypes = genericParams.Any(parameter => parameter.TypeParameterKind == TypeParameterKind.Type);
             var trailingElementType = inferringClassTypes && testMethodParams.Length > 0 && testMethodParams[^1].CollectsTrailingArguments()
                 ? TupleArgumentHelper.GetTrailingElementType(testMethodParams[^1].Type)
@@ -8339,7 +8337,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // MethodDataSource method inference historically takes the last parameter's binding
                 // (#7121). Validate each parameter's own interfaces before merging those bindings.
                 var parameterMap = inferringClassTypes ? genericParamMap : new Dictionary<string, ITypeSymbol>();
-                if (!ProcessTypeForGenerics(parameterType, tupleElements[i].Type, genericParams, parameterMap))
+                if (!ProcessTypeForGenerics(parameterType, tupleElements[i], genericParams, parameterMap))
                 {
                     return null;
                 }
