@@ -12,6 +12,14 @@ namespace TUnit.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 {
+    private static readonly SymbolDisplayFormat TestDataTypeDisplayFormat =
+        new(
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+            genericsOptions: SymbolDisplayFormat.MinimallyQualifiedFormat.GenericsOptions,
+            memberOptions: SymbolDisplayFormat.MinimallyQualifiedFormat.MemberOptions,
+            parameterOptions: SymbolDisplayFormat.MinimallyQualifiedFormat.ParameterOptions,
+            miscellaneousOptions: SymbolDisplayFormat.MinimallyQualifiedFormat.MiscellaneousOptions);
+
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create(
             Rules.WrongArgumentTypeTestData,
@@ -622,8 +630,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 context.ReportDiagnostic(Diagnostic.Create(
                     Rules.WrongArgumentTypeTestData,
                     attribute.GetLocation(),
-                    string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
-                    string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
+                    string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(TestDataTypeDisplayFormat) ?? "null")),
+                    string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(TestDataTypeDisplayFormat) ?? "null")))
                 );
                 return;
             }
@@ -666,8 +674,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     Diagnostic.Create(
                         Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
-                        string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
-                        string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
+                        string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(TestDataTypeDisplayFormat) ?? "null")),
+                        string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(TestDataTypeDisplayFormat) ?? "null")))
                 );
                 return;
             }
@@ -708,8 +716,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     context.ReportDiagnostic(Diagnostic.Create(
                         Rules.WrongArgumentTypeTestData,
                         attribute.GetLocation(),
-                        string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
-                        string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
+                        string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(TestDataTypeDisplayFormat) ?? "null")),
+                        string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(TestDataTypeDisplayFormat) ?? "null")))
                     );
                     return;
                 }
@@ -744,8 +752,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 Diagnostic.Create(
                     Rules.WrongArgumentTypeTestData,
                     attribute.GetLocation(),
-                    string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")),
-                    string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) ?? "null")))
+                    string.Join(", ", unwrappedTypes.Select(t => t?.ToDisplayString(TestDataTypeDisplayFormat) ?? "null")),
+                    string.Join(", ", testParameterTypes.Select(t => t?.ToDisplayString(TestDataTypeDisplayFormat) ?? "null")))
             );
         }
     }

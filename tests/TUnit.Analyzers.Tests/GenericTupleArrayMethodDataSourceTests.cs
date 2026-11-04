@@ -97,7 +97,7 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
         {
             await Verifier.VerifyAnalyzerAsync(source,
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
-                    .WithArguments($"Fixture, CancellationToken, {sourceElement}", $"(Fixture, CancellationToken, {targetElement})"));
+                    .WithArguments($"C.Fixture, CancellationToken, {sourceElement}", $"(C.Fixture, CancellationToken, {targetElement})"));
         }
         else
         {
