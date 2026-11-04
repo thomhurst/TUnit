@@ -541,3 +541,23 @@ public class ExplicitDeferredOwnConstructorRows<T>(int id, T value) : DeferredOw
         }
     }
 }
+
+// Generated discovery currently adds extra inferred int entries in the interface fixtures above (#7446).
+[GenerateGenericTest(typeof(string))]
+[MethodDataSource(nameof(DeclaredRows))]
+[MethodDataSource(nameof(DeferredRows))]
+public class ExplicitDeclaredAndDeferredRows<T>(T value)
+{
+    public static IEnumerable<string> DeclaredRows() => ["first"];
+    public static IEnumerable<object> DeferredRows() => ["second"];
+
+    [Test]
+    [Arguments("method")]
+    public void Test(T methodValue)
+    {
+        if (value is not ("first" or "second") || methodValue is not "method")
+        {
+            throw new InvalidOperationException("Expected declared and deferred constructor rows.");
+        }
+    }
+}

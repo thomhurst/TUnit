@@ -2795,6 +2795,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var dsWriter = new CodeWriter(includeHeader: false);
             if (classDataSourcePartition is not null)
             {
+                if (classDataSourcePartition.AlwaysActiveSources.Length > 0)
+                {
+                    dsWriter.AppendLine("[");
+                    dsWriter.Append("..");
+                }
                 // Splits the rows of the sources whose row types the generator cannot see by the class type
                 // arguments they infer, as reflection mode does at discovery (#7210)
                 var typeArguments = string.Join(", ", entry.ClassTypeArgs.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"));
@@ -2837,6 +2842,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     dsWriter.Append($", {string.Join(", ", classDataSourcePartition.PartitionedIndices.Select(i => i.ToString(CultureInfo.InvariantCulture)))}");
                 }
                 dsWriter.Append(")");
+                if (classDataSourcePartition.AlwaysActiveSources.Length > 0)
+                {
+                    dsWriter.AppendLine(",");
+                    foreach (var source in classDataSourcePartition.AlwaysActiveSources)
+                    {
+                        GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, source, GetClassRowConstructor(concreteTypeSymbol), concreteTypeSymbol);
+                    }
+                    dsWriter.Append("]");
+                }
             }
             writer.AppendLine($"classDataSources: {dsWriter},");
         }
@@ -2845,8 +2859,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// <summary>
     /// The class data sources of an instantiation whose rows are split at run time by the class type arguments they
     /// infer. <paramref name="PartitionedIndices"/> are the sources whose row types the generator cannot see.
+    /// <paramref name="AlwaysActiveSources"/> are deferred own-member sources appended outside the partition,
+    /// independently of whether a matching inferred constructor group exists.
     /// </summary>
-    private sealed record ClassDataSourcePartition(AttributeData[] DataSources, int[] PartitionedIndices, GenericClassInferencePolicy.RowFallback Fallback);
+    private sealed record ClassDataSourcePartition(AttributeData[] DataSources, int[] PartitionedIndices, GenericClassInferencePolicy.RowFallback Fallback, AttributeData[] AlwaysActiveSources);
 
     /// <summary>
     /// For an instantiation of a generic class whose class-level data sources include one whose row types the
@@ -2930,12 +2946,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // The class rows scoped to this instantiation, with every untyped source, in declaration order
             for (var i = 0; i < allClassDataSources.Length; i++)
             {
+                // Reflection appends deferred own-member rows independently of inferred groups.
+                if (deferredOwnSources.Any(source => AreSameAttribute(source, allClassDataSources[i])))
+                {
+                    continue;
+                }
                 if (isUntyped[i])
                 {
-                    if (!deferredOwnSources.Any(source => AreSameAttribute(source, allClassDataSources[i])))
-                    {
-                        partitionedIndices.Add(dataSources.Count);
-                    }
+                    partitionedIndices.Add(dataSources.Count);
                     dataSources.Add(allClassDataSources[i]);
                 }
                 else if (entry.IsSpecificClassDataSource(allClassDataSources[i]))
@@ -2959,12 +2977,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             for (var i = 0; i < allClassDataSources.Length; i++)
             {
+                // Reflection appends deferred own-member rows independently of inferred groups.
+                if (deferredOwnSources.Any(source => AreSameAttribute(source, allClassDataSources[i])))
+                {
+                    continue;
+                }
                 if (isUntyped[i])
                 {
-                    if (!deferredOwnSources.Any(source => AreSameAttribute(source, allClassDataSources[i])))
-                    {
-                        partitionedIndices.Add(dataSources.Count);
-                    }
+                    partitionedIndices.Add(dataSources.Count);
                     dataSources.Add(allClassDataSources[i]);
                 }
                 else if (!hasCompileTimeClassRow || matchesTypedSource[i])
@@ -2979,7 +2999,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             : GenericClassInferencePolicy.SelectRowFallback(hasCompileTimeClassRow, hasClassArgumentsRows);
 
         return new ClassDataSourcePartition(dataSources.ToArray(), partitionedIndices.ToArray(),
-            entry.OnlyExplicitFallback ? GenericClassInferencePolicy.RowFallback.OnlyWhenNoRowInfers : fallback);
+            entry.OnlyExplicitFallback ? GenericClassInferencePolicy.RowFallback.OnlyWhenNoRowInfers : fallback,
+            entry.OnlyExplicitFallback ? [] : deferredOwnSources);
     }
 
     /// <summary>
