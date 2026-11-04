@@ -29,3 +29,21 @@ public class ConstrainedMethodSourceClassTests<T> where T : class
     [Test, MethodDataSource(nameof(Rows))]
     public void InvalidClassType(T value) { }
 }
+
+public interface IInferenceMarker<T>;
+public class AmbiguousInferenceRow : IInferenceMarker<int>, IInferenceMarker<string>;
+public class ReversedAmbiguousInferenceRow : IInferenceMarker<string>, IInferenceMarker<int>;
+
+[EngineTest(ExpectedResult.Failure)]
+#pragma warning disable TUnit0001 // These incompatible sources deliberately exercise discovery failures.
+public class AmbiguousMethodSourceClassTests<T>
+{
+    public static IEnumerable<AmbiguousInferenceRow> Rows() => [new()];
+    public static IEnumerable<ReversedAmbiguousInferenceRow> ReversedRows() => [new()];
+
+    [Test, MethodDataSource(nameof(Rows))]
+    public void CannotInfer(IInferenceMarker<T> value) { }
+
+    [Test, MethodDataSource(nameof(ReversedRows))]
+    public void CannotInferReversed(IInferenceMarker<T> value) { }
+}

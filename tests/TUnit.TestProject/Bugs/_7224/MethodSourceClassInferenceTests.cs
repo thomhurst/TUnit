@@ -98,3 +98,14 @@ public class MultipleMethodSourceClassInferenceTests<T>
 
 public class InferenceBase<T>;
 public class InferenceDerived<T> : InferenceBase<T>;
+
+[EngineTest(ExpectedResult.Pass)]
+public class NullableMethodSourceClassInferenceTests<T> where T : struct
+{
+    public static IEnumerable<int> Rows() => [1];
+
+    #pragma warning disable TUnit0001 // Nullable generic class inference is supported at runtime; analyzer follow-up: #7573.
+    [Test, MethodDataSource(nameof(Rows))]
+    #pragma warning restore TUnit0001
+    public async Task NullableValue(T? value) => await Assert.That(value).IsEqualTo((T)(object)1);
+}

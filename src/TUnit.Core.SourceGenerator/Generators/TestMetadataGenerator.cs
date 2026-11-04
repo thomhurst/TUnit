@@ -8284,14 +8284,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var tupleElements = tupleType.TupleElements;
             for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
             {
-                ProcessTypeForGenerics(testMethodParams[i].Type, tupleElements[i].Type, genericParams, genericParamMap);
+                if (!ProcessTypeForGenerics(testMethodParams[i].Type, tupleElements[i].Type, genericParams, genericParamMap))
+                {
+                    return null;
+                }
             }
         }
         else if (testMethodParams.Length > 0)
         {
             // Any other row is a single value for the first parameter. This includes typed arrays
             // such as int[]: only object[] rows are spread (DataSourceHelpers.ToObjectArray).
-            ProcessTypeForGenerics(testMethodParams[0].Type, rowType, genericParams, genericParamMap);
+            if (!ProcessTypeForGenerics(testMethodParams[0].Type, rowType, genericParams, genericParamMap))
+            {
+                return null;
+            }
         }
 
         // Build the result array in the correct order
@@ -8817,50 +8823,74 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             : null;
     }
 
-    private static void ProcessTypeForGenerics(ITypeSymbol paramType, ITypeSymbol actualType, ImmutableArray<ITypeParameterSymbol> genericParams, Dictionary<string, ITypeSymbol> genericParamMap)
+    private static bool ProcessTypeForGenerics(ITypeSymbol paramType, ITypeSymbol actualType, ImmutableArray<ITypeParameterSymbol> genericParams, Dictionary<string, ITypeSymbol> genericParamMap)
     {
-        // Direct type parameter match
         if (paramType is ITypeParameterSymbol typeParam && genericParams.Contains(typeParam))
         {
+            if (genericParamMap.TryGetValue(typeParam.Name, out var existing))
+            {
+                return SymbolEqualityComparer.Default.Equals(existing, actualType);
+            }
+
             genericParamMap[typeParam.Name] = actualType;
-            return;
+            return true;
         }
 
-        // Arrays such as T[] fed an int[]
+        // A non-null nullable argument is boxed as its underlying value type at runtime.
+        if (paramType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableParam)
+        {
+            var underlyingType = actualType is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableActual
+                ? nullableActual.TypeArguments[0]
+                : actualType;
+            return ProcessTypeForGenerics(nullableParam.TypeArguments[0], underlyingType, genericParams, genericParamMap);
+        }
+
         if (paramType is IArrayTypeSymbol paramArray
             && actualType is IArrayTypeSymbol actualArray
             && paramArray.Rank == actualArray.Rank)
         {
-            ProcessTypeForGenerics(paramArray.ElementType, actualArray.ElementType, genericParams, genericParamMap);
-            return;
+            return ProcessTypeForGenerics(paramArray.ElementType, actualArray.ElementType, genericParams, genericParamMap);
         }
 
-        // Match the same generic construction on the value, its base types and its interfaces.
+        // Inspect every matching construction: multiple interfaces must agree on each binding.
         if (paramType is INamedTypeSymbol { IsGenericType: true } namedParamType)
         {
             for (var candidate = actualType as INamedTypeSymbol; candidate != null; candidate = candidate.BaseType)
             {
-                MapMatchingType(candidate);
+                if (!MapMatchingType(candidate))
+                {
+                    return false;
+                }
             }
 
             foreach (var implemented in actualType.AllInterfaces)
             {
-                MapMatchingType(implemented);
+                if (!MapMatchingType(implemented))
+                {
+                    return false;
+                }
             }
 
-            void MapMatchingType(INamedTypeSymbol candidate)
+            bool MapMatchingType(INamedTypeSymbol candidate)
             {
                 if (!SymbolEqualityComparer.Default.Equals(namedParamType.OriginalDefinition, candidate.OriginalDefinition))
                 {
-                    return;
+                    return true;
                 }
 
                 for (var i = 0; i < namedParamType.TypeArguments.Length; i++)
                 {
-                    ProcessTypeForGenerics(namedParamType.TypeArguments[i], candidate.TypeArguments[i], genericParams, genericParamMap);
+                    if (!ProcessTypeForGenerics(namedParamType.TypeArguments[i], candidate.TypeArguments[i], genericParams, genericParamMap))
+                    {
+                        return false;
+                    }
                 }
+
+                return true;
             }
         }
+
+        return true;
     }
 
     /// <summary>
