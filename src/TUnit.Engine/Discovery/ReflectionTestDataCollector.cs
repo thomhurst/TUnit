@@ -2557,7 +2557,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var typeArguments = new Type?[genericParameterCount];
 
-        if (scope == GenericParameterScope.Class && dataParameters.Length == 1 && GetValueTupleElementTypes(dataParameters[0].ParameterType) is not null)
+        if (scope == GenericParameterScope.Class && dataParameters.Length == 1 && GetTupleElementTypes(dataParameters[0].ParameterType) is not null)
         {
             if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, scope))
             {
@@ -2609,10 +2609,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         else if (dataParameters.Length > 1 && (spreadsReferenceArray || requiredCount <= 1))
         {
             // A scalar binds only to the first parameter. A wrapped reference array spreads its
-            // elements across the data parameters, including generic parameters after the first.
+            // elements across required data parameters, including generic parameters after the first.
+            // Its declared type does not reveal its length, so trailing optional values may be omitted.
             var suppliedParameterCount = spreadsReferenceArray ? dataParameters.Length : 1;
             for (var i = 0; i < suppliedParameterCount; i++)
             {
+                if (i > 0 && (dataParameters[i].IsOptional || dataParameters[i].HasDefaultValue))
+                {
+                    continue;
+                }
+
                 if (!MapTypedRowParameters(dataParameters[i].ParameterType, rowType, typeArguments, scope))
                 {
                     return null;

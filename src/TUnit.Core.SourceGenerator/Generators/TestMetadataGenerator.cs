@@ -8293,11 +8293,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (testMethodParams.Length > 0)
         {
-            // Wrapped reference arrays spread over every data parameter. Other rows bind whole
+            // Wrapped reference arrays spread over required data parameters. Their declared type
+            // does not reveal whether trailing optional values are supplied. Other rows bind whole
             // to the first parameter, including bare typed arrays such as int[].
             var suppliedParameterCount = spreadsReferenceArray ? testMethodParams.Length : 1;
             for (var i = 0; i < suppliedParameterCount; i++)
             {
+                if (i > 0 && testMethodParams[i].IsOptional)
+                {
+                    continue;
+                }
+
                 if (!ProcessTypeForGenerics(testMethodParams[i].Type, rowType, genericParams, genericParamMap))
                 {
                     return null;

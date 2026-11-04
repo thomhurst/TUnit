@@ -21,6 +21,7 @@ public class MethodSourceClassInferenceTests<T>
 
     public static IEnumerable<TestDataRow<string[]>> WrappedRows() => [new(new[] { "one" })];
     public static IEnumerable<TestDataRow<string[]>> WrappedPairRows() => [new(new[] { "one", "two" })];
+    public static IEnumerable<Tuple<string, int>> ReferenceTupleRows() => [System.Tuple.Create("one", 1)];
     public static IEnumerable<List<int>> ListRows() => [new() { 1 }];
     public static IEnumerable<InferenceDerived<int>> DerivedRows() => [new()];
     public static IEnumerable<object> UntypedRows() => [1];
@@ -40,6 +41,20 @@ public class MethodSourceClassInferenceTests<T>
     {
         await Assert.That(label).IsEqualTo("one");
         await Assert.That(value).IsEqualTo((T)(object)"two");
+    }
+
+    [Test, MethodDataSource(nameof(WrappedRows))]
+    public async Task WrappedArrayOptional(T first, IEnumerable<T>? rest = null)
+    {
+        await Assert.That(first).IsEqualTo((T)(object)"one");
+        await Assert.That(rest).IsNull();
+    }
+
+    [Test, MethodDataSource(nameof(ReferenceTupleRows))]
+    public async Task ReferenceTuple(Tuple<T, int> value)
+    {
+        await Assert.That(value.Item1).IsEqualTo((T)(object)"one");
+        await Assert.That(value.Item2).IsEqualTo(1);
     }
 
     [Test, MethodDataSource(nameof(ListRows))]
