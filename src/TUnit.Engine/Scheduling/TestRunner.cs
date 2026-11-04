@@ -134,7 +134,10 @@ public sealed class TestRunner
                 {
                     // Use the coordinator's early-skip path so tracked objects, row scopes,
                     // completion accounting and context resources follow the normal cleanup path.
-                    test.Context.SkipReason ??= "Skipped due to failed dependencies";
+                    if (string.IsNullOrEmpty(test.Context.SkipReason))
+                    {
+                        test.Context.SkipReason = "Skipped due to failed dependencies";
+                    }
                     break;
                 }
             }

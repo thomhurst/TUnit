@@ -176,6 +176,27 @@ public class TestRunnerTests
         await Assert.That(dependent.Context.SkipReason).IsEqualTo("Existing skip reason");
     }
 
+    [Test]
+    [Arguments(null)]
+    [Arguments("")]
+    [Arguments("Existing skip reason")]
+    public async Task DependencySkip_PreservesOnlyNonEmptySkipReasons(string? existingReason)
+    {
+        var runner = CreateRunner(out var coordinator);
+        var dependency = CreateTest("failed-dependency");
+        dependency.State = TestState.Failed;
+        dependency.ExecutionTask = Task.CompletedTask;
+        var dependent = CreateTest("skipped-dependent", [dependency]);
+        dependent.Context.SkipReason = existingReason;
+
+        await runner.ExecuteTestAsync(dependent, CancellationToken.None);
+
+        await Assert.That(coordinator.GetCallCount(dependent)).IsEqualTo(1);
+        await Assert.That(dependent.State).IsEqualTo(TestState.Skipped);
+        await Assert.That(dependent.Context.SkipReason).IsEqualTo(
+            string.IsNullOrEmpty(existingReason) ? "Skipped due to failed dependencies" : existingReason);
+    }
+
     private static TestRunner CreateRunner(out FakeTestCoordinator coordinator, NotInParallelLock? executionLock = null)
     {
         coordinator = new FakeTestCoordinator();
