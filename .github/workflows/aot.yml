@@ -256,6 +256,7 @@ jobs:
           }
 
       - name: Download latest captured Windows engine dump
+        id: download_name_based
         if: inputs.analyze_windows_dump_artifact == ''
         uses: actions/download-artifact@v8.0.2
         with:
@@ -264,19 +265,37 @@ jobs:
           github-token: ${{ github.token }}
           path: captured-dump
 
+      - name: Record name-based dump download failure
+        if: ${{ always() && steps.download_name_based.outcome == 'failure' }}
+        shell: pwsh
+        env:
+          DUMP_RUN_ID: ${{ inputs.analyze_windows_dump_run }}
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          "Name-based Windows dump download failed for run $env:DUMP_RUN_ID" | Set-Content analysis/download-error.txt
+          throw 'Name-based Windows dump download failed'
+
       - name: Extract managed stacks and async waits
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
         shell: pwsh
         run: |
-          dotnet tool install --global dotnet-dump --version 10.0.750501
-          if ($LASTEXITCODE -ne 0) { throw 'dotnet-dump installation failed' }
-          $dumps = @(Get-ChildItem captured-dump -Recurse -Filter 'hangdump.windows-reflection-pass.dmp')
-          if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
           New-Item -ItemType Directory -Path analysis -Force | Out-Null
-          dotnet-dump analyze $dumps[0].FullName -c 'clrthreads' -c 'threadpool' -c 'syncblk' -c 'clrstack -all' -c 'dumpasync' -c 'exit' *> analysis/managed-stacks.txt
-          if ($LASTEXITCODE -ne 0) { throw 'Dump analysis failed; see managed-stacks.txt' }
+          try {
+            dotnet tool install --global dotnet-dump --version 10.0.750501
+            if ($LASTEXITCODE -ne 0) { throw 'dotnet-dump installation failed' }
+            $dumps = @(Get-ChildItem captured-dump -Recurse -Filter 'hangdump.windows-reflection-pass.dmp')
+            if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
+            dotnet-dump analyze $dumps[0].FullName -c 'clrthreads' -c 'threadpool' -c 'syncblk' -c 'clrstack -all' -c 'dumpasync' -c 'exit' *> analysis/managed-stacks.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Dump analysis failed; see managed-stacks.txt' }
+          } catch {
+            $_ | Out-String | Set-Content analysis/managed-analysis-error.txt
+            throw
+          }
 
       # dotnet-dump cannot show the native wait inside Thread.StartInternal (#7554).
       - name: Extract native thread waits
+        if: ${{ !cancelled() }}
         timeout-minutes: 5
         shell: pwsh
         run: |
