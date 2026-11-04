@@ -78,4 +78,23 @@ public class PreservedGenericTupleTests
         await Assert.That(token.CanBeCanceled).IsTrue();
     }
 
+    public object NullValueTupleRow() => new ValueTuple<string?>(null);
+
+    public object NullReferenceTupleRow() => Tuple.Create<string?>(null);
+
+    [Test, GenerateGenericTest(typeof(object)), InstanceMethodDataSource(nameof(NullValueTupleRow))]
+    public async Task NullValueTupleToReferenceTuple<T>(CancellationToken token, Tuple<T> row)
+    {
+        await Assert.That(row).IsNotNull();
+        await Assert.That(row.Item1).IsNull();
+        await Assert.That(token.CanBeCanceled).IsTrue();
+    }
+
+    [Test, GenerateGenericTest(typeof(object)), InstanceMethodDataSource(nameof(NullReferenceTupleRow))]
+    public async Task NullReferenceTupleConversion<T>(Tuple<T> row)
+    {
+        await Assert.That(row).IsNotNull();
+        await Assert.That(row.Item1).IsNull();
+    }
+
 }

@@ -22,11 +22,21 @@ public static class DataSourceHelpers
     // Reference-tuple targets and sources need every element for invoker conversions. Value tuples can
     // retain their nested shape unless mutable element boxes must reach invocation.
     internal static bool ShouldFlattenErasedTuple(object tuple, ParameterMetadata parameter)
-        => parameter.TypeInfo is ConstructedGeneric generic
-                && generic.GenericDefinition.FullName is { } name
-                && name.StartsWith("System.Tuple`", StringComparison.Ordinal)
+    {
+        var targetName = (parameter.TypeInfo as ConstructedGeneric)?.GenericDefinition.FullName;
+        var targetIsReferenceTuple = targetName?.StartsWith("System.Tuple`", StringComparison.Ordinal) == true;
+
+        // A flattened [null] is indistinguishable from a null row. The reference-tuple
+        // invoker can reconstruct a preserved singleton containing null, including conversions.
+        if (targetName == "System.Tuple`1" && UnwrapTupleAot(tuple) is [null])
+        {
+            return false;
+        }
+
+        return targetIsReferenceTuple
             || !tuple.GetType().IsValueType
             || RequiresFlattenedTupleBinding(tuple);
+    }
 
     private static readonly ConcurrentDictionary<Type, bool> TupleMutableElementShapes = new();
 
