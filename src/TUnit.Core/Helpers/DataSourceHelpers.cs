@@ -33,6 +33,13 @@ public static class DataSourceHelpers
             return false;
         }
 
+        // Keep singleton value-tuple rows wrapped even across tuple families. An element
+        // may itself be a singleton tuple; flattening would lose which container is the row.
+        if (targetName == "System.ValueTuple`1")
+        {
+            return RequiresFlattenedTupleBinding(tuple);
+        }
+
         return targetIsReferenceTuple
             || !tuple.GetType().IsValueType
             || RequiresFlattenedTupleBinding(tuple);

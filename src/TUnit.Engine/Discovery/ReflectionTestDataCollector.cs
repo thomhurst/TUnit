@@ -3917,12 +3917,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 var singleDataIndex = tupleElements is not null
                     ? Array.FindIndex(parameters, static p => p.ParameterType != typeof(CancellationToken))
                     : -1;
+                // Singleton value-tuple rows stay wrapped through DataUnwrapper, including
+                // incompatible containers whose elements need conversion. Match the generated
+                // invoker instead of treating that container as an already-flattened element.
                 if (tupleElements is { Length: > 0 }
                     && args.Length == tupleElements.Length + parameters.Length - 1
                     && (tupleElements.Length > 1
                         || args[singleDataIndex] is { } singleValue
                             && !(DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue) is [null])
-                            && !parameters[singleDataIndex].ParameterType.IsInstanceOfType(singleValue)))
+                            && !parameters[singleDataIndex].ParameterType.IsInstanceOfType(singleValue)
+                            && !(parameters[singleDataIndex].ParameterType.IsValueType
+                                && DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue).Length == 1)))
                 {
                     // DataUnwrapper spreads an incompatible tuple so each element can be
                     // converted before constructing the target, as the generated invoker does.

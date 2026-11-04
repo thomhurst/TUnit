@@ -132,4 +132,31 @@ public class PreservedGenericTupleTests
         await Assert.That(row.Item1).IsEqualTo((T)(object)"text");
     }
 
+    public object NestedSingletonRow() => new ValueTuple<ValueTuple<int>>(new ValueTuple<int>(1));
+
+    public object NestedReferenceSingletonRow() => Tuple.Create(new ValueTuple<int>(1));
+
+    [Test, InstanceMethodDataSource(nameof(NestedSingletonRow))]
+    public async Task NestedSingletonElement(ValueTuple<object> row)
+    {
+        await Assert.That(row.Item1 is ValueTuple<int>).IsTrue();
+        await Assert.That(((ValueTuple<int>)row.Item1).Item1).IsEqualTo(1);
+    }
+
+    [Test, InstanceMethodDataSource(nameof(NestedReferenceSingletonRow))]
+    public Task NestedReferenceSingletonElement(ValueTuple<object> row) => NestedSingletonElement(row);
+
+    [Test, GenerateGenericTest(typeof(object)), InstanceMethodDataSource(nameof(NestedSingletonRow))]
+    public async Task GenericNestedSingletonElement<T>(CancellationToken token, ValueTuple<T> row)
+    {
+        await Assert.That(row.Item1 is ValueTuple<int>).IsTrue();
+        await Assert.That(token.CanBeCanceled).IsTrue();
+    }
+
+    [Test, GenerateGenericTest(typeof(object)), InstanceMethodDataSource(nameof(NestedReferenceSingletonRow))]
+    public async Task GenericNestedReferenceSingletonElement<T>(ValueTuple<T> row)
+    {
+        await Assert.That(row.Item1 is ValueTuple<int>).IsTrue();
+    }
+
 }

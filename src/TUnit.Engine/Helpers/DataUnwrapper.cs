@@ -153,8 +153,11 @@ internal class DataUnwrapper
         if (dataParameterCount == 1 && TupleHelper.IsTupleType(lastDataParameterType))
         {
             // Keep the runtime tuple intact until generic inference closes the parameter type.
+            // Singleton value-tuple conversion also needs the outer container: its element
+            // can itself be a tuple, indistinguishable from a preserved row after flattening.
             if (!DataSourceHelpers.RequiresFlattenedTupleBinding(values[0]!)
-                && (lastDataParameterType.ContainsGenericParameters || lastDataParameterType.IsInstanceOfType(values[0])))
+                && (lastDataParameterType.ContainsGenericParameters || lastDataParameterType.IsInstanceOfType(values[0])
+                    || lastDataParameterType.IsGenericType && lastDataParameterType.GetGenericTypeDefinition() == typeof(ValueTuple<>)))
             {
                 return values;
             }
