@@ -5,6 +5,208 @@ namespace TUnit.Analyzers.Tests;
 public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 {
     [Test]
+    [Arguments("int")]
+    [Arguments("int?")]
+    public async Task Nullable_Generic_Class_Parameter_Accepts_Value_Data(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests<T> where T : struct, IComparable<T>
+            {
+                public static IEnumerable<{{rowType}}> Rows() => [1];
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run(T? value) { }
+            }
+            """);
+    }
+
+    [Test]
+    [Arguments("int")]
+    [Arguments("int?")]
+    public async Task Nullable_Generic_Class_Parameter_With_Explicit_Type_Accepts_Convertible_Data(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [GenerateGenericTest(typeof(double))]
+            public class Tests<T> where T : struct, IComparable<double>
+            {
+                public static IEnumerable<{{rowType}}> Rows() => [1];
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run(T? value) { }
+            }
+            """);
+    }
+
+    [Test]
+    [Arguments("int")]
+    [Arguments("int?")]
+    public async Task Nullable_Generic_Class_Parameter_With_Constructor_Inferred_Type_Accepts_Convertible_Data(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [Arguments(1d)]
+            public class Tests<T>(T seed) where T : struct, IComparable<double>
+            {
+                public static IEnumerable<Func<{{rowType}}>> Rows() { yield return () => 1; }
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run(T? value) { }
+            }
+            """);
+    }
+
+    [Test]
+    [Arguments("int")]
+    [Arguments("int?")]
+    public async Task Nullable_Generic_Class_Parameter_With_Inherited_Constructor_Data_Accepts_Convertible_Data(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [Arguments(1d)]
+            public abstract class Base { }
+            public class Tests<T>(T seed) : Base where T : struct, IComparable<double>
+            {
+                public static IEnumerable<Func<{{rowType}}>> Rows() { yield return () => 1; }
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run(T? value) { }
+            }
+            """);
+    }
+
+    [Test]
+    [Arguments("int", false)]
+    [Arguments("int?", false)]
+    [Arguments("int", true)]
+    [Arguments("int?", true)]
+    public async Task Independently_Supplied_Nullable_Class_Type_Does_Not_Affect_Peer_Constraints(
+        string rowType, bool constructorSuppliesType)
+    {
+        var attribute = constructorSuppliesType ? "[Arguments(1d)]" : "[GenerateGenericTest(typeof(double))]";
+        var constructor = constructorSuppliesType ? "(T seed)" : "";
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            {{attribute}}
+            public class Tests<T>{{constructor}} where T : struct
+            {
+                public static IEnumerable<Func<({{rowType}}, double)>> Rows() { yield return () => (1, 2d); }
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run<U>(T? first, U second) where U : IComparable<T> { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Nullable_Generic_Class_Parameter_With_Conflicting_Inference_Accepts_Convertible_Data()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests<T> where T : struct, IComparable<double>
+            {
+                public static IEnumerable<Func<(int?, double?)>> Rows() { yield return () => (1, 2d); }
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run(T? first, T? second) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Nullable_Generic_Class_Parameter_With_Certain_Inference_Rejects_Constraint_Violation()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests<T> where T : struct, IComparable<double>
+            {
+                public static IEnumerable<Func<(int?, int)>> Rows() { yield return () => (1, 2); }
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(T? first, T? second) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("int?, int", "T?, T?"));
+    }
+
+    [Test]
+    [Arguments("int")]
+    [Arguments("int?")]
+    public async Task Type_Free_Constructor_Does_Not_Bypass_Nullable_Constraint_Check(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [Arguments("seed")]
+            public class Tests<T>(string seed) where T : struct, IDisposable
+            {
+                public static IEnumerable<Func<{{rowType}}>> Rows() => [];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(T? value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments(rowType, "T?"));
+    }
+
+    [Test]
+    public async Task Explicit_Class_Type_Does_Not_Bypass_Data_Source_Overload_Argument_Matching()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [GenerateGenericTest(typeof(int))]
+            public class Tests<T> where T : struct
+            {
+                public static IEnumerable<int> Rows(T? input) => [1];
+                public static IEnumerable<string> Rows(string input) => [input];
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object[] { "hello" })]
+                public void Run(string value) { }
+            }
+            """);
+    }
+
+    [Test]
+    [Arguments("string", "struct")]
+    [Arguments("int", "struct, System.IDisposable")]
+    public async Task Nullable_Generic_Class_Parameter_Rejects_Constraint_Violation(string rowType, string constraints)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests<T> where T : {{constraints}}
+            {
+                public static IEnumerable<{{rowType}}> Rows() => [];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(T? value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0)
+                .WithArguments(rowType, "T?"));
+    }
+
+    [Test]
     public async Task Private_Intermediate_Source_Does_Not_Hide_Public_Base_Overload()
     {
         await Verifier.VerifyAnalyzerAsync(
