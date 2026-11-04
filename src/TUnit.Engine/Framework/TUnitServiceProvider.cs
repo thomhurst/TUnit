@@ -247,11 +247,9 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
         var testRunner = Register(
             new TestRunner(
                 testCoordinator,
-                MessageBus,
                 isFailFastEnabled,
                 FailFastCancellationSource,
                 Logger,
-                testStateManager,
                 ParallelLimitLockProvider,
                 notInParallelLock));
 

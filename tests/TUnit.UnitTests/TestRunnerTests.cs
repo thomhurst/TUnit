@@ -133,6 +133,7 @@ public class TestRunnerTests
         await runner.ExecuteTestAsync(dependent, cancellationToken);
 
         await Assert.That(dependent.State).IsEqualTo(TestState.Skipped);
+        await Assert.That(coordinator.GetCallCount(dependent)).IsEqualTo(1);
         await Assert.That(coordinator.GetCallCount(firstCycleTest)).IsEqualTo(0);
         await Assert.That(coordinator.GetCallCount(secondCycleTest)).IsEqualTo(0);
     }
@@ -155,11 +156,9 @@ public class TestRunnerTests
 
         return new TestRunner(
             coordinator,
-            new FakeMessageBus(),
             isFailFastEnabled: false,
             new CancellationTokenSource(),
             logger: null!,
-            new TestStateManager(),
             new ParallelLimitLockProvider(),
             new NotInParallelLock());
     }
@@ -302,14 +301,14 @@ public class TestRunnerTests
                 return CompleteAfterAsync(test, executionTask);
             }
 
-            test.SetResult(TestState.Passed);
+            test.SetResult(string.IsNullOrEmpty(test.Context.SkipReason) ? TestState.Passed : TestState.Skipped);
             return default;
         }
 
         private static async ValueTask CompleteAfterAsync(AbstractExecutableTest test, Task executionTask)
         {
             await executionTask.ConfigureAwait(false);
-            test.SetResult(TestState.Passed);
+            test.SetResult(string.IsNullOrEmpty(test.Context.SkipReason) ? TestState.Passed : TestState.Skipped);
         }
     }
 
