@@ -72,3 +72,39 @@ public class MethodSourceConversionTests
         await Assert.That(other).IsEqualTo(47);
     }
 }
+
+public sealed class InheritedClassSourceValue
+{
+    public static implicit operator int(InheritedClassSourceValue value) => 48;
+}
+
+[MethodDataSource(typeof(InheritedClassSourceBase), nameof(InheritedClassSourceBase.Rows))]
+public abstract class InheritedClassSourceBase
+{
+    public static InheritedClassSourceValue Rows() => new();
+}
+
+public class InheritedClassSourceTests(int value) : InheritedClassSourceBase
+{
+    [Test]
+    public async Task ConvertsInheritedSource() => await Assert.That(value).IsEqualTo(48);
+}
+
+public sealed class PropertySourceValue
+{
+    public static implicit operator int(PropertySourceValue value) => 49;
+}
+
+public abstract class PropertySourceBase
+{
+    public static PropertySourceValue Rows() => new();
+
+    [MethodDataSource(nameof(Rows))]
+    public int Value { get; set; }
+}
+
+public class PropertySourceConversionTests : PropertySourceBase
+{
+    [Test]
+    public async Task ConvertsInheritedProperty() => await Assert.That(Value).IsEqualTo(49);
+}

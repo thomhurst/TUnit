@@ -7,6 +7,76 @@ namespace TUnit.Core.SourceGenerator.Tests;
 public class AotConverterScanTests
 {
     [Test]
+    public async Task HandlesInheritedPropertyAndAmbiguousSources()
+    {
+        const string providerSource = """
+            public struct HiddenRow { public static implicit operator int(HiddenRow value) => 44; }
+            public struct ClassRow { public static implicit operator int(ClassRow value) => 42; }
+            public class Provider
+            {
+                protected class HiddenRows : System.Collections.Generic.List<HiddenRow> { }
+                protected static HiddenRows Hidden() => new();
+                public static ClassRow ClassData() => new();
+            }
+            """;
+        const string source = """
+            using TUnit.Core;
+            public struct PropertyRow { public static implicit operator int(PropertyRow value) => 43; }
+            public struct AmbiguousRow { public static implicit operator Target(AmbiguousRow value) => new(); }
+            public struct Target { public static implicit operator Target(AmbiguousRow value) => new(); }
+            public struct ExplicitRow { public static explicit operator ExplicitTarget(ExplicitRow value) => new(); }
+            public struct ExplicitTarget { public static explicit operator ExplicitTarget(ExplicitRow value) => new(); }
+            public struct LocalRow { public static implicit operator int(LocalRow value) => 45; }
+            [MethodDataSource(typeof(Provider), nameof(Provider.ClassData))]
+            public class Base
+            {
+                public static PropertyRow PropertyData() => new();
+                [MethodDataSource(nameof(PropertyData))]
+                public int Value { get; set; }
+            }
+            public class Tests : Base
+            {
+                public Tests(int value) { }
+                public static AmbiguousRow Rows() => new();
+                public static ExplicitRow ExplicitRows() => new();
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Ambiguous(object value) { }
+                [Test, MethodDataSource(nameof(ExplicitRows))]
+                public void Explicit(object value) { }
+                [Test, MethodDataSource(typeof(Provider), "Hidden")]
+                public void Hidden(int value) { }
+                [MethodDataSource(nameof(LocalData))]
+                public int Local { get; set; }
+                public static LocalRow LocalData() => new();
+            }
+            """;
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var provider = CSharpCompilation.Create("ExternalProvider",
+            [CSharpSyntaxTree.ParseText(providerSource, parseOptions)], ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        using var image = new MemoryStream();
+        await Assert.That(provider.Emit(image).Success).IsTrue();
+        var compilation = CSharpCompilation.Create("InheritedAndAmbiguousSources",
+            [CSharpSyntaxTree.ParseText(source, parseOptions)],
+            ReferencesHelper.References.Append(MetadataReference.CreateFromImage(image.ToArray())),
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new AotConverterGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
+        foreach (var type in new[] { "ClassRow", "PropertyRow", "LocalRow", "HiddenRow" })
+        {
+            await Assert.That(generated).Contains("typeof(global::" + type + ")");
+        }
+        await Assert.That(generated).DoesNotContain("AmbiguousRow");
+        await Assert.That(generated).DoesNotContain("ExplicitRow");
+        await Assert.That(generated).DoesNotContain("HiddenRows");
+    }
+
+    [Test]
     public async Task FindsMethodSourceWhenMetadataNamesAreAmbiguous()
     {
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);

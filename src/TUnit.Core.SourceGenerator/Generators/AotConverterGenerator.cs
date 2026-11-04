@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
@@ -310,22 +311,21 @@ public class AotConverterGenerator : IIncrementalGenerator
             return;
         }
 
-        if (!ShouldIncludeType(namedType, compilation))
+        // Inaccessible wrappers can still expose accessible sequence elements.
+        if (ShouldIncludeType(namedType, compilation))
         {
-            return;
-        }
+            var conversionOperators = namedType.GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(m => (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
+                            m is { IsStatic: true, Parameters.Length: 1 });
 
-        var conversionOperators = namedType.GetMembers()
-            .OfType<IMethodSymbol>()
-            .Where(m => (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
-                        m is { IsStatic: true, Parameters.Length: 1 });
-
-        foreach (var method in conversionOperators)
-        {
-            var conversionInfo = GetConversionInfoFromSymbol(method, compilation);
-            if (conversionInfo != null)
+            foreach (var method in conversionOperators)
             {
-                conversions.Add(ToConversionEntry(conversionInfo));
+                var conversionInfo = GetConversionInfoFromSymbol(method, compilation);
+                if (conversionInfo != null)
+                {
+                    conversions.Add(ToConversionEntry(conversionInfo));
+                }
             }
         }
 
@@ -483,6 +483,16 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
 
         if (!IsAccessibleType(sourceType, compilation) || !IsAccessibleType(targetType, compilation))
+        {
+            return null;
+        }
+
+        // Match the assignment/cast that will be emitted. An operator on each endpoint
+        // can make the conversion ambiguous even when the test never needs that pair.
+        var conversion = ((CSharpCompilation)compilation).ClassifyConversion(sourceType, targetType);
+        if (!conversion.Exists || !conversion.IsUserDefined ||
+            (isImplicit && !conversion.IsImplicit) ||
+            !SymbolEqualityComparer.Default.Equals(conversion.MethodSymbol, methodSymbol))
         {
             return null;
         }
@@ -839,7 +849,15 @@ public class AotConverterGenerator : IIncrementalGenerator
             var typesToScan = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             var orderedTypes = new List<ITypeSymbol>();
 
-            ScanAttributesForTypes(classSymbol.GetAttributes(), typesToScan, orderedTypes, classSymbol, compilation, this);
+            ScanAttributesForTypes(classSymbol.GetAttributesIncludingBaseTypes().ToImmutableArray(), typesToScan, orderedTypes, classSymbol, compilation, this);
+
+            foreach (var type in classSymbol.GetSelfAndBaseTypes())
+            {
+                foreach (var property in type.GetMembers().OfType<IPropertySymbol>())
+                {
+                    ScanAttributesForTypes(property.GetAttributes(), typesToScan, orderedTypes, property.ContainingType, compilation, this);
+                }
+            }
 
             foreach (var constructor in classSymbol.Constructors)
             {
