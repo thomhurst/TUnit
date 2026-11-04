@@ -14,7 +14,8 @@ public static class HangDumpArguments
     /// 7 GB macOS runner never finished, so a slow-but-passing run sat until the 30-minute module
     /// timeout (#7575). A heap dump of the same process is about 0.5 GB, is written in under a
     /// second, and still holds the async state machines that <c>dotnet-dump analyze</c> needs for
-    /// <c>dumpasync</c>.
+    /// <c>dumpasync</c>. Linux and Windows keep the default full dump on purpose: it finishes there,
+    /// and it holds the native memory a heap dump leaves out.
     /// </summary>
     public static string[] Create(string fileName, string timeout) =>
         RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
