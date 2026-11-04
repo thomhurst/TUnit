@@ -1,5 +1,7 @@
 # Troubleshooting & FAQ
 
+See [Generator diagnostics](/docs/reference/generator-diagnostics.md) for source-generator IDs and their meanings.
+
 ## FAQ[​](#faq "Direct link to FAQ")
 
 ### Why do I have to await assertions?[​](#why-do-i-have-to-await-assertions "Direct link to Why do I have to await assertions?")
