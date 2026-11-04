@@ -30,13 +30,13 @@ public class AotConverterScanTests
             [MethodDataSource(typeof(Provider), nameof(Provider.ClassData))]
             public class Base
             {
-                public static PropertyRow PropertyData() => new();
-                [MethodDataSource(nameof(PropertyData))]
+                [MethodDataSource("PropertyData")]
                 public int Value { get; set; }
             }
             public class Tests : Base
             {
                 public Tests(int value) { }
+                public static PropertyRow PropertyData() => new();
                 public static AmbiguousRow Rows() => new();
                 public static ExplicitRow ExplicitRows() => new();
                 [Test, MethodDataSource(nameof(Rows))]

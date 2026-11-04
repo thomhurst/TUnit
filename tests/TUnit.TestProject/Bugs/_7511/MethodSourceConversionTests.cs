@@ -97,14 +97,17 @@ public sealed class PropertySourceValue
 
 public abstract class PropertySourceBase
 {
-    public static PropertySourceValue Rows() => new();
-
-    [MethodDataSource(nameof(Rows))]
+    // The source is supplied by the derived test class; analyzer support is tracked in #7551.
+#pragma warning disable TUnit0004
+    [MethodDataSource("Rows")]
+#pragma warning restore TUnit0004
     public int Value { get; set; }
 }
 
 public class PropertySourceConversionTests : PropertySourceBase
 {
+    public static PropertySourceValue Rows() => new();
+
     [Test]
     public async Task ConvertsInheritedProperty() => await Assert.That(Value).IsEqualTo(49);
 }

@@ -855,7 +855,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             {
                 foreach (var property in type.GetMembers().OfType<IPropertySymbol>())
                 {
-                    ScanAttributesForTypes(property.GetAttributes(), typesToScan, orderedTypes, property.ContainingType, compilation, this);
+                    ScanAttributesForTypes(property.GetAttributes(), typesToScan, orderedTypes, classSymbol, compilation, this);
                 }
             }
 
