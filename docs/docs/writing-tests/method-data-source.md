@@ -123,6 +123,14 @@ public class MyTestClass
 }
 ```
 
+A tuple row whose type matches the first tuple parameter binds to that parameter whole when
+all remaining parameters are optional or `params`. For example, a typed source returning
+`IEnumerable<(int, int)>` can supply `(25, 26)` to a test with parameters
+`((int, int) pair, int extra = 5)`; `pair` receives `(25, 26)` and `extra` receives `5`.
+An `object[]` row containing only that tuple, such as `new object[] { (25, 26) }`, binds
+the same way. To supply `extra`, return a nested tuple row such as `((25, 26), 7)` or an
+`object[]` row containing both values; those rows spread across the parameters.
+
 ## Async Data Sources (AOT-Compatible)
 
 TUnit's AOT mode supports async data sources with `IAsyncEnumerable<T>` for scenarios requiring asynchronous data loading:

@@ -4,7 +4,7 @@ using TUnit.Engine.Tests.Enums;
 namespace TUnit.Engine.Tests;
 
 /// <summary>
-/// A tuple row binds whole to a tuple parameter followed by optional or params parameters (#7212).
+/// A tuple row binds whole to a tuple parameter followed by optional or params parameters, from object[] and typed sources (#7212, #7340).
 /// </summary>
 public class Issue7212Tests(TestMode testMode) : InvokableTestBase(testMode)
 {
@@ -15,8 +15,8 @@ public class Issue7212Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7212/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(8),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(8),
+                result => result.ResultSummary.Counters.Total.ShouldBe(18),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(18),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }

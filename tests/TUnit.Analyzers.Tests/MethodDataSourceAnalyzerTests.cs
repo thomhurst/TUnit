@@ -624,10 +624,36 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
         );
     }
 
-    // An object[] row holding only the tuple binds whole (#7212), but a typed tuple row is spread
-    // before binding in source-generated mode, so TUnit0001 keeps rejecting it.
     [Test]
-    public async Task Method_Data_Source_Is_Flagged_When_Typed_Tuple_Precedes_Optional_Parameter()
+    [Arguments("int extra = 5")]
+    [Arguments("params int[] rest")]
+    [Arguments("int extra = 5, params int[] rest")]
+    public async Task Method_Data_Source_Is_Not_Flagged_When_Typed_Tuple_Precedes_Optional_Parameter(string tail)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class MyClass
+            {
+                public static IEnumerable<(int, int)> Rows()
+                {
+                    yield return (25, 26);
+                }
+
+                [MethodDataSource(nameof(Rows))]
+                [Test]
+                public void MyTest((int, int) pair, int extra = 5)
+                {
+                }
+            }
+            """
+        );
+    }
+
+    [Test]
+    public async Task Typed_Tuple_Does_Not_Supply_A_Required_Trailing_Parameter()
     {
         await Verifier.VerifyAnalyzerAsync(
             """
@@ -643,12 +669,11 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 
                 [{|#0:MethodDataSource(nameof(Rows))|}]
                 [Test]
-                public void MyTest((int, int) pair, int extra = 5)
+                public void MyTest((int, int) pair, int extra)
                 {
                 }
             }
             """,
-
             Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                 .WithLocation(0)
                 .WithArguments("int, int", "(int, int), int")

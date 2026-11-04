@@ -496,9 +496,10 @@ public static class DataSourceHelpers
             // If we have expected types, handle nested tuples intelligently
             if (expectedTypes != null && expectedTypes.Length > 0)
             {
-                // Special case: If there's a single parameter that expects a tuple type,
-                // and the item is a tuple, don't unwrap
-                if (expectedTypes.Length == 1 && TupleHelper.IsTupleType(expectedTypes[0]))
+                // Keep a matching first tuple parameter whole, including when later parameters
+                // are omitted. A nested row of a different type still spreads into columns.
+                if (TupleHelper.IsTupleType(expectedTypes[0])
+                    && (expectedTypes.Length == 1 || expectedTypes[0].IsInstanceOfType(item)))
                 {
                     return RequiresFlattenedTupleBinding(item)
                         ? UnwrapTupleAot(item)
