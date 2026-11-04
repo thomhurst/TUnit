@@ -21,6 +21,10 @@ on:
         description: 'Also analyze the Windows engine hang dump from this AOT run ID (optional)'
         required: false
         type: string
+      analyze_windows_dump_artifact:
+        description: 'Exact dump artifact ID (optional; disambiguates artifacts from rerun attempts)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -225,7 +229,8 @@ jobs:
       - name: Download captured Windows engine dump
         uses: actions/download-artifact@v5
         with:
-          name: HangDump-engine-tests-windows-latest
+          name: ${{ inputs.analyze_windows_dump_artifact == '' && 'HangDump-engine-tests-windows-latest' || '' }}
+          artifact-ids: ${{ inputs.analyze_windows_dump_artifact }}
           run-id: ${{ inputs.analyze_windows_dump_run }}
           github-token: ${{ github.token }}
           path: captured-dump
