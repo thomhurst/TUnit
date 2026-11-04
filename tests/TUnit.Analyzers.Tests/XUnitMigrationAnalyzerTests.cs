@@ -53,6 +53,64 @@ public class XUnitMigrationAnalyzerTests
             ConfigureXUnitTest);
     }
 
+    [Arguments(false)]
+    [Arguments(true)]
+    [Test]
+    public async Task XUnit_Single_Named_Arguments_Converted_In_Source_Order(bool expectedFirst)
+    {
+        var arguments = expectedFirst
+            ? "expected: GetExpected(), collection: GetCollection()"
+            : "collection: GetCollection(), expected: GetExpected()";
+        var captures = expectedFirst
+            ? "(object)(((GetExpected()))!), (global::System.Collections.IEnumerable)(GetCollection())"
+            : "(global::System.Collections.IEnumerable)(GetCollection()), (object)(((GetExpected()))!)";
+        var collectionItem = expectedFirst ? "Item2" : "Item1";
+        var expectedItem = expectedFirst ? "Item1" : "Item2";
+        await CodeFixer.VerifyCodeFixAsync(
+            $$"""
+            {|#0:using Xunit;
+            using Assert = Xunit.Assert;
+
+            public class MyClass
+            {
+                private object[] GetCollection() => new object[] { 1, 2 };
+                private object GetExpected() => 1;
+
+                [Fact]
+                public void MyTest()
+                {
+                    Assert.Single({{arguments}});
+                }
+            }|}
+            """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            $$"""
+            using System.Threading.Tasks;
+
+            public class MyClass
+            {
+                private object[] GetCollection() => new object[] { 1, 2 };
+                private object GetExpected() => 1;
+
+                [Test]
+                public async Task MyTest()
+                {
+                    await Assert.That(({{captures}})).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.{{collectionItem}}), singleItem => global::System.Object.Equals(singleItem, singleArguments.{{expectedItem}})) == 1);
+                }
+            }
+            """,
+            test =>
+            {
+                ConfigureXUnitTest(test);
+                test.CompilerDiagnostics = CompilerDiagnostics.Errors;
+                test.ReferenceAssemblies = new ReferenceAssemblies("net10.0",
+                    new PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"), "ref/net10.0");
+                test.TestState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
+                test.TestState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
+                test.FixedState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
+            });
+    }
+
     [Arguments("expected")]
     [Arguments("true ? expected : new object()")]
     [Arguments("null")]
@@ -94,6 +152,7 @@ public class XUnitMigrationAnalyzerTests
             test =>
             {
                 ConfigureXUnitTest(test);
+                // The shared verifier promotes all nullable warnings to errors.
                 test.CompilerDiagnostics = CompilerDiagnostics.Errors;
                 test.ReferenceAssemblies = new ReferenceAssemblies("net10.0",
                     new PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"), "ref/net10.0");
@@ -110,7 +169,8 @@ public class XUnitMigrationAnalyzerTests
     [Arguments(1, true, true)]
     [Arguments(2, false, true)]
     [Test]
-    public async Task XUnit_Single_Expected_Value_Semantics(int matches, bool shouldPass, bool nullExpected)
+    [Arguments(1, true, false, true)]
+    public async Task XUnit_Single_Expected_Value_Semantics(int matches, bool shouldPass, bool nullExpected, bool expectedFirst = false)
     {
         var calls = new List<string>();
         object? expectedValue = nullExpected ? null : new SingleEqualityItem();
@@ -136,7 +196,9 @@ public class XUnitMigrationAnalyzerTests
         }
 
         // The generated expression must evaluate each argument once before enumeration.
-        async Task CheckAsync() => await TUnit.Assertions.Assert.That(((global::System.Collections.IEnumerable)(GetCollection()), (object?)(GetExpected()))).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.Item1), singleItem => global::System.Object.Equals(singleItem, singleArguments.Item2)) == 1);
+        async Task CheckCollectionFirstAsync() => await TUnit.Assertions.Assert.That(((global::System.Collections.IEnumerable)(GetCollection()), (object?)(GetExpected()))).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.Item1), singleItem => global::System.Object.Equals(singleItem, singleArguments.Item2)) == 1);
+        async Task CheckExpectedFirstAsync() => await TUnit.Assertions.Assert.That(((object?)(GetExpected()), (global::System.Collections.IEnumerable)(GetCollection()))).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.Item2), singleItem => global::System.Object.Equals(singleItem, singleArguments.Item1)) == 1);
+        Task CheckAsync() => expectedFirst ? CheckExpectedFirstAsync() : CheckCollectionFirstAsync();
         if (shouldPass)
         {
             await CheckAsync();
@@ -145,7 +207,7 @@ public class XUnitMigrationAnalyzerTests
         {
             await TUnit.Assertions.Assert.That(() => CheckAsync()).Throws<TUnit.Assertions.Exceptions.AssertionException>();
         }
-        await TUnit.Assertions.Assert.That(calls.SequenceEqual(new[] { "collection", "expected", "enumeration" })).IsTrue();
+        await TUnit.Assertions.Assert.That(calls.SequenceEqual(expectedFirst ? new[] { "expected", "collection", "enumeration" } : new[] { "collection", "expected", "enumeration" })).IsTrue();
     }
 
     // IEquatable<T> must not replace object equality (the expected overload is non-generic).

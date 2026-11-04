@@ -376,9 +376,18 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             while (identifiers.Contains(pair)) pair += "_";
             var item = "singleItem";
             while (identifiers.Contains(item)) item += "_";
-            var expected = args[1].Expression.ToString();
+            var expectedFirst = args[0].NameColon?.Name.Identifier.ValueText == "expected";
+            collection = args[expectedFirst ? 1 : 0].Expression.ToString();
+            var expected = args[expectedFirst ? 0 : 1].Expression.ToString();
+            var collectionCapture = $"(global::System.Collections.IEnumerable)({collection})";
+            var expectedCapture = $"(object)((({expected}))!)";
+            var captures = expectedFirst
+                ? $"{expectedCapture}, {collectionCapture}"
+                : $"{collectionCapture}, {expectedCapture}";
+            var collectionItem = expectedFirst ? "Item2" : "Item1";
+            var expectedItem = expectedFirst ? "Item1" : "Item2";
             return (AssertionConversionKind.Single,
-                $"await Assert.That(((global::System.Collections.IEnumerable)({collection}), (object)((({expected}))!))).Satisfies({pair} => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>({pair}.Item1), {item} => global::System.Object.Equals({item}, {pair}.Item2)) == 1)",
+                $"await Assert.That(({captures})).Satisfies({pair} => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>({pair}.{collectionItem}), {item} => global::System.Object.Equals({item}, {pair}.{expectedItem})) == 1)",
                 true, null);
         }
 
