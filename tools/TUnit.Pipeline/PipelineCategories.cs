@@ -29,8 +29,8 @@ public static class PipelineCategories
     /// <summary>
     /// Test suites whose result does not depend on the operating system: analyzers, code fixers,
     /// source-generator and public-API snapshots, templates, and the pure-logic assertion and mock
-    /// libraries. macOS skips them on pull requests (see dotnet.yml), since Ubuntu and Windows
-    /// already run them and macOS runners are the scarcest.
+    /// libraries. Ubuntu runs them; Windows and macOS pull request runs pass --os-specific-only,
+    /// so Windows runs only their .NET Framework TFMs and macOS skips them (see <see cref="PipelineScope"/>).
     /// </summary>
     public const string PlatformNeutral = "PlatformNeutral";
 }

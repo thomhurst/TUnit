@@ -17,6 +17,12 @@ public class RunTemplateTestsModule : Module<CommandResult>
 {
     protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
+        // Templates have no .NET Framework variant, so an OS-specific run leaves them to Ubuntu.
+        if (PipelineScope.OsSpecificOnly)
+        {
+            return null;
+        }
+
         var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Templates.Tests.csproj").AssertExists();
 
         return await context.DotNet().Test(new DotNetTestOptions
