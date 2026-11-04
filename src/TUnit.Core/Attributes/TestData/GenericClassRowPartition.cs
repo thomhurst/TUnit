@@ -465,6 +465,13 @@ public static class GenericClassRowPartition
             return true;
         }
 
+        // CastHelper's non-primitive fallback accepts IConvertible string targets too.
+        // Keep candidates without invoking a potentially user-defined conversion here.
+        if (target == typeof(string) && value is IConvertible)
+        {
+            return true;
+        }
+
         if (target.IsEnum)
         {
             try
@@ -534,6 +541,7 @@ public static class GenericClassRowPartition
         return new ConcreteType(type);
     }
 
+    // Planned metadata replacement and matcher consolidation: https://github.com/thomhurst/TUnit/issues/7615
     // Compare generated type descriptions without MakeGenericType, which cannot close arbitrary types in AOT.
     // direction: 1 = expected accepts actual, -1 = actual accepts expected, 0 = invariant equality.
     private static bool MatchesConstructorParameterType(TypeInfo expected, Type actual, Type[] classTypeArguments, int direction)

@@ -27,6 +27,43 @@ public class GenericClassSourceRuntimeTests
     private sealed class ConvertedRowValue;
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Partition_Retains_Convertible_String_Rows(bool generated)
+    {
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(typeof(string)) { Name = "first", TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(typeof(string)), CachedIsOptional = false },
+            new ParameterMetadata(typeof(int)) { Name = "second", TypeInfo = generated ? new GenericParameter(1, false) : new ConcreteType(typeof(int)), CachedIsOptional = true }
+        ];
+        object?[][] original = [["a"], [123], [1.5m], [true], ['x'], [RowEnum.A], [new DateTime(2026, 1, 2)]];
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create([typeof(string), typeof(int)], GenericClassRowFallback.AllRows, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata)) rows.Add(await factory());
+        await Assert.That(rows.Count).IsEqualTo(original.Length);
+        for (var i = 0; i < rows.Count; i++)
+        {
+            await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+            await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<string>(rows[i]![0]))
+                .IsEqualTo(Convert.ChangeType(original[i][0], typeof(string)) as string);
+        }
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new object()], parameters, [typeof(string), typeof(int)])).IsFalse();
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
+    }
+
+    [Test]
     [Arguments(false, false)]
     [Arguments(false, true)]
     [Arguments(true, false)]
