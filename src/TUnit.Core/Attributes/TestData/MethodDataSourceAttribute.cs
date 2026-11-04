@@ -342,7 +342,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Use MembersToGenerate which contains the correct parameters for this data generator type
         // (constructor params for class-level, method params for method-level)
         var paramTypes = GetMemberTypes(dataGeneratorMetadata.MembersToGenerate);
-        var preserveGenericTuple = HasSingleErasedGenericTupleParameter(dataGeneratorMetadata.MembersToGenerate);
+        var genericTupleParameter = GetSingleErasedGenericTupleParameter(dataGeneratorMetadata.MembersToGenerate);
 
         object?[] ToRow(object? item)
         {
@@ -358,12 +358,12 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
 
             // Retain nested value tuples, or all reference-tuple elements, until binding.
-            if (preserveGenericTuple)
+            if (genericTupleParameter is not null)
             {
                 item = DataSourceHelpers.InvokeIfFunc(item);
                 if (DataSourceHelpers.IsTuple(item))
                 {
-                    return DataSourceHelpers.ShouldFlattenErasedTuple(item!)
+                    return DataSourceHelpers.ShouldFlattenErasedTuple(item!, genericTupleParameter)
                         ? DataSourceHelpers.UnwrapTupleAot(item)
                         : [item];
                 }
@@ -795,14 +795,14 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         return args;
     }
 
-    private static bool HasSingleErasedGenericTupleParameter(IMemberMetadata[]? members)
+    private static ParameterMetadata? GetSingleErasedGenericTupleParameter(IMemberMetadata[]? members)
     {
         ParameterMetadata? dataParameter = null;
         foreach (var member in members ?? [])
         {
             if (member is not ParameterMetadata parameter)
             {
-                return false;
+                return null;
             }
 
             if (parameter.Type == typeof(CancellationToken))
@@ -812,13 +812,15 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
 
             if (dataParameter is not null)
             {
-                return false;
+                return null;
             }
 
             dataParameter = parameter;
         }
 
-        return dataParameter is not null && DataSourceHelpers.IsErasedGenericTupleParameter(dataParameter);
+        return dataParameter is not null && DataSourceHelpers.IsErasedGenericTupleParameter(dataParameter)
+            ? dataParameter
+            : null;
     }
 
     private static Type[]? GetMemberTypes(IMemberMetadata[]? members)

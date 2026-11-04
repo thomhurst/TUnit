@@ -142,7 +142,7 @@ internal class DataUnwrapper
         if (dataParameterCount == 1
             && DataSourceHelpers.IsErasedGenericTupleParameter(lastDataParameter))
         {
-            return DataSourceHelpers.ShouldFlattenErasedTuple(values[0]!)
+            return DataSourceHelpers.ShouldFlattenErasedTuple(values[0]!, lastDataParameter)
                 ? DataSourceHelpers.UnwrapTupleAot(values[0])
                 : values;
         }

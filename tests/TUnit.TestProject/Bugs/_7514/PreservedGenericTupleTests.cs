@@ -60,4 +60,22 @@ public class PreservedGenericTupleTests
     {
         await Assert.That(row.Item1).IsEqualTo((T)(object)"text");
     }
+
+    public object ValueTupleIntegerRow() => new ValueTuple<int>(1);
+
+    public object ValueTupleStringRow() => new ValueTuple<string>("text");
+
+    [Test, GenerateGenericTest(typeof(int)), InstanceMethodDataSource(nameof(ValueTupleIntegerRow))]
+    public async Task ValueTupleToReferenceTuple<T>(Tuple<T> row)
+    {
+        await Assert.That(row.Item1).IsEqualTo((T)(object)1);
+    }
+
+    [Test, GenerateGenericTest(typeof(object)), InstanceMethodDataSource(nameof(ValueTupleStringRow))]
+    public async Task ValueTupleToReferenceTupleConversion<T>(CancellationToken token, Tuple<T> row)
+    {
+        await Assert.That(row.Item1).IsEqualTo((T)(object)"text");
+        await Assert.That(token.CanBeCanceled).IsTrue();
+    }
+
 }

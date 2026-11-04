@@ -19,10 +19,14 @@ public static class DataSourceHelpers
             && (name.StartsWith("System.ValueTuple`", StringComparison.Ordinal)
                 || name.StartsWith("System.Tuple`", StringComparison.Ordinal));
 
-    // Reference tuples need every element for invoker conversions. Value tuples can
+    // Reference-tuple targets and sources need every element for invoker conversions. Value tuples can
     // retain their nested shape unless mutable element boxes must reach invocation.
-    internal static bool ShouldFlattenErasedTuple(object tuple)
-        => !tuple.GetType().IsValueType || RequiresFlattenedTupleBinding(tuple);
+    internal static bool ShouldFlattenErasedTuple(object tuple, ParameterMetadata parameter)
+        => parameter.TypeInfo is ConstructedGeneric generic
+                && generic.GenericDefinition.FullName is { } name
+                && name.StartsWith("System.Tuple`", StringComparison.Ordinal)
+            || !tuple.GetType().IsValueType
+            || RequiresFlattenedTupleBinding(tuple);
 
     private static readonly ConcurrentDictionary<Type, bool> TupleMutableElementShapes = new();
 
