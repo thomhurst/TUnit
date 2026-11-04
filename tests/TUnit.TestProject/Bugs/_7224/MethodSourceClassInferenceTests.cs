@@ -50,6 +50,14 @@ public class MethodSourceClassInferenceTests<T>
         await Assert.That(rest).IsNull();
     }
 
+    [Test, MethodDataSource(nameof(WrappedRows))]
+    public async Task WrappedArrayEmptyParams(T first, params IEnumerable<T>[] rest)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(first).IsEqualTo((T)(object)"one");
+        await Assert.That(rest.Length).IsEqualTo(0);
+    }
+
     [Test, MethodDataSource(nameof(WrappedPairRows))]
     public async Task WrappedArraySuppliedOptional(string label, T value = default!)
     {
@@ -166,6 +174,31 @@ public class MethodSourceMethodInferenceTests
         await Assert.That(values.Length).IsEqualTo(2);
         await Assert.That(values[1]).IsEqualTo((T)(object)"two");
     }
+
+    public static IEnumerable<TestDataRow<Func<int>[]>> DelegateRows() => [new(new Func<int>[] { () => 42 })];
+
+    [Test, MethodDataSource(nameof(DelegateRows))]
+    public async Task WrappedDelegateArray<T>(params T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(Func<int>));
+        await Assert.That(((Func<int>)(object)values.Single()!)()).IsEqualTo(42);
+    }
+
+    [Test, MethodDataSource(nameof(DelegateRows))]
+    public async Task WrappedDelegateArrayWithFirst<T>(T first, params T[] rest)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(Func<int>));
+        await Assert.That(((Func<int>)(object)first!)()).IsEqualTo(42);
+        await Assert.That(rest.Length).IsEqualTo(0);
+    }
+
+    [Test, MethodDataSource(typeof(ExternalWrappedRows), nameof(ExternalWrappedRows.Rows))]
+    public async Task ExternalWrappedArray<T>(params T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(Uri));
+        await Assert.That(((Uri)(object)values.Single()!).Host).IsEqualTo("example.com");
+    }
+
 }
 
 [EngineTest(ExpectedResult.Pass)]
@@ -182,4 +215,9 @@ public class WrappedArrayPartialOptionalInferenceTests<T, U>
         await Assert.That(second).IsEqualTo((U)(object)"two");
         await Assert.That(omitted).IsNull();
     }
+}
+
+public static class ExternalWrappedRows
+{
+    public static IEnumerable<TestDataRow<Uri[]>> Rows() => [new(new[] { new Uri("https://example.com") })];
 }

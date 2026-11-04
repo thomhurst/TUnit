@@ -8301,7 +8301,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 for (var i = 0; i < suppliedParameterCount; i++)
                 {
                     var parameter = testMethodParams[i];
-                    var optional = spreadsReferenceArray && parameter.IsOptional;
+                    var optional = spreadsReferenceArray && (parameter.IsOptional || parameter.IsParams);
                     if (optional != (pass == 1))
                     {
                         continue;
