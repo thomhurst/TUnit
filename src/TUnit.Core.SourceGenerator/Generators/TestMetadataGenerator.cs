@@ -1250,7 +1250,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var methodArgumentsAttributes = methodArgumentsBucket ?? [];
 
         var classArgumentsAttributes = testMethod.IsGenericType
-            ? testMethod.TypeSymbol.GetAttributes()
+            ? testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
                 .ToArray()
             : Array.Empty<AttributeData>();
@@ -1322,11 +1322,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // it an [Arguments(null)] row still infers object, as without a class row, and a method row
             // that infers types breaking the class's constraints is reported. Reflection mode applies the
             // same rule.
+            // Explicit generic tests are not inherited; constructor data sources are.
             var classTypeArgumentsSupplied = testMethod.TypeSymbol.GetAttributes().Any(a =>
-                a.AttributeClass is { } attributeClass
-                && (attributeClass.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute")
-                    || (DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
-                        && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a)))));
+                a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
+                || testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
+                    a.AttributeClass is { } attributeClass
+                    && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
+                    && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a)));
 
             // classTypeArgumentsSupplied already includes explicit [GenerateGenericTest] class types.
             foreach (var methodArgAttr in methodArgumentsAttributes)
@@ -1423,7 +1425,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process class-level Arguments attributes for generic classes
         if (testMethod.IsGenericType)
         {
-            foreach (var argAttr in testMethod.TypeSymbol.GetAttributes().Where(a => a.AttributeClass?.Name == "ArgumentsAttribute"))
+            foreach (var argAttr in classArgumentsAttributes)
             {
                 var classInferredTypes = InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, argAttr, compilation);
                 if (classInferredTypes is { Length: > 0 })
@@ -4843,8 +4845,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Check for data source attributes on the class
-        foreach (var attr in testMethod.TypeSymbol.GetAttributes())
+        // Constructor data sources can be inherited.
+        foreach (var attr in testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
         {
             if (DataSourceAttributeHelper.IsDataSourceAttribute(attr.AttributeClass))
             {
@@ -6591,7 +6593,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // For generic classes, collect class-level Arguments attributes separately
         if (testMethod.IsGenericType)
         {
-            classArgumentsAttributes = testMethod.TypeSymbol.GetAttributes()
+            classArgumentsAttributes = testMethod.TypeSymbol.GetAttributesIncludingBaseTypes()
                 .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute")
                 .ToArray();
         }
@@ -6898,8 +6900,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Process class-level Arguments attributes for generic classes (combined with generic methods)
         if (testMethod.IsGenericType)
         {
-            var argumentsAttributes = testMethod.TypeSymbol.GetAttributes()
-                .Where(a => a.AttributeClass?.Name == "ArgumentsAttribute");
+            var argumentsAttributes = classArgumentsAttributes;
 
             foreach (var argAttr in argumentsAttributes)
             {
