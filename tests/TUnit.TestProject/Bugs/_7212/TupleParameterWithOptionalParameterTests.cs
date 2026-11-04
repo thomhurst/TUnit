@@ -198,6 +198,35 @@ public class MutableTupleWithOptionalParameterTests
         await Assert.That(rest).IsEmpty();
     }
 
+    public static Func<((Fixture, int), int)> NestedValueRow() => () => ((CreateFixture(), 26), 27);
+    public static Func<Tuple<(Fixture, int), int>> NestedReferenceRow() => () => Tuple.Create((CreateFixture(), 26), 27);
+
+    [Test, MethodDataSource(nameof(NestedValueRow))]
+    public async Task Nested_Mutable_Tuple_And_Optional(((Fixture, int), int) pair, int extra = 5)
+    {
+        await Check(pair.Item1.Item1, pair.Item1.Item2);
+        await Assert.That(pair.Item2).IsEqualTo(27);
+        await Assert.That(extra).IsEqualTo(5);
+    }
+
+    [Test, MethodDataSource(nameof(NestedReferenceRow))]
+    public async Task Nested_Mutable_Reference_Tuple_And_Optional(Tuple<(Fixture, int), int> pair, int extra = 5)
+    {
+        await Check(pair.Item1.Item1, pair.Item1.Item2);
+        await Assert.That(pair.Item2).IsEqualTo(27);
+        await Assert.That(extra).IsEqualTo(5);
+    }
+
+    public static Func<(Tuple<Fixture, int>, int)> NestedInnerReferenceRow() => () => (Tuple.Create(CreateFixture(), 26), 27);
+
+    [Test, MethodDataSource(nameof(NestedInnerReferenceRow))]
+    public async Task Nested_Inner_Reference_Tuple_And_Optional((Tuple<Fixture, int>, int) pair, int extra = 5)
+    {
+        await Check(pair.Item1.Item1, pair.Item1.Item2);
+        await Assert.That(pair.Item2).IsEqualTo(27);
+        await Assert.That(extra).IsEqualTo(5);
+    }
+
     private static async Task Check(Fixture fixture, int number)
     {
         await Assert.That(fixture.Initialized).IsTrue();
@@ -230,5 +259,32 @@ public class MutableTupleWithOptionalParameterTests
         public Type Type => typeof(Fixture);
         public bool ShouldInitialize => false;
         public IEnumerable<TUnit.Core.Interfaces.SourceGenerator.PropertyInjectionMetadata> GetPropertyMetadata() => [];
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class ConvertedAndGenericTupleOptionalTests
+{
+    public static IEnumerable<object[]> ConvertedRows() => [[new ConvertibleList()]];
+    public static IEnumerable<object[]> GenericRows() => [[(25, 26)]];
+
+    [Test, MethodDataSource(nameof(ConvertedRows))]
+    public async Task Convertible_List_And_Optional((int, int) pair, int extra = 5)
+    {
+        await Assert.That(pair).IsEqualTo((25, 26));
+        await Assert.That(extra).IsEqualTo(5);
+    }
+
+    [Test, GenerateGenericTest(typeof(int)), MethodDataSource(nameof(GenericRows))]
+    public async Task Generic_Tuple_And_Optional<T>((T, int) pair, int extra = 5)
+    {
+        await Assert.That(pair.Item1).IsEqualTo((T)(object)25);
+        await Assert.That(pair.Item2).IsEqualTo(26);
+        await Assert.That(extra).IsEqualTo(5);
+    }
+
+    public sealed class ConvertibleList : List<object>
+    {
+        public static implicit operator (int, int)(ConvertibleList value) => (25, 26);
     }
 }

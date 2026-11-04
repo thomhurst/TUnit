@@ -70,11 +70,17 @@ public static class DataSourceHelpers
             return false;
         }
 
+        return ContainsMutableTupleElement(RetainTupleElements(tuple));
+    }
+
+    private static bool ContainsMutableTupleElement(object?[] elements)
+    {
         // Nullable struct elements box to null when empty. Only flatten when an actual
         // mutable value needs reconstruction; otherwise retain the tuple container.
-        foreach (var element in UnwrapTupleAot(tuple))
+        foreach (var element in elements)
         {
-            if (element is not null && element.GetType().IsValueType
+            if (element is TupleArgument
+                || element is not null && element.GetType().IsValueType
                 && (element is IAsyncInitializer or IEventReceiver
                     || PropertyInjectionCache.HasInjectableProperties(element.GetType())))
             {
@@ -93,7 +99,7 @@ public static class DataSourceHelpers
             {
                 var element = Nullable.GetUnderlyingType(elements[i]) ?? elements[i];
                 if (IsMutableTupleElementType(element)
-                    || i == 7 && TupleHelper.IsTupleType(element) && HasMutableTupleElementShape(element))
+                    || TupleHelper.IsTupleType(element) && HasMutableTupleElementShape(element))
                 {
                     return true;
                 }
@@ -181,6 +187,31 @@ public static class DataSourceHelpers
         return result;
     }
 #endif
+
+    internal static object?[] RetainTupleElements(object? tuple)
+    {
+        var elements = UnwrapTupleAot(tuple);
+        for (var i = 0; i < elements.Length; i++)
+        {
+            elements[i] = RetainNestedTuple(elements[i]);
+        }
+        return elements;
+    }
+
+    // Recursively keep the same mutable boxes at each nested tuple boundary. Invocation
+    // reconstructs each retained tuple after discovery services finish mutating its elements.
+    private static object? RetainNestedTuple(object? element)
+    {
+        if (element is null || !TupleHelper.IsTupleType(element.GetType())
+            || !HasMutableTupleElementShape(element.GetType()))
+        {
+            return element;
+        }
+
+        // Inspect and retain one extraction, rather than recursively extracting twice per level.
+        var elements = RetainTupleElements(element);
+        return ContainsMutableTupleElement(elements) ? new TupleArgument(element.GetType(), elements) : element;
+    }
 
     /// <summary>
     /// AOT-compatible tuple unwrapping that handles common tuple types without reflection
@@ -508,7 +539,7 @@ public static class DataSourceHelpers
                 {
                     if (RequiresFlattenedTupleBinding(item))
                     {
-                        var elements = UnwrapTupleAot(item);
+                        var elements = RetainTupleElements(item);
                         return expectedTypes.Length == 1 ? elements : [new TupleArgument(item.GetType(), elements)];
                     }
 

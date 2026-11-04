@@ -338,8 +338,8 @@ public static class DataSourceFactories
                 if (!tupleRowBinding.AllowMutableElements && DataSourceHelpers.RequiresFlattenedTupleBinding(item!))
                 {
                     return tupleRowBinding.MatchingType is null
-                        ? DataSourceHelpers.UnwrapTupleAot(item)
-                        : [new TupleArgument(item!.GetType(), DataSourceHelpers.UnwrapTupleAot(item))];
+                        ? DataSourceHelpers.RetainTupleElements(item)
+                        : [new TupleArgument(item!.GetType(), DataSourceHelpers.RetainTupleElements(item))];
                 }
 
                 return [item];

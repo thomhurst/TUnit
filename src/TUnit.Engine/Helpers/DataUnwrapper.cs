@@ -135,7 +135,7 @@ internal class DataUnwrapper
 
         if (dataParameterCount == 0)
         {
-            return DataSourceHelpers.UnwrapTupleAot(values[0]);
+            return DataSourceHelpers.RetainTupleElements(values[0]);
         }
 
         var lastDataParameter = expectedParameters[lastDataParameterIndex];
@@ -148,7 +148,7 @@ internal class DataUnwrapper
             && DataSourceHelpers.IsErasedGenericTupleParameter(lastDataParameter))
         {
             return DataSourceHelpers.ShouldFlattenErasedTuple(values[0]!, lastDataParameter)
-                ? DataSourceHelpers.UnwrapTupleAot(values[0])
+                ? DataSourceHelpers.RetainTupleElements(values[0])
                 : values;
         }
 
@@ -169,7 +169,7 @@ internal class DataUnwrapper
 
             // A reference tuple with a lone null must retain its container: [null] also
             // represents an actual null argument. Value tuples always reconstruct from null.
-            var tupleElements = DataSourceHelpers.UnwrapTupleAot(values[0]);
+            var tupleElements = DataSourceHelpers.RetainTupleElements(values[0]);
             return !lastDataParameterType.IsValueType && tupleElements is [null] ? values : tupleElements;
         }
 
@@ -183,11 +183,11 @@ internal class DataUnwrapper
             && RemainingDataParametersAreOmittable(expectedParameters, firstDataParameterIndex))
         {
             return values[0] is not TupleArgument && DataSourceHelpers.RequiresFlattenedTupleBinding(values[0]!)
-                ? [new TupleArgument(values[0]!.GetType(), DataSourceHelpers.UnwrapTupleAot(values[0]))]
+                ? [new TupleArgument(values[0]!.GetType(), DataSourceHelpers.RetainTupleElements(values[0]))]
                 : values;
         }
 
-        var elements = DataSourceHelpers.UnwrapTupleAot(values[0]);
+        var elements = DataSourceHelpers.RetainTupleElements(values[0]);
 
         // A trailing array data parameter collects every remaining element. Otherwise extra
         // elements beyond the data parameters are dropped.
