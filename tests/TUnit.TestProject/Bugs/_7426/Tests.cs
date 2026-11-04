@@ -40,7 +40,6 @@ public class DirectRuntimeSource<T>(T value)
 [Arguments(42)]
 public abstract class ArgumentsBase;
 
-[GenerateGenericTest(typeof(int))]
 public class InheritedArguments<T>(T value) : ArgumentsBase
 {
     [Test]
