@@ -7,7 +7,12 @@ namespace TUnit.TestProject;
 
 [EngineTest(ExpectedResult.Pass)]
 [RunOn(OS.Windows)]
-[Repeat(100)]
+// Keep the repeat count low. STAThreadExecutor runs the test and every global [BeforeEvery(Test)] and
+// [AfterEvery(Test)] hook in this project (about 55 of them) on its own new STA thread, and each
+// one costs about 1ms of CPU, mostly in the kernel. With [Repeat(100)] this class started about
+// 78,000 threads and used about 120 of the 140 CPU seconds that the [EngineTest=Pass] run needs.
+// On the 4-core Windows CI runner that pushed the run past its 10-minute timeout (#7554).
+[Repeat(10)]
 [UnconditionalSuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]
 public class STAThreadTests
 {
