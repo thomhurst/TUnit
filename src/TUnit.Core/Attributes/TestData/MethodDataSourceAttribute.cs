@@ -445,9 +445,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// (#7208). Keep it in step with <see cref="GetRowsFromRuntimeValueAsync"/>; MethodDataSourceDeclaredRowTypeTests
     /// checks the two against each other.
     /// </summary>
+    // Constructor inference consumes the array as a whole; method inference also needs its spread shape.
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     internal static Type? GetDeclaredRowType(Type memberType)
-        => GetDeclaredRowType(memberType, out _);
+        => GetDeclaredRowTypeCore(memberType, out _, out _, normalizeReferenceArray: false);
 
     // Keep the spread shape alongside the element type: unlike a scalar row, a wrapped reference array
     // can supply more than one required method parameter.
@@ -458,6 +459,10 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     // Tuple inference must not consume a nested wrapper after the reader already removed one.
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     internal static Type? GetDeclaredRowType(Type memberType, out bool spreadsReferenceArray, out bool rowWrapperRemoved)
+        => GetDeclaredRowTypeCore(memberType, out spreadsReferenceArray, out rowWrapperRemoved, normalizeReferenceArray: true);
+
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    private static Type? GetDeclaredRowTypeCore(Type memberType, out bool spreadsReferenceArray, out bool rowWrapperRemoved, bool normalizeReferenceArray)
     {
         rowWrapperRemoved = false;
         spreadsReferenceArray = false;
@@ -509,7 +514,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             rowWrapperRemoved = true;
             rowType = UnwrapFunc(rowData);
             // UnwrapArray spreads reference arrays through object[] covariance.
-            if (rowType is { IsArray: true } && rowType.Name.EndsWith("[]", StringComparison.Ordinal) && rowType.GetElementType() is { IsValueType: false, IsPointer: false } elementType)
+            if (normalizeReferenceArray && rowType is { IsArray: true } && rowType.Name.EndsWith("[]", StringComparison.Ordinal) && rowType.GetElementType() is { IsValueType: false, IsPointer: false } elementType)
             {
                 rowType = elementType;
                 spreadsReferenceArray = true;

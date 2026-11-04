@@ -36,6 +36,20 @@ public class MethodSourceClassInferenceTests<T>
     public static IEnumerable<InferenceDerived<int>> DerivedRows() => [new()];
     public static IEnumerable<object> UntypedRows() => [1];
 
+    [Test, MethodDataSource(nameof(WrappedPairRows))]
+    public async Task WrappedArrayPlainTrailing(T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(values.Length).IsEqualTo(2);
+    }
+
+    [Test, MethodDataSource(nameof(WrappedRows))]
+    public async Task WrappedArrayEmptyPlainTrailing(T first, IEnumerable<T>[] rest)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(rest.Length).IsEqualTo(0);
+    }
+
     [Test, MethodDataSource(nameof(WrappedRows))]
     public async Task WrappedArray(T value) => await Assert.That(value).IsEqualTo((T)(object)"one");
 
@@ -185,6 +199,13 @@ public class MethodSourceMethodInferenceTests
         await Assert.That(values[1]).IsEqualTo((T)(object)"two");
     }
 
+    [Test, MethodDataSource(nameof(Rows))]
+    public async Task WrappedArrayPlainTrailing<T>(T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(values.Length).IsEqualTo(2);
+    }
+
     public static IEnumerable<TestDataRow<Func<int>[]>> DelegateRows() => [new(new Func<int>[] { () => 42 })];
 
     [Test, MethodDataSource(nameof(DelegateRows))]
@@ -230,4 +251,19 @@ public class WrappedArrayPartialOptionalInferenceTests<T, U>
 public static class ExternalWrappedRows
 {
     public static IEnumerable<TestDataRow<Uri[]>> Rows() => [new(new[] { new Uri("https://example.com") })];
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[MethodDataSource(nameof(Rows))]
+public class WrappedArrayConstructorInferenceTests<T>(params T[] values)
+{
+    public static IEnumerable<TestDataRow<string[]>> Rows() => [new(new[] { "one", "two" })];
+
+    [Test, Arguments("seed")]
+    public async Task ConstructorArray(T seed)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(values.Length).IsEqualTo(2);
+        await Assert.That(values[1]).IsEqualTo((T)(object)"two");
+    }
 }

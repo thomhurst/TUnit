@@ -14,7 +14,7 @@ internal class Tests7224 : TestsBase
             await Assert.That(generated).Contains("instance.WrappedDelegateArray<global::System.Func<int>>(");
             await Assert.That(generated).Contains("instance.WrappedDelegateArrayWithFirst<global::System.Func<int>>(");
             await Assert.That(generated).Contains("instance.ExternalWrappedArray<global::System.Uri>(");
-            foreach (var method in new[] { "NestedWrappedTuple", "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "WrappedArrayPair", "WrappedArrayLaterParameter", "WrappedArrayOptional", "WrappedArraySuppliedOptional", "WrappedArrayEmptyParams", "WrappedArrayParams", "WrappedArrayLaterParams", "OptionalFillsMissingType", "ReferenceTuple", "Interface", "BaseType", "MixedSources" })
+            foreach (var method in new[] { "ConstructorArray", "WrappedArrayPlainTrailing", "WrappedArrayEmptyPlainTrailing", "NestedWrappedTuple", "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "WrappedArrayPair", "WrappedArrayLaterParameter", "WrappedArrayOptional", "WrappedArraySuppliedOptional", "WrappedArrayEmptyParams", "WrappedArrayParams", "WrappedArrayLaterParams", "OptionalFillsMissingType", "ReferenceTuple", "Interface", "BaseType", "MixedSources" })
             {
                 await Assert.That(generated).Contains($"instance.{method}(");
             }

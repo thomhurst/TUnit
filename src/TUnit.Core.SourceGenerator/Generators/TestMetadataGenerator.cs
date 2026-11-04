@@ -8301,13 +8301,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 for (var i = 0; i < suppliedParameterCount; i++)
                 {
                     var parameter = testMethodParams[i];
-                    var optional = spreadsReferenceArray && (parameter.IsOptional || parameter.IsParams);
+                    var collectsTrailingValues = i == testMethodParams.Length - 1 && parameter.CollectsTrailingArguments();
+                    var optional = spreadsReferenceArray && (parameter.IsOptional || collectsTrailingValues);
                     if (optional != (pass == 1))
                     {
                         continue;
                     }
 
-                    var parameterType = spreadsReferenceArray && parameter.IsParams && parameter.Type is IArrayTypeSymbol array
+                    var parameterType = spreadsReferenceArray && collectsTrailingValues && parameter.Type is IArrayTypeSymbol array
                         ? array.ElementType
                         : parameter.Type;
                     if (optional)
@@ -8707,10 +8708,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// arguments (<c>object</c> or <c>object[]</c> rows, or a non-generic <c>IEnumerable</c>), since
     /// those are only known at runtime.
     /// </summary>
+    // Constructor matching needs the whole array; method matching additionally consumes its spread shape.
     private static ITypeSymbol? GetMethodDataSourceRowType(ISymbol dataSourceMember, MethodDataSourceRowTypes wellKnown, Compilation compilation)
-        => GetMethodDataSourceRowType(dataSourceMember, wellKnown, compilation, out _);
+        => GetMethodDataSourceRowType(dataSourceMember, wellKnown, compilation, out _, normalizeReferenceArray: false);
 
-    private static ITypeSymbol? GetMethodDataSourceRowType(ISymbol dataSourceMember, MethodDataSourceRowTypes wellKnown, Compilation compilation, out bool spreadsReferenceArray)
+    private static ITypeSymbol? GetMethodDataSourceRowType(ISymbol dataSourceMember, MethodDataSourceRowTypes wellKnown, Compilation compilation, out bool spreadsReferenceArray, bool normalizeReferenceArray = true)
     {
         spreadsReferenceArray = false;
         var type = dataSourceMember switch
@@ -8773,7 +8775,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             type = Unwrap(rowData, funcType);
             // TestDataRowUnwrapper spreads reference arrays through object[] covariance.
-            if (type is IArrayTypeSymbol { IsSZArray: true, ElementType.IsReferenceType: true } referenceArray)
+            if (normalizeReferenceArray && type is IArrayTypeSymbol { IsSZArray: true, ElementType.IsReferenceType: true } referenceArray)
             {
                 type = referenceArray.ElementType;
                 spreadsReferenceArray = true;

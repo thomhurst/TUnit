@@ -2579,19 +2579,20 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         if (spreadsReferenceArray)
         {
             // Required bindings take precedence because the declared array type cannot tell us
-            // whether optional or params arguments were supplied. They can fill missing types.
+            // whether optional arguments or trailing array elements were supplied. They can fill missing types.
             for (var pass = 0; pass < 2; pass++)
             {
                 foreach (var parameter in dataParameters)
                 {
-                    var optional = parameter.IsOptional || parameter.HasDefaultValue
-                        || parameter.IsDefined(typeof(ParamArrayAttribute), false) || IsParamCollection(parameter);
+                    var collectsTrailingValues = parameter == dataParameters[^1]
+                        && (IsSingleDimensionalZeroBasedArray(parameter.ParameterType) || parameter.IsDefined(typeof(ParamArrayAttribute), false) || IsParamCollection(parameter));
+                    var optional = parameter.IsOptional || parameter.HasDefaultValue || collectsTrailingValues;
                     if (optional != (pass == 1))
                     {
                         continue;
                     }
 
-                    var parameterType = parameter.IsDefined(typeof(ParamArrayAttribute), false) && parameter.ParameterType.IsArray
+                    var parameterType = collectsTrailingValues && parameter.ParameterType.IsArray
                         ? parameter.ParameterType.GetElementType()!
                         : parameter.ParameterType;
                     if (optional)
