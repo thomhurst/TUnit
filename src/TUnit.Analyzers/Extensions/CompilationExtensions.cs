@@ -22,6 +22,7 @@ public static class CompilationExtensions
         if (argumentType is not null && parameterType is not null
             && ContainsArray(parameterType) && ContainsTypeParameter(parameterType))
         {
+            // Constraint and general inference validation remain separate (#7520).
             return compilation.MatchesOpenArrayShape(argumentType, parameterType);
         }
 
@@ -84,10 +85,10 @@ public static class CompilationExtensions
                 return compilation.MatchesOpenArrayShape(sourceArray.ElementType, targetArray.ElementType, requiresIdentity: true);
             }
 
-            if (parameterType is INamedTypeSymbol { IsTupleType: true } targetTuple
-                && argumentType is INamedTypeSymbol { IsTupleType: true } sourceTuple)
+            if (parameterType is INamedTypeSymbol { IsTupleType: true } targetTuple)
             {
-                if (sourceTuple.TupleElements.Length != targetTuple.TupleElements.Length)
+                if (argumentType is not INamedTypeSymbol { IsTupleType: true } sourceTuple
+                    || sourceTuple.TupleElements.Length != targetTuple.TupleElements.Length)
                 {
                     return false;
                 }
