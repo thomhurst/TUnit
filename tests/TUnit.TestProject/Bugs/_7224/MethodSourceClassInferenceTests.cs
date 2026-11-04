@@ -15,6 +15,16 @@ public class MethodSourceClassInferenceTests<T>
         await Assert.That(((TestDataRow<int>)(object)value!).Data).IsEqualTo(42);
     }
 
+    public static IEnumerable<ValueTuple<TestDataRow<int>>> BareTupleRows()
+        => [new(new(42))];
+
+    [Test, MethodDataSource(nameof(BareTupleRows))]
+    public async Task BareWrappedTuple(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)42);
+    }
+
     #pragma warning disable TUnit0001 // Omitted plain trailing arrays are supported at runtime; analyzer follow-up: #7587.
     [Test, MethodDataSource(nameof(SingleRows))]
     public async Task ScalarEmptyPlainTrailing(T first, T[] rest)

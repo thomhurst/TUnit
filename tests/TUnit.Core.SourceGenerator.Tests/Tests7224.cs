@@ -14,7 +14,7 @@ internal class Tests7224 : TestsBase
             await Assert.That(generated).Contains("instance.WrappedDelegateArray<global::System.Func<int>>(");
             await Assert.That(generated).Contains("instance.WrappedDelegateArrayWithFirst<global::System.Func<int>>(");
             await Assert.That(generated).Contains("instance.ExternalWrappedArray<global::System.Uri>(");
-            foreach (var method in new[] { "ScalarEmptyPlainTrailing", "TupleEmptyPlainTrailing", "ConstructorArray", "WrappedArrayPlainTrailing", "WrappedArrayEmptyPlainTrailing", "NestedWrappedTuple", "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "WrappedArrayPair", "WrappedArrayLaterParameter", "WrappedArrayOptional", "WrappedArraySuppliedOptional", "WrappedArrayEmptyParams", "WrappedArrayParams", "WrappedArrayLaterParams", "OptionalFillsMissingType", "ReferenceTuple", "Interface", "BaseType", "MixedSources" })
+            foreach (var method in new[] { "ScalarEmptyPlainTrailing", "TupleEmptyPlainTrailing", "ConstructorArray", "WrappedArrayPlainTrailing", "WrappedArrayEmptyPlainTrailing", "NestedWrappedTuple", "BareWrappedTuple", "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "WrappedArrayPair", "WrappedArrayLaterParameter", "WrappedArrayOptional", "WrappedArraySuppliedOptional", "WrappedArrayEmptyParams", "WrappedArrayParams", "WrappedArrayLaterParams", "OptionalFillsMissingType", "ReferenceTuple", "Interface", "BaseType", "MixedSources" })
             {
                 await Assert.That(generated).Contains($"instance.{method}(");
             }
@@ -30,6 +30,8 @@ internal class Tests7224 : TestsBase
             await Assert.That(generated).Contains("WrappedArrayConstructorPairInferenceTests<string, string>");
             await Assert.That(generated).Contains("WrappedArrayConstructorOmittedArrayTests<string, int>");
             await Assert.That(generated).Contains("instance.ExplicitTypesPreserveOmittedArray(");
+            await Assert.That(generated).Contains("WrappedArrayConstructorExplicitAndInferredTests<object>");
+            await Assert.That(generated).Contains("WrappedArrayConstructorExplicitAndInferredTests<string>");
         });
 
     [Test]

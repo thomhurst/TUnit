@@ -49,3 +49,20 @@ public class WrappedArrayConstructorOmittedArrayTests<T, U>(T first, U[] rest) w
         await Assert.That(rest).IsEmpty();
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(object))]
+[MethodDataSource(nameof(Rows))]
+public class WrappedArrayConstructorExplicitAndInferredTests<T>(params T[] values)
+{
+    public static IEnumerable<TestDataRow<string[]>> Rows() => [new(new[] { "one" })];
+
+    // Seed generator class inference, as in the other constructor fixtures (#7333).
+    [Test, Arguments("seed")]
+    public async Task InferredTypesRemainAvailable(T seed)
+    {
+        await Assert.That(typeof(T) == typeof(object) || typeof(T) == typeof(string)).IsTrue();
+        await Assert.That(values.Length).IsEqualTo(1);
+        await Assert.That(values[0]).IsEqualTo((T)(object)"one");
+    }
+}

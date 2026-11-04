@@ -8280,16 +8280,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         var compilation = testMethod.CompilationContext.Compilation;
+        // Row values bind to the data parameters only; the engine supplies the CancellationToken.
+        var testMethodParams = GetDataParameters(testMethod.MethodSymbol);
         var dataSourceMember = ResolveMethodDataSourceMember(providerType, methodName, mdsAttr, compilation);
         var spreadsReferenceArray = false;
-        var rowType = dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation, out spreadsReferenceArray);
+        var rowType = dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember,
+            testMethod.CompilationContext.MethodDataSourceRowTypes, compilation, out spreadsReferenceArray,
+            unwrapBareTupleRow: !(testMethodParams.Length == 1 && testMethodParams[0].Type.IsTupleType));
         if (rowType == null)
         {
             return null;
         }
 
-        // Row values bind to the data parameters only; the engine supplies the CancellationToken.
-        var testMethodParams = GetDataParameters(testMethod.MethodSymbol);
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
         if (!spreadsReferenceArray && rowType is INamedTypeSymbol { IsTupleType: true } tupleType
@@ -8728,7 +8730,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return GetMethodDataSourceRowType(dataSourceMember, wellKnown, compilation, out _, normalizeReferenceArray: false);
     }
 
-    private static ITypeSymbol? GetMethodDataSourceRowType(ISymbol dataSourceMember, MethodDataSourceRowTypes wellKnown, Compilation compilation, out bool spreadsReferenceArray, bool normalizeReferenceArray = true)
+    private static ITypeSymbol? GetMethodDataSourceRowType(ISymbol dataSourceMember, MethodDataSourceRowTypes wellKnown, Compilation compilation, out bool spreadsReferenceArray, bool normalizeReferenceArray = true, bool unwrapBareTupleRow = false)
     {
         spreadsReferenceArray = false;
         var type = dataSourceMember switch
@@ -8787,6 +8789,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Func inside it. Anything nested deeper reaches the test as a value (e.g. a Func<int> row
         // from Func<Func<int>>), so inference must see that value's type too.
         type = Unwrap(type, funcType);
+        // ToObjectArray spreads a bare one-element tuple before UnwrapArray consumes its row wrapper.
+        // An outer TestDataRow has not been removed yet, so a wrapped tuple keeps its nested row intact.
+        if (unwrapBareTupleRow && type is INamedTypeSymbol { IsTupleType: true, TupleElements.Length: 1 } tuple
+            && TryUnwrap(tuple.TupleElements[0].Type, testDataRowType, out _))
+        {
+            type = tuple.TupleElements[0].Type;
+        }
+
         if (TryUnwrap(type, testDataRowType, out var rowData))
         {
             type = Unwrap(rowData, funcType);

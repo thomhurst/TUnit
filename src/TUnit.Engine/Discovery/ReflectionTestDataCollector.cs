@@ -3002,19 +3002,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             ? [rowType]
             : GetTupleElementTypes(rowType) ?? [rowType];
         var typeArguments = new Type[typeParameters.Length];
+        var inferredFromPossiblyOmittedArray = false;
 
         for (var i = 0; i < typeParameters.Length; i++)
         {
             for (var j = 0; j < parameters.Length && (spreadsReferenceArray || j < rowElements.Length) && typeArguments[i] == null; j++)
             {
-                // A spread array may omit its trailing collecting parameter. Explicit class types must
-                // remain available when only that potentially absent value would infer a type argument.
-                if (spreadsReferenceArray && hasExplicitTypes && j == parameters.Length - 1
-                    && IsSingleDimensionalZeroBasedArray(parameters[j].ParameterType))
-                {
-                    continue;
-                }
-
                 var elementType = spreadsReferenceArray ? rowType : rowElements[j];
                 if (elementType != typeof(object)
                     && ReflectionGenericTypeResolver.MatchTypeParameter(
@@ -3024,6 +3017,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     && typeArgument != typeof(object))
                 {
                     typeArguments[i] = typeArgument;
+                    inferredFromPossiblyOmittedArray |= spreadsReferenceArray && j == parameters.Length - 1
+                        && IsSingleDimensionalZeroBasedArray(parameters[j].ParameterType);
                 }
             }
 
@@ -3033,7 +3028,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
         }
 
-        return typeArguments;
+        // A declared array may supply elements, so keep valid inferred instantiations alongside explicit
+        // ones. If its possibly empty tail alone causes a constraint failure, defer to the explicit types.
+        return hasExplicitTypes && inferredFromPossiblyOmittedArray
+            && ReflectionGenericTypeResolver.FindConstraintViolation(typeParameters[0].DeclaringType!, typeArguments) is not null
+                ? null
+                : typeArguments;
     }
 
     /// <summary>Mirrors the generator's <c>ProcessTypeForGenerics</c>.</summary>

@@ -11,8 +11,21 @@ public class Issue7224Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7224/*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-            result => result.ResultSummary.Counters.Total.ShouldBe(41),
-            result => result.ResultSummary.Counters.Passed.ShouldBe(41),
+            result => result.ResultSummary.Counters.Total.ShouldBe(44),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(44),
+            result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+        ]);
+    }
+
+    [Test]
+    public async Task Supplied_Constructor_Array_Infers_Alongside_Explicit_Class_Types()
+    {
+        // Standalone constructor-row inference in generated mode is tracked in #7333.
+        Skip.When(testMode != TestMode.Reflection, "Only reflection mode infers standalone constructor rows");
+        await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7224Reflection/*/*",
+        [
+            result => result.ResultSummary.Counters.Total.ShouldBe(2),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(2),
             result => result.ResultSummary.Counters.Failed.ShouldBe(0)
         ]);
     }
