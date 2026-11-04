@@ -292,7 +292,9 @@ jobs:
             if (!(Test-Path $cdb)) { throw 'Windows SDK did not install x64 cdb.exe' }
             $dumps = @(Get-ChildItem captured-dump -Recurse -Filter 'hangdump.windows-reflection-pass.dmp')
             if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
-            & $cdb -z $dumps[0].FullName -y 'srv*symbols*https://msdl.microsoft.com/download/symbols' -c '.reload; ~* kb; !locks; q' *> analysis/native-stacks.txt
+            $symbolCache = Join-Path $env:RUNNER_TEMP 'engine-dump-symbols'
+            New-Item -ItemType Directory -Path $symbolCache -Force | Out-Null
+            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c '.reload; ~* kb; !locks; q' *> analysis/native-stacks.txt
             if ($LASTEXITCODE -ne 0) { throw 'Native dump analysis failed; see native-stacks.txt' }
           } catch {
             $_ | Out-String | Set-Content analysis/native-analysis-error.txt
