@@ -378,3 +378,38 @@ public class ConstructorScopedTypedMethodRows<T>(T constructorValue)
         }
     }
 }
+
+[GenerateGenericTest(typeof(IComparable))]
+[MethodDataSource(nameof(ConstructorRows))]
+public class ExplicitCompatibleMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<IComparable> ConstructorRows() => [42];
+    public static IEnumerable<int> MethodRows() => [43];
+
+    [Test]
+    [MethodDataSource(nameof(MethodRows))]
+    public void Test(T methodValue)
+    {
+        if (constructorValue is not 42 || methodValue is not 43)
+        {
+            throw new InvalidOperationException("Expected compatible method rows on the explicit interface instantiation.");
+        }
+    }
+}
+
+[GenerateGenericTest(typeof(IComparable))]
+[MethodDataSource(nameof(ConstructorRows))]
+public class ExplicitCompatibleTypedMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<IComparable> ConstructorRows() => [42];
+
+    [Test]
+    [TypedMethodRows]
+    public void Test(T methodValue)
+    {
+        if (constructorValue is not 42 || methodValue is not 43)
+        {
+            throw new InvalidOperationException("Expected compatible typed rows on the explicit interface instantiation.");
+        }
+    }
+}

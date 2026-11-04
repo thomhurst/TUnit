@@ -1753,6 +1753,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
+        // Explicit class types accept compatible method values even when those values infer
+        // different class types. Constructor inference can create their scoped entry before
+        // explicit-type processing, so retain the method providers after that deduplication.
+        if (testMethod is { IsGenericType: true, IsGenericMethod: false } && rowInstantiations is not null)
+        {
+            foreach (var instantiation in rowInstantiations.Values)
+            {
+                if (instantiation.HasExplicitClassTypes && instantiation.HasClassRows)
+                {
+                    foreach (var attribute in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                    {
+                        instantiation.AddRow(attribute, isClassRow: false);
+                    }
+
+                    foreach (var attribute in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
+                    {
+                        if (attribute.AttributeClass is { } attributeClass
+                            && DataSourceAttributeHelper.IsTypedDataSourceAttribute(attributeClass))
+                        {
+                            instantiation.AddRow(attribute, isClassRow: false);
+                        }
+                    }
+                }
+            }
+        }
+
         // A class row fixes the instantiation's types on its own, so an own-class [MethodDataSource] member whose
         // declared rows infer the same types supplies further class rows for it, with or without [GenerateGenericTest],
         // as reflection mode groups those rows with the class [Arguments] rows (#7208). A member whose rows infer no
