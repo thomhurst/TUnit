@@ -893,6 +893,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var joinsDuplicateMethodSources = testMethod is { IsGenericMethod: true, IsGenericType: false }
             && !testMethod.MethodAttributes.Any(static a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
 
+        // Without constructor data, method sources supply the class types and partition their rows,
+        // matching reflection's BuildTestsFromMethodRows. Constructor sources keep their own policy.
+        var scopesClassMethodSources = testMethod is { IsGenericType: true, IsGenericMethod: false }
+            && !testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
+                a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass));
+
         // A generic class whose widest public constructor takes arguments
         var hasParameterizedConstructor = testMethod.IsGenericType
             && testMethod.TypeSymbol.Constructors
@@ -1036,12 +1042,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // A generic method on a non-generic class runs only the sources scoped to its
                     // instantiation, so any method data source that infers the same types as an earlier
                     // one (a second [MethodDataSource] declared like the first, say) joins it too.
-                    // Otherwise its rows would be reported as uninferable (#7163). Reflection mode drops
-                    // such a source when the method has [GenerateGenericTest], so it is dropped here too.
+                    // Otherwise its rows would be reported as uninferable (#7163). With method-level
+                    // [GenerateGenericTest], duplicate inferred sources are dropped, as in reflection.
+                    // Non-generic methods inferring class types group sources of the same types too.
                     // The name also matches [Arguments<T>], a literal row that joins as well (#7214).
                     if (specificAttr is not null && GenericMethodInferencePolicy.JoinsDuplicate(
                         isLiteralRow: specificAttr.AttributeClass?.Name == "ArgumentsAttribute",
-                        joinsInferredSources: joinsDuplicateMethodSources && !isClassRow))
+                        joinsInferredSources: (joinsDuplicateMethodSources || scopesClassMethodSources) && !isClassRow))
                     {
                         existing.AddRow(specificAttr, isClassRow);
                     }
@@ -1413,7 +1420,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 if (InferClassTypesFromMethodDataSource(testMethod, mdsAttr) is { Length: > 0 } inferredTypes)
                 {
-                    TryAddInstantiation(inferredTypes);
+                    // As in reflection discovery, each source belongs to the class types its row infers.
+                    // Sources inferring the same types join the existing instantiation.
+                    TryAddInstantiation(inferredTypes, scopesClassMethodSources ? mdsAttr : null);
                 }
             }
 
@@ -8450,7 +8459,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        // Find the method in the test class
+        // Only members declared on this class participate in inference, matching reflection
+        // discovery's DeclaredOnly lookup. Inherited sources can still run on explicitly supplied types.
         var testClass = testMethod.TypeSymbol;
         var dataMethod = testClass.GetMembers(methodName)
             .OfType<IMethodSymbol>()
