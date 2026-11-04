@@ -1310,16 +1310,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Inherited member sources must establish their constructor types before a null method row
-        // defers inference to them. Reflection discovery groups these sources by their rows as well.
+        // defers inference to them. Only untyped providers read members on the open generic class;
+        // external providers infer from runtime row values instead, matching reflection discovery.
         if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
             foreach (var baseType in testMethod.TypeSymbol.GetBaseTypes())
             {
                 foreach (var attribute in baseType.GetAttributes())
                 {
-                    if (attribute.AttributeClass?.Name == "MethodDataSourceAttribute"
+                    if (attribute.AttributeClass is { Name: "MethodDataSourceAttribute", IsGenericType: false }
+                        && attribute.ConstructorArguments is [{ Value: string }]
                         && GetMethodDataSourceDeclaredRowType(testMethod, attribute) is { } rowType
-                        && InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType) is { Length: > 0 } classTypes)
+                        && InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType) is { Length: > 0 } classTypes
+                        && FindInaccessibleType(classTypes, compilation) is null)
                     {
                         TryAddInstantiation(classTypes, attribute, reportClassViolationAs: ClassViolationSource.ClassArguments, isClassRow: true);
                     }

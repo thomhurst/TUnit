@@ -98,7 +98,7 @@ public class InheritedMixedSources<T>(T value) : InheritedMixedSourcesBase
     }
 }
 
-[MethodDataSource(typeof(InheritedNullSourceBase), nameof(Rows))]
+[MethodDataSource(nameof(Rows))]
 public abstract class InheritedNullSourceBase
 {
     public static IEnumerable<string> Rows() => ["constructor"];
@@ -113,6 +113,61 @@ public class InheritedSourceNullArguments<T>(T value) : InheritedNullSourceBase
         if (typeof(T) != typeof(string) || value is not "constructor" || methodValue is not null)
         {
             throw new InvalidOperationException("Expected the inherited source to infer string and supply the constructor row.");
+        }
+    }
+}
+
+[MethodDataSource(typeof(ExternalComparableRows), nameof(ExternalComparableRows.Rows))]
+public abstract class ExternalComparableSourceBase;
+
+public static class ExternalComparableRows
+{
+    public static IEnumerable<IComparable> Rows() => ["constructor"];
+}
+
+[GenerateGenericTest(typeof(string))]
+public class InheritedExternalSource<T>(T value) : ExternalComparableSourceBase
+{
+    [Test]
+    public void Test()
+    {
+        if (typeof(T) != typeof(string) || value is not "constructor")
+        {
+            throw new InvalidOperationException("External sources must use row values rather than their declared interface type.");
+        }
+    }
+}
+
+[GenerateGenericTest(typeof(string))]
+public class InheritedConstrainedExternalSource<T>(T value) : ExternalComparableSourceBase
+    where T : class, IComparable<string>
+{
+    [Test]
+    public void Test()
+    {
+        if (value.CompareTo("constructor") != 0)
+        {
+            throw new InvalidOperationException("Expected the valid explicit string instantiation without a declared-interface constraint failure.");
+        }
+    }
+}
+
+[MethodDataSource(typeof(PrivateRowSourceBase), "Rows")]
+public abstract class PrivateRowSourceBase
+{
+    private sealed class PrivateRow;
+    private static IEnumerable<PrivateRow> Rows() => [new()];
+}
+
+[GenerateGenericTest(typeof(object))]
+public class InheritedPrivateRowSource<T>(T value) : PrivateRowSourceBase
+{
+    [Test]
+    public void Test()
+    {
+        if (value is null)
+        {
+            throw new InvalidOperationException("Expected the private external row to remain runnable.");
         }
     }
 }
