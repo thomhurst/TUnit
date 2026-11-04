@@ -280,6 +280,17 @@ public class MethodSourceMethodInferenceTests
         await Assert.That(values.Length).IsEqualTo(2);
     }
 
+    public static IEnumerable<TestDataRow<object[][]>> JaggedRows() => [new(new[] { new object[] { "one" }, new object[] { 2 } })];
+
+    [Test, MethodDataSource(nameof(JaggedRows))]
+    public async Task WrappedJaggedArray<T>(params T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(object[]));
+        await Assert.That(values.Length).IsEqualTo(2);
+        await Assert.That(((object[])(object)values[0]!)[0]).IsEqualTo("one");
+        await Assert.That(((object[])(object)values[1]!)[0]).IsEqualTo(2);
+    }
+
     public static IEnumerable<TestDataRow<Func<int>[]>> DelegateRows() => [new(new Func<int>[] { () => 42 })];
 
     [Test, MethodDataSource(nameof(DelegateRows))]

@@ -11,6 +11,7 @@ internal class Tests7224 : TestsBase
             await Assert.That(generated).Contains("MethodSourceClassInferenceTests<int>");
             await Assert.That(generated).Contains("NullableMethodSourceClassInferenceTests<int>");
             await Assert.That(generated).Contains("instance.NullableValue(");
+            await Assert.That(generated).Contains("instance.WrappedJaggedArray<object[]>(");
             await Assert.That(generated).Contains("instance.WrappedDelegateArray<global::System.Func<int>>(");
             await Assert.That(generated).Contains("instance.WrappedDelegateArrayWithFirst<global::System.Func<int>>(");
             await Assert.That(generated).Contains("instance.ExternalWrappedArray<global::System.Uri>(");
@@ -26,6 +27,8 @@ internal class Tests7224 : TestsBase
         async files =>
         {
             var generated = string.Join(Environment.NewLine, files);
+            await Assert.That(generated).Contains("WrappedArrayConstructorOmittedOptionalTests<string, int>");
+            await Assert.That(generated).Contains("instance.ExplicitTypesPreserveOmittedOptional(");
             await Assert.That(generated).Contains("ExplicitClassDeferredRowTests<string, int>");
             await Assert.That(generated).Contains("instance.GenericMethodPreservesExplicitClassRow<bool>(");
             await Assert.That(generated).Contains("WrappedArrayConstructorScalarInferenceTests<string>");

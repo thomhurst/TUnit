@@ -8207,10 +8207,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             for (var j = 0; j < constructor.Parameters.Length && (spreadsReferenceArray || j < rowElements.Length) && typeArguments[i] == null; j++)
             {
-                // A spread array may omit its trailing collecting parameter. Explicit class types must
-                // remain available when only that potentially absent value would infer a type argument.
-                if (spreadsReferenceArray && hasExplicitTypes && j == constructor.Parameters.Length - 1
-                    && constructor.Parameters[j].Type is IArrayTypeSymbol { IsSZArray: true })
+                // A spread array may omit optional or trailing collecting parameters. Explicit class types
+                // remain available when only a potentially absent value would infer a type argument.
+                if (spreadsReferenceArray && hasExplicitTypes && (constructor.Parameters[j].IsOptional
+                    || j == constructor.Parameters.Length - 1 && constructor.Parameters[j].Type is IArrayTypeSymbol { IsSZArray: true }))
                 {
                     continue;
                 }
@@ -8336,9 +8336,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var parameterType = inferringClassTypes && tupleElements.Length > testMethodParams.Length && i >= testMethodParams.Length - 1
                     ? trailingElementType!
                     : testMethodParams[i].Type;
-                if (!ProcessTypeForGenerics(parameterType, tupleElements[i].Type, genericParams, genericParamMap))
+                // MethodDataSource method inference historically takes the last parameter's binding
+                // (#7121). Validate each parameter's own interfaces before merging those bindings.
+                var parameterMap = inferringClassTypes ? genericParamMap : new Dictionary<string, ITypeSymbol>();
+                if (!ProcessTypeForGenerics(parameterType, tupleElements[i].Type, genericParams, parameterMap))
                 {
                     return null;
+                }
+
+                if (!inferringClassTypes)
+                {
+                    foreach (var binding in parameterMap)
+                    {
+                        genericParamMap[binding.Key] = binding.Value;
+                    }
                 }
             }
         }
@@ -8844,7 +8855,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         if (type.SpecialType == SpecialType.System_Object
-            || type is IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Object })
+            || !spreadsReferenceArray && type is IArrayTypeSymbol { ElementType.SpecialType: SpecialType.System_Object })
         {
             return null;
         }

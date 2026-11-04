@@ -366,6 +366,7 @@ public static class TupleArgumentHelper
     }
 
     /// <summary>
+    /// Shared by invocation generation and declared-row inference so both bind collected values to the same element type.
     /// Gets the element type for a trailing collecting parameter. Handles plain arrays as well as
     /// C# 13 <c>params</c> collections whose target is an array-assignable generic interface
     /// (<c>IEnumerable&lt;T&gt;</c>, <c>IReadOnlyList&lt;T&gt;</c>, etc.) — for those a generated

@@ -84,6 +84,10 @@ public class MethodDataSourceDeclaredRowTypeTests
         await Assert.That(rowType).IsEqualTo(typeof(string));
         await Assert.That(spreadsReferenceArray).IsTrue();
 
+        var jaggedElement = MethodDataSourceAttribute.GetDeclaredRowType(typeof(IEnumerable<TestDataRow<object[][]>>), out var spreadsJaggedArray);
+        await Assert.That(jaggedElement).IsEqualTo(typeof(object[]));
+        await Assert.That(spreadsJaggedArray).IsTrue();
+
         MethodDataSourceAttribute.GetDeclaredRowType(typeof(IEnumerable<string[]>), out var spreadsBareArray);
         await Assert.That(spreadsBareArray).IsFalse();
     }

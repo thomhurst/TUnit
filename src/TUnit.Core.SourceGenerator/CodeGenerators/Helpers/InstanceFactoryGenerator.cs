@@ -348,6 +348,14 @@ public static class InstanceFactoryGenerator
                 }
                 arguments[arguments.Count - 1] = new InvocationArgument(trailingExpression);
             }
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                if (!parameters[i].CollectsTrailingArguments() && TupleArgumentHelper.TryFormatDefaultValue(parameters[i], out var defaultValue))
+                {
+                    arguments[i] = arguments[i] with { Expression = $"(args.Length <= {i.ToString(CultureInfo.InvariantCulture)} ? {defaultValue} : {arguments[i].Expression})" };
+                }
+            }
+
             if (!useCachedConstructor && parameters.Any(static parameter => parameter.RefKind != RefKind.None))
             {
                 // By-reference arguments need assignable locals. Evaluate all conversions in

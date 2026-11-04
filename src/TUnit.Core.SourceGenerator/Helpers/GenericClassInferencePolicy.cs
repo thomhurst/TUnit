@@ -28,6 +28,8 @@ internal static class GenericClassInferencePolicy
     internal static bool NullMethodRowInfersObject(bool hasClassTypeSource, bool hasExplicitClassTypes)
         => !hasClassTypeSource && !hasExplicitClassTypes;
 
+    // Mixed inferred and untyped method sources keep the inferred tests; uninferable sources are
+    // omitted without a discovery failure when another source already supplies the class types.
     internal static bool ReportsUninferredMethodSource(bool hasClassTypeSource, bool hasExplicitClassTypes, bool hasInferredMethodTypes)
         => !hasClassTypeSource && !hasExplicitClassTypes && !hasInferredMethodTypes;
 

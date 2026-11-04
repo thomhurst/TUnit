@@ -521,7 +521,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
         }
 
-        return rowType == null || rowType == typeof(object[]) || spreadsReferenceArray && rowType == typeof(object) ? null : rowType;
+        return rowType == null || !spreadsReferenceArray && rowType == typeof(object[]) || spreadsReferenceArray && rowType == typeof(object) ? null : rowType;
     }
 
     private static Type? UnwrapFunc(Type? type) =>

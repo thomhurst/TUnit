@@ -91,3 +91,20 @@ public class ExplicitClassDeferredRowTests<T, U>(T first, U[] rest) where U : st
         await Assert.That(rest).IsEmpty();
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(string), typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class WrappedArrayConstructorOmittedOptionalTests<T, U>(T first, U second = default) where U : struct
+{
+    public static IEnumerable<TestDataRow<string[]>> Rows() => [new(new[] { "one" })];
+
+    [Test]
+    public async Task ExplicitTypesPreserveOmittedOptional()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(typeof(U)).IsEqualTo(typeof(int));
+        await Assert.That(first).IsEqualTo((T)(object)"one");
+        await Assert.That(second).IsEqualTo(default(U));
+    }
+}

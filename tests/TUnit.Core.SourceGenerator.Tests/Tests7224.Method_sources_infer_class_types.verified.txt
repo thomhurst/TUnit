@@ -3984,6 +3984,119 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7224_MethodSourceMethodInferenceTests_WrappedJaggedArray__T___TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests)),
+        Name = "MethodSourceMethodInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7224",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("WrappedJaggedArray", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests), "WrappedJaggedArray", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            switch (args.Length)
+            {
+                case 0:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedJaggedArray<object[]>(global::System.Array.Empty<object[]>()));
+                    }
+                case 1:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedJaggedArray<object[]>((args[0] is null ? null : args[0] is object[][] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<object[]>(args[0]))));
+                    }
+                case 2:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedJaggedArray<object[]>(new object[][] { global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[1]) }));
+                    }
+                case 3:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedJaggedArray<object[]>(new object[][] { global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[2]) }));
+                    }
+                case 4:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedJaggedArray<object[]>(new object[][] { global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[3]) }));
+                    }
+                case 5:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedJaggedArray<object[]>(new object[][] { global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[4]) }));
+                    }
+                case 6:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.WrappedJaggedArray<object[]>(new object[][] { global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[5]) }));
+                    }
+                default:
+                    return new global::System.Threading.Tasks.ValueTask(instance.WrappedJaggedArray<object[]>((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<object[]>(args[i]))) : global::System.Array.Empty<object[]>())));
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("JaggedRows"),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests>(
+            methodName: "WrappedJaggedArray<object[]>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests.WrappedJaggedArray<object[]>",
+            methodTypeArgumentsIdentity: "<object[]>",
+            filePath: "",
+            lineNumber: 285,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("JaggedRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests.JaggedRows()),
+    },
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7224_MethodSourceMethodInferenceTests_WrappedJaggedArray__T___TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests>(static () => TUnit_TestProject_Bugs__7224_MethodSourceMethodInferenceTests_WrappedJaggedArray__T___TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7224_MethodSourceMethodInferenceTests_WrappedDelegateArray__T___TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests", new global::TUnit.Core.ClassMetadata
@@ -4065,7 +4178,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests.WrappedDelegateArray<Func<int>>",
             methodTypeArgumentsIdentity: "<global::System.Func<int>>",
             filePath: "",
-            lineNumber: 285,
+            lineNumber: 296,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4183,7 +4296,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests.WrappedDelegateArrayWithFirst<Func<int>>",
             methodTypeArgumentsIdentity: "<global::System.Func<int>>",
             filePath: "",
-            lineNumber: 292,
+            lineNumber: 303,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4296,7 +4409,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceMethodInferenceTests.ExternalWrappedArray<Uri>",
             methodTypeArgumentsIdentity: "<global::System.Uri>",
             filePath: "",
-            lineNumber: 300,
+            lineNumber: 311,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4394,7 +4507,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "omitted", ne
             methodName: "OptionalFillsMissingType",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.WrappedArrayPartialOptionalInferenceTests<string,string>.OptionalFillsMissingType",
             filePath: "",
-            lineNumber: 314,
+            lineNumber: 325,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4478,7 +4591,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "seed", new g
             methodName: "ConstructorArray",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.WrappedArrayConstructorInferenceTests<string>.ConstructorArray",
             filePath: "",
-            lineNumber: 336,
+            lineNumber: 347,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

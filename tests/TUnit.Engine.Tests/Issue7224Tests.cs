@@ -11,8 +11,8 @@ public class Issue7224Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7224/*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-            result => result.ResultSummary.Counters.Total.ShouldBe(52),
-            result => result.ResultSummary.Counters.Passed.ShouldBe(52),
+            result => result.ResultSummary.Counters.Total.ShouldBe(54),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(54),
             result => result.ResultSummary.Counters.Failed.ShouldBe(0)
         ]);
     }

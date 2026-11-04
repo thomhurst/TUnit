@@ -2569,7 +2569,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 && !parameter.HasDefaultValue
                 && !parameter.IsDefined(typeof(ParamArrayAttribute), false)
                 && !IsParamCollection(parameter)
-                && !(parameter == dataParameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
+                && !(scope == GenericParameterScope.Class && parameter == dataParameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
             {
                 requiredCount++;
             }
@@ -3011,7 +3011,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             ? [rowType]
             : GetTupleElementTypes(rowType) ?? [rowType];
         var typeArguments = new Type[typeParameters.Length];
-        var inferredFromPossiblyOmittedArray = false;
+        var inferredFromPossiblyOmittedValue = false;
 
         for (var i = 0; i < typeParameters.Length; i++)
         {
@@ -3026,8 +3026,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     && typeArgument != typeof(object))
                 {
                     typeArguments[i] = typeArgument;
-                    inferredFromPossiblyOmittedArray |= spreadsReferenceArray && j == parameters.Length - 1
-                        && IsSingleDimensionalZeroBasedArray(parameters[j].ParameterType);
+                    inferredFromPossiblyOmittedValue |= spreadsReferenceArray && (parameters[j].IsOptional
+                        || j == parameters.Length - 1 && IsSingleDimensionalZeroBasedArray(parameters[j].ParameterType));
                 }
             }
 
@@ -3038,8 +3038,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // A declared array may supply elements, so keep valid inferred instantiations alongside explicit
-        // ones. If its possibly empty tail alone causes a constraint failure, defer to the explicit types.
-        return hasExplicitTypes && inferredFromPossiblyOmittedArray
+        // ones. If a possibly omitted optional value or empty tail causes a constraint failure, defer to the explicit types.
+        return hasExplicitTypes && inferredFromPossiblyOmittedValue
             && ReflectionGenericTypeResolver.FindConstraintViolation(typeParameters[0].DeclaringType!, typeArguments) is not null
                 ? null
                 : typeArguments;
