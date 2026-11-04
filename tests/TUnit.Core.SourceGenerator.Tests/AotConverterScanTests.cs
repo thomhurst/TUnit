@@ -14,6 +14,12 @@ public class AotConverterScanTests
             using TUnit.Core;
             internal struct CollectionValue { public static implicit operator int(CollectionValue value) => 42; }
             internal class Values : List<CollectionValue> { }
+            internal struct RecursiveValue { public static implicit operator int(RecursiveValue value) => 42; }
+            internal class Rows<T> : IEnumerable<Rows<T[]>>
+            {
+                public IEnumerator<Rows<T[]>> GetEnumerator() => throw new System.NotSupportedException();
+                System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+            }
             public class Box<T> { public static implicit operator int(Box<T> value) => 42; }
             internal class Tests
             {
@@ -26,6 +32,9 @@ public class AotConverterScanTests
                 private static Hidden.NestedValue NestedRows() => new();
                 private static Box<PrivateValue> GenericRows() => new();
                 private static Values ConcreteRows() => new();
+                private static Rows<RecursiveValue> RecursiveRows() => new();
+                [Test, MethodDataSource(nameof(RecursiveRows))]
+                public void Recursive(object value) { }
                 [Test, MethodDataSource(nameof(PrivateRows))]
                 public void Private(int value) { }
                 [Test, MethodDataSource(nameof(NestedRows))]
@@ -54,6 +63,7 @@ public class AotConverterScanTests
         await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
         var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
         await Assert.That(generated).Contains("typeof(global::CollectionValue)");
+        await Assert.That(generated).Contains("typeof(global::RecursiveValue)");
         await Assert.That(generated).DoesNotContain("PrivateValue");
         await Assert.That(generated).DoesNotContain("NestedValue");
     }

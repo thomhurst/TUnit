@@ -296,7 +296,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
     }
 
-    private static void CollectConversionsForType(ITypeSymbol type, List<ConversionEntry> conversions, Compilation compilation, HashSet<ITypeSymbol> visited)
+    private static void CollectConversionsForType(ITypeSymbol type, List<ConversionEntry> conversions, Compilation compilation, HashSet<ITypeSymbol> visited, HashSet<ITypeSymbol> expandingSequences)
     {
         if (!visited.Add(type))
         {
@@ -305,7 +305,7 @@ public class AotConverterGenerator : IIncrementalGenerator
 
         if (type is IArrayTypeSymbol arrayType)
         {
-            CollectConversionsForType(arrayType.ElementType, conversions, compilation, visited);
+            CollectConversionsForType(arrayType.ElementType, conversions, compilation, visited, expandingSequences);
             return;
         }
 
@@ -337,21 +337,36 @@ public class AotConverterGenerator : IIncrementalGenerator
         {
             foreach (var typeArg in namedType.TypeArguments)
             {
-                CollectConversionsForType(typeArg, conversions, compilation, visited);
+                CollectConversionsForType(typeArg, conversions, compilation, visited, expandingSequences);
             }
         }
 
-        // Concrete collections can hide their element type in a base class or interface.
-        // Only sequence interfaces describe data rows; arbitrary interfaces are not data wrappers.
-        foreach (var sequence in namedType.AllInterfaces)
+        // A sequence can expand indefinitely, e.g. Rows<T> : IEnumerable<Rows<T[]>>.
+        // Track definitions on the current sequence path, while still scanning concrete
+        // type arguments and operators above, and allowing sibling instantiations.
+        if (!expandingSequences.Add(namedType.OriginalDefinition))
         {
-            if (sequence is { Arity: 1, Name: "IEnumerable" or "IAsyncEnumerable" } &&
-                sequence.ContainingNamespace is
-                    { Name: "Generic", ContainingNamespace: { Name: "Collections", ContainingNamespace:
-                        { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } })
+            return;
+        }
+
+        try
+        {
+            // Concrete collections can hide their element type in a base class or interface.
+            // Only sequence interfaces describe data rows; arbitrary interfaces are not data wrappers.
+            foreach (var sequence in namedType.AllInterfaces)
             {
-                CollectConversionsForType(sequence.TypeArguments[0], conversions, compilation, visited);
+                if (sequence is { Arity: 1, Name: "IEnumerable" or "IAsyncEnumerable" } &&
+                    sequence.ContainingNamespace is
+                        { Name: "Generic", ContainingNamespace: { Name: "Collections", ContainingNamespace:
+                            { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } })
+                {
+                    CollectConversionsForType(sequence.TypeArguments[0], conversions, compilation, visited, expandingSequences);
+                }
             }
+        }
+        finally
+        {
+            expandingSequences.Remove(namedType.OriginalDefinition);
         }
     }
 
@@ -767,7 +782,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                 if (!_typeConversions.TryGetValue(type, out var typeConversions))
                 {
                     var collected = new List<ConversionEntry>();
-                    CollectConversionsForType(type, collected, compilation, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
+                    CollectConversionsForType(type, collected, compilation, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default), new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
                     typeConversions = _typeConversions.GetOrAdd(type, collected.ToArray());
                 }
 
