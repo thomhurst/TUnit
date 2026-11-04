@@ -171,3 +171,23 @@ public class InheritedPrivateRowSource<T>(T value) : PrivateRowSourceBase
         }
     }
 }
+
+[Arguments(42)]
+[MethodDataSource(nameof(Rows))]
+public abstract class InheritedDeclaredRowBase
+{
+    public static IEnumerable<IComparable> Rows() => ["constructor"];
+}
+
+public class InheritedDeclaredRowPartition<T>(T value) : InheritedDeclaredRowBase
+{
+    [Test]
+    public void Test()
+    {
+        if ((typeof(T) != typeof(int) || value is not 42)
+            && (typeof(T) != typeof(IComparable) || value is not "constructor"))
+        {
+            throw new InvalidOperationException("Expected constructor rows to retain their inferred declared types.");
+        }
+    }
+}

@@ -1318,11 +1318,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 foreach (var attribute in baseType.GetAttributes())
                 {
-                    if (attribute.AttributeClass is { Name: "MethodDataSourceAttribute", IsGenericType: false }
-                        && attribute.ConstructorArguments is [{ Value: string }]
-                        && GetMethodDataSourceDeclaredRowType(testMethod, attribute) is { } rowType
-                        && InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType) is { Length: > 0 } classTypes
-                        && FindInaccessibleType(classTypes, compilation) is null)
+                    if (InferClassTypesFromOwnMethodDataSource(testMethod, attribute) is { } classTypes)
                     {
                         TryAddInstantiation(classTypes, attribute, reportClassViolationAs: ClassViolationSource.ClassArguments, isClassRow: true);
                     }
@@ -2739,7 +2735,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.Indent();
             foreach (var attr in classDataSources)
             {
-                GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, GetClassRowConstructor(concreteTypeSymbol), concreteTypeSymbol);
+                if (classDataSourcePartition is not null && InferClassTypesFromOwnMethodDataSource(testMethod, attr) is { } declaredClassTypes)
+                {
+                    // Own-member rows keep the constructor types inferred from their declaration in reflection
+                    // mode, even when a value has a more specific runtime type (IComparable vs string, say).
+                    var sourceWriter = new CodeWriter(includeHeader: false);
+                    GenerateDataSourceAttribute(sourceWriter, testMethod.CompilationContext, attr, GetClassRowConstructor(concreteTypeSymbol), concreteTypeSymbol);
+                    var declaredTypes = string.Join(", ", declaredClassTypes.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"));
+                    dsWriter.AppendLine($"global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource({sourceWriter.ToString().Trim().TrimEnd(',')}, false, {declaredTypes}),");
+                }
+                else
+                {
+                    GenerateDataSourceAttribute(dsWriter, testMethod.CompilationContext, attr, GetClassRowConstructor(concreteTypeSymbol), concreteTypeSymbol);
+                }
             }
             dsWriter.Unindent();
             dsWriter.Append("}");
@@ -8221,6 +8229,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return GetTupleElementTypes(namedType.TypeArguments[7]) is { } rest
             ? namedType.TypeArguments.Take(7).Concat(rest).ToArray()
             : null;
+    }
+
+    // Only own-class member sources infer constructor types from their declared row types. External
+    // providers use runtime values instead. Keep inference and runtime partition emission on the same rule.
+    private static ITypeSymbol[]? InferClassTypesFromOwnMethodDataSource(TestMethodMetadata testMethod, AttributeData attribute)
+    {
+        if (attribute.AttributeClass is { Name: "MethodDataSourceAttribute", IsGenericType: false }
+            && attribute.ConstructorArguments is [{ Value: string }]
+            && GetMethodDataSourceDeclaredRowType(testMethod, attribute) is { } rowType
+            && InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType) is { Length: > 0 } classTypes
+            && FindInaccessibleType(classTypes, testMethod.CompilationContext.Compilation) is null)
+        {
+            return classTypes;
+        }
+
+        return null;
     }
 
     private static ITypeSymbol? GetMethodDataSourceDeclaredRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
