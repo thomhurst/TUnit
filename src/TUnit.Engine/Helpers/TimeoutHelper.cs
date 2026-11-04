@@ -59,13 +59,40 @@ internal static class TimeoutHelper
     /// <param name="testContext">Tracks execution tokens linked to the timeout token, including captured tokens replaced during execution.</param>
     /// <exception cref="TimeoutException">Thrown when the timeout elapses before task completion.</exception>
     /// <exception cref="OperationCanceledException">Thrown when cancellation is requested.</exception>
-    public static async Task ExecuteWithTimeoutAsync(
+    public static Task ExecuteWithTimeoutAsync(
         Func<CancellationToken, Task> taskFactory,
         TimeSpan timeout,
         CancellationTokenSource timeoutCts,
         CancellationToken externalToken,
         string? timeoutMessage = null,
         TestContext? testContext = null)
+        => ExecuteWithTimeoutCoreAsync(taskFactory, timeout, timeoutCts, externalToken,
+            timeoutMessage, testContext, startTimeoutImmediately: true);
+
+    /// <summary>
+    /// Executes a scheduled task with external cancellation active while queued. The factory must
+    /// call the supplied start action immediately before invoking the body, so queue delay does not
+    /// consume the body's timeout. The caller owns the linked cancellation source.
+    /// </summary>
+    public static Task ExecuteWithTimeoutFromStartAsync(
+        Func<CancellationToken, Action, Task> taskFactory,
+        TimeSpan timeout,
+        CancellationTokenSource timeoutCts,
+        CancellationToken externalToken,
+        string? timeoutMessage = null,
+        TestContext? testContext = null)
+        => ExecuteWithTimeoutCoreAsync(
+            token => taskFactory(token, () => timeoutCts.CancelAfter(timeout)),
+            timeout, timeoutCts, externalToken, timeoutMessage, testContext, startTimeoutImmediately: false);
+
+    private static async Task ExecuteWithTimeoutCoreAsync(
+        Func<CancellationToken, Task> taskFactory,
+        TimeSpan timeout,
+        CancellationTokenSource timeoutCts,
+        CancellationToken externalToken,
+        string? timeoutMessage,
+        TestContext? testContext,
+        bool startTimeoutImmediately)
     {
         // Set up cancellation detection BEFORE scheduling timeout to avoid race condition
         // where timeout fires before registration completes (with very small timeouts)
@@ -74,8 +101,12 @@ internal static class TimeoutHelper
             static state => ((TaskCompletionSource<bool>)state!).TrySetCanceled(),
             cancelledTcs);
 
-        // Now schedule the timeout - registration is guaranteed to catch it
-        timeoutCts.CancelAfter(timeout);
+        // Ordinary factories may block synchronously, so arm their timeout before calling them.
+        // Scheduled factories instead signal when the body starts; external cancellation is already active.
+        if (startTimeoutImmediately)
+        {
+            timeoutCts.CancelAfter(timeout);
+        }
 
         var executionTask = taskFactory(timeoutCts.Token);
 
@@ -96,6 +127,12 @@ internal static class TimeoutHelper
                 // Classify that cancellation through the same timeout/external-cancellation path.
             }
         }
+
+        // The body can fault after cancellation and even after the grace period. Observe that
+        // eventual fault on every target framework, including the external-cancellation path.
+        _ = executionTask.ContinueWith(static task => { _ = task.Exception; },
+            CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
 
         // Determine if it was external cancellation or timeout
         if (externalToken.IsCancellationRequested)

@@ -369,7 +369,7 @@ internal class TestExecutor
 
                     var timeoutMessage = $"Test '{context.Metadata.TestDetails.TestName}' timed out after {testTimeout.Value}";
 
-                    await TimeoutHelper.ExecuteWithTimeoutAsync(
+                    await TimeoutHelper.ExecuteWithTimeoutFromStartAsync(
                         CreateTimeoutTestInvoker(executableTest),
                         testTimeout.Value,
                         testBodyTimeoutCts,
@@ -630,11 +630,17 @@ internal class TestExecutor
     // Lambdas that capture a parameter make the compiler allocate their closure at method entry,
     // on every call — even when the branch that creates the lambda never runs. Building them in
     // small helpers keeps that closure off the per-test hot path.
-    private static Func<CancellationToken, Task> CreateTimeoutTestInvoker(AbstractExecutableTest executableTest)
+    private static Func<CancellationToken, Action, Task> CreateTimeoutTestInvoker(AbstractExecutableTest executableTest)
         // A test can block before returning its task. Schedule the invocation so TimeoutHelper
         // can race cancellation even in that case. Task.Run flows ExecutionContext (including
-        // TestContext and hook AsyncLocals); custom executors still control body execution.
-        => ct => Task.Run(() => ExecuteTestAsync(executableTest, ct).AsTask(), ct);
+        // TestContext and hook AsyncLocals); body changes to AsyncLocals stay in that copied context.
+        // Custom executors still control body execution. Queue delay does not consume the body timeout.
+        => (ct, startTimeout) => Task.Run(() =>
+        {
+            ct.ThrowIfCancellationRequested();
+            startTimeout();
+            return ExecuteTestAsync(executableTest, ct).AsTask();
+        }, ct);
 
     private static ValueTask ExecuteWithTestExecutorAsync(ITestExecutor testExecutor, AbstractExecutableTest executableTest)
         => testExecutor.ExecuteTest(executableTest.Context,
