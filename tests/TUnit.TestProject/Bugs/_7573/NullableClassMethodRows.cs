@@ -56,3 +56,26 @@ public class NullableClassMethodRows<T> where T : struct
         await Assert.That(second).IsNull();
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+public class ExplicitNullableClassMethodRows<T> where T : struct
+{
+    public static IEnumerable<int> OwnRows() => [1];
+    public IEnumerable<int> InstanceRows() => [2];
+
+    [Test]
+    [MethodDataSource(nameof(OwnRows))]
+    [MethodDataSource(nameof(InstanceRows))]
+    [MethodDataSource(typeof(NullableClassRowsProvider), nameof(NullableClassRowsProvider.ExternalRows))]
+    public async Task RetainsAllSources(T? value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsNotNull();
+    }
+}
+
+public static class NullableClassRowsProvider
+{
+    public static IEnumerable<int> ExternalRows() => [3];
+}

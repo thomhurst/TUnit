@@ -1424,6 +1424,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Sources inferring the same types join the existing instantiation.
                     TryAddInstantiation(inferredTypes, scopesClassMethodSources ? mdsAttr : null);
                 }
+                else if (scopesClassMethodSources)
+                {
+                    // Explicit class types also run sources whose declared rows cannot infer the class
+                    // (including instance and external sources), even when an inferred entry exists.
+                    (uninferredMethodDataSources ??= []).Add(mdsAttr);
+                }
             }
 
             if (InferTypesFromTypedDataSourceForClass(testMethod.TypeSymbol, testMethod.MethodSymbol) is { Length: > 0 } parameterTypes)
