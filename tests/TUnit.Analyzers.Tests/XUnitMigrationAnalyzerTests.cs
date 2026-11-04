@@ -14,6 +14,7 @@ public class XUnitMigrationAnalyzerTests
     [Arguments("new object[] { null, 2 }", "(object)null")]
     [Arguments("new System.Collections.ArrayList { 1, 2 }", "1")]
     [Arguments("singleArguments()", "singleItem()")]
+    [Arguments("new System.Collections.ArrayList { new object() }", "new()")]
     [Test]
     public async Task XUnit_Single_Expected_Value_Converted(string collection, string expected)
     {
@@ -45,7 +46,7 @@ public class XUnitMigrationAnalyzerTests
                 [Test]
                 public async Task MyTest()
                 {
-                    await Assert.That(((global::System.Collections.IEnumerable)({{collection}}), ({{expected}}) as object)).Satisfies(singleArguments_ => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments_.Item1), singleItem_ => global::System.Object.Equals(singleItem_, singleArguments_.Item2)) == 1);
+                    await Assert.That(((global::System.Collections.IEnumerable)({{collection}}), (object)({{expected}}))).Satisfies(singleArguments_ => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments_.Item1), singleItem_ => global::System.Object.Equals(singleItem_, singleArguments_.Item2)) == 1);
                 }
             }
             """,
@@ -66,8 +67,17 @@ public class XUnitMigrationAnalyzerTests
         System.Collections.IEnumerable GetCollection()
         {
             calls.Add("collection");
-            return new object?[] { new SingleEqualityItem(), 2 }
-                .Concat(Enumerable.Repeat(expectedValue, matches));
+            return Enumerate();
+        }
+        IEnumerable<object?> Enumerate()
+        {
+            calls.Add("enumeration");
+            yield return new SingleEqualityItem();
+            yield return 2;
+            for (var i = 0; i < matches; i++)
+            {
+                yield return expectedValue;
+            }
         }
         object? GetExpected()
         {
@@ -76,7 +86,7 @@ public class XUnitMigrationAnalyzerTests
         }
 
         // The generated expression must evaluate each argument once before enumeration.
-        async Task CheckAsync() => await TUnit.Assertions.Assert.That(((global::System.Collections.IEnumerable)(GetCollection()), (GetExpected()) as object)).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.Item1), singleItem => global::System.Object.Equals(singleItem, singleArguments.Item2)) == 1);
+        async Task CheckAsync() => await TUnit.Assertions.Assert.That(((global::System.Collections.IEnumerable)(GetCollection()), (object?)(GetExpected()))).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.Item1), singleItem => global::System.Object.Equals(singleItem, singleArguments.Item2)) == 1);
         if (shouldPass)
         {
             await CheckAsync();
@@ -85,7 +95,7 @@ public class XUnitMigrationAnalyzerTests
         {
             await TUnit.Assertions.Assert.That(() => CheckAsync()).Throws<TUnit.Assertions.Exceptions.AssertionException>();
         }
-        await TUnit.Assertions.Assert.That(calls).IsEquivalentTo(new[] { "collection", "expected" });
+        await TUnit.Assertions.Assert.That(calls.SequenceEqual(new[] { "collection", "expected", "enumeration" })).IsTrue();
     }
 
     // IEquatable<T> must not replace object equality (the expected overload is non-generic).

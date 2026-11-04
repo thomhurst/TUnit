@@ -376,7 +376,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             while (identifiers.Contains(item)) item += "_";
             var expected = args[1].Expression.ToString();
             return (AssertionConversionKind.Single,
-                $"await Assert.That(((global::System.Collections.IEnumerable)({collection}), ({expected}) as object)).Satisfies({pair} => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>({pair}.Item1), {item} => global::System.Object.Equals({item}, {pair}.Item2)) == 1)",
+                $"await Assert.That(((global::System.Collections.IEnumerable)({collection}), (object)({expected}))).Satisfies({pair} => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>({pair}.Item1), {item} => global::System.Object.Equals({item}, {pair}.Item2)) == 1)",
                 true, null);
         }
 
