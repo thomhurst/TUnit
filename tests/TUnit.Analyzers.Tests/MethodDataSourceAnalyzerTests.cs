@@ -64,6 +64,31 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("int", false)]
+    [Arguments("int?", false)]
+    [Arguments("int", true)]
+    [Arguments("int?", true)]
+    public async Task Independently_Supplied_Nullable_Class_Type_Does_Not_Affect_Peer_Constraints(
+        string rowType, bool constructorSuppliesType)
+    {
+        var attribute = constructorSuppliesType ? "[Arguments(1d)]" : "[GenerateGenericTest(typeof(double))]";
+        var constructor = constructorSuppliesType ? "(T seed)" : "";
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            {{attribute}}
+            public class Tests<T>{{constructor}} where T : struct
+            {
+                public static IEnumerable<Func<({{rowType}}, double)>> Rows() { yield return () => (1, 2d); }
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run<U>(T? first, U second) where U : IComparable<T> { }
+            }
+            """);
+    }
+
+    [Test]
     public async Task Nullable_Generic_Class_Parameter_With_Conflicting_Inference_Accepts_Convertible_Data()
     {
         await Verifier.VerifyAnalyzerAsync(

@@ -643,7 +643,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                     OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
                     TypeArguments: [ITypeParameterSymbol { DeclaringMethod: null }]
                 })
-                ? CompilationExtensions.InferTypeArguments(unwrappedTypes, testParameterTypes)
+                ? CompilationExtensions.InferTypeArguments(context.Compilation, unwrappedTypes, testParameterTypes)
                 : null;
 
             var conversions = unwrappedTypes.ZipAll(testParameterTypes,

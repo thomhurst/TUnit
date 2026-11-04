@@ -147,9 +147,7 @@ public static class CompilationExtensions
         {
             // Explicit instantiations and constructor data supply T independently of the method row.
             // CastHelper converts the method data to the resulting parameter type.
-            if (HasGenerateGenericTestAttribute(nullableTypeParameter)
-                || nullableTypeParameter.DeclaringType?.GetAttributes()
-                    .Any(attribute => attribute.IsDataSourceAttribute(compilation)) == true)
+            if (HasIndependentlySuppliedClassType(compilation, nullableTypeParameter))
             {
                 return true;
             }
@@ -200,12 +198,13 @@ public static class CompilationExtensions
     /// <summary>
     /// Maps each type parameter to the data type it is inferred as, when that is certain: every test parameter
     /// that mentions the type parameter is the bare type parameter (or a nullable class type parameter),
-    /// and all of them infer the same underlying data type.
+    /// and all of them infer the same underlying data type. Class types supplied independently by attributes
+    /// or constructor data are excluded because method rows do not determine their type arguments.
     /// Otherwise the inference depends on which occurrence wins (the generator takes the last one and converts the
     /// other values to it), so the type parameter is left out.
     /// </summary>
     public static Dictionary<ITypeParameterSymbol, ITypeSymbol> InferTypeArguments(
-        IReadOnlyList<ITypeSymbol?> argumentTypes, IReadOnlyList<ITypeSymbol?> parameterTypes)
+        Compilation compilation, IReadOnlyList<ITypeSymbol?> argumentTypes, IReadOnlyList<ITypeSymbol?> parameterTypes)
     {
         var inferred = new Dictionary<ITypeParameterSymbol, ITypeSymbol>(SymbolEqualityComparer.Default);
         var uncertain = new HashSet<ITypeParameterSymbol>(SymbolEqualityComparer.Default);
@@ -241,8 +240,10 @@ public static class CompilationExtensions
                 continue;
             }
 
+            // Independently supplied class types must not contaminate peer method constraints.
             // Bare class type parameters keep their existing deferred constraint validation.
-            if (typeParameter.DeclaringMethod is null && !isNullableClassParameter)
+            if (typeParameter.DeclaringMethod is null
+                && (!isNullableClassParameter || HasIndependentlySuppliedClassType(compilation, typeParameter)))
             {
                 uncertain.Add(typeParameter);
                 continue;
@@ -306,6 +307,13 @@ public static class CompilationExtensions
             && argumentType is not null and not ITypeParameterSymbol and not IErrorTypeSymbol
             && argumentType.TypeKind != TypeKind.Dynamic
             && !ExactTypeExtensions.IsExactType(argumentType);
+    }
+
+    private static bool HasIndependentlySuppliedClassType(Compilation compilation, ITypeParameterSymbol typeParameter)
+    {
+        return HasGenerateGenericTestAttribute(typeParameter)
+            || typeParameter.DeclaringType?.GetAttributes()
+                .Any(attribute => attribute.IsDataSourceAttribute(compilation)) == true;
     }
 
     /// <summary>
