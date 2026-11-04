@@ -28,6 +28,12 @@ public enum GenericClassRowFallback
     /// supplies its constructor arguments. A single empty row is yielded, and the instance factory fails for it.
     /// </summary>
     NoClassRow,
+
+    /// <summary>
+    /// Every class row supplies an explicit instantiation only when no partitioned row infers its types.
+    /// When a constructor group exists, none of its literal method rows applies to this instantiation.
+    /// </summary>
+    OnlyWhenNoRowInfers,
 }
 
 /// <summary>
@@ -466,9 +472,16 @@ internal sealed class GenericClassRowPartitionDataSource : Attribute, IDataSourc
     public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata dataGeneratorMetadata)
     {
         var evaluation = await _coordinator.GetEvaluationAsync(dataGeneratorMetadata).ConfigureAwait(false);
-        RecordYieldsEveryRow(
-            dataGeneratorMetadata.TestBuilderContext,
-            !evaluation.AnyRowInfers && _coordinator.Fallback == GenericClassRowFallback.AllRows);
+        var useEveryRow = !evaluation.AnyRowInfers && _coordinator.Fallback is
+            GenericClassRowFallback.AllRows or GenericClassRowFallback.OnlyWhenNoRowInfers;
+        RecordYieldsEveryRow(dataGeneratorMetadata.TestBuilderContext, useEveryRow);
+
+        // A nonempty inferred constructor group scopes method rows, and none applies to this entry.
+        // An empty group leaves the independently requested explicit instantiation and its raw rows.
+        if (evaluation.AnyRowInfers && _coordinator.Fallback == GenericClassRowFallback.OnlyWhenNoRowInfers)
+        {
+            yield break;
+        }
 
         if (!evaluation.AnyRowInfers && _coordinator.Fallback == GenericClassRowFallback.NoClassRow)
         {
@@ -497,7 +510,6 @@ internal sealed class GenericClassRowPartitionDataSource : Attribute, IDataSourc
             yield break;
         }
 
-        var useEveryRow = !evaluation.AnyRowInfers && _coordinator.Fallback == GenericClassRowFallback.AllRows;
         foreach (var evaluatedRow in evaluation.RowsByIndex[_index] ?? [])
         {
             if (useEveryRow || evaluatedRow.InfersTypeArguments)

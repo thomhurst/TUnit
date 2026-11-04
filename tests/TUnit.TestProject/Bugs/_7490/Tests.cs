@@ -466,3 +466,78 @@ public class MultipleConstructorTypesExternalMethodRows<T>(T constructorValue)
         }
     }
 }
+
+[Arguments(42)]
+[GenerateGenericTest(typeof(IComparable))]
+[MethodDataSource(nameof(Rows), SkipIfEmpty = true)]
+public class ExplicitEmptyConstructorLiteralMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<IComparable> Rows() => [];
+
+    [Test]
+    [Arguments(43)]
+    public void Test(T methodValue)
+    {
+        if (constructorValue is not 42 || methodValue is not 43)
+        {
+            throw new InvalidOperationException("Expected explicit fallback to keep constructor and method rows.");
+        }
+    }
+}
+
+[GenerateGenericTest(typeof(IComparable))]
+[MethodDataSource(nameof(Rows), SkipIfEmpty = true)]
+[MethodDataSource(nameof(IntegerRows))]
+public class ExplicitEmptyConstructorProviderMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<IComparable> Rows() => [];
+    public static IEnumerable<int> IntegerRows() => [42];
+
+    [Test]
+    [Arguments(43)]
+    public void Test(T methodValue)
+    {
+        if (constructorValue is not 42 || methodValue is not 43)
+        {
+            throw new InvalidOperationException("Expected explicit fallback to the other constructor provider.");
+        }
+    }
+}
+
+[GenerateGenericTest(typeof(IComparable))]
+[MethodDataSource(nameof(Rows))]
+public class ExplicitNonemptyConstructorLiteralMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<IComparable> Rows() => [42];
+
+    [Test]
+    [Arguments(43)]
+    public void Test(T methodValue)
+    {
+        if (typeof(T) != typeof(int) || constructorValue is not 42 || methodValue is not 43)
+        {
+            throw new InvalidOperationException("A nonempty constructor group must scope literal method rows.");
+        }
+    }
+}
+
+[Arguments(1, "literal")]
+public abstract class DeferredOwnConstructorRowsBase;
+
+[GenerateGenericTest(typeof(string))]
+[MethodDataSource(nameof(Rows))]
+public class ExplicitDeferredOwnConstructorRows<T>(int id, T value) : DeferredOwnConstructorRowsBase
+{
+    public static IEnumerable<(int, object)> Rows() => [(2, "source")];
+
+    [Test]
+    [Arguments(null)]
+    public void Test(T? methodValue)
+    {
+        if (typeof(T) != typeof(string) || methodValue is not null
+            || (id == 1 ? value is not "literal" : id != 2 || value is not "source"))
+        {
+            throw new InvalidOperationException("Expected inherited literal and deferred own-member constructor rows.");
+        }
+    }
+}

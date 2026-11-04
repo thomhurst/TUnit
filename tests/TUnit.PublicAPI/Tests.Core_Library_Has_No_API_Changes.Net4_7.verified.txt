@@ -772,6 +772,7 @@ namespace
         None = 0,
         AllRows = 1,
         NoClassRow = 2,
+        OnlyWhenNoRowInfers = 3,
     }
     public static class GenericClassRowPartition
     {

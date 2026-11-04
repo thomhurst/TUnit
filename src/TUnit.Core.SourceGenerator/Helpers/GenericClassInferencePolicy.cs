@@ -12,6 +12,8 @@ internal static class GenericClassInferencePolicy
         AllRows,
         // Literal class rows exist but none match; emit the missing-class-row diagnostic.
         NoClassRow,
+        // Explicit fallback survives only when no inferred constructor group exists.
+        OnlyWhenNoRowInfers,
     }
 
     internal static RowFallback SelectRowFallback(bool hasMatchingClassRow, bool hasClassArgumentsRows)

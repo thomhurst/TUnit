@@ -751,6 +751,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // A class-only explicit instantiation survives even when the inferred source is empty.
         public bool HasExplicitClassTypes { get; set; }
 
+        // No inferred method row applies, but an empty constructor group may leave an explicit fallback.
+        public bool OnlyExplicitFallback { get; set; }
+
         /// <summary>
         /// Set when data attributes, <c>[GenerateGenericTest]</c> or <c>IInfersType&lt;T&gt;</c> inferred
         /// method type arguments that break the method's generic constraints. The entry cannot call
@@ -1929,10 +1932,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Literal method rows run only on the class types they infer. Constructor-source entries
-        // without a matching method row yield no test, whether or not the class also has [Arguments].
+        // without a matching method row yield no test. Explicit types still supply a fallback when an
+        // inferred constructor group is empty; a matching literal class row guarantees a nonempty group.
         if (testMethod is { IsGenericType: true, IsGenericMethod: false } && inferringRows is not null)
         {
-            results.RemoveAll(instantiation => instantiation.HasClassRows && !instantiation.HasMethodRows);
+            foreach (var instantiation in results)
+            {
+                instantiation.OnlyExplicitFallback = instantiation.HasExplicitClassTypes
+                    && instantiation.HasClassRows && !instantiation.HasMethodRows
+                    && !classArgumentsAttributes.Any(source =>
+                        InferTypesFromClassArgumentsAttribute(testMethod.TypeSymbol, source, compilation) is { } literalTypes
+                        && InferredTypesMatch(literalTypes, instantiation.ClassTypeArgs));
+            }
+            results.RemoveAll(instantiation => instantiation.HasClassRows && !instantiation.HasMethodRows
+                && !instantiation.OnlyExplicitFallback);
         }
 
         // Reflection mode (ReflectionGenericConstraintViolations in TUnit.Engine) reports class-level
@@ -2659,11 +2672,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (entry.SpecificArgumentsAttribute != null)
         {
-            if (!MethodParametersReferenceTypeParameters(testMethod))
+            if (!MethodParametersReferenceTypeParameters(testMethod) || entry.OnlyExplicitFallback)
             {
-                // The method's parameters do not depend on any inferred type, so its data sources
-                // play no part in choosing the instantiation: every one of them applies, as on a
-                // non-generic class (#7106).
+                // Independent method parameters run every source, as on a non-generic class (#7106).
+                // Explicit fallback entries do too, but only when no inferred constructor group exists.
                 methodDataSources = methodSymbol.GetAttributes()
                     .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
                     .ToList();
@@ -2793,10 +2805,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.Indent();
             foreach (var attr in classDataSources)
             {
-                if (classDataSourcePartition is not null && InferClassTypesFromOwnMethodDataSource(testMethod, attr) is { } declaredClassTypes)
+                var declaredClassTypes = classDataSourcePartition is not null
+                    ? InferClassTypesFromOwnMethodDataSource(testMethod, attr)
+                    : null;
+                if (entry.OnlyExplicitFallback)
                 {
-                    // Own-member rows keep the constructor types inferred from their declaration in reflection
-                    // mode, even when a value has a more specific runtime type (IComparable vs string, say).
+                    declaredClassTypes ??= attr.AttributeClass?.Name == "ArgumentsAttribute"
+                        ? InferTypesFromClassArgumentsAttribute(typeSymbol, attr, testMethod.CompilationContext.Compilation)
+                        : InferClassTypesFromTypedClassDataSource(typeSymbol, attr.AttributeClass!);
+                }
+                if (classDataSourcePartition is not null && declaredClassTypes is not null)
+                {
+                    // Preserve constructor-position and declared own-member inference while checking whether
+                    // a constructor group exists, even when runtime values have more specific types.
                     var sourceWriter = new CodeWriter(includeHeader: false);
                     GenerateDataSourceAttribute(sourceWriter, testMethod.CompilationContext, attr, GetClassRowConstructor(concreteTypeSymbol), concreteTypeSymbol);
                     var declaredTypes = string.Join(", ", declaredClassTypes.Select(t => $"typeof({t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})"));
@@ -2811,7 +2832,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.Append("}");
             if (classDataSourcePartition is not null)
             {
-                dsWriter.Append($", {string.Join(", ", classDataSourcePartition.PartitionedIndices.Select(i => i.ToString(CultureInfo.InvariantCulture)))})");
+                if (classDataSourcePartition.PartitionedIndices.Length > 0)
+                {
+                    dsWriter.Append($", {string.Join(", ", classDataSourcePartition.PartitionedIndices.Select(i => i.ToString(CultureInfo.InvariantCulture)))}");
+                }
+                dsWriter.Append(")");
             }
             writer.AppendLine($"classDataSources: {dsWriter},");
         }
@@ -2862,11 +2887,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             isUntyped[i] = classTypes[i] is null;
         }
 
-        if (Array.IndexOf(isUntyped, true) < 0)
+        if (Array.IndexOf(isUntyped, true) < 0 && !entry.OnlyExplicitFallback)
         {
             return null;
         }
 
+        // Reflection adds own-member sources that cannot infer types directly to explicit instantiations.
+        // Their rows must not be re-inferred by the runtime partition's value-based heuristic.
+        var deferredOwnSources = entry.HasExplicitClassTypes
+            ? GetOwnClassMethodDataSourcesForInstantiation(testMethod, entry.ClassTypeArgs)
+                .Where(source => InferClassTypesFromOwnMethodDataSource(testMethod, source) is null).ToArray()
+            : [];
         var dataSources = new List<AttributeData>(allClassDataSources.Length);
         var partitionedIndices = new List<int>();
         // A declared own-member source establishes this instantiation even when it has no rows.
@@ -2883,14 +2914,28 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             && InferTypesFromClassArgumentsAttribute(typeSymbol, source, testMethod.CompilationContext.Compilation) is { } literalTypes
             && InferredTypesMatch(literalTypes, entry.ClassTypeArgs));
 
-        if ((entry.HasClassRows || entry.HasNoClassRow) && (!entry.HasExplicitClassTypes || hasMatchingLiteralRow))
+        if (entry.OnlyExplicitFallback)
+        {
+            for (var i = 0; i < allClassDataSources.Length; i++)
+            {
+                if (!deferredOwnSources.Any(source => AreSameAttribute(source, allClassDataSources[i])))
+                {
+                    partitionedIndices.Add(dataSources.Count);
+                }
+                dataSources.Add(allClassDataSources[i]);
+            }
+        }
+        else if ((entry.HasClassRows || entry.HasNoClassRow) && (!entry.HasExplicitClassTypes || hasMatchingLiteralRow))
         {
             // The class rows scoped to this instantiation, with every untyped source, in declaration order
             for (var i = 0; i < allClassDataSources.Length; i++)
             {
                 if (isUntyped[i])
                 {
-                    partitionedIndices.Add(dataSources.Count);
+                    if (!deferredOwnSources.Any(source => AreSameAttribute(source, allClassDataSources[i])))
+                    {
+                        partitionedIndices.Add(dataSources.Count);
+                    }
                     dataSources.Add(allClassDataSources[i]);
                 }
                 else if (entry.IsSpecificClassDataSource(allClassDataSources[i]))
@@ -2916,7 +2961,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 if (isUntyped[i])
                 {
-                    partitionedIndices.Add(dataSources.Count);
+                    if (!deferredOwnSources.Any(source => AreSameAttribute(source, allClassDataSources[i])))
+                    {
+                        partitionedIndices.Add(dataSources.Count);
+                    }
                     dataSources.Add(allClassDataSources[i]);
                 }
                 else if (!hasCompileTimeClassRow || matchesTypedSource[i])
@@ -2930,7 +2978,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? GenericClassInferencePolicy.RowFallback.AllRows
             : GenericClassInferencePolicy.SelectRowFallback(hasCompileTimeClassRow, hasClassArgumentsRows);
 
-        return new ClassDataSourcePartition(dataSources.ToArray(), partitionedIndices.ToArray(), fallback);
+        return new ClassDataSourcePartition(dataSources.ToArray(), partitionedIndices.ToArray(),
+            entry.OnlyExplicitFallback ? GenericClassInferencePolicy.RowFallback.OnlyWhenNoRowInfers : fallback);
     }
 
     /// <summary>
