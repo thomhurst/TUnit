@@ -20,4 +20,16 @@ public class RegistrationFailure7525Tests(TestMode testMode) : InvokableTestBase
                     && x.Output.ErrorInfo.Message.Contains("failed (#7525)"))
         ]);
     }
+    [Test]
+    public async Task RegistrationFailureDisposesExistingArguments()
+    {
+        await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7525/RegistrationDisposalTests/*",
+        [
+            result => result.ResultSummary.Counters.Total.ShouldBe(2),
+            result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+            result => result.Results.Single(x => x.Outcome == "Failed").Output!.ErrorInfo!.Message!
+                .ShouldContain("Registration receiver failed (#7525)")
+        ]);
+    }
 }

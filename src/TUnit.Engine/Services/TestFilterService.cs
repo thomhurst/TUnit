@@ -122,6 +122,22 @@ internal class TestFilterService(TUnitFrameworkLogger logger, TestArgumentRegist
         {
             // Registration callbacks are user code. Preserve the failure on this test so
             // neither sequential nor parallel registration aborts the rest of the request.
+            if (isForExecution)
+            {
+                try
+                {
+                    // Track only objects that already exist. Tracking is idempotent if
+                    // argument registration completed before a later callback failed.
+                    testArgumentRegistrationService.TrackSkippedTestArguments(test.Context);
+                }
+                catch (Exception trackingException)
+                {
+                    logger.LogDebug($"Could not track the objects of registration-failed test '{test.TestId}' for disposal: {trackingException.Message}");
+                }
+            }
+
+            // A callback failure takes precedence over an earlier request to skip.
+            test.Context.SkipReason = null;
             test.SetResult(TestState.Failed, ex);
         }
         finally
