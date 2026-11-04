@@ -439,7 +439,9 @@ public static class GenericClassRowPartition
         };
         if (target is null)
         {
-            return false;
+            return Converters.AotConverterRegistry.HasConverter(value.GetType(), (description, classTypeArguments),
+                static (registeredTarget, state) => MatchesConstructorParameterType(
+                    state.description, registeredTarget, state.classTypeArguments, direction: 0));
         }
 
         target = Nullable.GetUnderlyingType(target) ?? target;
@@ -477,7 +479,7 @@ public static class GenericClassRowPartition
         }
 
         var source = value.GetType();
-        if ((source.IsPrimitive || source == typeof(string) || source == typeof(decimal))
+        if ((source.IsPrimitive || source.IsEnum || source == typeof(string) || source == typeof(decimal))
             && (target.IsPrimitive || target == typeof(decimal)))
         {
             try

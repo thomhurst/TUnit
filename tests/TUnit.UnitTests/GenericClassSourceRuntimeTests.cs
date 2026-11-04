@@ -24,6 +24,57 @@ public class GenericClassSourceRuntimeTests
         public static bool TryParse(string? value, IFormatProvider? provider, out DeferredParse result) => throw new InvalidOperationException("Partitioning must not invoke TryParse");
     }
 
+    private sealed class ConvertedRowValue;
+
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(false, true)]
+    [Arguments(true, false)]
+    [Arguments(true, true)]
+    public async Task Partition_Retains_Enum_And_Registered_Constructed_Conversions(bool generated, bool constructed)
+    {
+        TUnit.Core.Converters.AotConverterRegistry.Register<ConvertedRowValue, List<int>>(
+            _ => throw new InvalidOperationException("Partitioning must not invoke converters"));
+        TypeInfo first = constructed
+            ? generated ? new ConstructedGeneric(typeof(List<>), [new GenericParameter(0, false)]) : new ConcreteType(typeof(List<int>))
+            : generated ? new GenericParameter(0, false) : new ConcreteType(typeof(int));
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(constructed ? typeof(List<int>) : typeof(int)) { Name = "first", TypeInfo = first, CachedIsOptional = false },
+            new ParameterMetadata(typeof(string)) { Name = "second", TypeInfo = generated ? new GenericParameter(1, false) : new ConcreteType(typeof(string)), CachedIsOptional = true }
+        ];
+        object?[][] original = constructed ? [[new List<int>()], [new ConvertedRowValue()]] : [[1], [RowEnum.A]];
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create([typeof(int), typeof(string)], GenericClassRowFallback.AllRows, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata)) rows.Add(await factory());
+        await Assert.That(rows.Count).IsEqualTo(original.Length);
+        for (var i = 0; i < rows.Count; i++) await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+        if (constructed)
+        {
+            // A registered List<int> target must not admit an unrelated closed instantiation.
+            parameters[0] = new ParameterMetadata(typeof(List<string>)) { Name = "first", TypeInfo = generated
+                ? new ConstructedGeneric(typeof(List<>), [new GenericParameter(1, false)]) : new ConcreteType(typeof(List<string>)), CachedIsOptional = false };
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new ConvertedRowValue()], parameters, [typeof(int), typeof(string)])).IsFalse();
+        }
+        else
+        {
+            await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<int>(RowEnum.A)).IsEqualTo(1);
+        }
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
+    }
+
     [Test]
     public async Task Parseable_Candidates_Do_Not_Invoke_User_Parsing()
     {
