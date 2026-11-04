@@ -1043,9 +1043,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Otherwise its rows would be reported as uninferable (#7163). Reflection mode drops
                     // such a source when the method has [GenerateGenericTest], so it is dropped here too.
                     // The name also matches [Arguments<T>], a literal row that joins as well (#7214).
+                    // A generic class's constructor-scoped entry must retain typed method providers too.
                     if (specificAttr is not null && GenericMethodInferencePolicy.JoinsDuplicate(
                         isLiteralRow: specificAttr.AttributeClass?.Name == "ArgumentsAttribute",
-                        joinsInferredSources: joinsDuplicateMethodSources && !isClassRow))
+                        joinsInferredSources: !isClassRow && (joinsDuplicateMethodSources
+                            || (testMethod is { IsGenericType: true, IsGenericMethod: false }
+                                && existing.HasClassRows
+                                && DataSourceAttributeHelper.IsTypedDataSourceAttribute(specificAttr.AttributeClass)))))
                     {
                         existing.AddRow(specificAttr, isClassRow);
                     }
@@ -2843,7 +2847,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             InferClassTypesFromOwnMethodDataSource(testMethod, source) is { } declaredTypes
             && InferredTypesMatch(declaredTypes, entry.ClassTypeArgs));
 
-        if ((entry.HasClassRows || entry.HasNoClassRow) && !entry.HasExplicitClassTypes)
+        // Explicit types can also be established by literal rows. Keep those matching rows
+        // alongside partitioned providers even when a provider yields a matching row.
+        var hasMatchingLiteralRow = entry.HasExplicitClassTypes && allClassDataSources.Any(source =>
+            source.AttributeClass?.Name == "ArgumentsAttribute"
+            && InferTypesFromClassArgumentsAttribute(typeSymbol, source, testMethod.CompilationContext.Compilation) is { } literalTypes
+            && InferredTypesMatch(literalTypes, entry.ClassTypeArgs));
+
+        if ((entry.HasClassRows || entry.HasNoClassRow) && (!entry.HasExplicitClassTypes || hasMatchingLiteralRow))
         {
             // The class rows scoped to this instantiation, with every untyped source, in declaration order
             for (var i = 0; i < allClassDataSources.Length; i++)

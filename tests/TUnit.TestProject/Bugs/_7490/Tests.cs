@@ -340,3 +340,41 @@ public class ExplicitEmptyDeclaredRowPartition<T>(T value)
         }
     }
 }
+
+[Arguments(42)]
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class ExplicitMatchingLiteralRows<T>(T value)
+{
+    public static IEnumerable<int> Rows() => [43];
+
+    [Test]
+    public void Test()
+    {
+        if (typeof(T) != typeof(int) || value is not (42 or 43))
+        {
+            throw new InvalidOperationException("Expected both matching literal and declared constructor rows.");
+        }
+    }
+}
+
+public class TypedMethodRowsAttribute : DataSourceGeneratorAttribute<int>
+{
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata metadata) => [() => 43];
+}
+
+[MethodDataSource(nameof(ConstructorRows))]
+public class ConstructorScopedTypedMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<int> ConstructorRows() => [42];
+
+    [Test]
+    [TypedMethodRows]
+    public void Test(T methodValue)
+    {
+        if (constructorValue is not 42 || methodValue is not 43)
+        {
+            throw new InvalidOperationException("Expected typed method rows on the constructor-scoped entry.");
+        }
+    }
+}
