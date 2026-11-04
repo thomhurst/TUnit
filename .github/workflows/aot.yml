@@ -335,8 +335,24 @@ jobs:
             if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
             $symbolCache = Join-Path $env:RUNNER_TEMP 'engine-dump-symbols'
             New-Item -ItemType Directory -Path $symbolCache -Force | Out-Null
-            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c '.reload; lmvm coreclr; uf coreclr!ThreadNative_Start; ~* r; ~* kb; !locks; q' *> analysis/native-stacks.txt
+            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c '.reload; lmvm coreclr; uf coreclr!ThreadNative_Start; ~* r; ~* kn; !locks; q' *> analysis/native-stacks.txt
             if ($LASTEXITCODE -ne 0) { throw 'Native dump analysis failed; see native-stacks.txt' }
+            # Top-frame registers belong to SleepEx/SwitchToThread, not ThreadNative_Start.
+            # Unwind each starter before reading its preserved RBX (the target native Thread).
+            $targetCommands = @('.reload')
+            $threadIndex = $null
+            foreach ($line in Get-Content analysis/native-stacks.txt) {
+              if ($line -match '^\s*(\d+)\s+Id:') {
+                $threadIndex = $Matches[1]
+              } elseif ($null -ne $threadIndex -and $line -match '^\s*([0-9a-fA-F]+)\s+.*coreclr!ThreadNative_Start\+') {
+                $frameIndex = $Matches[1]
+                $targetCommands += "~$($threadIndex)s; .frame /r 0x$frameIndex; dd @rbx L4; dq @rbx+0x110 L1"
+              }
+            }
+            if ($targetCommands.Count -eq 1) { throw 'No numbered ThreadNative_Start frames found; see native-stacks.txt' }
+            $targetCommands += 'q'
+            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c ($targetCommands -join '; ') *> analysis/start-targets.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Starter target analysis failed; see start-targets.txt' }
           } catch {
             $_ | Out-String | Set-Content analysis/native-analysis-error.txt
             throw
