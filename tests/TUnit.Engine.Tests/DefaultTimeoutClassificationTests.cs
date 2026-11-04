@@ -16,7 +16,9 @@ namespace TUnit.Engine.Tests;
 public class DefaultTimeoutClassificationTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
-    public async Task Hanging_Test_Fails_With_Timeout_Message_When_Only_DefaultTestTimeout_Is_Set()
+    [Arguments("Hanging_Test_With_DefaultTestTimeout_Should_Timeout")]
+    [Arguments("Synchronously_Blocking_Test_With_DefaultTestTimeout_Should_Timeout")]
+    public async Task Hanging_Test_Fails_With_Timeout_Message_When_Only_DefaultTestTimeout_Is_Set(string testName)
     {
         // The matching [Before(TestDiscovery)] hook in TestProject detects this class name
         // in the filter string and programmatically sets DefaultTestTimeout=200ms for the
@@ -25,7 +27,7 @@ public class DefaultTimeoutClassificationTests(TestMode testMode) : InvokableTes
         // test-host-controller mode under --hangdump does not reliably propagate env vars
         // through to the test host process on all CI runners.
         await RunTestsWithFilter(
-            "/*/*/DefaultTimeoutClassificationTests/Hanging_Test_With_DefaultTestTimeout_Should_Timeout",
+            $"/*/*/DefaultTimeoutClassificationTests/{testName}",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
