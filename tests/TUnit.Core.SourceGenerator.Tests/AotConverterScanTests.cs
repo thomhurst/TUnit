@@ -7,6 +7,58 @@ namespace TUnit.Core.SourceGenerator.Tests;
 public class AotConverterScanTests
 {
     [Test]
+    public async Task HandlesConcreteCollectionsAndInaccessibleSourceTypes()
+    {
+        const string source = """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            internal struct CollectionValue { public static implicit operator int(CollectionValue value) => 42; }
+            internal class Values : List<CollectionValue> { }
+            public class Box<T> { public static implicit operator int(Box<T> value) => 42; }
+            internal class Tests
+            {
+                private struct PrivateValue { public static implicit operator int(PrivateValue value) => 42; }
+                private class Hidden
+                {
+                    public struct NestedValue { public static implicit operator int(NestedValue value) => 42; }
+                }
+                private static PrivateValue PrivateRows() => new();
+                private static Hidden.NestedValue NestedRows() => new();
+                private static Box<PrivateValue> GenericRows() => new();
+                private static Values ConcreteRows() => new();
+                [Test, MethodDataSource(nameof(PrivateRows))]
+                public void Private(int value) { }
+                [Test, MethodDataSource(nameof(NestedRows))]
+                public void Nested(int value) { }
+                [Test, MethodDataSource(nameof(GenericRows))]
+                public void Generic(int value) { }
+                [Test, MethodDataSource(nameof(ConcreteRows))]
+                public void Concrete(int value) { }
+                [Test, MethodDataSource("Missing")]
+                public void Missing(int value) { }
+                [Test, MethodDataSource(typeof(List<>), "Missing")]
+                public void OpenGeneric(int value) { }
+            }
+            """;
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var compilation = CSharpCompilation.Create(
+            "ConcreteAndPrivateSources",
+            [CSharpSyntaxTree.ParseText(source, parseOptions)],
+            ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new AotConverterGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
+        await Assert.That(generated).Contains("typeof(global::CollectionValue)");
+        await Assert.That(generated).DoesNotContain("PrivateValue");
+        await Assert.That(generated).DoesNotContain("NestedValue");
+    }
+
+    [Test]
     public async Task FindsMethodSourceOnlyConversions()
     {
         const string source = """

@@ -220,9 +220,12 @@ public class AotConverterGenerator : IIncrementalGenerator
         Compilation compilation, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes)
     {
         // Include derived attributes such as InstanceMethodDataSourceAttribute.
+        var methodDataSourceAttribute = compilation.GetTypeByMetadataName("TUnit.Core.MethodDataSourceAttribute");
+        var genericMethodDataSourceAttribute = compilation.GetTypeByMetadataName("TUnit.Core.MethodDataSourceAttribute`1");
         var sourceAttribute = attribute.AttributeClass;
         while (sourceAttribute is not null &&
-               sourceAttribute.GloballyQualifiedNonGeneric() != "global::TUnit.Core.MethodDataSourceAttribute")
+               !SymbolEqualityComparer.Default.Equals(sourceAttribute.OriginalDefinition, methodDataSourceAttribute) &&
+               !SymbolEqualityComparer.Default.Equals(sourceAttribute.OriginalDefinition, genericMethodDataSourceAttribute))
         {
             sourceAttribute = sourceAttribute.BaseType;
         }
@@ -293,11 +296,16 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
     }
 
-    private static void CollectConversionsForType(ITypeSymbol type, List<ConversionEntry> conversions, Compilation compilation)
+    private static void CollectConversionsForType(ITypeSymbol type, List<ConversionEntry> conversions, Compilation compilation, HashSet<ITypeSymbol> visited)
     {
+        if (!visited.Add(type))
+        {
+            return;
+        }
+
         if (type is IArrayTypeSymbol arrayType)
         {
-            CollectConversionsForType(arrayType.ElementType, conversions, compilation);
+            CollectConversionsForType(arrayType.ElementType, conversions, compilation, visited);
             return;
         }
 
@@ -329,7 +337,20 @@ public class AotConverterGenerator : IIncrementalGenerator
         {
             foreach (var typeArg in namedType.TypeArguments)
             {
-                CollectConversionsForType(typeArg, conversions, compilation);
+                CollectConversionsForType(typeArg, conversions, compilation, visited);
+            }
+        }
+
+        // Concrete collections can hide their element type in a base class or interface.
+        // Only sequence interfaces describe data rows; arbitrary interfaces are not data wrappers.
+        foreach (var sequence in namedType.AllInterfaces)
+        {
+            if (sequence is { Arity: 1, Name: "IEnumerable" or "IAsyncEnumerable" } &&
+                sequence.ContainingNamespace is
+                    { Name: "Generic", ContainingNamespace: { Name: "Collections", ContainingNamespace:
+                        { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } })
+            {
+                CollectConversionsForType(sequence.TypeArguments[0], conversions, compilation, visited);
             }
         }
     }
@@ -384,70 +405,6 @@ public class AotConverterGenerator : IIncrementalGenerator
 
     private static bool IsAccessibleType(ITypeSymbol type, Compilation compilation)
     {
-        if (type == null || compilation == null)
-        {
-            return false;
-        }
-
-        if (type.SpecialType != SpecialType.None)
-        {
-            return true;
-        }
-
-        if (type.TypeKind == TypeKind.TypeParameter)
-        {
-            return true;
-        }
-
-        if (type is INamedTypeSymbol namedType)
-        {
-            var typeAssembly = namedType.ContainingAssembly;
-            var currentAssembly = compilation.Assembly;
-
-            if (currentAssembly != null && SymbolEqualityComparer.Default.Equals(typeAssembly, currentAssembly))
-            {
-                return true;
-            }
-
-            if (namedType.DeclaredAccessibility == Accessibility.Public)
-            {
-                return true;
-            }
-
-            if (namedType.DeclaredAccessibility == Accessibility.Internal)
-            {
-                if (currentAssembly == null)
-                {
-                    return false;
-                }
-
-                if (typeAssembly != null && typeAssembly.GivesAccessTo(currentAssembly))
-                {
-                    return true;
-                }
-
-                return false;
-            }
-
-            if (namedType.IsGenericType)
-            {
-                foreach (var typeArg in namedType.TypeArguments)
-                {
-                    if (!IsAccessibleType(typeArg, compilation))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            if (namedType.ContainingType != null)
-            {
-                return IsAccessibleType(namedType.ContainingType, compilation);
-            }
-
-            return false;
-        }
-
         if (type is IArrayTypeSymbol arrayType)
         {
             return IsAccessibleType(arrayType.ElementType, compilation);
@@ -458,7 +415,15 @@ public class AotConverterGenerator : IIncrementalGenerator
             return IsAccessibleType(pointerType.PointedAtType, compilation);
         }
 
-        return false;
+        // Converters live in a separate top-level class, so same-assembly membership alone
+        // does not grant access to private/protected types or their containing types.
+        if (!compilation.IsSymbolAccessibleWithin(type, compilation.Assembly))
+        {
+            return false;
+        }
+
+        return type is not INamedTypeSymbol namedType ||
+               namedType.TypeArguments.All(argument => IsAccessibleType(argument, compilation));
     }
 
     private static ConversionInfo? GetConversionInfoFromSymbol(IMethodSymbol methodSymbol, Compilation compilation)
@@ -802,7 +767,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                 if (!_typeConversions.TryGetValue(type, out var typeConversions))
                 {
                     var collected = new List<ConversionEntry>();
-                    CollectConversionsForType(type, collected, compilation);
+                    CollectConversionsForType(type, collected, compilation, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
                     typeConversions = _typeConversions.GetOrAdd(type, collected.ToArray());
                 }
 

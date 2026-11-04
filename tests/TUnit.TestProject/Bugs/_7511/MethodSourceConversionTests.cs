@@ -20,8 +20,11 @@ public sealed class ExplicitTupleSourceValue
     public static explicit operator (int, int)(ExplicitTupleSourceValue value) => (44, 45);
 }
 
+public sealed class ConcreteValues : List<SourceValue>;
+
 public class MethodSourceConversionTests
 {
+    public static ConcreteValues Concrete() => [new()];
     public static SourceValue Scalar() => new();
     public static ExplicitSourceValue Explicit() => new();
     public static (TupleSourceValue, int) Tuple() => (new(), 46);
@@ -38,6 +41,7 @@ public class MethodSourceConversionTests
     }
 
     [Test, MethodDataSource(nameof(Scalar))]
+    [MethodDataSource(nameof(Concrete))]
     [MethodDataSource(nameof(Array))]
     [MethodDataSource(nameof(Enumerable))]
     [MethodDataSource(nameof(Async))]
