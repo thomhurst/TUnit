@@ -7,6 +7,11 @@ namespace TUnit.Engine.Tests;
 public class ExpectedStateTests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
+    // This child runs the entire passing suite, including thousands of dedicated-thread hooks.
+    // Competing with the other engine children (four per CPU) for Windows thread startup can
+    // exhaust its session budget while tests are still making progress (#7554).
+    // Isolate the parent invocation; retain the child's own parallelism and every test.
+    [NotInParallel]
     public async Task Pass()
     {
         var options = new RunOptions();
