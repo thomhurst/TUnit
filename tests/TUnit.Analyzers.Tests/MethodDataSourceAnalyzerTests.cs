@@ -5,6 +5,46 @@ namespace TUnit.Analyzers.Tests;
 public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 {
     [Test]
+    [Arguments("int")]
+    [Arguments("int?")]
+    public async Task Nullable_Generic_Class_Parameter_Accepts_Value_Data(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests<T> where T : struct, IComparable<T>
+            {
+                public static IEnumerable<{{rowType}}> Rows() => [1];
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run(T? value) { }
+            }
+            """);
+    }
+
+    [Test]
+    [Arguments("string", "struct")]
+    [Arguments("int", "struct, System.IDisposable")]
+    public async Task Nullable_Generic_Class_Parameter_Rejects_Constraint_Violation(string rowType, string constraints)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests<T> where T : {{constraints}}
+            {
+                public static IEnumerable<{{rowType}}> Rows() => [];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(T? value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                .WithLocation(0)
+                .WithArguments(rowType, "T?"));
+    }
+
+    [Test]
     public async Task Private_Intermediate_Source_Does_Not_Hide_Public_Base_Overload()
     {
         await Verifier.VerifyAnalyzerAsync(

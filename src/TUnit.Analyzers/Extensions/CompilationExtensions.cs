@@ -19,6 +19,22 @@ public static class CompilationExtensions
             return true;
         }
 
+        // Discovery infers a nullable class parameter's underlying type from either T or T? data.
+        if (parameterType is INamedTypeSymbol
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+                TypeArguments: [ITypeParameterSymbol { DeclaringMethod: null } nullableTypeParameter]
+            }
+            && argumentType is not null)
+        {
+            var underlyingType = argumentType is INamedTypeSymbol
+                {
+                    OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+                    TypeArguments: [var underlying]
+                } ? underlying : argumentType;
+            return compilation.CanSatisfyConstraints(underlyingType, nullableTypeParameter, null);
+        }
+
         if (argumentType is not null && parameterType is not null
             && ContainsArray(parameterType) && ContainsTypeParameter(parameterType))
         {
