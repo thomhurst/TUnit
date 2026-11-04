@@ -105,6 +105,33 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("Outer<dynamic>.Variant<string>", "Outer<object>.Variant<Uri>", "Outer<object>.Variant<object>")]
+    [Arguments("Outer<object>.Variant<string>", "Outer<dynamic>.Variant<Uri>", "Outer<object>.Variant<object>")]
+    [Arguments("Outer<dynamic>.Inner<int>.Variant<string>", "Outer<object>.Inner<int>.Variant<Uri>", "Outer<object>.Inner<int>.Variant<object>")]
+    public async Task ExplicitNestedDelegatePreservesContainingIdentity(string left, string right, string binding)
+    {
+        await Verifier.VerifyAnalyzerAsync($$"""
+            #pragma warning disable TUnit0046
+            using System;
+            using TUnit.Core;
+            public interface IContravariant<in A, in B> { }
+            public class Outer<A>
+            {
+                public delegate void Variant<in B>(B value);
+                public class Inner<B> { public delegate void Variant<in D>(D value); }
+            }
+            public class C
+            {
+                public static {{left}} LeftBound({{binding}} value) => value;
+                public static {{right}} RightBound({{binding}} value) => value;
+                public static (int, IContravariant<{{left}}, {{right}}>[]) Row() => default;
+                [Test, MethodDataSource(nameof(Row)), GenerateGenericTest(typeof({{binding}}))]
+                public void Test<T>((int, IContravariant<T, T>[]) row) { }
+            }
+            """);
+    }
+
+    [Test]
     [Arguments("(Box<int>[], Box<string>[])", "(Box<T>[], T[])", true)]
     [Arguments("(Box<string>[], Box<int>[])", "(T[], Box<T>[])", true)]
     [Arguments("(Box<int>[], int[])", "(Box<T>[], T[])", false)]

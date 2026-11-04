@@ -232,7 +232,11 @@ internal static class OpenArrayMatcher
 
             // Containing constructions are invariant even when the delegate's own
             // arguments support variance (Outer<string>.D and Outer<object>.D differ).
-            if (!SymbolEqualityComparer.Default.Equals(leftDelegate.ContainingType, rightDelegate.ContainingType))
+            // Roslyn identity also preserves equivalent dynamic/object constructions.
+            if (!SymbolEqualityComparer.Default.Equals(leftDelegate.ContainingType, rightDelegate.ContainingType)
+                && (leftDelegate.ContainingType is not { } leftContaining
+                    || rightDelegate.ContainingType is not { } rightContaining
+                    || !compilation.ClassifyConversion(leftContaining, rightContaining).IsIdentity))
             {
                 return false;
             }
