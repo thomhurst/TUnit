@@ -393,7 +393,7 @@ public class TimeoutHelperTests
     [Arguments(true)]
     public async Task Ordinary_Factory_Has_Timeout_Armed_Before_Invocation(bool throwsSynchronously)
     {
-        await Assert.That(() => TimeoutHelper.ExecuteWithTimeoutAsync(
+        var exception = await Assert.That(() => TimeoutHelper.ExecuteWithTimeoutAsync(
                 token =>
                 {
                     // This factory does not return its task until the timeout is signalled.
@@ -407,6 +407,10 @@ public class TimeoutHelperTests
                     return Task.FromCanceled(token);
                 }, TimeSpan.FromMilliseconds(50), CancellationToken.None))
             .ThrowsExactly<TimeoutException>();
+
+        await Assert.That(exception!.InnerException).IsNull();
+        await Assert.That(exception.Message).DoesNotContain(nameof(OperationCanceledException));
+        await Assert.That(exception.Message).DoesNotContain(nameof(TaskCanceledException));
     }
 
     [Test]
