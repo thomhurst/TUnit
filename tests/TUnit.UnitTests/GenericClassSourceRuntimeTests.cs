@@ -88,6 +88,70 @@ public class GenericClassSourceRuntimeTests
         await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow(values, generated, [typeof(int), typeof(int)])).IsFalse();
     }
 
+    public sealed class ArrayComparerConstructor<T, U>(IComparer<T[]> first, U second = default!);
+    public sealed class MatrixComparerConstructor<T, U>(IComparer<T[,]> first, U second = default!);
+
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(true, false)]
+    [Arguments(false, true)]
+    [Arguments(true, true)]
+    public async Task Optional_Partition_Preserves_Array_Supertype_Comparers(bool matrix, bool referenceElement)
+    {
+        var open = matrix ? typeof(MatrixComparerConstructor<,>) : typeof(ArrayComparerConstructor<,>);
+        var element = referenceElement ? typeof(string) : typeof(int);
+        var closed = referenceElement
+            ? (matrix ? typeof(MatrixComparerConstructor<string, int>) : typeof(ArrayComparerConstructor<string, int>))
+            : (matrix ? typeof(MatrixComparerConstructor<int, int>) : typeof(ArrayComparerConstructor<int, int>));
+        var generated = ParameterMetadataFactory.ForConstructor(open, true,
+            new ParameterMetadata(typeof(object)) { Name = "first", TypeInfo = new ConstructedGeneric(typeof(IComparer<>), [new ConcreteType(typeof(object))]), CachedIsOptional = false },
+            new ParameterMetadata(typeof(object)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true });
+        var reflected = closed.GetConstructors()[0].GetParameters().Select(p => (IMemberMetadata)new ParameterMetadata(p.ParameterType)
+        {
+            Name = p.Name!, TypeInfo = new ConcreteType(p.ParameterType), ReflectionInfo = p
+        }).ToArray();
+        object[] candidates = [Comparer<object>.Default, Comparer<Array>.Default,
+            Comparer<System.Collections.IEnumerable>.Default, Comparer<IEnumerable<int>>.Default,
+            Comparer<IList<int>>.Default, Comparer<IReadOnlyList<int>>.Default,
+            Comparer<ICollection<int>>.Default, Comparer<IReadOnlyCollection<int>>.Default,
+            Comparer<IEnumerable<object>>.Default, Comparer<IList<object>>.Default,
+            Comparer<IEnumerable<string>>.Default, Comparer<IList<string>>.Default, Comparer<string>.Default];
+        foreach (var parameters in new IMemberMetadata[][] { generated, reflected })
+        {
+            var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+            var partition = GenericClassRowPartition.Create([element, typeof(int)], GenericClassRowFallback.AllRows, [source], 0);
+            var metadata = new DataGeneratorMetadata
+            {
+                TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+                Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+                TestClassInstance = null, ClassInstanceArguments = null
+            };
+            var rows = new List<object?[]?>();
+            await foreach (var factory in partition[0].GetDataRowsAsync(metadata))
+            {
+                rows.Add(await factory());
+            }
+            var expectedType = closed.GetConstructors()[0].GetParameters()[0].ParameterType;
+            var accepted = candidates.Where(expectedType.IsInstanceOfType).ToArray();
+            await Assert.That(rows.Count).IsEqualTo(accepted.Length + 1);
+            await Assert.That(rows[0]![0]).IsNull();
+            for (var i = 0; i < accepted.Length; i++)
+            {
+                await Assert.That(ReferenceEquals(rows[i + 1]![0], accepted[i])).IsTrue();
+            }
+        }
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            yield return () => Task.FromResult<object?[]?>([null]);
+            foreach (var candidate in candidates)
+            {
+                yield return () => Task.FromResult<object?[]?>([candidate]);
+            }
+            await Task.CompletedTask;
+        }
+    }
+
     [Test]
     [Arguments(true, false, false)]
     [Arguments(false, false, true)]

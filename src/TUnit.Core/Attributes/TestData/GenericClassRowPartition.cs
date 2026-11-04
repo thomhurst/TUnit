@@ -417,6 +417,28 @@ public static class GenericClassRowPartition
     {
         if (expected is ConstructorArray array)
         {
+            if (direction < 0 && !actual.IsArray)
+            {
+                // All arrays inherit Array's non-generic supertypes. Only vectors also
+                // implement the generic collection interfaces, with their element type.
+                if (actual.IsAssignableFrom(typeof(Array)))
+                {
+                    return true;
+                }
+                if (array.IsVector && actual.IsGenericType)
+                {
+                    var definition = actual.GetGenericTypeDefinition();
+                    if (definition == typeof(IEnumerable<>) || definition == typeof(ICollection<>)
+                        || definition == typeof(IList<>) || definition == typeof(IReadOnlyCollection<>)
+                        || definition == typeof(IReadOnlyList<>))
+                    {
+                        var argument = actual.GetGenericArguments()[0];
+                        var argumentDirection = argument.IsValueType || IsValueType(array.Element) ? 0 : direction;
+                        return MatchesConstructorParameterType(array.Element, argument, classTypeArguments, argumentDirection);
+                    }
+                }
+                return false;
+            }
             if (!actual.IsArray || actual.GetArrayRank() != array.Rank
                 || actual.Name.EndsWith("[]", StringComparison.Ordinal) != array.IsVector)
             {
