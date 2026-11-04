@@ -828,7 +828,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
         {
             // Resolve legacy setters once when metadata is collected, not per injection.
             sb.AppendLine("#if !NET8_0_OR_GREATER");
-            sb.AppendLine($"        var property_{prop.PropertyName} = typeof({prop.ContainingTypeFullyQualified}).GetProperty(\"{prop.PropertyName}\");");
+            sb.AppendLine($"        var property_{prop.PropertyName} = typeof({prop.ContainingTypeFullyQualified}).GetProperty(\"{prop.PropertyName}\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance);");
             sb.AppendLine("#endif");
         }
 

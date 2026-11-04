@@ -35,10 +35,16 @@ public class StructPropertyInjectionTests
     }
 
     private static async Task Check(Fixture fixture)
-        => await Assert.That(fixture.Dependency).IsNotNull();
+    {
+        await Assert.That(fixture.Dependency).IsNotNull();
+        await Assert.That(fixture.InternalDependency).IsNotNull();
+    }
 
     public struct Fixture
     {
+        [ClassDataSource<Dependency>]
+        internal Dependency? InternalDependency { get; set; }
+
         [ClassDataSource<Dependency>]
         public Dependency? Dependency { get; set; }
     }

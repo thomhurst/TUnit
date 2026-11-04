@@ -18,7 +18,32 @@ internal sealed class PropertyInjectionSource_0d709104 : IPropertySource
     public IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata()
     {
 #if !NET8_0_OR_GREATER
-        var property_Dependency = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Fixture).GetProperty("Dependency");
+        var property_InternalDependency = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Fixture).GetProperty("InternalDependency", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance);
+#endif
+        yield return new PropertyInjectionMetadata
+        {
+            PropertyName = "InternalDependency",
+            PropertyType = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Dependency),
+            ContainingType = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Fixture),
+            CreateDataSource = () =>
+            {
+                var dataSource = new global::TUnit.Core.ClassDataSourceAttribute<global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Dependency>();
+                return dataSource;
+            },
+            GetProperty = static instance => ((global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Fixture)instance).InternalDependency,
+            SetProperty = (instance, value) =>
+            {
+#if NET8_0_OR_GREATER
+                ref var typedInstance = ref global::System.Runtime.CompilerServices.Unsafe.Unbox<global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Fixture>(instance);
+                typedInstance.InternalDependency = (global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Dependency)value;
+#else
+                property_InternalDependency.SetValue(instance, value);
+#endif
+            }
+        };
+
+#if !NET8_0_OR_GREATER
+        var property_Dependency = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Fixture).GetProperty("Dependency", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance);
 #endif
         yield return new PropertyInjectionMetadata
         {
@@ -81,7 +106,7 @@ internal sealed class PropertyInjectionSource_2e9d2fba : IPropertySource
     public IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata()
     {
 #if !NET8_0_OR_GREATER
-        var property_InitDependency = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.InitFixture).GetProperty("InitDependency");
+        var property_InitDependency = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.InitFixture).GetProperty("InitDependency", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance);
 #endif
         yield return new PropertyInjectionMetadata
         {
@@ -145,7 +170,7 @@ internal sealed class PropertyInjectionSource_Generic_c9aaf94e : IPropertySource
     public IEnumerable<PropertyInjectionMetadata> GetPropertyMetadata()
     {
 #if !NET8_0_OR_GREATER
-        var property_Dependency = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.GenericFixture<global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Dependency>).GetProperty("Dependency");
+        var property_Dependency = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.GenericFixture<global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Dependency>).GetProperty("Dependency", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance);
 #endif
         yield return new PropertyInjectionMetadata
         {
@@ -170,7 +195,7 @@ internal sealed class PropertyInjectionSource_Generic_c9aaf94e : IPropertySource
         };
 
 #if !NET8_0_OR_GREATER
-        var property_InitDependency = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.GenericFixture<global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Dependency>).GetProperty("InitDependency");
+        var property_InitDependency = typeof(global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.GenericFixture<global::TUnit.TestProject.Bugs._7609.StructPropertyInjectionTests.Dependency>).GetProperty("InitDependency", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance);
 #endif
         yield return new PropertyInjectionMetadata
         {
