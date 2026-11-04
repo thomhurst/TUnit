@@ -491,7 +491,7 @@ internal static class MetadataGenerationHelper
     {
         var properties = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
-            .Where(p => p.DeclaredAccessibility == Accessibility.Public && p.Name != "EqualityContract")
+            .Where(p => p.DeclaredAccessibility == Accessibility.Public && !p.IsIndexer && p.Name != "EqualityContract")
             .ToList();
 
         propertyCount = properties.Count;
@@ -533,7 +533,7 @@ internal static class MetadataGenerationHelper
     {
         var properties = typeSymbol.GetMembers()
             .OfType<IPropertySymbol>()
-            .Where(p => p.DeclaredAccessibility == Accessibility.Public && p.Name != "EqualityContract")
+            .Where(p => p.DeclaredAccessibility == Accessibility.Public && !p.IsIndexer && p.Name != "EqualityContract")
             .ToList();
 
         propertyCount = properties.Count;
