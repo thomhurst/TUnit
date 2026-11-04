@@ -13,11 +13,14 @@ public static class CompilationExtensions
     public static bool HasImplicitConversionOrGenericParameter(this Compilation compilation, ITypeSymbol? argumentType,
         ITypeSymbol? parameterType)
     {
-        return HasImplicitConversionOrGenericParameter(compilation, argumentType, parameterType, EmptyArrayBindings, _ => true);
+        var matcher = parameterType is not null && ContainsTypeParameter(parameterType) ? new OpenArrayMatcher() : null;
+        var matches = HasImplicitConversionOrGenericParameter(compilation, argumentType, parameterType,
+            EmptyArrayBindings, _ => true, matcher);
+        return matcher?.IsExhausted == true || matches;
     }
 
     private static bool HasImplicitConversionOrGenericParameter(Compilation compilation, ITypeSymbol? argumentType,
-        ITypeSymbol? parameterType, ArrayBindings bindings, Func<ArrayBindings, bool> next)
+        ITypeSymbol? parameterType, ArrayBindings bindings, Func<ArrayBindings, bool> next, OpenArrayMatcher? matcher)
     {
         if (parameterType == null && argumentType != null)
         {
@@ -43,7 +46,7 @@ public static class CompilationExtensions
         {
             return parameterArray.Rank == argumentArray.Rank
                 && parameterArray.IsSZArray == argumentArray.IsSZArray
-                && OpenArrayMatcher.MatchesArrayElement(compilation, argumentArray.ElementType,
+                && (matcher ??= new OpenArrayMatcher()).MatchesArrayElement(compilation, argumentArray.ElementType,
                     parameterArray.ElementType, bindings, next,
                     allowReferenceConversions: argumentArray.ElementType.IsReferenceType);
         }
@@ -72,7 +75,7 @@ public static class CompilationExtensions
                     ? MatchElements(index + 1, candidateBindings)
                     : HasImplicitConversionOrGenericParameter(compilation,
                         argumentTuple.TupleElements[index].Type, parameterTuple.TupleElements[index].Type,
-                        candidateBindings, candidate => MatchElements(index + 1, candidate));
+                        candidateBindings, candidate => MatchElements(index + 1, candidate), matcher);
             }
 
             return MatchElements(0, bindings);

@@ -5,6 +5,29 @@ namespace TUnit.Analyzers.Tests;
 public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
 {
     [Test]
+    public async Task InterfaceSearchStopsConservativelyWhenWorkBudgetIsExhausted()
+    {
+        // Every early choice matches, but the last tuple sibling conflicts. Without a
+        // shared budget this explores the Cartesian product of interface alternatives.
+        var tags = string.Join("\n", Enumerable.Range(0, 40).Select(i => $"public class Tag{i} {{ }}"));
+        var interfaces = string.Join(", ", Enumerable.Range(0, 40).Select(i => $"IChoice<Tag{i}>"));
+        await Verifier.VerifyAnalyzerAsync($$"""
+            #pragma warning disable TUnit0046
+            using TUnit.Core;
+            public interface IChoice<A> { }
+            public class Box<A> { }
+            {{tags}}
+            public class Many : {{interfaces}} { }
+            public class C
+            {
+                public static (Many[], Many[], Many[], Box<int>[]) Row() => default;
+                [Test, MethodDataSource(nameof(Row))]
+                public void Test<T, U, V>((IChoice<T>[], IChoice<U>[], IChoice<V>[], Box<string>[]) row) { }
+            }
+            """);
+    }
+
+    [Test]
     public async Task ExistingGenericTupleKeepsRuntimeConversions()
     {
         await Verifier.VerifyAnalyzerAsync("""
@@ -136,6 +159,14 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     [Arguments("(Box<string>[], Box<int>[])", "(T[], Box<T>[])", true)]
     [Arguments("(Box<int>[], int[])", "(Box<T>[], T[])", false)]
     [Arguments("(string[], Box<object>[])", "(T[], Box<T>[])", false)]
+    [Arguments("IConsumer<Func<object[]>, Func<IList<string>>, Func<IList<Uri>>>[]", "IConsumer<T, T, T>[]", true)]
+    [Arguments("IConsumer<Func<IList<string>>, Func<object[]>, Func<IList<Uri>>>[]", "IConsumer<T, T, T>[]", true)]
+    [Arguments("IConsumer<Func<IList<string>>, Func<IList<Uri>>, Func<object[]>>[]", "IConsumer<T, T, T>[]", true)]
+    [Arguments("IConsumer<Func<Func<object[]>>, Func<Func<IList<string>>>, Func<Func<IList<Uri>>>>[]", "IConsumer<T, T, T>[]", true)]
+    [Arguments("IConsumer<Func<object[][]>, Func<IList<string[]>>, Func<IReadOnlyList<Uri[]>>>[]", "IConsumer<T, T, T>[]", true)]
+    [Arguments("IConsumer<Func<object[]>, Func<IList<string>>, Func<IEnumerable<object>>>[]", "IConsumer<T, T, T>[]", false)]
+    [Arguments("IConsumer<Func<object[]>, Func<IList<IDisposable>>, Func<IReadOnlyList<ICloneable>>>[]", "IConsumer<T, T, T>[]", false)]
+    [Arguments("IConsumer<Func<Func<object[]>>, Func<Func<IList<string>>>, Func<Func<IEnumerable<object>>>>[]", "IConsumer<T, T, T>[]", false)]
     [Arguments("IConsumer<object[], IList<string>, IList<Uri>>[]", "IConsumer<T, T, T>[]", true)]
     [Arguments("IConsumer<IList<string>, object[], IList<Uri>>[]", "IConsumer<T, T, T>[]", true)]
     [Arguments("IConsumer<IList<string>, IList<Uri>, object[]>[]", "IConsumer<T, T, T>[]", true)]

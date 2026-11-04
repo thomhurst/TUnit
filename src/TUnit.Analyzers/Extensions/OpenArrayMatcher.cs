@@ -11,16 +11,29 @@ namespace TUnit.Analyzers.Extensions;
 // interface/delegate implementations remain accepted; generic constraints are handled separately.
 // Conversions involving unsubstituted type parameters use Roslyn's existing constraint
 // information; this matcher does not infer or validate new constraints (see #7520).
-internal static class OpenArrayMatcher
+internal sealed class OpenArrayMatcher
 {
+    // One bounded search per row: exhaustion accepts conservatively instead of reporting
+    // an unproven mismatch. Count recursive visits and bound pairs, including retries.
+    private int _remainingSteps = 512;
+
+    internal bool IsExhausted => _remainingSteps < 0;
+
+    private bool TryStep() => --_remainingSteps >= 0;
+
     // Array elements are not rebuilt as tuples by CastHelper. After inference, constructed
     // element types must agree rather than merely having element-wise numeric conversions.
     // A candidate succeeds only if the rest of the constructed type also matches. This
     // continuation lets interface/base alternatives retry after a later argument conflicts.
-    internal static bool MatchesArrayElement(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
+    internal bool MatchesArrayElement(Compilation compilation, ITypeSymbol argument, ITypeSymbol parameter,
         ArrayBindings bindings, Func<ArrayBindings, bool> next, bool allowReferenceConversions = true,
         VarianceKind variance = VarianceKind.Out)
     {
+        if (!TryStep())
+        {
+            return true;
+        }
+
         if (parameter is ITypeParameterSymbol typeParameter)
         {
             // Keep variant bounds as well as exact bindings: a later invariant occurrence
@@ -41,6 +54,11 @@ internal static class OpenArrayMatcher
 
                 foreach (var occurrence in occurrences)
                 {
+                    if (!TryStep())
+                    {
+                        return true;
+                    }
+
                     var source = occurrence.Variance == VarianceKind.In ? invariant.Type : occurrence.Type;
                     var target = occurrence.Variance == VarianceKind.In ? occurrence.Type : invariant.Type;
                     var boundConversion = compilation.ClassifyConversion(source, target);
@@ -63,6 +81,11 @@ internal static class OpenArrayMatcher
 
                 foreach (var upper in occurrences)
                 {
+                    if (!TryStep())
+                    {
+                        return true;
+                    }
+
                     if (upper.Variance == VarianceKind.In)
                     {
                         var boundConversion = compilation.ClassifyConversion(lower.Type, upper.Type);
@@ -172,15 +195,69 @@ internal static class OpenArrayMatcher
         return false;
     }
 
-    private static bool CanShareReferenceSubtype(Compilation compilation, ImmutableArray<ITypeSymbol> bounds)
+    private bool CanShareReferenceSubtype(Compilation compilation, ImmutableArray<ITypeSymbol> bounds)
     {
+        if (!TryStep())
+        {
+            return true;
+        }
+
         IArrayTypeSymbol? array = null;
         for (var i = 0; i < bounds.Length; i++)
         {
             array ??= bounds[i] as IArrayTypeSymbol;
             for (var j = i + 1; j < bounds.Length; j++)
             {
+                if (!TryStep())
+                {
+                    return true;
+                }
+
                 if (!CanShareReferenceSubtype(compilation, bounds[i], bounds[j]))
+                {
+                    return false;
+                }
+            }
+        }
+
+        if (IsExhausted)
+        {
+            return true;
+        }
+
+        // A common delegate subtype uses one construction. Project every covariant
+        // argument together, so nested arrays/interfaces cannot pick different witnesses
+        // for each pair. Pairwise validation above checks definition, containers and identity.
+        INamedTypeSymbol? delegateBound = null;
+        foreach (var bound in bounds)
+        {
+            if (bound is INamedTypeSymbol { TypeKind: TypeKind.Delegate } candidate)
+            {
+                delegateBound = candidate;
+                break;
+            }
+        }
+
+        if (delegateBound is not null)
+        {
+            for (var i = 0; i < delegateBound.TypeArguments.Length; i++)
+            {
+                if (delegateBound.TypeParameters[i].Variance != VarianceKind.Out
+                    || !delegateBound.TypeArguments[i].IsReferenceType)
+                {
+                    continue;
+                }
+
+                var argumentBounds = ImmutableArray.CreateBuilder<ITypeSymbol>();
+                foreach (var bound in bounds)
+                {
+                    if (bound is INamedTypeSymbol { TypeKind: TypeKind.Delegate } other)
+                    {
+                        argumentBounds.Add(other.TypeArguments[i]);
+                    }
+                }
+
+                if (!CanShareReferenceSubtype(compilation, argumentBounds.ToImmutable()))
                 {
                     return false;
                 }
@@ -219,8 +296,13 @@ internal static class OpenArrayMatcher
     }
 
     // Conservative upper-bound check: unknown interface/delegate implementations remain possible.
-    private static bool CanShareReferenceSubtype(Compilation compilation, ITypeSymbol left, ITypeSymbol right)
+    private bool CanShareReferenceSubtype(Compilation compilation, ITypeSymbol left, ITypeSymbol right)
     {
+        if (!TryStep())
+        {
+            return true;
+        }
+
         var forward = compilation.ClassifyConversion(left, right);
         var reverse = compilation.ClassifyConversion(right, left);
         if (forward.IsIdentity || (forward.IsImplicit && forward.IsReference)
@@ -308,7 +390,7 @@ internal static class OpenArrayMatcher
             && !(left.TypeKind == TypeKind.Class && right.TypeKind == TypeKind.Class);
     }
 
-    private static bool CanArraySubtypeImplement(Compilation compilation, IArrayTypeSymbol array, INamedTypeSymbol target)
+    private bool CanArraySubtypeImplement(Compilation compilation, IArrayTypeSymbol array, INamedTypeSymbol target)
     {
         // An array subtype can change its reference element type, but cannot acquire
         // arbitrary interfaces. Non-generic interfaces were handled by conversion above.
