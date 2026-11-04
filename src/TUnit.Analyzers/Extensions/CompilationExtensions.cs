@@ -27,8 +27,11 @@ public static class CompilationExtensions
             }
             && argumentType is not null)
         {
-            // An explicit class instantiation supplies T independently of the row; CastHelper converts the data.
-            if (HasGenerateGenericTestAttribute(nullableTypeParameter))
+            // Explicit instantiations and constructor data supply T independently of the method row.
+            // CastHelper converts the method data to the resulting parameter type.
+            if (HasGenerateGenericTestAttribute(nullableTypeParameter)
+                || nullableTypeParameter.DeclaringType?.GetAttributes()
+                    .Any(attribute => attribute.IsDataSourceAttribute(compilation)) == true)
             {
                 return true;
             }

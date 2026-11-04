@@ -41,8 +41,31 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 public void Run(T? value) { }
             }
             """,
+            // The separate mutable-reference warning for generic class data is tracked in #7598.
             Verifier.Diagnostic(Rules.ReturnFunc)
                 .WithLocation(0));
+    }
+
+    [Test]
+    [Arguments("int")]
+    [Arguments("int?")]
+    public async Task Nullable_Generic_Class_Parameter_With_Constructor_Inferred_Type_Accepts_Convertible_Data(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [Arguments(1d)]
+            public class Tests<T>(T seed) where T : struct, IComparable<double>
+            {
+                public static IEnumerable<Func<{{rowType}}>> {|#0:Rows|}() { yield return () => 1; }
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run(T? value) { }
+            }
+            """,
+            // The separate mutable-reference warning for generic class data is tracked in #7598.
+            Verifier.Diagnostic(Rules.ReturnFunc).WithLocation(0));
     }
 
     [Test]
