@@ -748,6 +748,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         public bool HasParameterizedConstructor { get; init; }
 
+        // A class-only explicit instantiation survives even when the inferred source is empty.
+        public bool HasExplicitClassTypes { get; set; }
+
         /// <summary>
         /// Set when data attributes, <c>[GenerateGenericTest]</c> or <c>IInfersType&lt;T&gt;</c> inferred
         /// method type arguments that break the method's generic constraints. The entry cannot call
@@ -1011,6 +1014,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     && rowInstantiations is not null
                     && rowInstantiations.TryGetValue(typeKey, out var existing))
                 {
+                    existing.HasExplicitClassTypes |= fromGenerateGenericTest && classTypeArgs.Length > 0 && !testMethod.IsGenericMethod;
+
                     if (fromGenerateGenericTest && uninferredMethodDataSources is not null && existing.HasMethodRows)
                     {
                         foreach (var uninferred in uninferredMethodDataSources)
@@ -1105,6 +1110,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 SpecificArgumentsAttribute = specificAttr,
                 SpecificIsClassRow = specificAttr is not null && isClassRow,
                 HasParameterizedConstructor = hasParameterizedConstructor,
+                HasExplicitClassTypes = fromGenerateGenericTest && classTypeArgs.Length > 0 && !testMethod.IsGenericMethod,
                 MethodConstraintViolations = violation == null ? null : [violation],
             };
 
@@ -1437,6 +1443,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         && existing.HasClassRows)
                     {
                         existing.AddRow(mdsAttr, isClassRow: false);
+                    }
+                }
+                else if (rowInstantiations is not null)
+                {
+                    // External and otherwise non-inferring providers still supply method rows
+                    // after constructor sources have established the closed class types.
+                    foreach (var existing in rowInstantiations.Values)
+                    {
+                        if (existing.HasClassRows)
+                        {
+                            existing.AddRow(mdsAttr, isClassRow: false);
+                        }
                     }
                 }
             }
@@ -2820,11 +2838,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var partitionedIndices = new List<int>();
         // A declared own-member source establishes this instantiation even when it has no rows.
         // In that case reflection creates no group; do not fabricate a NoClassRow fallback.
-        var hasCompileTimeClassRow = allClassDataSources.Any(source =>
+        // Explicit class types still need fallback rows if that inferred group never materializes.
+        var hasCompileTimeClassRow = !entry.HasExplicitClassTypes && allClassDataSources.Any(source =>
             InferClassTypesFromOwnMethodDataSource(testMethod, source) is { } declaredTypes
             && InferredTypesMatch(declaredTypes, entry.ClassTypeArgs));
 
-        if (entry.HasClassRows || entry.HasNoClassRow)
+        if ((entry.HasClassRows || entry.HasNoClassRow) && !entry.HasExplicitClassTypes)
         {
             // The class rows scoped to this instantiation, with every untyped source, in declaration order
             for (var i = 0; i < allClassDataSources.Length; i++)
@@ -2843,7 +2862,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            // Only method rows inferred this instantiation. A typed source of these types supplies its class rows;
+            // Method rows or explicit class types need fallback when no partitioned row matches.
+            // A typed source of these types supplies its class rows;
             // without one, every class data source may build the instance (#7161).
             var matchesTypedSource = new bool[allClassDataSources.Length];
             for (var i = 0; i < allClassDataSources.Length; i++)
@@ -2866,7 +2886,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        var fallback = GenericClassInferencePolicy.SelectRowFallback(hasCompileTimeClassRow, hasClassArgumentsRows);
+        var fallback = entry.HasExplicitClassTypes && !hasCompileTimeClassRow
+            ? GenericClassInferencePolicy.RowFallback.AllRows
+            : GenericClassInferencePolicy.SelectRowFallback(hasCompileTimeClassRow, hasClassArgumentsRows);
 
         return new ClassDataSourcePartition(dataSources.ToArray(), partitionedIndices.ToArray(), fallback);
     }

@@ -301,3 +301,42 @@ public class InheritedOpenMethodRows<T> : InheritedOpenMethodRowsBase<T>
         }
     }
 }
+
+public static class ExternalMethodRowsProvider
+{
+    public static IEnumerable<int> Rows() => [43];
+}
+
+[GenerateGenericTest(typeof(int))]
+[MethodDataSource(nameof(ConstructorRows))]
+public class ExternalMemberMethodRows<T>(T constructorValue)
+{
+    public static IEnumerable<int> ConstructorRows() => [42];
+
+    [Test]
+    [MethodDataSource(typeof(ExternalMethodRowsProvider), nameof(ExternalMethodRowsProvider.Rows))]
+    public void Test(T methodValue)
+    {
+        if (constructorValue is not 42 || methodValue is not 43)
+        {
+            throw new InvalidOperationException("Expected the external method provider on the constructor-scoped entry.");
+        }
+    }
+}
+
+[Arguments(42)]
+[GenerateGenericTest(typeof(IComparable))]
+[MethodDataSource(nameof(Rows), SkipIfEmpty = true)]
+public class ExplicitEmptyDeclaredRowPartition<T>(T value)
+{
+    public static IEnumerable<IComparable> Rows() => [];
+
+    [Test]
+    public void Test()
+    {
+        if (value is not 42 || (typeof(T) != typeof(int) && typeof(T) != typeof(IComparable)))
+        {
+            throw new InvalidOperationException("Expected the explicit interface instantiation to retain its assignable constructor row.");
+        }
+    }
+}
