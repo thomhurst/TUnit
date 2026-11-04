@@ -49,7 +49,7 @@ internal sealed class ReflectionGenericConstraintViolations(
 
     /// <summary>
     /// For a non-generic test method of the generic class, records each method-level
-    /// <see cref="ArgumentsAttribute"/> row whose values infer class type arguments that break the
+    /// data source whose values or declared row type infer class type arguments that break the
     /// class's constraints, as the source generator does.
     /// </summary>
     /// <remarks>
@@ -77,12 +77,12 @@ internal sealed class ReflectionGenericConstraintViolations(
 
             var parameters = testMethod.GetParameters();
 
-            foreach (var argumentsAttribute in testMethod.GetCustomAttributes<ArgumentsAttribute>(inherit: false))
+            foreach (var dataSource in ReflectionAttributeExtractor.ExtractDataSources(testMethod))
             {
                 // The same inference that builds the instantiations: CancellationToken parameters are skipped,
                 // and [Arguments(null)] (a null params array) infers object, as in the source generator (#7141)
-                var typeArguments = ReflectionTestDataCollector.InferClassTypeArgumentsFromMethodRow(
-                    classGenericParameters, parameters, argumentsAttribute, nullValuesArrayInfersObject: true);
+                var typeArguments = ReflectionTestDataCollector.InferClassTypeArgumentsFromMethodSource(
+                    testMethod, dataSource, classGenericParameters, parameters, nullValuesArrayInfersObject: true);
                 if (typeArguments == null)
                 {
                     continue;

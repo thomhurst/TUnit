@@ -19,6 +19,23 @@ public class MethodSourceClassInferenceTests<T>
     public static IEnumerable<int> OverloadedRows(int value) => [value];
     public static IEnumerable<string> OverloadedRows(string value) => [value];
 
+    public static IEnumerable<TestDataRow<string[]>> WrappedRows() => [new(new[] { "one" })];
+    public static IEnumerable<List<int>> ListRows() => [new() { 1 }];
+    public static IEnumerable<InferenceDerived<int>> DerivedRows() => [new()];
+    public static IEnumerable<object> UntypedRows() => [1];
+
+    [Test, MethodDataSource(nameof(WrappedRows))]
+    public async Task WrappedArray(T value) => await Assert.That(value).IsEqualTo((T)(object)"one");
+
+    [Test, MethodDataSource(nameof(ListRows))]
+    public async Task Interface(IEnumerable<T> values) => await Assert.That(values.Single()).IsEqualTo((T)(object)1);
+
+    [Test, MethodDataSource(nameof(DerivedRows))]
+    public async Task BaseType(InferenceBase<T> value) => await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+
+    [Test, Arguments(1), MethodDataSource(nameof(UntypedRows))]
+    public async Task MixedSources(T value) => await Assert.That(value).IsEqualTo((T)(object)1);
+
     [Test, MethodDataSource(nameof(SingleRows))]
     public async Task Single(T value) => await Assert.That(value).IsEqualTo((T)(object)1);
 
@@ -70,3 +87,6 @@ public class MultipleMethodSourceClassInferenceTests<T>
     [Test, MethodDataSource(nameof(IntRows)), MethodDataSource(nameof(MoreIntRows))]
     public async Task SameInstantiation(T value) => await Assert.That(value).IsEqualTo((T)(object)1);
 }
+
+public class InferenceBase<T>;
+public class InferenceDerived<T> : InferenceBase<T>;

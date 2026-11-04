@@ -890,6 +890,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // A generic method on a non-generic class without [GenerateGenericTest]: every method data source
         // that infers an existing instantiation's types joins it (#7163). With [GenerateGenericTest], a later
         // non-[Arguments] source inferring the same types is dropped, as reflection mode does (#7092).
+        var isClassOnlyInference = testMethod is { IsGenericType: true, IsGenericMethod: false };
         var joinsDuplicateMethodSources = testMethod is { IsGenericMethod: true, IsGenericType: false }
             && !testMethod.MethodAttributes.Any(static a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
 
@@ -1041,7 +1042,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // The name also matches [Arguments<T>], a literal row that joins as well (#7214).
                     if (specificAttr is not null && GenericMethodInferencePolicy.JoinsDuplicate(
                         isLiteralRow: specificAttr.AttributeClass?.Name == "ArgumentsAttribute",
-                        joinsInferredSources: (joinsDuplicateMethodSources || testMethod is { IsGenericType: true, IsGenericMethod: false }) && !isClassRow))
+                        joinsInferredSources: (joinsDuplicateMethodSources || isClassOnlyInference) && !isClassRow))
                     {
                         existing.AddRow(specificAttr, isClassRow);
                     }
@@ -1313,6 +1314,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Method-level [Arguments] rows of a non-generic method that infer the generic class's type arguments
         List<AttributeData>? inferringRows = null;
 
+        var hasExplicitClassTypes = testMethod.IsGenericType && testMethod.TypeSymbol.GetAttributes().Any(a =>
+            a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
+        var hasAnyClassDataSource = false;
+        var classTypeArgumentsSupplied = hasExplicitClassTypes;
+        if (testMethod.IsGenericType)
+        {
+            foreach (var attribute in testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
+            {
+                if (DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass))
+                {
+                    hasAnyClassDataSource = true;
+                    classTypeArgumentsSupplied |= !(attribute.AttributeClass?.Name == "ArgumentsAttribute"
+                        && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, attribute));
+                }
+            }
+        }
+
         // Handle generic classes with non-generic methods that have method-level Arguments
         if (testMethod is { IsGenericType: true, IsGenericMethod: false } && methodArgumentsAttributes.Count > 0)
         {
@@ -1324,12 +1342,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // that infers types breaking the class's constraints is reported. Reflection mode applies the
             // same rule.
             // Explicit generic tests are not inherited; constructor data sources are.
-            var classTypeArgumentsSupplied = testMethod.TypeSymbol.GetAttributes().Any(a =>
-                a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
-                || testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
-                    a.AttributeClass is { } attributeClass
-                    && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
-                    && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a)));
 
             // classTypeArgumentsSupplied already includes explicit [GenerateGenericTest] class types.
             foreach (var methodArgAttr in methodArgumentsAttributes)
@@ -1413,7 +1425,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 if (InferClassTypesFromMethodDataSource(testMethod, mdsAttr) is { Length: > 0 } inferredTypes)
                 {
-                    TryAddInstantiation(inferredTypes, mdsAttr);
+                    TryAddInstantiation(inferredTypes, mdsAttr,
+                        reportClassViolationAs: classTypeArgumentsSupplied ? null : ClassViolationSource.MethodArguments);
                 }
                 else
                 {
@@ -1853,11 +1866,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
 
-            // An instantiation that no row made, inferred from the declared type of a method data source
-            // (a [MethodDataSource] returning IEnumerable<object>), has no class row either. Reflection mode
-            // infers class type arguments only from class data sources and method [Arguments] rows, so it
-            // has no such instantiation. A [GenerateGenericTest] or a class data source of those types still
-            // supplies one.
+            // An instantiation inferred only from a parameter type has no data row. Keep it only when
+            // [GenerateGenericTest] or a class data source supplies those types, as in reflection mode.
             results.RemoveAll(instantiation =>
                 instantiation is { SpecificArgumentsAttribute: null, MethodConstraintViolations: null, ClassTypeArgs.Length: > 0 }
                 && (generateGenericTestTypes is null || !generateGenericTestTypes.Any(types => InferredTypesMatch(types, instantiation.ClassTypeArgs)))
@@ -1879,8 +1889,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         if (testMethod is { IsGenericType: true, IsGenericMethod: false }
-            && !testMethod.TypeSymbol.GetAttributes().Any(a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
-            && !testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass)))
+            && GenericClassInferencePolicy.ReportsUninferredMethodSource(
+                hasClassTypeSource: hasAnyClassDataSource,
+                hasExplicitClassTypes: hasExplicitClassTypes,
+                hasInferredMethodTypes: results.Count > 0 || classConstraintViolations.Count > 0))
         {
             foreach (var attribute in methodDataSourceBucket ?? Enumerable.Empty<AttributeData>())
             {
@@ -8719,6 +8731,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (TryUnwrap(type, testDataRowType, out var rowData))
         {
             type = Unwrap(rowData, funcType);
+            // TestDataRowUnwrapper spreads reference arrays through object[] covariance.
+            if (type is IArrayTypeSymbol { IsSZArray: true, ElementType.IsReferenceType: true } referenceArray)
+            {
+                type = referenceArray.ElementType;
+            }
         }
 
         if (type.SpecialType == SpecialType.System_Object
@@ -8818,15 +8835,30 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return;
         }
 
-        // Check for generic types like IEnumerable<T>, Func<T1, T2>, etc.
-        if (paramType is INamedTypeSymbol { IsGenericType: true } namedParamType &&
-            actualType is INamedTypeSymbol { IsGenericType: true } namedActualType &&
-            namedParamType.OriginalDefinition.Equals(namedActualType.OriginalDefinition, SymbolEqualityComparer.Default))
+        // Match the same generic construction on the value, its base types and its interfaces.
+        if (paramType is INamedTypeSymbol { IsGenericType: true } namedParamType)
         {
-            // Recursively process type arguments
-            for (var i = 0; i < namedParamType.TypeArguments.Length && i < namedActualType.TypeArguments.Length; i++)
+            for (var candidate = actualType as INamedTypeSymbol; candidate != null; candidate = candidate.BaseType)
             {
-                ProcessTypeForGenerics(namedParamType.TypeArguments[i], namedActualType.TypeArguments[i], genericParams, genericParamMap);
+                MapMatchingType(candidate);
+            }
+
+            foreach (var implemented in actualType.AllInterfaces)
+            {
+                MapMatchingType(implemented);
+            }
+
+            void MapMatchingType(INamedTypeSymbol candidate)
+            {
+                if (!SymbolEqualityComparer.Default.Equals(namedParamType.OriginalDefinition, candidate.OriginalDefinition))
+                {
+                    return;
+                }
+
+                for (var i = 0; i < namedParamType.TypeArguments.Length; i++)
+                {
+                    ProcessTypeForGenerics(namedParamType.TypeArguments[i], candidate.TypeArguments[i], genericParams, genericParamMap);
+                }
             }
         }
     }

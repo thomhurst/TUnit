@@ -544,8 +544,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Check for GenerateGenericTest attributes that explicitly specify type arguments
         var generateGenericTestAttributes = genericTypeDefinition.GetCustomAttributes<GenerateGenericTestAttribute>(inherit: false).ToArray();
 
-        // Without class-level data sources, method-level [Arguments] rows may infer the class's type
-        // arguments instead (#7106). They do so alongside [GenerateGenericTest], as in the source generator.
+        // Without class-level data sources, method-level [Arguments] rows or declared member-source
+        // row types may infer the class's type arguments instead (#7106, #7224). They do so alongside [GenerateGenericTest], as in the source generator.
         Dictionary<MethodInfo, List<Type[]>>? methodRowTypeArguments = null;
         var methodRowTests = classDataSources.Length == 0
             ? BuildTestsFromMethodRows(genericTypeDefinition, testMethods, generateGenericTestAttributes, out methodRowTypeArguments)
@@ -1070,12 +1070,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 var typeArguments = InferClassTypeArgumentsFromMethodSource(genericMethod, methodDataSources[i], classGenericParameters, parameters, nullValuesArrayInfersObject);
                 if (typeArguments == null)
                 {
-                    if (methodDataSources[i] is MethodDataSourceAttribute memberSource && generateGenericTestAttributes.Length == 0)
-                    {
-                        tests.Add(CreateFailedTestMetadata(genericTypeDefinition, genericMethod,
-                            new TUnit.Core.Exceptions.GenericTypeResolutionException($"Cannot infer generic class type arguments from method data source '{memberSource.MethodNameProvidingDataSource}'. Use a source with a concrete declared row type or add [GenerateGenericTest].")));
-                    }
-
                     continue;
                 }
 
@@ -1087,6 +1081,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 }
 
                 groupOfSource[i] = groupIndex;
+            }
+
+            if (GenericClassInferencePolicy.ReportsUninferredMethodSource(hasClassTypeSource: false,
+                hasExplicitClassTypes: generateGenericTestAttributes.Length > 0, hasInferredMethodTypes: typeArgumentGroups.Count > 0))
+            {
+                foreach (var source in methodDataSources)
+                {
+                    if (source is MethodDataSourceAttribute memberSource)
+                    {
+                        tests.Add(CreateFailedTestMetadata(genericTypeDefinition, genericMethod,
+                            new TUnit.Core.Exceptions.GenericTypeResolutionException($"Cannot infer generic class type arguments from method data source '{memberSource.MethodNameProvidingDataSource}'. Use a source with a concrete declared row type or add [GenerateGenericTest].")));
+                    }
+                }
             }
 
             if (typeArgumentGroups.Count > 0)
@@ -1577,7 +1584,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         && methodRowTypeArguments.TryGetValue(genericMethod, out var groups)
         && IndexOfTypeArguments(groups, typeArguments) >= 0;
 
-    private static Type[]? InferClassTypeArgumentsFromMethodSource(MethodInfo method, IDataSourceAttribute source, Type[] classParameters, ParameterInfo[] parameters, bool nullValuesArrayInfersObject)
+    internal static Type[]? InferClassTypeArgumentsFromMethodSource(MethodInfo method, IDataSourceAttribute source, Type[] classParameters, ParameterInfo[] parameters, bool nullValuesArrayInfersObject)
     {
         if (source is ArgumentsAttribute arguments)
         {
@@ -1589,7 +1596,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             && MethodDataSourceAttribute.GetDeclaredRowType(memberType) is { } rowType
             && rowType != typeof(object))
         {
-            var inferred = InferTypesFromTypedRow(method, rowType, classParameters.Length, inferClassParameters: true);
+            var inferred = InferTypesFromTypedRow(method, rowType, classParameters.Length, scope: GenericParameterScope.Class);
             return inferred is not null && !Array.Exists(inferred, static type => type.ContainsGenericParameters) ? inferred : null;
         }
 
@@ -2422,6 +2429,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static bool IsTypedArgumentsRow(IDataSourceAttribute dataSource)
         => dataSource.GetType() is { IsGenericType: true } type && type.GetGenericTypeDefinition() == typeof(ArgumentsAttribute<>);
 
+    private enum GenericParameterScope { Method, Class }
+
     /// <summary>
     /// Mirrors the generator's <c>InferTypesFromDataSourceAttribute</c> for generic methods: reads the type
     /// arguments of the <c>DataSourceGeneratorAttribute</c> / <c>AsyncDataSourceGeneratorAttribute</c> base.
@@ -2495,13 +2504,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// T, since they are invoked and unwrapped before invocation, and a reference-type array T there spreads, so its element binds. A T? parameter takes a value of its underlying type. Each parameter type is matched against its value type, including
     /// type arguments nested in generic parameter types. Every type parameter must be inferred, each to one type.
     /// </summary>
-    private static Type[]? InferTypesFromTypedRow(MethodInfo method, Type rowType, int genericParameterCount, bool inferClassParameters = false)
+    private static Type[]? InferTypesFromTypedRow(MethodInfo method, Type rowType, int genericParameterCount, GenericParameterScope scope = GenericParameterScope.Method)
     {
         // The row reaches the method as ToObjectArray and TestDataRowUnwrapper.UnwrapArray produce it: a
         // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
         // once, so the value binds as that T.
         // Member-source row types have already been unwrapped by GetDeclaredRowType.
-        if (!inferClassParameters)
+        if (scope == GenericParameterScope.Method)
         {
             rowType = UnwrapFunc(rowType);
         }
@@ -2511,7 +2520,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         var spreadsReferenceArray = false;
-        var testDataRowType = inferClassParameters ? null : FindTestDataRowType(rowType);
+        var testDataRowType = scope == GenericParameterScope.Class ? null : FindTestDataRowType(rowType);
         var isTestDataRow = testDataRowType is not null;
         if (testDataRowType is not null)
         {
@@ -2551,9 +2560,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var typeArguments = new Type?[genericParameterCount];
 
-        if (inferClassParameters && dataParameters.Length == 1 && GetValueTupleElementTypes(dataParameters[0].ParameterType) is not null)
+        if (scope == GenericParameterScope.Class && dataParameters.Length == 1 && GetValueTupleElementTypes(dataParameters[0].ParameterType) is not null)
         {
-            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, inferClassParameters))
+            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, scope))
             {
                 return null;
             }
@@ -2567,7 +2576,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // reference array spread) like a whole TestDataRow<T> row.
             if (!isTestDataRow && tupleElements.Length == 1 && FindTestDataRowType(tupleElements[0]) is not null)
             {
-                return InferTypesFromTypedRow(method, tupleElements[0], genericParameterCount, inferClassParameters);
+                return InferTypesFromTypedRow(method, tupleElements[0], genericParameterCount, scope);
             }
 
             if (tupleElements.Length < requiredCount || tupleElements.Length > dataParameters.Length)
@@ -2577,7 +2586,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             for (var i = 0; i < tupleElements.Length; i++)
             {
-                if (!MapTypedRowParameters(dataParameters[i].ParameterType, tupleElements[i], typeArguments, inferClassParameters))
+                if (!MapTypedRowParameters(dataParameters[i].ParameterType, tupleElements[i], typeArguments, scope))
                 {
                     return null;
                 }
@@ -2595,7 +2604,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
         else if (dataParameters.Length == 1)
         {
-            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, inferClassParameters))
+            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, scope))
             {
                 return null;
             }
@@ -2603,7 +2612,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         else if (dataParameters.Length > 1 && requiredCount <= 1)
         {
             // A scalar row binds to the first data parameter; the rest are optional.
-            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, inferClassParameters))
+            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, scope))
             {
                 return null;
             }
@@ -2656,11 +2665,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <see cref="InferTypesFromTypedRow"/>, recording each method type parameter it binds. Returns false when
     /// one type parameter binds two different types.
     /// </summary>
-    private static bool MapTypedRowParameters(Type parameterType, Type valueType, Type?[] typeArguments, bool inferClassParameters = false)
+    private static bool MapTypedRowParameters(Type parameterType, Type valueType, Type?[] typeArguments, GenericParameterScope scope = GenericParameterScope.Method)
     {
         if (parameterType.IsGenericParameter)
         {
-            if ((parameterType.DeclaringMethod is null) != inferClassParameters)
+            if ((parameterType.DeclaringMethod is null ? GenericParameterScope.Class : GenericParameterScope.Method) != scope)
             {
                 return true;
             }
@@ -2679,7 +2688,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             && parameterType.GetArrayRank() == valueType.GetArrayRank()
             && IsSingleDimensionalZeroBasedArray(parameterType) == IsSingleDimensionalZeroBasedArray(valueType))
         {
-            return MapTypedRowParameters(parameterType.GetElementType()!, valueType.GetElementType()!, typeArguments, inferClassParameters);
+            return MapTypedRowParameters(parameterType.GetElementType()!, valueType.GetElementType()!, typeArguments, scope);
         }
 
         // A T? parameter (Nullable<T>) takes a non-nullable value of its underlying type.
@@ -2687,7 +2696,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             && parameterType.GetGenericTypeDefinition() == typeof(Nullable<>)
             && Nullable.GetUnderlyingType(valueType) is null)
         {
-            return MapTypedRowParameters(parameterType.GetGenericArguments()[0], valueType, typeArguments, inferClassParameters);
+            return MapTypedRowParameters(parameterType.GetGenericArguments()[0], valueType, typeArguments, scope);
         }
 
         if (parameterType.IsGenericType)
@@ -2721,7 +2730,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 var valueArguments = candidate.GetGenericArguments();
                 for (var i = 0; i < parameterArguments.Length; i++)
                 {
-                    if (!MapTypedRowParameters(parameterArguments[i], valueArguments[i], typeArguments, inferClassParameters))
+                    if (!MapTypedRowParameters(parameterArguments[i], valueArguments[i], typeArguments, scope))
                     {
                         return false;
                     }

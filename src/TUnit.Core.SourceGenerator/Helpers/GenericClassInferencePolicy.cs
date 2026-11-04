@@ -28,6 +28,9 @@ internal static class GenericClassInferencePolicy
     internal static bool NullMethodRowInfersObject(bool hasClassTypeSource, bool hasExplicitClassTypes)
         => !hasClassTypeSource && !hasExplicitClassTypes;
 
+    internal static bool ReportsUninferredMethodSource(bool hasClassTypeSource, bool hasExplicitClassTypes, bool hasInferredMethodTypes)
+        => !hasClassTypeSource && !hasExplicitClassTypes && !hasInferredMethodTypes;
+
     internal static bool IsCompletePair(int classArity, int methodArity, int typeArgumentCount)
         => classArity == 0 || methodArity == 0 || typeArgumentCount == classArity + methodArity;
 

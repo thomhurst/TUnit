@@ -494,6 +494,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         if (rowType != null && TestDataRowUnwrapper.GetInnerDataType(rowType) is { } rowData)
         {
             rowType = UnwrapFunc(rowData);
+            // UnwrapArray spreads reference arrays through object[] covariance.
+            if (rowType is { IsArray: true } && rowType.Name.EndsWith("[]", StringComparison.Ordinal) && rowType.GetElementType() is { IsValueType: false, IsPointer: false } elementType)
+            {
+                rowType = elementType;
+            }
         }
 
         return rowType == null || rowType == typeof(object[]) ? null : rowType;

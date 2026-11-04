@@ -9,7 +9,7 @@ internal class Tests7224 : TestsBase
         {
             var generated = string.Join(Environment.NewLine, files);
             await Assert.That(generated).Contains("MethodSourceClassInferenceTests<int>");
-            foreach (var method in new[] { "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External" })
+            foreach (var method in new[] { "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "Interface", "BaseType", "MixedSources" })
             {
                 await Assert.That(generated).Contains($"instance.{method}(");
             }
@@ -22,6 +22,7 @@ internal class Tests7224 : TestsBase
         {
             var generated = string.Join(Environment.NewLine, files);
             await Assert.That(generated).Contains("Cannot infer generic class type arguments from method data source 'Rows'");
+            await Assert.That(generated).Contains("InvalidClassType");
             await Assert.That(generated).Contains("ExplicitMethodSourceClassTests<int>");
             await Assert.That(generated).Contains("instance.ExplicitTypes(");
         });

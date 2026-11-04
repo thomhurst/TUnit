@@ -11,8 +11,8 @@ public class Issue7224Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7224/*/*",
         [
             result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-            result => result.ResultSummary.Counters.Total.ShouldBe(13),
-            result => result.ResultSummary.Counters.Passed.ShouldBe(13),
+            result => result.ResultSummary.Counters.Total.ShouldBe(17),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(17),
             result => result.ResultSummary.Counters.Failed.ShouldBe(0)
         ]);
     }
@@ -22,9 +22,9 @@ public class Issue7224Tests(TestMode testMode) : InvokableTestBase(testMode)
     {
         await RunTestsWithFilter("/*/TUnit.TestProject.Bugs._7224Unsupported/*/*",
         [
-            result => result.ResultSummary.Counters.Total.ShouldBe(2),
+            result => result.ResultSummary.Counters.Total.ShouldBe(3),
             result => result.ResultSummary.Counters.Passed.ShouldBe(1),
-            result => result.ResultSummary.Counters.Failed.ShouldBe(1)
+            result => result.ResultSummary.Counters.Failed.ShouldBe(2)
         ]);
     }
 }
