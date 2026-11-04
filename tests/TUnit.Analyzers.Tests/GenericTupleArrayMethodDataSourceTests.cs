@@ -136,6 +136,14 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     [Arguments("(Box<string>[], Box<int>[])", "(T[], Box<T>[])", true)]
     [Arguments("(Box<int>[], int[])", "(Box<T>[], T[])", false)]
     [Arguments("(string[], Box<object>[])", "(T[], Box<T>[])", false)]
+    [Arguments("IConsumer<object[], IList<string>, IList<Uri>>[]", "IConsumer<T, T, T>[]", true)]
+    [Arguments("IConsumer<IList<string>, object[], IList<Uri>>[]", "IConsumer<T, T, T>[]", true)]
+    [Arguments("IConsumer<IList<string>, IList<Uri>, object[]>[]", "IConsumer<T, T, T>[]", true)]
+    [Arguments("IConsumer<object[][], IList<string[]>, IReadOnlyList<Uri[]>>[]", "IConsumer<T, T, T>[]", true)]
+    [Arguments("IConsumer<object[], IList<string>, IEnumerable<object>>[]", "IConsumer<T, T, T>[]", false)]
+    [Arguments("IConsumer<IEnumerable<object>, IList<string>, object[]>[]", "IConsumer<T, T, T>[]", false)]
+    [Arguments("IConsumer<object[], IList<IDisposable>, IReadOnlyList<ICloneable>>[]", "IConsumer<T, T, T>[]", false)]
+    [Arguments("IConsumer<object[][], IList<string[]>, IReadOnlyList<object[]>>[]", "IConsumer<T, T, T>[]", false)]
     [Arguments("IContravariant<Outer<string>.D, Outer<object>.D>[]", "IContravariant<T, T>[]", true)]
     [Arguments("IContravariant<Outer<object>.D, Outer<string>.D>[]", "IContravariant<T, T>[]", true)]
     [Arguments("IContravariant<Outer<string>.D[], Outer<object>.D[]>[]", "IContravariant<T, T>[]", true)]
@@ -262,6 +270,7 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
             public class LaterAlternative : IInvariant<int, int>, IInvariant<string, string> { }
             public interface IPair<out A, out B> { }
             public interface IConsumer<A, in B> { }
+            public interface IConsumer<in A, in B, in C> { }
             public interface IInvariant<A, B> { }
             public class Alternative : IInvariant<int, string>, IInvariant<string, string> { }
             public class Pair<A, B> { }

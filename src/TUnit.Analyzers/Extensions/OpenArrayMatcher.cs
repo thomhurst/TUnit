@@ -9,6 +9,8 @@ namespace TUnit.Analyzers.Extensions;
 // Matches open array elements without rebuilding runtime objects. Tracks identity and
 // reference bounds, including tuple siblings and alternative interfaces. Unknown common
 // interface/delegate implementations remain accepted; generic constraints are handled separately.
+// Conversions involving unsubstituted type parameters use Roslyn's existing constraint
+// information; this matcher does not infer or validate new constraints (see #7520).
 internal static class OpenArrayMatcher
 {
     // Array elements are not rebuilt as tuples by CastHelper. After inference, constructed
@@ -73,31 +75,19 @@ internal static class OpenArrayMatcher
                 }
             }
 
-            // Upper bounds need a common subtype. Unrelated classes cannot share one,
-            // and a sealed class cannot gain an interface through a derived class.
-            // Unsealed class/interface and interface/interface pairs may have a common
-            // implementation, so leave those open rather than reporting a false mismatch.
-            for (var i = 0; i < occurrences.Length; i++)
+            var upperBounds = ImmutableArray.CreateBuilder<ITypeSymbol>();
+            foreach (var occurrence in occurrences)
             {
-                var left = occurrences[i];
-                if (left.Variance != VarianceKind.In || CompilationExtensions.ContainsTypeParameter(left.Type))
+                if (occurrence.Variance == VarianceKind.In
+                    && !CompilationExtensions.ContainsTypeParameter(occurrence.Type))
                 {
-                    continue;
+                    upperBounds.Add(occurrence.Type);
                 }
+            }
 
-                for (var j = i + 1; j < occurrences.Length; j++)
-                {
-                    var right = occurrences[j];
-                    if (right.Variance != VarianceKind.In || CompilationExtensions.ContainsTypeParameter(right.Type))
-                    {
-                        continue;
-                    }
-
-                    if (!CanShareReferenceSubtype(compilation, left.Type, right.Type))
-                    {
-                        return false;
-                    }
-                }
+            if (!CanShareReferenceSubtype(compilation, upperBounds.ToImmutable()))
+            {
+                return false;
             }
 
             return next(bindings.SetItem(typeParameter, occurrences));
@@ -180,6 +170,52 @@ internal static class OpenArrayMatcher
         }
 
         return false;
+    }
+
+    private static bool CanShareReferenceSubtype(Compilation compilation, ImmutableArray<ITypeSymbol> bounds)
+    {
+        IArrayTypeSymbol? array = null;
+        for (var i = 0; i < bounds.Length; i++)
+        {
+            array ??= bounds[i] as IArrayTypeSymbol;
+            for (var j = i + 1; j < bounds.Length; j++)
+            {
+                if (!CanShareReferenceSubtype(compilation, bounds[i], bounds[j]))
+                {
+                    return false;
+                }
+            }
+        }
+
+        if (array is null || !array.ElementType.IsReferenceType)
+        {
+            return true;
+        }
+
+        // An array common subtype has one element type satisfying every array and
+        // generic array-interface bound together. Pairwise checks alone can choose
+        // incompatible elements for IList<string> and IList<Uri> against object[].
+        var elementBounds = ImmutableArray.CreateBuilder<ITypeSymbol>();
+        foreach (var bound in bounds)
+        {
+            if (bound is IArrayTypeSymbol arrayBound)
+            {
+                elementBounds.Add(arrayBound.ElementType);
+            }
+            else if (bound is INamedTypeSymbol { TypeKind: TypeKind.Interface, TypeArguments.Length: 1 } target)
+            {
+                foreach (var implemented in array.AllInterfaces)
+                {
+                    if (SymbolEqualityComparer.Default.Equals(implemented.OriginalDefinition, target.OriginalDefinition))
+                    {
+                        elementBounds.Add(target.TypeArguments[0]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return CanShareReferenceSubtype(compilation, elementBounds.ToImmutable());
     }
 
     // Conservative upper-bound check: unknown interface/delegate implementations remain possible.
@@ -289,5 +325,4 @@ internal static class OpenArrayMatcher
 
         return false;
     }
-
 }
