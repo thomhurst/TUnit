@@ -1383,7 +1383,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Removes from <paramref name="classDataSources"/> the class-level [Arguments] rows whose values all bind to
     /// constructor parameters that do not use the class's type parameters, as <c>[Arguments(42)]</c> on
     /// <c>C&lt;T&gt;(int number)</c>, or that have no values, and returns them, or null when there are none. Such a row supplies no class
-    /// type argument (#7209). Mirrors <c>TestMetadataGenerator.ClassRowSuppliesNoTypeArguments</c>.
+    /// type argument (#7209). Rows that mention only some class type parameters are also split off:
+    /// they cannot create a closed class and need method rows to infer its types. Mirrors
+    /// <c>TestMetadataGenerator.ClassRowSuppliesNoTypeArguments</c> with partial rows enabled.
     /// </summary>
     private static IDataSourceAttribute[]? SplitTypeFreeClassRows(Type genericTypeDefinition, ref IDataSourceAttribute[] classDataSources)
     {
@@ -1402,7 +1404,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         for (var i = 0; i < classDataSources.Length; i++)
         {
             var source = classDataSources[i];
-            if (ClassRowSuppliesNoTypeArguments(genericTypeDefinition, source))
+            if (ClassRowSuppliesNoTypeArguments(genericTypeDefinition, source, includePartialRows: true))
             {
                 if (rest == null)
                 {
@@ -1431,7 +1433,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return typeFree.ToArray();
     }
 
-    private static bool ClassRowSuppliesNoTypeArguments(Type genericTypeDefinition, IDataSourceAttribute dataSource)
+    private static bool ClassRowSuppliesNoTypeArguments(Type genericTypeDefinition, IDataSourceAttribute dataSource, bool includePartialRows = false)
     {
         int valueCount;
         if (dataSource is ArgumentsAttribute arguments)
@@ -1460,8 +1462,53 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             hasClassTypeParameter |= parameters[i].ParameterType.ContainsGenericParameters;
         }
 
+        // Partial constructor rows cannot create a closed class, but still supply its constructor
+        // values when method rows infer all the types, matching source generation.
+        if (includePartialRows)
+        {
+            foreach (var typeParameter in genericTypeDefinition.GetGenericArguments())
+            {
+                var supplied = false;
+                for (var i = 0; i < boundCount; i++)
+                {
+                    supplied |= ContainsTypeParameter(parameters[i].ParameterType, typeParameter);
+                }
+
+                if (!supplied)
+                {
+                    return true;
+                }
+            }
+        }
+
         return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(
             valueCount: valueCount, boundCount: boundCount, hasClassTypeParameter: hasClassTypeParameter);
+    }
+
+    private static bool ContainsTypeParameter(Type type, Type parameter)
+    {
+        if (type == parameter)
+        {
+            return true;
+        }
+
+        if (type.HasElementType)
+        {
+            return ContainsTypeParameter(type.GetElementType()!, parameter);
+        }
+
+        if (type.IsGenericType)
+        {
+            foreach (var argument in type.GetGenericArguments())
+            {
+                if (ContainsTypeParameter(argument, parameter))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

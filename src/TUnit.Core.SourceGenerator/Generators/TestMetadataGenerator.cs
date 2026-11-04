@@ -893,12 +893,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var joinsDuplicateMethodSources = testMethod is { IsGenericMethod: true, IsGenericType: false }
             && !testMethod.MethodAttributes.Any(static a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
 
-        // Without constructor-supplied types, method sources supply the class types and partition
-        // their rows. Type-free constructor arguments supply values on those instantiations.
+        // Without a complete set of constructor-supplied types, method sources supply the class types
+        // and partition their rows. Incomplete constructor rows supply values on those instantiations.
         var scopesClassMethodSources = testMethod is { IsGenericType: true, IsGenericMethod: false }
             && !testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
                 a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
-                && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a)));
+                && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a, includePartialRows: true)));
 
         // A generic class whose widest public constructor takes arguments
         var hasParameterizedConstructor = testMethod.IsGenericType
@@ -1828,13 +1828,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             var addUninferredMethodDataSources = uninferredMethodDataSources is not null && MethodParametersReferenceTypeParameters(testMethod);
 
-            // Class rows whose values go to no type parameter infer no instantiation of their own, so they
+            // Class rows that cannot infer every type parameter create no instantiation of their own, so they
             // supply the constructor arguments of every instantiation that the method rows infer (#7209).
             // Reflection mode builds those instances from the same rows.
             List<AttributeData>? typeFreeClassRows = null;
             foreach (var classAttr in classArgumentsAttributes)
             {
-                if (ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, classAttr))
+                if (ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, classAttr, includePartialRows: true))
                 {
                     (typeFreeClassRows ??= []).Add(classAttr);
                 }
@@ -7031,7 +7031,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// row supplies no class type argument, so the method rows infer them, and the row only supplies the
     /// constructor arguments (#7209). Mirrors <c>ReflectionTestDataCollector.ClassRowSuppliesNoTypeArguments</c>.
     /// </summary>
-    private static bool ClassRowSuppliesNoTypeArguments(INamedTypeSymbol classSymbol, AttributeData argAttr)
+    /// <param name="includePartialRows">Also return true when a bound constructor parameter leaves
+    /// any class type parameter unmentioned. Such rows supply constructor values on method-inferred
+    /// classes; only complete constructor sets take precedence over method-source inference.</param>
+    private static bool ClassRowSuppliesNoTypeArguments(INamedTypeSymbol classSymbol, AttributeData argAttr, bool includePartialRows = false)
     {
         int valueCount;
         if (argAttr.AttributeClass is { IsGenericType: true, TypeArguments.Length: 1 })
@@ -7062,9 +7065,23 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             hasClassTypeParameter |= ContainsClassTypeParameter(primaryConstructor.Parameters[i].Type, classSymbol);
         }
 
+        if (includePartialRows && classSymbol.TypeParameters.Any(typeParameter =>
+                !primaryConstructor.Parameters.Take(boundCount).Any(parameter => ContainsTypeParameter(parameter.Type, typeParameter))))
+        {
+            return true;
+        }
+
         return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(
             valueCount: valueCount, boundCount: boundCount, hasClassTypeParameter: hasClassTypeParameter);
     }
+
+    private static bool ContainsTypeParameter(ITypeSymbol type, ITypeParameterSymbol parameter) => type switch
+    {
+        ITypeParameterSymbol typeParameter => SymbolEqualityComparer.Default.Equals(typeParameter, parameter),
+        IArrayTypeSymbol array => ContainsTypeParameter(array.ElementType, parameter),
+        INamedTypeSymbol named => named.TypeArguments.Any(argument => ContainsTypeParameter(argument, parameter)),
+        _ => false
+    };
 
     /// <param name="nullArgumentsArrayInfersObject">
     /// False when [GenerateGenericTest] or a class-level data source supplies the class type arguments: an
@@ -8515,13 +8532,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? funcType.TypeArguments[0]
             : innerType;
 
-        // Constructor data that supplies class types takes precedence over nullable method rows.
-        // Type-free constructor arguments still need their class types inferred from the method.
+        // Constructor data that supplies every class type takes precedence over nullable method rows.
+        // Incomplete constructor arguments still need their class types inferred from the method.
         // Keep the source on that class instead of creating a second row-inferred class.
         if (GetDataParameters(testMethod.MethodSymbol).Any(p => ContainsNullableClassParameter(p.Type))
             && testClass.GetAttributesIncludingBaseTypes().Any(a =>
                 a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
-                && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testClass, a))))
+                && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testClass, a, includePartialRows: true))))
         {
             return null;
         }

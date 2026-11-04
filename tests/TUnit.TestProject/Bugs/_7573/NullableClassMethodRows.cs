@@ -278,3 +278,21 @@ public class LiteralAndMethodClassRows<T> where T : struct
         }
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+public class PartialConstructorNullableClassRows<T, U>(T seed) where T : struct
+{
+    public static IEnumerable<Func<(int?[], string)>> Rows() => [() => ([42], "label")];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task PartialConstructorTypes(T?[] values, U label)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(typeof(U)).IsEqualTo(typeof(string));
+        await Assert.That(seed).IsEqualTo((T)(object)1);
+        await Assert.That(values[0]).IsEqualTo((T)(object)42);
+        await Assert.That(label!.ToString()).IsEqualTo("label");
+    }
+}
