@@ -130,5 +130,10 @@ public class CleanupHooks
         await Assert.That(_afterAssemblyCount).IsEqualTo(1);
         await Assert.That(TrackedResource.LastInAssembly).IsEqualTo(1);
         await Assert.That(TrackedResource.LastInSession).IsEqualTo(1);
+
+        if (Environment.GetEnvironmentVariable("TUNIT_7338_COMPLETION_PATH") is { } completionPath)
+        {
+            await File.WriteAllTextAsync(completionPath, "completed");
+        }
     }
 }

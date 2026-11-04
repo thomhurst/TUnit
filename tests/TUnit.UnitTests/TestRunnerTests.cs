@@ -150,7 +150,33 @@ public class TestRunnerTests
             .ThrowsExactly<OperationCanceledException>();
     }
 
-    private static TestRunner CreateRunner(out FakeTestCoordinator coordinator)
+    [Test, Timeout(5_000)]
+    public async Task DependencySkip_WaitsForExecutionLock(CancellationToken cancellationToken)
+    {
+        using var executionLock = new NotInParallelLock();
+        executionLock.Enable();
+        var runner = CreateRunner(out var coordinator, executionLock);
+        var dependency = CreateTest("failed-dependency");
+        dependency.State = TestState.Failed;
+        dependency.ExecutionTask = Task.CompletedTask;
+        var dependent = CreateTest("skipped-dependent", [dependency]);
+        dependent.Context.SkipReason = "Existing skip reason";
+
+        ValueTask execution;
+        using (await executionLock.EnterAsync(true, cancellationToken))
+        {
+            execution = runner.ExecuteTestAsync(dependent, cancellationToken);
+            await Assert.That(execution.IsCompleted).IsFalse();
+            await Assert.That(coordinator.GetCallCount(dependent)).IsEqualTo(0);
+        }
+
+        await execution;
+        await Assert.That(coordinator.GetCallCount(dependent)).IsEqualTo(1);
+        await Assert.That(dependent.State).IsEqualTo(TestState.Skipped);
+        await Assert.That(dependent.Context.SkipReason).IsEqualTo("Existing skip reason");
+    }
+
+    private static TestRunner CreateRunner(out FakeTestCoordinator coordinator, NotInParallelLock? executionLock = null)
     {
         coordinator = new FakeTestCoordinator();
 
@@ -160,7 +186,7 @@ public class TestRunnerTests
             new CancellationTokenSource(),
             logger: null!,
             new ParallelLimitLockProvider(),
-            new NotInParallelLock());
+            executionLock ?? new NotInParallelLock());
     }
 
     internal static AbstractExecutableTest CreateTest(
