@@ -53,7 +53,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Value",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.Value",
             filePath: "",
-            lineNumber: 15,
+            lineNumber: 16,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -135,7 +135,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "MultipleSources",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.MultipleSources",
             filePath: "",
-            lineNumber: 23,
+            lineNumber: 24,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -187,7 +187,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "MultipleSources",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<double>.MultipleSources",
             filePath: "",
-            lineNumber: 23,
+            lineNumber: 24,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -271,7 +271,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "NullableValue",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.NullableValue",
             filePath: "",
-            lineNumber: 33,
+            lineNumber: 34,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -351,7 +351,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Factory",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.Factory",
             filePath: "",
-            lineNumber: 41,
+            lineNumber: 42,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -432,7 +432,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "second", new
             methodName: "Tuple",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.Tuple",
             filePath: "",
-            lineNumber: 49,
+            lineNumber: 50,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

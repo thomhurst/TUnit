@@ -5,6 +5,7 @@ namespace TUnit.TestProject.Bugs._7573;
 [EngineTest(ExpectedResult.Pass)]
 public class NullableClassMethodRows<T> where T : struct
 {
+    public static IEnumerable<U> Values<U>() => [];
     public static IEnumerable<int> Values() => [42];
     public static IEnumerable<int> MoreValues() => [42];
     public static IEnumerable<double> DoubleValues() => [84d];

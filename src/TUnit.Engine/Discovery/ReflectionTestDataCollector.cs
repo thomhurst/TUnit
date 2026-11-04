@@ -2736,9 +2736,22 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return null;
         }
 
-        var dataMethod = testClass.GetMethod(source.MethodNameProvidingDataSource,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly,
-            binder: null, Type.EmptyTypes, modifiers: null);
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly;
+#if NET
+        var dataMethod = testClass.GetMethod(source.MethodNameProvidingDataSource, genericParameterCount: 0,
+            flags, binder: null, Type.EmptyTypes, modifiers: null);
+#else
+        MethodInfo? dataMethod = null;
+        foreach (var candidate in testClass.GetMethods(flags))
+        {
+            if (candidate.Name == source.MethodNameProvidingDataSource
+                && !candidate.IsGenericMethodDefinition && candidate.GetParameters().Length == 0)
+            {
+                dataMethod = candidate;
+                break;
+            }
+        }
+#endif
         if (dataMethod?.ReturnType is not { IsGenericType: true } returnType
             || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>))
         {

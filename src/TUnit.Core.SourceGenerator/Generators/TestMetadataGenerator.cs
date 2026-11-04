@@ -8464,7 +8464,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var testClass = testMethod.TypeSymbol;
         var dataMethod = testClass.GetMembers(methodName)
             .OfType<IMethodSymbol>()
-            .FirstOrDefault(m => m.IsStatic && m.Parameters.Length == 0);
+            .FirstOrDefault(m => m.IsStatic && !m.IsGenericMethod && m.Parameters.Length == 0);
 
         if (dataMethod == null)
         {
