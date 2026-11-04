@@ -327,12 +327,15 @@ public static class GenericClassRowPartition
         }
 
         var (values, _) = TestDataRowUnwrapper.UnwrapArray(row);
-        if (values.Length == 0 || values.Length > parameters.Length)
+        var trailing = parameters.LastOrDefault() is ParameterMetadata last
+            ? GetTrailingConstructorElement(last) : null;
+        var regularCount = parameters.Length - (trailing is null ? 0 : 1);
+        if (values.Length == 0 || (trailing is null && values.Length > parameters.Length))
         {
             return false;
         }
 
-        for (var i = values.Length; i < parameters.Length; i++)
+        for (var i = values.Length; i < regularCount; i++)
         {
             if (parameters[i] is not ParameterMetadata { IsOptional: true })
             {
@@ -342,40 +345,69 @@ public static class GenericClassRowPartition
 
         for (var i = 0; i < values.Length; i++)
         {
-            if (parameters[i] is not ParameterMetadata parameter)
+            if (i >= regularCount && trailing is not null)
+            {
+                // A single supplied collection stays intact; loose values bind to its elements.
+                if (values.Length == parameters.Length
+                    && MatchesConstructorValue(GetConstructorTypeInfo((ParameterMetadata)parameters[regularCount]), values[i], classTypeArguments))
+                {
+                    continue;
+                }
+                if (!MatchesConstructorValue(trailing, values[i], classTypeArguments))
+                {
+                    return false;
+                }
+            }
+            else if (parameters[i] is not ParameterMetadata parameter
+                || !MatchesConstructorValue(GetConstructorTypeInfo(parameter), values[i], classTypeArguments))
             {
                 return false;
-            }
-
-            if (values[i] is { } value)
-            {
-                if (!MatchesConstructorParameterType(GetConstructorTypeInfo(parameter), value.GetType(), classTypeArguments, direction: 1)
-                    && !MayConvertConstructorValue(GetConstructorTypeInfo(parameter), value, classTypeArguments))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                var type = parameter.TypeInfo switch
-                {
-                    GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
-                    ConstructedGeneric constructed => constructed.GenericDefinition,
-                    _ => parameter.Type
-                };
-                if (type.IsValueType && Nullable.GetUnderlyingType(type) is null
-                    && type != typeof(Nullable<>))
-                {
-                    return false;
-                }
             }
         }
 
         return true;
     }
 
+    private static TypeInfo? GetTrailingConstructorElement(ParameterMetadata parameter)
+    {
+        var description = GetConstructorTypeInfo(parameter);
+        return description switch
+        {
+            ConstructorArray { Rank: 1 } array => array.Element,
+            ConcreteType { Type: { IsArray: true } array } when array.GetArrayRank() == 1
+                => new ConcreteType(array.GetElementType()!),
+            ConstructedGeneric generic when IsCollectingInterface(generic.GenericDefinition) && parameter.IsParams
+                => generic.TypeArguments[0],
+            ConcreteType { Type: var type } when type.IsGenericType && IsCollectingInterface(type.GetGenericTypeDefinition()) && parameter.IsParams
+                => new ConcreteType(type.GetGenericArguments()[0]),
+            _ => null
+        };
+    }
+
+    private static bool IsCollectingInterface(Type type) => type == typeof(IEnumerable<>)
+        || type == typeof(ICollection<>) || type == typeof(IList<>)
+        || type == typeof(IReadOnlyCollection<>) || type == typeof(IReadOnlyList<>);
+
+    private static bool MatchesConstructorValue(TypeInfo description, object? value, Type[] classTypeArguments)
+    {
+        if (value is not null)
+        {
+            return MatchesConstructorParameterType(description, value.GetType(), classTypeArguments, direction: 1)
+                || MayConvertConstructorValue(description, value, classTypeArguments);
+        }
+
+        var type = description switch
+        {
+            GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
+            ConstructedGeneric constructed => constructed.GenericDefinition,
+            ConcreteType concrete => concrete.Type,
+            _ => typeof(object)
+        };
+        return !type.IsValueType || Nullable.GetUnderlyingType(type) is not null || type == typeof(Nullable<>);
+    }
+
     // Conversion belongs to the binder. Do not execute user converters while partitioning;
-    // retain candidates for registered conversions and the primitive CastHelper path.
+    // retain candidates for registered conversions and built-in scalar CastHelper paths.
     private static bool MayConvertConstructorValue(TypeInfo description, object value, Type[] classTypeArguments)
     {
         var target = description switch
@@ -400,6 +432,19 @@ public static class GenericClassRowPartition
         if (Converters.AotConverterRegistry.TryGetConverter(value.GetType(), target, out _))
         {
             return true;
+        }
+
+        if (target.IsEnum)
+        {
+            try
+            {
+                _ = Enum.ToObject(target, value);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
         }
 
         var source = value.GetType();

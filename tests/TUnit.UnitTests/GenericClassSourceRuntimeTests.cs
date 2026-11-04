@@ -11,6 +11,82 @@ public class GenericClassSourceRuntimeTests
     public sealed class NestedArrayConstructor<T, U>(T[][] first, U second = default!);
     public sealed class NestedGenericConstructor<T, U>(IEnumerable<T[]> first, U second = default!);
 
+    public sealed class CollectingConstructor<T, U>(T[] first, params U[] rest);
+    public enum RowEnum { A = 1 }
+
+    [Test]
+    public async Task Constructor_Partition_Preserves_Params_Interface_Elements()
+    {
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(typeof(int[])) { Name = "first", TypeInfo = new ConcreteType(typeof(int[])), CachedIsOptional = false },
+            new ParameterMetadata(typeof(IEnumerable<string>)) { Name = "rest", TypeInfo = new ConstructedGeneric(typeof(IEnumerable<>), [new GenericParameter(1, false)]), CachedIsOptional = false, CachedIsParams = true }
+        ];
+        foreach (object?[] row in new object?[][] { [new int[] { 1 }], [new int[] { 1 }, "a"], [new int[] { 1 }, "a", "b"], [new int[] { 1 }, new List<string>()] })
+        {
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow(row, parameters, [typeof(int), typeof(string)])).IsTrue();
+        }
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new int[] { 1 }, new object()], parameters, [typeof(int), typeof(string)])).IsFalse();
+        parameters[0] = new ParameterMetadata(typeof(long)) { Name = "first", TypeInfo = new ConcreteType(typeof(long)), CachedIsOptional = false };
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([2, "b", "c"], parameters, [typeof(long), typeof(string)])).IsTrue();
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Partition_Preserves_Trailing_Collections_And_Enum_Conversions(bool generated)
+    {
+        foreach (var collection in new[] { false, true })
+        {
+            Type[] arguments = collection ? [typeof(int), typeof(string)] : [typeof(RowEnum), typeof(int)];
+            var closed = collection ? typeof(CollectingConstructor<int, string>) : null;
+            IMemberMetadata[] parameters = collection
+                ? generated
+                    ? ParameterMetadataFactory.ForConstructor(typeof(CollectingConstructor<,>), true,
+                        new ParameterMetadata(typeof(object)) { Name = "first", TypeInfo = new ConcreteType(typeof(object)), CachedIsOptional = false, CachedIsParams = false },
+                        new ParameterMetadata(typeof(object)) { Name = "rest", TypeInfo = new ConcreteType(typeof(object)), CachedIsOptional = false, CachedIsParams = true })
+                    : closed!.GetConstructors()[0].GetParameters().Select(p => (IMemberMetadata)new ParameterMetadata(p.ParameterType)
+                        { Name = p.Name!, TypeInfo = new ConcreteType(p.ParameterType), ReflectionInfo = p }).ToArray()
+                : [new ParameterMetadata(typeof(RowEnum)) { Name = "first", TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(typeof(RowEnum)), CachedIsOptional = false },
+                   new ParameterMetadata(typeof(int)) { Name = "second", TypeInfo = generated ? new GenericParameter(1, false) : new ConcreteType(typeof(int)), CachedIsOptional = true }];
+            object?[][] original = collection
+                ? [[new int[] { 1 }, new string[] { "a" }], [new int[] { 2 }, "b", "c"], [new int[] { 3 }], [new int[] { 4 }, "d"]]
+                : [[RowEnum.A], [1], [1, 2]];
+            foreach (var row in original)
+            {
+                await Assert.That(GenericClassRowPartition.MatchesConstructorRow(row, parameters, arguments)).IsTrue();
+            }
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow(collection ? [new int[] { 1 }, new object()] : [new object()], parameters, arguments)).IsFalse();
+            var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+            var partition = GenericClassRowPartition.Create(arguments, GenericClassRowFallback.AllRows, [source], 0);
+            var metadata = new DataGeneratorMetadata
+            {
+                TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+                Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+                TestClassInstance = null, ClassInstanceArguments = null
+            };
+            var rows = new List<object?[]?>();
+            await foreach (var factory in partition[0].GetDataRowsAsync(metadata))
+            {
+                rows.Add(await factory());
+            }
+            await Assert.That(rows.Count).IsEqualTo(original.Length);
+            for (var i = 0; i < rows.Count; i++)
+            {
+                await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+            }
+
+            async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+            {
+                foreach (var row in original)
+                {
+                    yield return () => Task.FromResult<object?[]?>(row);
+                }
+                await Task.CompletedTask;
+            }
+        }
+    }
+
     [Test]
     [Arguments(false)]
     [Arguments(true)]
