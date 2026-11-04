@@ -235,10 +235,10 @@ jobs:
         run: |
           dotnet tool install --global dotnet-dump --version 10.0.750501
           if ($LASTEXITCODE -ne 0) { throw 'dotnet-dump installation failed' }
-          $dumps = @(Get-ChildItem captured-dump -Recurse -Filter '*.dmp')
-          if ($dumps.Count -ne 1) { throw "Expected one dump, found $($dumps.Count)" }
+          $dumps = @(Get-ChildItem captured-dump -Recurse -Filter 'hangdump.windows-reflection-pass.dmp')
+          if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
           New-Item -ItemType Directory -Path analysis | Out-Null
-          dotnet-dump analyze $dumps[0].FullName -c 'clrthreads' -c 'clrstack -all' -c 'dumpasync -stacks' -c 'exit' *> analysis/managed-stacks.txt
+          dotnet-dump analyze $dumps[0].FullName -c 'clrthreads' -c 'clrstack -all' -c 'dumpasync' -c 'exit' *> analysis/managed-stacks.txt
           if ($LASTEXITCODE -ne 0) { throw 'Dump analysis failed; see managed-stacks.txt' }
 
       - name: Upload managed dump analysis
