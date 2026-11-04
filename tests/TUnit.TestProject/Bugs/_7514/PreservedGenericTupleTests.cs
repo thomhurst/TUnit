@@ -118,4 +118,18 @@ public class PreservedGenericTupleTests
         await Assert.That(row.Item1).IsNull();
     }
 
+    [Test, GenerateGenericTest(typeof(object)), InstanceMethodDataSource(nameof(TypedSingletonRow))]
+    public async Task SingletonValueTupleConversionWithToken<T>(CancellationToken token, ValueTuple<T> row)
+    {
+        await Assert.That(row.Item1 is int).IsTrue();
+        await Assert.That(row.Item1).IsEqualTo((T)(object)1);
+        await Assert.That(token.CanBeCanceled).IsTrue();
+    }
+
+    [Test, GenerateGenericTest(typeof(object)), InstanceMethodDataSource(nameof(ReferenceRow))]
+    public async Task ReferenceToSingletonValueTuple<T>(ValueTuple<T> row)
+    {
+        await Assert.That(row.Item1).IsEqualTo((T)(object)"text");
+    }
+
 }

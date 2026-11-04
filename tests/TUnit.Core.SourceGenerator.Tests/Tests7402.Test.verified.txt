@@ -291,7 +291,7 @@ internal static class TUnit_TestProject_Bugs__7402_StaticTupleDataSourceTests__T
                 case 13:
                 {
                     // Special handling for single tuple parameter
-                    if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+                    if (args.Length == 1 && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 })
                     {
                         // Arguments are unwrapped tuple elements, reconstruct the tuple
                         return new global::System.Threading.Tasks.ValueTask(instance.Converted_Value_Tuple_Holds_Null(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
