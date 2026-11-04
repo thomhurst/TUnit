@@ -138,11 +138,11 @@ internal class DataUnwrapper
 
         // Generated metadata erases a parameter containing type parameters to object,
         // but TypeInfo retains its tuple shape. Preserve all elements until the invoker
-        // closes the type; mutable elements still need the usual flattened binding.
+        // closes the type; reference tuples and mutable elements need flattened binding.
         if (dataParameterCount == 1
             && DataSourceHelpers.IsErasedGenericTupleParameter(lastDataParameter))
         {
-            return DataSourceHelpers.RequiresFlattenedTupleBinding(values[0]!)
+            return DataSourceHelpers.ShouldFlattenErasedTuple(values[0]!)
                 ? DataSourceHelpers.UnwrapTupleAot(values[0])
                 : values;
         }

@@ -357,13 +357,13 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 }
             }
 
-            // Keep erased value-tuple rows whole so nested elements survive until binding.
+            // Retain nested value tuples, or all reference-tuple elements, until binding.
             if (preserveGenericTuple)
             {
                 item = DataSourceHelpers.InvokeIfFunc(item);
                 if (DataSourceHelpers.IsTuple(item))
                 {
-                    return DataSourceHelpers.RequiresFlattenedTupleBinding(item!)
+                    return DataSourceHelpers.ShouldFlattenErasedTuple(item!)
                         ? DataSourceHelpers.UnwrapTupleAot(item)
                         : [item];
                 }
