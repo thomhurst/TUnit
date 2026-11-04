@@ -2593,8 +2593,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         continue;
                     }
 
-                    var parameterType = collectsTrailingValues && parameter.ParameterType.IsArray
-                        ? parameter.ParameterType.GetElementType()!
+                    var parameterType = collectsTrailingValues
+                        ? GetTrailingElementType(parameter) ?? parameter.ParameterType
                         : parameter.ParameterType;
                     if (optional)
                     {

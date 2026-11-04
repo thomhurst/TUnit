@@ -120,6 +120,21 @@ public class MethodSourceClassInferenceTests<T>
     }
 
     [Test, MethodDataSource(nameof(WrappedPairRows))]
+    public async Task WrappedArrayParamsCollection(params IEnumerable<T> values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(values.Cast<string>().ToArray()).IsEquivalentTo(new[] { "one", "two" });
+    }
+
+    [Test, MethodDataSource(nameof(WrappedPairRows))]
+    public async Task WrappedArrayLaterParamsCollection(string label, params IReadOnlyList<T> values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(label).IsEqualTo("one");
+        await Assert.That(values.Single()).IsEqualTo((T)(object)"two");
+    }
+
+    [Test, MethodDataSource(nameof(WrappedPairRows))]
     public async Task WrappedArrayParams(params T[] values)
     {
         await Assert.That(values.Length).IsEqualTo(2);

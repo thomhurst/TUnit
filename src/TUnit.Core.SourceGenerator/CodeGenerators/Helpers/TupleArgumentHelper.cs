@@ -371,7 +371,7 @@ public static class TupleArgumentHelper
     /// (<c>IEnumerable&lt;T&gt;</c>, <c>IReadOnlyList&lt;T&gt;</c>, etc.) — for those a generated
     /// <c>T[]</c> satisfies the parameter. Returns null when no safe array construction applies.
     /// </summary>
-    private static ITypeSymbol? GetTrailingElementType(ITypeSymbol parameterType)
+    internal static ITypeSymbol? GetTrailingElementType(ITypeSymbol parameterType)
     {
         if (parameterType is IArrayTypeSymbol { IsSZArray: true } array)
         {

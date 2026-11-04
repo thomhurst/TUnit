@@ -8324,8 +8324,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         continue;
                     }
 
-                    var parameterType = spreadsReferenceArray && collectsTrailingValues && parameter.Type is IArrayTypeSymbol array
-                        ? array.ElementType
+                    var parameterType = spreadsReferenceArray && collectsTrailingValues
+                        ? TupleArgumentHelper.GetTrailingElementType(parameter.Type) ?? parameter.Type
                         : parameter.Type;
                     if (optional)
                     {
