@@ -102,10 +102,10 @@ public class AotConverterGenerator : IIncrementalGenerator
             foreach (var parameter in methodSymbol.Parameters)
             {
                 AddType(parameter.Type, methodTypes, orderedMethodTypes);
-                ScanAttributesForTypes(parameter.GetAttributes(), methodTypes, orderedMethodTypes, methodSymbol.ContainingType, compilation);
+                ScanAttributesForTypes(parameter.GetAttributes(), methodTypes, orderedMethodTypes, methodSymbol.ContainingType, compilation, caches);
             }
 
-            ScanAttributesForTypes(methodSymbol.GetAttributes(), methodTypes, orderedMethodTypes, methodSymbol.ContainingType, compilation);
+            ScanAttributesForTypes(methodSymbol.GetAttributes(), methodTypes, orderedMethodTypes, methodSymbol.ContainingType, compilation, caches);
 
             var classConversions = methodSymbol.ContainingType is { } containingType
                 ? caches.GetClassConversions(containingType, cancellationToken)
@@ -180,7 +180,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         }
     }
 
-    private static void ScanAttributesForTypes(ImmutableArray<AttributeData> attributes, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes, INamedTypeSymbol containingType, Compilation compilation)
+    private static void ScanAttributesForTypes(ImmutableArray<AttributeData> attributes, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes, INamedTypeSymbol containingType, Compilation compilation, CompilationCaches caches)
     {
         foreach (var attribute in attributes)
         {
@@ -194,7 +194,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                 continue;
             }
 
-            ScanMethodDataSourceReturnType(attribute, containingType, compilation, typesToScan, orderedTypes);
+            ScanMethodDataSourceReturnType(attribute, containingType, compilation, caches, typesToScan, orderedTypes);
 
             if (attribute.AttributeClass.IsGenericType)
             {
@@ -217,15 +217,11 @@ public class AotConverterGenerator : IIncrementalGenerator
     }
 
     private static void ScanMethodDataSourceReturnType(AttributeData attribute, INamedTypeSymbol containingType,
-        Compilation compilation, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes)
+        Compilation compilation, CompilationCaches caches, HashSet<ITypeSymbol> typesToScan, List<ITypeSymbol> orderedTypes)
     {
         // Include derived attributes such as InstanceMethodDataSourceAttribute.
-        var methodDataSourceAttribute = compilation.GetTypeByMetadataName("TUnit.Core.MethodDataSourceAttribute");
-        var genericMethodDataSourceAttribute = compilation.GetTypeByMetadataName("TUnit.Core.MethodDataSourceAttribute`1");
         var sourceAttribute = attribute.AttributeClass;
-        while (sourceAttribute is not null &&
-               !SymbolEqualityComparer.Default.Equals(sourceAttribute.OriginalDefinition, methodDataSourceAttribute) &&
-               !SymbolEqualityComparer.Default.Equals(sourceAttribute.OriginalDefinition, genericMethodDataSourceAttribute))
+        while (sourceAttribute is not null && !caches.IsMethodDataSourceAttribute(sourceAttribute))
         {
             sourceAttribute = sourceAttribute.BaseType;
         }
@@ -743,6 +739,22 @@ public class AotConverterGenerator : IIncrementalGenerator
     {
         private readonly ConcurrentDictionary<ITypeSymbol, ConversionEntry[]> _typeConversions = new(SymbolEqualityComparer.IncludeNullability);
         private readonly ConcurrentDictionary<INamedTypeSymbol, ClassConversions?> _classConversions = new(SymbolEqualityComparer.Default);
+        private readonly ConcurrentDictionary<IAssemblySymbol, MethodSourceDefinitions> _methodSourceDefinitions = new(SymbolEqualityComparer.Default);
+
+        private sealed record MethodSourceDefinitions(INamedTypeSymbol? NonGeneric, INamedTypeSymbol? Generic);
+
+        public bool IsMethodDataSourceAttribute(INamedTypeSymbol attributeType)
+        {
+            // Resolve in the bound symbol's assembly: compilation-wide lookup can be ambiguous
+            // when another reference defines the same metadata name (including extern aliases).
+            var definitions = _methodSourceDefinitions.GetOrAdd(attributeType.ContainingAssembly, static assembly =>
+                new MethodSourceDefinitions(
+                    assembly.GetTypeByMetadataName("TUnit.Core.MethodDataSourceAttribute"),
+                    assembly.GetTypeByMetadataName("TUnit.Core.MethodDataSourceAttribute`1")));
+            return SymbolEqualityComparer.Default.Equals(attributeType.OriginalDefinition, definitions.NonGeneric) ||
+                   SymbolEqualityComparer.Default.Equals(attributeType.OriginalDefinition, definitions.Generic);
+        }
+
         private readonly object _treeIndicesLock = new();
         private Dictionary<SyntaxTree, int>? _treeIndices;
 
@@ -827,7 +839,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             var typesToScan = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
             var orderedTypes = new List<ITypeSymbol>();
 
-            ScanAttributesForTypes(classSymbol.GetAttributes(), typesToScan, orderedTypes, classSymbol, compilation);
+            ScanAttributesForTypes(classSymbol.GetAttributes(), typesToScan, orderedTypes, classSymbol, compilation, this);
 
             foreach (var constructor in classSymbol.Constructors)
             {
@@ -839,7 +851,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                 foreach (var parameter in constructor.Parameters)
                 {
                     AddType(parameter.Type, typesToScan, orderedTypes);
-                    ScanAttributesForTypes(parameter.GetAttributes(), typesToScan, orderedTypes, classSymbol, compilation);
+                    ScanAttributesForTypes(parameter.GetAttributes(), typesToScan, orderedTypes, classSymbol, compilation, this);
                 }
             }
 

@@ -7,6 +7,56 @@ namespace TUnit.Core.SourceGenerator.Tests;
 public class AotConverterScanTests
 {
     [Test]
+    public async Task FindsMethodSourceWhenMetadataNamesAreAmbiguous()
+    {
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+        var duplicate = CSharpCompilation.Create("DuplicateAttributes",
+            [CSharpSyntaxTree.ParseText("""
+                namespace TUnit.Core
+                {
+                    public class MethodDataSourceAttribute : System.Attribute { }
+                    public class MethodDataSourceAttribute<T> : System.Attribute { }
+                }
+                """, parseOptions)], ReferencesHelper.References, options);
+        using var image = new MemoryStream();
+        var emit = duplicate.Emit(image);
+        await Assert.That(emit.Success).IsTrue();
+
+        var references = ReferencesHelper.References.Select(reference =>
+            Path.GetFileName(reference.FilePath) == "TUnit.Core.dll"
+                ? reference.WithAliases(["global", "core"])
+                : reference).Append(MetadataReference.CreateFromImage(image.ToArray()));
+        var compilation = CSharpCompilation.Create("AmbiguousMethodSources",
+            [CSharpSyntaxTree.ParseText("""
+                extern alias core;
+                using TUnit.Core;
+                public struct ScalarValue { public static implicit operator int(ScalarValue value) => 42; }
+                public struct GenericValue { public static implicit operator int(GenericValue value) => 43; }
+                public class Tests
+                {
+                    public static ScalarValue Rows() => new();
+                    public static GenericValue GenericRows() => new();
+                    [Test, core::TUnit.Core.MethodDataSource(nameof(Rows))]
+                    public void Scalar(int value) { }
+                    [Test, core::TUnit.Core.MethodDataSource<Tests>(nameof(GenericRows))]
+                    public void Generic(int value) { }
+                }
+                """, parseOptions)], references, options);
+        await Assert.That(compilation.GetTypeByMetadataName("TUnit.Core.MethodDataSourceAttribute")).IsNull();
+        await Assert.That(compilation.GetTypeByMetadataName("TUnit.Core.MethodDataSourceAttribute`1")).IsNull();
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new AotConverterGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
+        await Assert.That(generated).Contains("typeof(global::ScalarValue)");
+        await Assert.That(generated).Contains("typeof(global::GenericValue)");
+    }
+
+    [Test]
     public async Task HandlesConcreteCollectionsAndInaccessibleSourceTypes()
     {
         const string source = """
