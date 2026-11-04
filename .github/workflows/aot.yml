@@ -228,6 +228,7 @@ jobs:
 
       # download-artifact filters out earlier attempts, even when given an exact ID.
       - name: Download exact captured Windows engine dump
+        id: download_exact
         if: inputs.analyze_windows_dump_artifact != ''
         shell: pwsh
         env:
@@ -276,7 +277,8 @@ jobs:
           throw 'Name-based Windows dump download failed'
 
       - name: Extract managed stacks and async waits
-        if: ${{ !cancelled() }}
+        id: managed_analysis
+        if: ${{ !cancelled() && (steps.download_exact.outcome == 'success' || steps.download_name_based.outcome == 'success') }}
         timeout-minutes: 5
         shell: pwsh
         run: |
@@ -286,16 +288,35 @@ jobs:
             if ($LASTEXITCODE -ne 0) { throw 'dotnet-dump installation failed' }
             $dumps = @(Get-ChildItem captured-dump -Recurse -Filter 'hangdump.windows-reflection-pass.dmp')
             if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
-            dotnet-dump analyze $dumps[0].FullName -c 'clrthreads' -c 'threadpool' -c 'syncblk' -c 'clrstack -all' -c 'dumpasync' -c 'exit' *> analysis/managed-stacks.txt
+            dotnet-dump analyze $dumps[0].FullName -c 'eeversion' -c 'clrthreads' -c 'threadpool' -c 'syncblk' -c 'clrstack -all' -c 'dumpasync' -c 'exit' *> analysis/managed-stacks.txt
             if ($LASTEXITCODE -ne 0) { throw 'Dump analysis failed; see managed-stacks.txt' }
+            # Map Thread object monitors to their native thread pointers and IDs (#7554).
+            $threadCommands = @('-c', 'eeversion')
+            foreach ($line in Get-Content analysis/managed-stacks.txt) {
+              if ($line.Trim() -match '([0-9a-fA-F]{16}) System\.Threading\.Thread$') {
+                $threadCommands += @('-c', "dumpobj $($Matches[1])")
+              }
+            }
+            $threadCommands += @('-c', 'exit')
+            dotnet-dump analyze $dumps[0].FullName @threadCommands *> analysis/thread-objects.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Thread object analysis failed; see thread-objects.txt' }
           } catch {
             $_ | Out-String | Set-Content analysis/managed-analysis-error.txt
             throw
           }
 
+      - name: Record interrupted managed analysis
+        if: ${{ !cancelled() && steps.managed_analysis.outcome == 'failure' }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          if (!(Test-Path analysis/managed-analysis-error.txt)) {
+            'Managed analysis failed or timed out before its error handler completed; inspect any partial output.' | Set-Content analysis/managed-analysis-error.txt
+          }
+
       # dotnet-dump cannot show the native wait inside Thread.StartInternal (#7554).
       - name: Extract native thread waits
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && (steps.download_exact.outcome == 'success' || steps.download_name_based.outcome == 'success') }}
         timeout-minutes: 5
         shell: pwsh
         run: |
@@ -313,7 +334,7 @@ jobs:
             if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
             $symbolCache = Join-Path $env:RUNNER_TEMP 'engine-dump-symbols'
             New-Item -ItemType Directory -Path $symbolCache -Force | Out-Null
-            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c '.reload; ~* kb; !locks; q' *> analysis/native-stacks.txt
+            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c '.reload; lmvm coreclr; uf coreclr!ThreadNative_Start; ~* r; ~* kb; !locks; q' *> analysis/native-stacks.txt
             if ($LASTEXITCODE -ne 0) { throw 'Native dump analysis failed; see native-stacks.txt' }
           } catch {
             $_ | Out-String | Set-Content analysis/native-analysis-error.txt
