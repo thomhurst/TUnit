@@ -335,7 +335,8 @@ jobs:
             if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
             $symbolCache = Join-Path $env:RUNNER_TEMP 'engine-dump-symbols'
             New-Item -ItemType Directory -Path $symbolCache -Force | Out-Null
-            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c '.reload; lmvm coreclr; uf coreclr!ThreadNative_Start; ~* r; ~* kn; !locks; q' *> analysis/native-stacks.txt
+            # Include loader ownership and CPU times: #7554 also stalls inside DLL thread initialization.
+            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c '.reload; lmvm coreclr; lmvm ntdll; lmvm kernelbase; uf coreclr!ThreadNative_Start; ~* r; ~* kn; !runaway 7; dt ntdll!_PEB @$peb LoaderLock; !critsec ntdll!LdrpLoaderLock; !locks -v; q' *> analysis/native-stacks.txt
             if ($LASTEXITCODE -ne 0) { throw 'Native dump analysis failed; see native-stacks.txt' }
             # Top-frame registers belong to SleepEx/SwitchToThread, not ThreadNative_Start.
             # Unwind each starter before reading its preserved RBX (the target native Thread).
@@ -361,7 +362,8 @@ jobs:
             if ($targetAddresses.Count -eq 0) { throw 'No unwound RBX addresses found; see start-targets.txt' }
             $stateCommands = @('.reload')
             foreach ($address in $targetAddresses) {
-              $stateCommands += "dd 0x$address L4; dq 0x$address+0x110 L1"
+              # Keep raw state words; correlate IDs through clrthreads, not a runtime-specific offset.
+              $stateCommands += "dd 0x$address L4"
             }
             $stateCommands += 'q'
             & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c ($stateCommands -join '; ') *> analysis/start-target-states.txt
