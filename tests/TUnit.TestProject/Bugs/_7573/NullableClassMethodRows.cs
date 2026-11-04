@@ -136,6 +136,22 @@ public class ConstructorNullableClassRows<T>(T seed) where T : struct
 }
 
 [EngineTest(ExpectedResult.Pass)]
+[Arguments(1d)]
+public class ConstructorNestedNullableClassRows<T>(T seed) where T : struct
+{
+    public static IEnumerable<Func<int[]>> Rows() => [() => null!];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task NestedConstructorType(T?[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(double));
+        await Assert.That(seed).IsEqualTo((T)(object)1d);
+        await Assert.That(values).IsNull();
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
 [GenerateGenericTest(typeof(double))]
 public class ArgumentOverloadClassRows<T>
 {

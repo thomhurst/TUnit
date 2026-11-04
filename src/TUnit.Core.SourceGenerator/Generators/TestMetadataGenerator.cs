@@ -8518,9 +8518,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Constructor data that supplies class types takes precedence over nullable method rows.
         // Type-free constructor arguments still need their class types inferred from the method.
         // Keep the source on that class instead of creating a second row-inferred class.
-        if (GetDataParameters(testMethod.MethodSymbol).Any(p =>
-                p.Type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
-                    TypeArguments: [ITypeParameterSymbol { TypeParameterKind: TypeParameterKind.Type }] })
+        if (GetDataParameters(testMethod.MethodSymbol).Any(p => ContainsNullableClassParameter(p.Type))
             && testClass.GetAttributesIncludingBaseTypes().Any(a =>
                 a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
                 && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testClass, a))))
@@ -8569,6 +8567,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         return inferredTypes;
     }
+
+    // Match the recursive shapes visited by ProcessTypeForGenerics so constructor precedence also
+    // applies to nullable class parameters nested in arrays, tuples and other generic types.
+    private static bool ContainsNullableClassParameter(ITypeSymbol type) => type switch
+    {
+        INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+            TypeArguments: [ITypeParameterSymbol { TypeParameterKind: TypeParameterKind.Type }] } => true,
+        IArrayTypeSymbol array => ContainsNullableClassParameter(array.ElementType),
+        INamedTypeSymbol named => named.TypeArguments.Any(ContainsNullableClassParameter),
+        _ => false
+    };
 
     private static void ProcessTypeForGenerics(ITypeSymbol paramType, ITypeSymbol actualType, ImmutableArray<ITypeParameterSymbol> genericParams, Dictionary<string, ITypeSymbol> genericParamMap)
     {

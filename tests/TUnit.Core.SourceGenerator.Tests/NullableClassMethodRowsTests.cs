@@ -15,6 +15,7 @@ internal class NullableClassMethodRowsTests : TestsBase
                      ("OpenRow", "OpenClassMethodRows<int>"),
                      ("OpenArray", "OpenClassMethodRows<int>"),
                      ("ConstructorType", "ConstructorNullableClassRows<double>"),
+                     ("NestedConstructorType", "ConstructorNestedNullableClassRows<double>"),
                      ("SelectedOverload", "ArgumentOverloadClassRows<double>")
                  })
         {

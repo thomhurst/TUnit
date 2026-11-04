@@ -314,7 +314,54 @@ public static class CompilationExtensions
         return HasGenerateGenericTestAttribute(typeParameter)
             || typeParameter.DeclaringType?.GetSelfAndBaseTypes()
                 .SelectMany(type => type.GetAttributes())
-                .Any(attribute => attribute.IsDataSourceAttribute(compilation)) == true;
+                .Any(attribute => attribute.IsDataSourceAttribute(compilation)
+                    && !(attribute.AttributeClass?.Name == "ArgumentsAttribute"
+                        && ClassRowSuppliesNoTypeArguments(typeParameter.DeclaringType, attribute))) == true;
+    }
+
+    // Keep constructor-row precedence in step with TestMetadataGenerator.ClassRowSuppliesNoTypeArguments.
+    private static bool ClassRowSuppliesNoTypeArguments(INamedTypeSymbol classSymbol, AttributeData attribute)
+    {
+        int valueCount;
+        if (attribute.AttributeClass is { IsGenericType: true, TypeArguments.Length: 1 })
+        {
+            valueCount = 1;
+        }
+        else if (attribute.ConstructorArguments is [{ Kind: TypedConstantKind.Array } row])
+        {
+            valueCount = row.IsNull ? 1 : row.Values.Length;
+        }
+        else
+        {
+            return false;
+        }
+
+        var constructor = classSymbol.InstanceConstructors.FirstOrDefault(c => c.DeclaredAccessibility == Accessibility.Public
+                && c.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "TUnit.Core.TestConstructorAttribute"))
+            ?? classSymbol.InstanceConstructors.FirstOrDefault(c => c.DeclaredAccessibility == Accessibility.Public);
+        if (constructor is null)
+        {
+            return false;
+        }
+
+        var boundCount = Math.Min(valueCount, constructor.Parameters.Length);
+        for (var i = 0; i < boundCount; i++)
+        {
+            if (ContainsClassParameter(constructor.Parameters[i].Type))
+            {
+                return false;
+            }
+        }
+
+        return boundCount != 0 || valueCount == 0;
+
+        bool ContainsClassParameter(ITypeSymbol type) => type switch
+        {
+            ITypeParameterSymbol parameter => classSymbol.TypeParameters.Contains(parameter, SymbolEqualityComparer.Default),
+            IArrayTypeSymbol array => ContainsClassParameter(array.ElementType),
+            INamedTypeSymbol named => named.TypeArguments.Any(ContainsClassParameter),
+            _ => false
+        };
     }
 
     /// <summary>

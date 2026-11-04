@@ -146,6 +146,28 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("int")]
+    [Arguments("int?")]
+    public async Task Type_Free_Constructor_Does_Not_Bypass_Nullable_Constraint_Check(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [Arguments("seed")]
+            public class Tests<T>(string seed) where T : struct, IDisposable
+            {
+                public static IEnumerable<Func<{{rowType}}>> Rows() => [];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(T? value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments(rowType, "T?"));
+    }
+
+    [Test]
     public async Task Explicit_Class_Type_Does_Not_Bypass_Data_Source_Overload_Argument_Matching()
     {
         await Verifier.VerifyAnalyzerAsync(

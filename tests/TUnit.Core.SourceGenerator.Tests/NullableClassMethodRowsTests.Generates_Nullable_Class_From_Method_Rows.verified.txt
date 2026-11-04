@@ -1061,6 +1061,126 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7573_ConstructorNestedNullableClassRows_T_NestedConstructorType__T____TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "ConstructorNestedNullableClassRows",
+        Namespace = "TUnit.TestProject.Bugs._7573",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "seed", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("NestedConstructorType", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<>), "NestedConstructorType", false, 0, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double>(global::TUnit.Core.Helpers.CastHelper.Cast<double>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            switch (args.Length)
+            {
+                case 0:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedConstructorType(global::System.Array.Empty<double?>()));
+                    }
+                case 1:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedConstructorType((args[0] is null ? null : args[0] is double?[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<double?>(args[0]))));
+                    }
+                case 2:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedConstructorType(new double?[] { global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[1]) }));
+                    }
+                case 3:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedConstructorType(new double?[] { global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[2]) }));
+                    }
+                case 4:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedConstructorType(new double?[] { global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[3]) }));
+                    }
+                case 5:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedConstructorType(new double?[] { global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[4]) }));
+                    }
+                case 6:
+                    {
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedConstructorType(new double?[] { global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[5]) }));
+                    }
+                default:
+                    return new global::System.Threading.Tasks.ValueTask(instance.NestedConstructorType((args.Length > 0 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(0, args.Length), i => global::TUnit.Core.Helpers.CastHelper.Cast<double?>(args[i]))) : global::System.Array.Empty<double?>())));
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("Rows"),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass),
+            new global::TUnit.Core.ArgumentsAttribute(1d)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double>>(
+            methodName: "NestedConstructorType",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double>.NestedConstructorType",
+            filePath: "",
+            lineNumber: 144,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double>.Rows()),
+    },
+},
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(1d),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7573_ConstructorNestedNullableClassRows_T_NestedConstructorType__T____TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double>>(static () => TUnit_TestProject_Bugs__7573_ConstructorNestedNullableClassRows_T_NestedConstructorType__T____TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7573_ArgumentOverloadClassRows_T_SelectedOverload__T_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7573.ArgumentOverloadClassRows<>", new global::TUnit.Core.ClassMetadata
@@ -1111,7 +1231,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "SelectedOverload",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ArgumentOverloadClassRows<double>.SelectedOverload",
             filePath: "",
-            lineNumber: 145,
+            lineNumber: 161,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1202,7 +1322,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "PartitionsBesideConstructor",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.TypeFreeConstructorNullableRows<int>.PartitionsBesideConstructor",
             filePath: "",
-            lineNumber: 162,
+            lineNumber: 178,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1259,7 +1379,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "PartitionsBesideConstructor",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.TypeFreeConstructorNullableRows<double>.PartitionsBesideConstructor",
             filePath: "",
-            lineNumber: 162,
+            lineNumber: 178,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1351,7 +1471,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "InfersBesideConstructor",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.TypeFreeConstructorNullableRows<int>.InfersBesideConstructor",
             filePath: "",
-            lineNumber: 172,
+            lineNumber: 188,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1436,7 +1556,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "UsesExternalProvider",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.GenericProviderNullableRows<double>.UsesExternalProvider",
             filePath: "",
-            lineNumber: 188,
+            lineNumber: 204,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1521,7 +1641,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "RetainsInstanceBesideConstructor",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.TypeFreeConstructorUninferredRows<int>.RetainsInstanceBesideConstructor",
             filePath: "",
-            lineNumber: 209,
+            lineNumber: 225,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1611,7 +1731,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "RetainsUntypedSource",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ExplicitUntypedClassRows<int>.RetainsUntypedSource",
             filePath: "",
-            lineNumber: 226,
+            lineNumber: 242,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1694,7 +1814,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "PartitionsBesideLiteral",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.LiteralAndMethodClassRows<int>.PartitionsBesideLiteral",
             filePath: "",
-            lineNumber: 249,
+            lineNumber: 265,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1743,7 +1863,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "PartitionsBesideLiteral",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.LiteralAndMethodClassRows<double>.PartitionsBesideLiteral",
             filePath: "",
-            lineNumber: 249,
+            lineNumber: 265,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
