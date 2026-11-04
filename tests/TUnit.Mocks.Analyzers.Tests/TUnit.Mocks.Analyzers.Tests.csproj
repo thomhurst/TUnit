@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\eng\TestProject.props" />
+  <Import Project="..\..\eng\AnalyzerTestReferencePacks.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TUnit.Mocks.Analyzers\TUnit.Mocks.Analyzers.csproj" />

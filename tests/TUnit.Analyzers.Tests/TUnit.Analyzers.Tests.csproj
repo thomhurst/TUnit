@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\eng\TestProject.props" />
+  <Import Project="..\..\eng\AnalyzerTestReferencePacks.props" />
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />

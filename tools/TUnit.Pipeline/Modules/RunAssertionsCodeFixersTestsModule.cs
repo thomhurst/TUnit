@@ -21,7 +21,7 @@ public class RunAssertionsCodeFixersTestsModule : TestBaseModule
                 NoBuild = true,
                 Configuration = "Release",
                 Framework = framework,
-                Arguments = ["--hangdump", "--hangdump-filename", $"hangdump.assertions-codefixers-tests-{framework}.dmp", "--hangdump-timeout", "5m"],
+                Arguments = [..HangDumpArguments.Create($"hangdump.assertions-codefixers-tests-{framework}.dmp", "5m")],
             },
             new CommandExecutionOptions
             {

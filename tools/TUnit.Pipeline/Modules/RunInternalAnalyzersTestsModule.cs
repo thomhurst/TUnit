@@ -21,7 +21,7 @@ public class RunInternalAnalyzersTestsModule : TestBaseModule
                 NoBuild = true,
                 Configuration = "Release",
                 Framework = framework,
-                Arguments = ["--hangdump", "--hangdump-filename", $"hangdump.internal-analyzers-tests-{framework}.dmp", "--hangdump-timeout", "5m"],
+                Arguments = [..HangDumpArguments.Create($"hangdump.internal-analyzers-tests-{framework}.dmp", "5m")],
             },
             new CommandExecutionOptions
             {

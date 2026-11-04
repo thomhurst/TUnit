@@ -30,7 +30,7 @@ public abstract class EngineTestsModuleBase : Module<CommandResult>
             Configuration = "Release",
             Framework = "net10.0",
             Arguments = [
-                "--hangdump", "--hangdump-filename", $"hangdump.{RuntimeInformation.RuntimeIdentifier}.engine-tests-{TestMode}.dmp", "--hangdump-timeout", "30m",
+                ..HangDumpArguments.Create($"hangdump.{RuntimeInformation.RuntimeIdentifier}.engine-tests-{TestMode}.dmp", "30m"),
                 "--timeout", "35m",
                 // Each engine test mostly waits on a child test-application process, so the
                 // engine's default limit (twice the processor count) leaves the CPUs idle. Four
