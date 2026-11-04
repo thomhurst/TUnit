@@ -9,6 +9,16 @@ namespace TUnit.UnitTests;
 public class DataSourceHelpersTests
 {
     [Test]
+    public async Task Accepted_ITuple_Keeps_Nested_Row_As_Data()
+    {
+        object tuple = ValueTuple.Create(new TestDataRow<int>(7) { Skip = "payload only" });
+        var container = tuple.ToObjectArrayWithTypes([typeof(System.Runtime.CompilerServices.ITuple)]);
+        var (unwrapped, metadata) = TestDataRowUnwrapper.UnwrapArray(container, typeof(System.Runtime.CompilerServices.ITuple));
+        await Assert.That(ReferenceEquals(unwrapped[0], tuple)).IsTrue();
+        await Assert.That(metadata).IsNull();
+    }
+
+    [Test]
     [Arguments(null, false)]
     [Arguments("text", true)]
     public async Task SingletonReferenceTupleDecision_DoesNotAllocateElementArray(string? element, bool expectedFlatten)

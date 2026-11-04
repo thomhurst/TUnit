@@ -353,6 +353,11 @@ public static class GenericClassRowPartition
                 {
                     continue;
                 }
+                if (values.Length == parameters.Length && values[i] is Array { Rank: 1 } suppliedArray
+                    && MatchesTrailingArrayElements(suppliedArray, trailing, classTypeArguments))
+                {
+                    continue;
+                }
                 if (!MatchesConstructorValue(trailing, values[i], classTypeArguments))
                 {
                     return false;
@@ -396,14 +401,23 @@ public static class GenericClassRowPartition
                 || MayConvertConstructorValue(description, value, classTypeArguments);
         }
 
-        var type = description switch
+        // Both generated CastHelper and reflection constructor binding accept null for
+        // value types as their default value; leave that conversion to the binder.
+        return true;
+    }
+
+    private static bool MatchesTrailingArrayElements(Array values, TypeInfo element, Type[] classTypeArguments)
+    {
+        // Like CastHelper.ToTrailingArray, support rank-one arrays with any lower bound.
+        var lowerBound = values.GetLowerBound(0);
+        for (var i = 0; i < values.Length; i++)
         {
-            GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
-            ConstructedGeneric constructed => constructed.GenericDefinition,
-            ConcreteType concrete => concrete.Type,
-            _ => typeof(object)
-        };
-        return !type.IsValueType || Nullable.GetUnderlyingType(type) is not null || type == typeof(Nullable<>);
+            if (!MatchesConstructorValue(element, values.GetValue(lowerBound + i), classTypeArguments))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     // Conversion belongs to the binder. Do not execute user converters while partitioning;
@@ -575,6 +589,18 @@ public static class GenericClassRowPartition
         }
         if (direction > 0)
         {
+            // CLR vectors also implement invariant collection interfaces covariantly
+            // for reference elements (for example string[] is an IList<object>).
+            if (actual.IsArray && actual.Name.EndsWith("[]", StringComparison.Ordinal)
+                && IsCollectingInterface(constructed.GenericDefinition))
+            {
+                var element = actual.GetElementType()!;
+                var elementDirection = element.IsValueType || IsValueType(constructed.TypeArguments[0]) ? 0 : direction;
+                if (MatchesConstructorParameterType(constructed.TypeArguments[0], element, classTypeArguments, elementDirection))
+                {
+                    return true;
+                }
+            }
             for (var candidate = actual.BaseType; candidate is not null; candidate = candidate.BaseType)
             {
                 if (MatchesConstructed(candidate))

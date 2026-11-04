@@ -14,6 +14,64 @@ public class GenericClassSourceRuntimeTests
     public sealed class CollectingConstructor<T, U>(T[] first, params U[] rest);
     public enum RowEnum { A = 1 }
 
+    public sealed class ScalarCollectingConstructor<T, U>(T first, params U[] rest);
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Trailing_Arrays_Convert_Each_Element(bool generated)
+    {
+        IMemberMetadata[] parameters = generated
+            ? ParameterMetadataFactory.ForConstructor(typeof(ScalarCollectingConstructor<,>), true,
+                new ParameterMetadata(typeof(object)) { Name = "first", TypeInfo = new GenericParameter(0, false), CachedIsOptional = false },
+                new ParameterMetadata(typeof(object)) { Name = "rest", TypeInfo = new ConcreteType(typeof(object)), CachedIsOptional = false, CachedIsParams = true })
+            : typeof(ScalarCollectingConstructor<long, int>).GetConstructors()[0].GetParameters().Select(p => (IMemberMetadata)new ParameterMetadata(p.ParameterType)
+                { Name = p.Name!, TypeInfo = new ConcreteType(p.ParameterType), ReflectionInfo = p }).ToArray();
+        object?[][] original = [[1L, new int[] { 1 }], [2L, new object?[] { 2, null, "3" }], [3L, Array.CreateInstance(typeof(object), [1], [1])]];
+        ((Array)original[2][1]!).SetValue(4, 1);
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var coordinator = new GenericClassRowPartition.Coordinator([typeof(long), typeof(int)], GenericClassRowFallback.AllRows, [source], [0]);
+        var evaluation = await coordinator.EvaluateAsync(new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        });
+        await Assert.That(evaluation.AnyRowInfers).IsTrue();
+        foreach (var row in evaluation.RowsByIndex[0]!)
+        {
+            await Assert.That(row.InfersTypeArguments).IsTrue();
+        }
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([1L, new object[] { new object() }], parameters, [typeof(long), typeof(int)])).IsFalse();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([1L, new int[1, 1]], parameters, [typeof(long), typeof(int)])).IsFalse();
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
+    }
+
+    [Test]
+    [Arguments(typeof(IEnumerable<>))]
+    [Arguments(typeof(ICollection<>))]
+    [Arguments(typeof(IList<>))]
+    [Arguments(typeof(IReadOnlyCollection<>))]
+    [Arguments(typeof(IReadOnlyList<>))]
+    public async Task Vector_Array_Covariance_Matches_Closed_Collection_Parameters(Type definition)
+    {
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(typeof(object)) { Name = "first", TypeInfo = new ConstructedGeneric(definition, [new GenericParameter(0, false)]), CachedIsOptional = false },
+            new ParameterMetadata(typeof(int)) { Name = "second", TypeInfo = new ConcreteType(typeof(int)), CachedIsOptional = true }
+        ];
+        foreach (object value in new object[] { new string[1], new int[1], new string[1, 1], Array.CreateInstance(typeof(string), [1], [1]) })
+        {
+            var expected = definition.MakeGenericType(typeof(object)).IsInstanceOfType(value);
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([value], parameters, [typeof(object)])).IsEqualTo(expected);
+        }
+    }
+
     [Test]
     public async Task Constructor_Partition_Preserves_Params_Interface_Elements()
     {
@@ -100,7 +158,7 @@ public class GenericClassSourceRuntimeTests
                 new ParameterMetadata(arguments[0]) { Name = "first", TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(arguments[0]), CachedIsOptional = false },
                 new ParameterMetadata(arguments[1]) { Name = "second", TypeInfo = generated ? new GenericParameter(1, false) : new ConcreteType(arguments[1]), CachedIsOptional = true }
             ];
-            object?[][] original = numeric ? [[1L], [1], [2, 3]] : [[1], [2, null]];
+            object?[][] original = numeric ? [[1L], [1], [2, 3]] : [[1], [null], [2, null]];
             var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
             var partition = GenericClassRowPartition.Create(arguments, GenericClassRowFallback.AllRows, [source], 0);
             var metadata = new DataGeneratorMetadata

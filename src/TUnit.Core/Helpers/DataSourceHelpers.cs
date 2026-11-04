@@ -539,7 +539,8 @@ public static class DataSourceHelpers
                 {
                     // A bare singleton value-tuple row exposes its TestDataRow before wrapper removal.
                     // Preserve the reference-tuple payload, rather than its outer row container.
-                    if (!expectedTypes[0].IsValueType && item.GetType().IsValueType
+                    if (!expectedTypes[0].IsInstanceOfType(item)
+                        && !expectedTypes[0].IsValueType && item.GetType().IsValueType
                         && UnwrapTupleAot(item) is [ITestDataRow wrapped])
                     {
                         return [wrapped];
