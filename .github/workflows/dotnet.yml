@@ -360,3 +360,14 @@ jobs:
       - name: Compile documentation snippets
         shell: pwsh
         run: ./scripts/Verify-DocSnippets.ps1 -PackagesPath artifacts/doc-packages -Version $env:DocsVersion
+
+      - name: Verify packaged F# async trimming
+        shell: pwsh
+        run: ./scripts/Verify-FSharpTrimming.ps1 -PackagesPath artifacts/doc-packages -Version $env:DocsVersion
+
+      - name: Upload trimming smoke logs
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: fsharp-trimming-logs
+          path: artifacts/fsharp-trimming/**/*.log
