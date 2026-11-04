@@ -19,6 +19,12 @@ public static class CompilationExtensions
             return true;
         }
 
+        if (argumentType is not null && parameterType is not null
+            && ContainsArray(parameterType) && ContainsTypeParameter(parameterType))
+        {
+            return compilation.MatchesOpenArrayShape(argumentType, parameterType);
+        }
+
         if (parameterType?.IsGenericDefinition() == false)
         {
             if (argumentType is null)
@@ -47,6 +53,69 @@ public static class CompilationExtensions
         }
 
         return compilation.HasImplicitConversion(argumentType?.OriginalDefinition, parameterType?.OriginalDefinition);
+    }
+
+    private static bool ContainsArray(ITypeSymbol type) => type switch
+    {
+        IArrayTypeSymbol => true,
+        INamedTypeSymbol { IsTupleType: true } tuple => tuple.TupleElements.Any(x => ContainsArray(x.Type)),
+        _ => false
+    };
+
+    private static bool MatchesOpenArrayShape(this Compilation compilation, ITypeSymbol argumentType,
+        ITypeSymbol parameterType, bool requiresIdentity = false)
+    {
+        if (ContainsTypeParameter(parameterType))
+        {
+            var conversion = compilation.ClassifyConversion(argumentType, parameterType);
+            if (conversion.IsIdentity || (!requiresIdentity && conversion.IsImplicit))
+            {
+                return true;
+            }
+
+            if (parameterType is IArrayTypeSymbol targetArray)
+            {
+                if (argumentType is not IArrayTypeSymbol sourceArray
+                    || sourceArray.Rank != targetArray.Rank || sourceArray.IsSZArray != targetArray.IsSZArray)
+                {
+                    return false;
+                }
+
+                return compilation.MatchesOpenArrayShape(sourceArray.ElementType, targetArray.ElementType, requiresIdentity: true);
+            }
+
+            if (parameterType is INamedTypeSymbol { IsTupleType: true } targetTuple
+                && argumentType is INamedTypeSymbol { IsTupleType: true } sourceTuple)
+            {
+                if (sourceTuple.TupleElements.Length != targetTuple.TupleElements.Length)
+                {
+                    return false;
+                }
+
+                for (var i = 0; i < sourceTuple.TupleElements.Length; i++)
+                {
+                    if (!compilation.MatchesOpenArrayShape(sourceTuple.TupleElements[i].Type,
+                            targetTuple.TupleElements[i].Type, requiresIdentity))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            // Inferring nested generic arguments, constraints and shared bounds is deliberately out of scope.
+            return true;
+        }
+
+        // Value-type array elements (including tuples) are invariant. Their fields cannot
+        // use the numeric or reference conversions available to a standalone tuple.
+        if (requiresIdentity)
+        {
+            return SymbolEqualityComparer.Default.Equals(argumentType, parameterType);
+        }
+
+        return compilation.HasImplicitConversionOrGenericParameter(argumentType, parameterType);
     }
 
     /// <summary>
