@@ -346,13 +346,26 @@ jobs:
                 $threadIndex = $Matches[1]
               } elseif ($null -ne $threadIndex -and $line -match '^\s*([0-9a-fA-F]+)\s+.*coreclr!ThreadNative_Start\+') {
                 $frameIndex = $Matches[1]
-                $targetCommands += "~$($threadIndex)s; .frame /r 0x$frameIndex; dd @rbx L4; dq @rbx+0x110 L1"
+                $targetCommands += "~$($threadIndex)s; .frame /r 0x$frameIndex"
               }
             }
             if ($targetCommands.Count -eq 1) { throw 'No numbered ThreadNative_Start frames found; see native-stacks.txt' }
             $targetCommands += 'q'
             & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c ($targetCommands -join '; ') *> analysis/start-targets.txt
             if ($LASTEXITCODE -ne 0) { throw 'Starter target analysis failed; see start-targets.txt' }
+            # .frame /r prints unwound registers, but @rbx still evaluates in the top frame.
+            # Read explicit addresses from that output rather than debugger register expressions.
+            $targetAddresses = @(Get-Content analysis/start-targets.txt | ForEach-Object {
+              if ($_ -match '^rax=[0-9a-fA-F]+\s+rbx=([0-9a-fA-F]+)\s+rcx=') { $Matches[1] }
+            } | Select-Object -Unique)
+            if ($targetAddresses.Count -eq 0) { throw 'No unwound RBX addresses found; see start-targets.txt' }
+            $stateCommands = @('.reload')
+            foreach ($address in $targetAddresses) {
+              $stateCommands += "dd 0x$address L4; dq 0x$address+0x110 L1"
+            }
+            $stateCommands += 'q'
+            & $cdb -z $dumps[0].FullName -y "srv*$symbolCache*https://msdl.microsoft.com/download/symbols" -c ($stateCommands -join '; ') *> analysis/start-target-states.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Starter state analysis failed; see start-target-states.txt' }
           } catch {
             $_ | Out-String | Set-Content analysis/native-analysis-error.txt
             throw
