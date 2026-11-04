@@ -1,5 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\eng\TestProject.props" />
+  <Import Project="..\..\eng\AnalyzerTestReferencePacks.props" />
 
   <PropertyGroup>
     <!-- ASP.NET Core only supports .NET 8.0+ -->

@@ -8,6 +8,7 @@ using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 using ModularPipelines.Options;
+using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
@@ -29,7 +30,7 @@ public class RunAspNetTestsModule : Module<CommandResult>
             NoBuild = true,
             Configuration = "Release",
             Framework = "net10.0",
-            Arguments = ["--hangdump", "--hangdump-filename", "hangdump.aspnet-tests.dmp", "--hangdump-timeout", "5m"],
+            Arguments = [..HangDumpArguments.Create("hangdump.aspnet-tests.dmp", "5m")],
         }, new CommandExecutionOptions
         {
             WorkingDirectory = project.Folder!.Path,

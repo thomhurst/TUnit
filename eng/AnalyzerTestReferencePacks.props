@@ -1,0 +1,31 @@
+<Project>
+  <!--
+    Restores the reference packs that the analyzer tests' ReferenceAssemblies resolve, so they are
+    already in the NuGet global packages folder when the tests start.
+
+    Microsoft.CodeAnalysis.Testing resolves each ReferenceAssemblies under one machine-wide file lock
+    ($TMPDIR/test-packages/.lock, retried once a second) and checks the global packages folder
+    before any feed. Without these downloads every analyzer test process on a fresh CI runner
+    fetches the ~50 MB packs from nuget.org while holding that lock, and the processes running in
+    parallel queue behind each other. On macOS the first tests waited up to 5 minutes, which
+    tripped the hang dump (#7575).
+
+    Keep the versions in step with the ReferenceAssemblies the tests use: ReferenceAssemblies.Net.Net80
+    and .Net90 (8.0.0, 9.0.0), the explicit net10.0 pack (10.0.0), ReferenceAssemblies.NetFramework.Net472
+    (1.0.2), the explicit net48 pack (1.0.3), and every PackageIdentity passed to AddPackages. A
+    version missing here still works; it is just downloaded at test time again.
+  -->
+  <ItemGroup>
+    <PackageDownload Include="Microsoft.NETCore.App.Ref" Version="[8.0.0];[9.0.0];[10.0.0]" />
+    <PackageDownload Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="[1.0.2]" />
+    <PackageDownload Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="[1.0.3]" />
+
+    <!-- Packages the verifiers add with ReferenceAssemblies.AddPackages, and their dependencies. -->
+    <PackageDownload Include="Microsoft.Bcl.AsyncInterfaces" Version="[9.0.0]" />
+    <PackageDownload Include="xunit.v3.assert" Version="[2.0.0];[3.2.0]" />
+    <PackageDownload Include="xunit.v3.extensibility.core" Version="[3.0.1]" />
+    <PackageDownload Include="System.Collections.Immutable" Version="[6.0.0]" />
+    <PackageDownload Include="System.Memory" Version="[4.5.5]" />
+    <PackageDownload Include="System.Runtime.CompilerServices.Unsafe" Version="[6.0.0]" />
+  </ItemGroup>
+</Project>

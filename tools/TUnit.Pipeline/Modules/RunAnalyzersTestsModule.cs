@@ -19,7 +19,7 @@ public class RunAnalyzersTestsModule : TestBaseModule
                 NoBuild = true,
                 Configuration = "Release",
                 Framework = framework,
-                Arguments = ["--hangdump", "--hangdump-filename", $"hangdump.analyzers-tests-{framework}.dmp", "--hangdump-timeout", "5m"],
+                Arguments = [..HangDumpArguments.Create($"hangdump.analyzers-tests-{framework}.dmp", "5m")],
             },
             new CommandExecutionOptions
             {
