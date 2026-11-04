@@ -1,3 +1,4 @@
+using TUnit.SourceGeneration;
 using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -70,7 +71,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             {
                 spc.ReportDiagnostic(Diagnostic.Create(
                     new DiagnosticDescriptor(
-                        id: "TUNITGEN001",
+                        id: GeneratorDiagnosticIds.AotConverterFailed,
                         title: "TUnit.AotConverterGenerator Failed",
                         messageFormat: "AotConverterGenerator failed: {0}: {1}",
                         category: "TUnit.Generator",
@@ -540,7 +541,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                     var targetDisplay = conversion.TargetType?.DisplayString ?? "null";
                     context.ReportDiagnostic(Diagnostic.Create(
                         new DiagnosticDescriptor(
-                            id: "TUNITGEN002",
+                            id: GeneratorDiagnosticIds.NullConversionType,
                             title: "Null type in conversion",
                             messageFormat: "Skipping converter generation: SourceType={0}, TargetType={1}. Check test data sources that use implicit conversions between these types.",
                             category: "TUnit.Generator",
@@ -558,7 +559,7 @@ public class AotConverterGenerator : IIncrementalGenerator
                 var targetDisplay = conversion.TargetType?.DisplayString ?? "unknown";
                 context.ReportDiagnostic(Diagnostic.Create(
                     new DiagnosticDescriptor(
-                        id: "TUNITGEN003",
+                        id: GeneratorDiagnosticIds.ConversionTypeCheckFailed,
                         title: "Error checking conversion types",
                         messageFormat: "Error checking conversion types (SourceType={0}, TargetType={1}): {2}",
                         category: "TUnit.Generator",

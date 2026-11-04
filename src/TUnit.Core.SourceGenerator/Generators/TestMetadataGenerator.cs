@@ -1,3 +1,4 @@
+using TUnit.SourceGeneration;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -26,7 +27,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private const string InstanceMethodDataSourceAttributeName = "global::TUnit.Core.InstanceMethodDataSourceAttribute";
 
     private static readonly DiagnosticDescriptor GenerationErrorDescriptor = new(
-        "TUNIT0999",
+        GeneratorDiagnosticIds.TestMetadataGenerationFailed,
         "Source Generation Error",
         "Failed to generate test metadata for {0}.{1}: {2}",
         "TUnit",
@@ -5641,7 +5642,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             context.ReportDiagnostic(Diagnostic.Create(
                 new DiagnosticDescriptor(
-                    "TUNIT0998",
+                    GeneratorDiagnosticIds.PerClassTestSourceGenerationFailed,
                     "Per-Class TestSource Generation Error",
                     "Failed to generate per-class TestSource for {0}: {1}",
                     "TUnit",
