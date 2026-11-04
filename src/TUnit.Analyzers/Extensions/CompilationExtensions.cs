@@ -19,31 +19,6 @@ public static class CompilationExtensions
             return true;
         }
 
-        // Discovery infers a nullable class parameter's underlying type from either T or T? data.
-        if (parameterType is INamedTypeSymbol
-            {
-                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
-                TypeArguments: [ITypeParameterSymbol { DeclaringMethod: null } nullableTypeParameter]
-            }
-            && argumentType is not null)
-        {
-            // Explicit instantiations and constructor data supply T independently of the method row.
-            // CastHelper converts the method data to the resulting parameter type.
-            if (HasGenerateGenericTestAttribute(nullableTypeParameter)
-                || nullableTypeParameter.DeclaringType?.GetAttributes()
-                    .Any(attribute => attribute.IsDataSourceAttribute(compilation)) == true)
-            {
-                return true;
-            }
-
-            var underlyingType = argumentType is INamedTypeSymbol
-                {
-                    OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
-                    TypeArguments: [var underlying]
-                } ? underlying : argumentType;
-            return compilation.CanSatisfyConstraints(underlyingType, nullableTypeParameter, null);
-        }
-
         if (argumentType is not null && parameterType is not null
             && ContainsArray(parameterType) && ContainsTypeParameter(parameterType))
         {
@@ -162,6 +137,38 @@ public static class CompilationExtensions
         ITypeSymbol? parameterType,
         IReadOnlyDictionary<ITypeParameterSymbol, ITypeSymbol>? inferredTypeArguments = null)
     {
+        // Discovery infers a nullable class parameter's underlying type from either T or T? data.
+        if (parameterType is INamedTypeSymbol
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+                TypeArguments: [ITypeParameterSymbol { DeclaringMethod: null } nullableTypeParameter]
+            }
+            && argumentType is not null)
+        {
+            // Explicit instantiations and constructor data supply T independently of the method row.
+            // CastHelper converts the method data to the resulting parameter type.
+            if (HasGenerateGenericTestAttribute(nullableTypeParameter)
+                || nullableTypeParameter.DeclaringType?.GetAttributes()
+                    .Any(attribute => attribute.IsDataSourceAttribute(compilation)) == true)
+            {
+                return true;
+            }
+
+            var underlyingType = argumentType is INamedTypeSymbol
+                {
+                    OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+                    TypeArguments: [var underlying]
+                } ? underlying : argumentType;
+            // Multiple occurrences can infer different types; the generator converts the earlier values
+            // to the final inferred type. Only reject constraints when inference is certain.
+            if (inferredTypeArguments is not null && !inferredTypeArguments.ContainsKey(nullableTypeParameter))
+            {
+                return true;
+            }
+
+            return compilation.CanSatisfyConstraints(underlyingType, nullableTypeParameter, inferredTypeArguments);
+        }
+
         if (parameterType is ITypeParameterSymbol typeParameter && argumentType is not null)
         {
             // With [GenerateGenericTest] the attribute supplies the type argument and the generated call converts
@@ -192,7 +199,8 @@ public static class CompilationExtensions
 
     /// <summary>
     /// Maps each type parameter to the data type it is inferred as, when that is certain: every test parameter
-    /// that mentions the type parameter is the bare type parameter, and all of them receive the same data type.
+    /// that mentions the type parameter is the bare type parameter (or a nullable class type parameter),
+    /// and all of them infer the same underlying data type.
     /// Otherwise the inference depends on which occurrence wins (the generator takes the last one and converts the
     /// other values to it), so the type parameter is left out.
     /// </summary>
@@ -210,6 +218,22 @@ public static class CompilationExtensions
                 continue;
             }
 
+            var argumentType = i < argumentTypes.Count ? argumentTypes[i] : null;
+            var isNullableClassParameter = parameterType is INamedTypeSymbol
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+                TypeArguments: [ITypeParameterSymbol { DeclaringMethod: null }]
+            };
+            if (isNullableClassParameter)
+            {
+                parameterType = ((INamedTypeSymbol)parameterType).TypeArguments[0];
+                if (argumentType is INamedTypeSymbol
+                    { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T, TypeArguments: [var underlying] })
+                {
+                    argumentType = underlying;
+                }
+            }
+
             if (parameterType is not ITypeParameterSymbol typeParameter)
             {
                 // A type parameter nested in a constructed parameter type can also drive the inference.
@@ -217,14 +241,13 @@ public static class CompilationExtensions
                 continue;
             }
 
-            // Class type parameters are not inferred from the method's data row.
-            if (typeParameter.DeclaringMethod is null)
+            // Bare class type parameters keep their existing deferred constraint validation.
+            if (typeParameter.DeclaringMethod is null && !isNullableClassParameter)
             {
                 uncertain.Add(typeParameter);
                 continue;
             }
 
-            var argumentType = i < argumentTypes.Count ? argumentTypes[i] : null;
             if (argumentType is null
                 || (inferred.TryGetValue(typeParameter, out var existing)
                     && !SymbolEqualityComparer.Default.Equals(existing, argumentType)))

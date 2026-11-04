@@ -636,8 +636,13 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
             
-            // Only a bare type-parameter test parameter reads the inferred type arguments.
-            var inferredTypeArguments = testParameterTypes.Any(t => t is ITypeParameterSymbol)
+            // Include nullable class parameters so repeated occurrences only validate certain inference.
+            var inferredTypeArguments = testParameterTypes.Any(t => t is ITypeParameterSymbol
+                or INamedTypeSymbol
+                {
+                    OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+                    TypeArguments: [ITypeParameterSymbol { DeclaringMethod: null }]
+                })
                 ? CompilationExtensions.InferTypeArguments(unwrappedTypes, testParameterTypes)
                 : null;
 

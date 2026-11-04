@@ -36,14 +36,11 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             [GenerateGenericTest(typeof(double))]
             public class Tests<T> where T : struct, IComparable<double>
             {
-                public static IEnumerable<{{rowType}}> {|#0:Rows|}() => [1];
+                public static IEnumerable<{{rowType}}> Rows() => [1];
                 [Test, MethodDataSource(nameof(Rows))]
                 public void Run(T? value) { }
             }
-            """,
-            // The separate mutable-reference warning for generic class data is tracked in #7598.
-            Verifier.Diagnostic(Rules.ReturnFunc)
-                .WithLocation(0));
+            """);
     }
 
     [Test]
@@ -59,13 +56,65 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
             [Arguments(1d)]
             public class Tests<T>(T seed) where T : struct, IComparable<double>
             {
-                public static IEnumerable<Func<{{rowType}}>> {|#0:Rows|}() { yield return () => 1; }
+                public static IEnumerable<Func<{{rowType}}>> Rows() { yield return () => 1; }
                 [Test, MethodDataSource(nameof(Rows))]
                 public void Run(T? value) { }
             }
+            """);
+    }
+
+    [Test]
+    public async Task Nullable_Generic_Class_Parameter_With_Conflicting_Inference_Accepts_Convertible_Data()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests<T> where T : struct, IComparable<double>
+            {
+                public static IEnumerable<Func<(int?, double?)>> Rows() { yield return () => (1, 2d); }
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run(T? first, T? second) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Nullable_Generic_Class_Parameter_With_Certain_Inference_Rejects_Constraint_Violation()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests<T> where T : struct, IComparable<double>
+            {
+                public static IEnumerable<Func<(int?, int)>> Rows() { yield return () => (1, 2); }
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(T? first, T? second) { }
+            }
             """,
-            // The separate mutable-reference warning for generic class data is tracked in #7598.
-            Verifier.Diagnostic(Rules.ReturnFunc).WithLocation(0));
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("int?, int", "T?, T?"));
+    }
+
+    [Test]
+    public async Task Explicit_Class_Type_Does_Not_Bypass_Data_Source_Overload_Argument_Matching()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [GenerateGenericTest(typeof(int))]
+            public class Tests<T> where T : struct
+            {
+                public static IEnumerable<int> Rows(T? input) => [1];
+                public static IEnumerable<string> Rows(string input) => [input];
+                [Test, MethodDataSource(nameof(Rows), Arguments = new object[] { "hello" })]
+                public void Run(string value) { }
+            }
+            """);
     }
 
     [Test]
