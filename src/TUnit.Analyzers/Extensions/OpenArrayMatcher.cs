@@ -15,7 +15,11 @@ internal sealed class OpenArrayMatcher
 {
     // One bounded search per row: exhaustion accepts conservatively instead of reporting
     // an unproven mismatch. Count recursive visits and bound pairs, including retries.
-    private int _remainingSteps = 512;
+    // The budget belongs to the row, not a backtracking branch: failed alternatives do
+    // not refund steps. Interface traversal order can therefore affect when validation
+    // exhausts its budget, but exhaustion always accepts the whole row conservatively.
+    private const int MaxStepsPerRow = 512;
+    private int _remainingSteps = MaxStepsPerRow;
 
     internal bool IsExhausted => _remainingSteps < 0;
 
