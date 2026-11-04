@@ -27,6 +27,12 @@ public static class CompilationExtensions
             }
             && argumentType is not null)
         {
+            // An explicit class instantiation supplies T independently of the row; CastHelper converts the data.
+            if (HasGenerateGenericTestAttribute(nullableTypeParameter))
+            {
+                return true;
+            }
+
             var underlyingType = argumentType is INamedTypeSymbol
                 {
                     OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,

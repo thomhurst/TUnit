@@ -24,6 +24,28 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("int")]
+    [Arguments("int?")]
+    public async Task Nullable_Generic_Class_Parameter_With_Explicit_Type_Accepts_Convertible_Data(string rowType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            [GenerateGenericTest(typeof(double))]
+            public class Tests<T> where T : struct, IComparable<double>
+            {
+                public static IEnumerable<{{rowType}}> {|#0:Rows|}() => [1];
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run(T? value) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.ReturnFunc)
+                .WithLocation(0));
+    }
+
+    [Test]
     [Arguments("string", "struct")]
     [Arguments("int", "struct, System.IDisposable")]
     public async Task Nullable_Generic_Class_Parameter_Rejects_Constraint_Violation(string rowType, string constraints)
