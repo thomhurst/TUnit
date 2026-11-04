@@ -490,9 +490,13 @@ public class AotConverterGenerator : IIncrementalGenerator
         // Match the assignment/cast that will be emitted. An operator on each endpoint
         // can make the conversion ambiguous even when the test never needs that pair.
         var conversion = ((CSharpCompilation)compilation).ClassifyConversion(sourceType, targetType);
-        if (!conversion.Exists || !conversion.IsUserDefined ||
+        // Decimal exposes operators that Roslyn classifies as built-in numeric
+        // conversions, with no selected method. They still need AOT registrations.
+        if (!conversion.Exists ||
             (isImplicit && !conversion.IsImplicit) ||
-            !SymbolEqualityComparer.Default.Equals(conversion.MethodSymbol, methodSymbol))
+            (conversion.IsUserDefined
+                ? !SymbolEqualityComparer.Default.Equals(conversion.MethodSymbol, methodSymbol)
+                : !conversion.IsNumeric))
         {
             return null;
         }

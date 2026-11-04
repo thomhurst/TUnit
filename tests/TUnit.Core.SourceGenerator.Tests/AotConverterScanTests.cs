@@ -7,6 +7,32 @@ namespace TUnit.Core.SourceGenerator.Tests;
 public class AotConverterScanTests
 {
     [Test]
+    public async Task PreservesBuiltInDecimalConversions()
+    {
+        const string source = """
+            using TUnit.Core;
+            public class Tests
+            {
+                [Test, Arguments('A')]
+                public void Decimal(decimal value) { }
+            }
+            """;
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var compilation = CSharpCompilation.Create("DecimalConverters",
+            [CSharpSyntaxTree.ParseText(source, parseOptions)], ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new AotConverterGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
+        await Assert.That(System.Text.RegularExpressions.Regex.IsMatch(generated, @"SourceType => typeof\(char\);\s+public Type TargetType => typeof\(decimal\);")).IsTrue();
+        await Assert.That(System.Text.RegularExpressions.Regex.IsMatch(generated, @"SourceType => typeof\(decimal\);\s+public Type TargetType => typeof\(char\);")).IsTrue();
+    }
+
+    [Test]
     public async Task HandlesInheritedPropertyAndAmbiguousSources()
     {
         const string providerSource = """
