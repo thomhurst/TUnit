@@ -272,8 +272,32 @@ jobs:
           $dumps = @(Get-ChildItem captured-dump -Recurse -Filter 'hangdump.windows-reflection-pass.dmp')
           if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
           New-Item -ItemType Directory -Path analysis -Force | Out-Null
-          dotnet-dump analyze $dumps[0].FullName -c 'clrthreads' -c 'clrstack -all' -c 'dumpasync' -c 'exit' *> analysis/managed-stacks.txt
+          dotnet-dump analyze $dumps[0].FullName -c 'clrthreads' -c 'threadpool' -c 'syncblk' -c 'clrstack -all' -c 'dumpasync' -c 'exit' *> analysis/managed-stacks.txt
           if ($LASTEXITCODE -ne 0) { throw 'Dump analysis failed; see managed-stacks.txt' }
+
+      # dotnet-dump cannot show the native wait inside Thread.StartInternal (#7554).
+      - name: Extract native thread waits
+        timeout-minutes: 5
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          try {
+            $cdb = "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe"
+            if (!(Test-Path $cdb)) {
+              # Windows SDK 10.0.26100.9457; install only its debugging tools.
+              Invoke-WebRequest 'https://go.microsoft.com/fwlink/?linkid=2382321' -OutFile winsdksetup.exe
+              $installer = Start-Process -FilePath .\winsdksetup.exe -ArgumentList '/features OptionId.WindowsDesktopDebuggers /quiet /norestart' -Wait -PassThru
+              if ($installer.ExitCode -notin @(0, 3010)) { throw "Debugger installation failed: $($installer.ExitCode)" }
+            }
+            if (!(Test-Path $cdb)) { throw 'Windows SDK did not install x64 cdb.exe' }
+            $dumps = @(Get-ChildItem captured-dump -Recurse -Filter 'hangdump.windows-reflection-pass.dmp')
+            if ($dumps.Count -ne 1) { throw "Expected one Windows reflection pass dump, found $($dumps.Count)" }
+            & $cdb -z $dumps[0].FullName -y 'srv*symbols*https://msdl.microsoft.com/download/symbols' -c '.reload; ~* kb; !locks; q' *> analysis/native-stacks.txt
+            if ($LASTEXITCODE -ne 0) { throw 'Native dump analysis failed; see native-stacks.txt' }
+          } catch {
+            $_ | Out-String | Set-Content analysis/native-analysis-error.txt
+            throw
+          }
 
       - name: Upload managed dump analysis
         if: always()
