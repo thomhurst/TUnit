@@ -316,6 +316,7 @@ jobs:
 
       # dotnet-dump cannot show the native wait inside Thread.StartInternal (#7554).
       - name: Extract native thread waits
+        id: native_analysis
         if: ${{ !cancelled() && (steps.download_exact.outcome == 'success' || steps.download_name_based.outcome == 'success') }}
         timeout-minutes: 5
         shell: pwsh
@@ -339,6 +340,15 @@ jobs:
           } catch {
             $_ | Out-String | Set-Content analysis/native-analysis-error.txt
             throw
+          }
+
+      - name: Record interrupted native analysis
+        if: ${{ always() && steps.native_analysis.outcome == 'failure' }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path analysis -Force | Out-Null
+          if (!(Test-Path analysis/native-analysis-error.txt)) {
+            'Native analysis failed or timed out before its error handler completed; inspect any partial output.' | Set-Content analysis/native-analysis-error.txt
           }
 
       - name: Upload managed dump analysis
