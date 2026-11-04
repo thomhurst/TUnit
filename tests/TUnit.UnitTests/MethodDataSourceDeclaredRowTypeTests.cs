@@ -61,6 +61,21 @@ public class MethodDataSourceDeclaredRowTypeTests
     }
 
     [Test]
+    public async Task Nested_Row_Preserves_Whether_A_Wrapper_Was_Removed()
+    {
+        var wrapped = MethodDataSourceAttribute.GetDeclaredRowType(
+            typeof(IEnumerable<TestDataRow<ValueTuple<TestDataRow<int>>>>), out var spreadsArray, out var wrapperRemoved);
+        await Assert.That(wrapped).IsEqualTo(typeof(ValueTuple<TestDataRow<int>>));
+        await Assert.That(wrapperRemoved).IsTrue();
+        await Assert.That(spreadsArray).IsFalse();
+
+        var bare = MethodDataSourceAttribute.GetDeclaredRowType(
+            typeof(IEnumerable<ValueTuple<TestDataRow<int>>>), out _, out var bareWrapperRemoved);
+        await Assert.That(bare).IsEqualTo(wrapped);
+        await Assert.That(bareWrapperRemoved).IsFalse();
+    }
+
+    [Test]
     public async Task Wrapped_Reference_Array_Preserves_Its_Spread_Shape()
     {
         var rowType = MethodDataSourceAttribute.GetDeclaredRowType(typeof(IEnumerable<TestDataRow<string[]>>), out var spreadsReferenceArray);

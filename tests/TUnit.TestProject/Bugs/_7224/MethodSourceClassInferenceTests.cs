@@ -5,6 +5,16 @@ namespace TUnit.TestProject.Bugs._7224;
 [EngineTest(ExpectedResult.Pass)]
 public class MethodSourceClassInferenceTests<T>
 {
+    public static IEnumerable<TestDataRow<ValueTuple<TestDataRow<int>>>> NestedRows()
+        => [new(new ValueTuple<TestDataRow<int>>(new(42)))];
+
+    [Test, MethodDataSource(nameof(NestedRows))]
+    public async Task NestedWrappedTuple(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(TestDataRow<int>));
+        await Assert.That(((TestDataRow<int>)(object)value!).Data).IsEqualTo(42);
+    }
+
     public static IEnumerable<int> SingleRows() => [1];
     public static IEnumerable<(int, string)> TupleRows() => [(1, "one")];
     public static int[] ArrayRows => [1];

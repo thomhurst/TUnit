@@ -453,7 +453,13 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     // can supply more than one required method parameter.
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     internal static Type? GetDeclaredRowType(Type memberType, out bool spreadsReferenceArray)
+        => GetDeclaredRowType(memberType, out spreadsReferenceArray, out _);
+
+    // Tuple inference must not consume a nested wrapper after the reader already removed one.
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    internal static Type? GetDeclaredRowType(Type memberType, out bool spreadsReferenceArray, out bool rowWrapperRemoved)
     {
+        rowWrapperRemoved = false;
         spreadsReferenceArray = false;
         if (memberType == typeof(Task) || memberType == typeof(ValueTask))
         {
@@ -500,6 +506,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         rowType = UnwrapFunc(rowType);
         if (rowType != null && TestDataRowUnwrapper.GetInnerDataType(rowType) is { } rowData)
         {
+            rowWrapperRemoved = true;
             rowType = UnwrapFunc(rowData);
             // UnwrapArray spreads reference arrays through object[] covariance.
             if (rowType is { IsArray: true } && rowType.Name.EndsWith("[]", StringComparison.Ordinal) && rowType.GetElementType() is { IsValueType: false, IsPointer: false } elementType)

@@ -1588,10 +1588,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         if (source is MethodDataSourceAttribute memberSource
             && memberSource.GetDeclaredMemberType(memberSource.ClassProvidingDataSource ?? method.DeclaringType!) is { } memberType
-            && MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is { } rowType
+            && MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray, out var rowWrapperRemoved) is { } rowType
             && rowType != typeof(object))
         {
-            var inferred = InferTypesFromDeclaredRow(method, rowType, classParameters.Length, GenericParameterScope.Class, spreadsReferenceArray);
+            var inferred = InferTypesFromDeclaredRow(method, rowType, classParameters.Length, GenericParameterScope.Class, spreadsReferenceArray, rowWrapperRemoved);
             return inferred is not null && !Array.Exists(inferred, static type => type.ContainsGenericParameters) ? inferred : null;
         }
 
@@ -2517,10 +2517,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static Type[]? InferTypesFromTypedRow(MethodInfo method, Type rowType, int genericParameterCount)
         => InferTypesFromTypedRowCore(method, rowType, genericParameterCount, GenericParameterScope.Method, spreadsReferenceArray: false, rowIsNormalized: false);
 
-    private static Type[]? InferTypesFromDeclaredRow(MethodInfo method, Type rowType, int genericParameterCount, GenericParameterScope scope, bool spreadsReferenceArray)
-        => InferTypesFromTypedRowCore(method, rowType, genericParameterCount, scope, spreadsReferenceArray, rowIsNormalized: true);
+    private static Type[]? InferTypesFromDeclaredRow(MethodInfo method, Type rowType, int genericParameterCount, GenericParameterScope scope, bool spreadsReferenceArray, bool rowWrapperRemoved = false)
+        => InferTypesFromTypedRowCore(method, rowType, genericParameterCount, scope, spreadsReferenceArray, rowIsNormalized: true, rowWrapperRemoved);
 
-    private static Type[]? InferTypesFromTypedRowCore(MethodInfo method, Type rowType, int genericParameterCount, GenericParameterScope scope, bool spreadsReferenceArray, bool rowIsNormalized)
+    private static Type[]? InferTypesFromTypedRowCore(MethodInfo method, Type rowType, int genericParameterCount, GenericParameterScope scope, bool spreadsReferenceArray, bool rowIsNormalized, bool rowWrapperRemoved = false)
     {
         // The row reaches the method as ToObjectArray and TestDataRowUnwrapper.UnwrapArray produce it: a
         // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
@@ -2536,7 +2536,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         var testDataRowType = rowIsNormalized ? null : FindTestDataRowType(rowType);
-        var isTestDataRow = testDataRowType is not null;
+        // Normalized member rows retain whether UnwrapArray already consumed its one wrapper.
+        var isTestDataRow = rowWrapperRemoved || testDataRowType is not null;
         if (testDataRowType is not null)
         {
             rowType = UnwrapFunc(testDataRowType.GetGenericArguments()[0]);
