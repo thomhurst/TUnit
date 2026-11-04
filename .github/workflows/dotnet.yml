@@ -114,14 +114,62 @@ jobs:
             echo "PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
           } >> "$GITHUB_ENV"
 
+      # Windows and macOS pull request runs test only what can differ by OS (--os-specific-only
+      # below): Ubuntu runs every suite, so the PlatformNeutral suites' projects need not build here.
+      # Windows still builds the suites with .NET Framework snapshots, which only it can run. The
+      # list names what to leave out, so a new project builds everywhere until it is added here;
+      # anything an included project references still builds through its project reference.
+      - name: Select projects
+        id: projects
+        shell: bash
+        env:
+          OS_SPECIFIC_ONLY: ${{ github.event_name == 'pull_request' && matrix.os != 'ubuntu-latest' }}
+        run: |
+          if [ "$OS_SPECIFIC_ONLY" != "true" ]; then
+            echo "solution=TUnit.CI.slnx" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          excluded=(
+            tests/TUnit.Analyzers.Internal.Tests/
+            tests/TUnit.Analyzers.Tests/
+            tests/TUnit.AspNetCore.Analyzers.Tests/
+            tests/TUnit.Assertions.Analyzers.CodeFixers.Tests/
+            tests/TUnit.Assertions.Analyzers.Tests/
+            tests/TUnit.Assertions.Should.SourceGenerator.Tests/
+            tests/TUnit.Assertions.Should.Tests/
+            tests/TUnit.Assertions.Tests/
+            tests/TUnit.Mocks.
+            tests/TUnit.SourceGenerator.IncrementalTests/
+            tests/TUnit.Templates.Tests/
+            # Linux-only modules (RunAspireTestsModule, RunAspNetTestsModule), and projects no
+            # module runs.
+            tests/TUnit.Aspire.Tests
+            examples/
+            benchmarks/
+          )
+          if [ "${{ matrix.os }}" != "windows-latest" ]; then
+            excluded+=(
+              tests/TUnit.Core.SourceGenerator.Tests/
+              tests/TUnit.Assertions.SourceGenerator.Tests/
+              tests/TUnit.PublicAPI/
+            )
+          fi
+          printf '%s\n' "${excluded[@]}" > excluded-projects.txt
+          grep -oE 'Path="[^"]+\.(cs|fs|vb)proj"' TUnit.CI.slnx | sed -E 's/^Path="(.*)"$/\1/' \
+            | grep -vFf excluded-projects.txt \
+            | jq -R . | jq -s '{solution: {path: "TUnit.CI.slnx", projects: .}}' > ci.slnf
+          echo "Building $(jq '.solution.projects | length' ci.slnf) of $(grep -cE 'Path="[^"]+proj"' TUnit.CI.slnx) projects:"
+          jq -r '.solution.projects[]' ci.slnf
+          echo "solution=ci.slnf" >> "$GITHUB_OUTPUT"
+
       - name: Restore
         shell: bash
-        run: dotnet restore TUnit.CI.slnx
+        run: dotnet restore ${{ steps.projects.outputs.solution }}
 
       - name: Build
         shell: bash
         run: >-
-          dotnet build TUnit.CI.slnx -c Release --no-restore -graphBuild:True
+          dotnet build ${{ steps.projects.outputs.solution }} -c Release --no-restore -graphBuild:True
           "-p:Version=${{ steps.gitversion.outputs.semVer }}"
           "-p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
           "-p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
@@ -156,13 +204,16 @@ jobs:
           # Framework TFM they no longer compete with the engine tests for this runner's CPUs.
           # macOS skips them: the packages are platform-neutral, and packing and testing them took
           # CPU from the test modules on the smallest runner.
-          # On pull requests macOS also skips the PlatformNeutral suites, which Ubuntu and Windows
-          # already run, and runs the Reflection-mode engine tests here instead: aot.yml leaves
-          # macOS out of pull requests, so this is the only general macOS job a PR push queues.
+          # On pull requests macOS runs the Reflection-mode engine tests here: aot.yml leaves macOS
+          # out of pull requests, so this is the only general macOS job a PR push queues.
           ignore-categories: >-
             ${{ matrix.os == 'ubuntu-latest' && 'Aot EngineTests'
-            || (matrix.os == 'macos-latest' && github.event_name == 'pull_request') && 'Aot Packaging NuGetPackageTests PlatformNeutral'
+            || (matrix.os == 'macos-latest' && github.event_name == 'pull_request') && 'Aot Packaging NuGetPackageTests'
             || 'Aot EngineTests Packaging NuGetPackageTests' }}
+          # On pull requests Windows and macOS skip what Ubuntu already proves: the PlatformNeutral
+          # suites, apart from the .NET Framework TFMs only Windows can run (see PipelineScope).
+          # Manual runs, which publish, keep every suite on every OS.
+          os-specific-only: ${{ github.event_name == 'pull_request' && matrix.os != 'ubuntu-latest' }}
 
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.2

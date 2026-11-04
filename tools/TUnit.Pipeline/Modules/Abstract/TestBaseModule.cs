@@ -43,7 +43,13 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
     {
         var results = new List<CommandResult>();
 
-        foreach (var framework in TestableFrameworks)
+        // Ubuntu runs the modern TFMs of the PlatformNeutral suites, so an OS-specific run keeps
+        // only the .NET Framework ones (Windows snapshots such as the .Net4_7 variants).
+        var frameworks = PipelineScope.OsSpecificOnly && PipelineScope.IsPlatformNeutral(GetType())
+            ? TestableFrameworks.Where(PipelineScope.IsNetFramework)
+            : TestableFrameworks;
+
+        foreach (var framework in frameworks)
         {
             var (testOptions, executionOptions) = await GetTestOptions(context, framework, cancellationToken);
 

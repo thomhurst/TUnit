@@ -9,6 +9,10 @@ inputs:
     description: Categories to skip
     required: false
     default: ''
+  os-specific-only:
+    description: Run only what can differ by operating system (see PipelineScope)
+    required: false
+    default: 'false'
   admin-token:
     description: 'Admin token'
     required: true
@@ -41,11 +45,15 @@ runs:
         if [ ${#ignore_categories[@]} -gt 0 ]; then
           args+=(--ignore-categories "${ignore_categories[@]}")
         fi
+        if [ "$PIPELINE_OS_SPECIFIC_ONLY" = "true" ]; then
+          args+=(--os-specific-only)
+        fi
         dotnet run -c Release --no-build "${args[@]}"
       working-directory: "tools/TUnit.Pipeline"
       env:
         PIPELINE_CATEGORIES: ${{ inputs.categories }}
         PIPELINE_IGNORE_CATEGORIES: ${{ inputs.ignore-categories }}
+        PIPELINE_OS_SPECIFIC_ONLY: ${{ inputs.os-specific-only }}
         ADMIN_TOKEN: ${{ inputs.admin-token }}
         GITHUB_TOKEN: ${{ github.token }}
         DOTNET_ENVIRONMENT: ${{ inputs.environment }}

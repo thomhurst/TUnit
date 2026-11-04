@@ -24,9 +24,16 @@ var ignoreCategoryOption = new Option<string[]>(
     DefaultValueFactory = _ => []
 };
 
+var osSpecificOnlyOption = new Option<bool>(
+    name: "--os-specific-only")
+{
+    Description = "Run only what can differ by operating system: PlatformNeutral suites keep just their .NET Framework TFMs, which Ubuntu cannot run.",
+};
+
 var rootCommand = new RootCommand("The pipeline for building, testing and packaging TUnit");
 rootCommand.Add(categoryOption);
 rootCommand.Add(ignoreCategoryOption);
+rootCommand.Add(osSpecificOnlyOption);
 rootCommand.Validators.Add(result =>
 {
     if (result.GetValue(categoryOption) is { Length: > 0 } && result.GetValue(ignoreCategoryOption) is { Length: > 0 })
@@ -38,6 +45,7 @@ rootCommand.SetAction(async parseResult =>
 {
     var categories = parseResult.GetValue(categoryOption)!;
     var ignoreCategories = parseResult.GetValue(ignoreCategoryOption)!;
+    PipelineScope.OsSpecificOnly = parseResult.GetValue(osSpecificOnlyOption);
 
     var builder = Pipeline.CreateBuilder();
     builder.Configuration.AddEnvironmentVariables();
@@ -51,7 +59,11 @@ rootCommand.SetAction(async parseResult =>
     }
     else
     {
-        builder.IgnoreCategories(["ReadMe", ..ignoreCategories]);
+        // Off Windows no PlatformNeutral suite has an OS-specific TFM left, so skip the modules outright.
+        var platformNeutral = PipelineScope.OsSpecificOnly && !OperatingSystem.IsWindows()
+            ? new[] { PipelineCategories.PlatformNeutral }
+            : [];
+        builder.IgnoreCategories(["ReadMe", ..ignoreCategories, ..platformNeutral]);
     }
 
     await builder.Build().RunAsync();
