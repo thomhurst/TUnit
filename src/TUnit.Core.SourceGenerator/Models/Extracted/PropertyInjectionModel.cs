@@ -107,6 +107,9 @@ internal sealed record PropertyDataSourceModel : IEquatable<PropertyDataSourceMo
     /// </summary>
     public required bool IsContainingTypeGeneric { get; init; }
 
+    /// <summary>Whether the declaring type requires mutation through its original box.</summary>
+    public bool IsContainingTypeValueType { get; init; }
+
     /// <summary>
     /// Whether the property is static
     /// </summary>
@@ -159,6 +162,7 @@ internal sealed record PropertyDataSourceModel : IEquatable<PropertyDataSourceMo
             && GenericTypeConstraints == other.GenericTypeConstraints
             && IsInitOnly == other.IsInitOnly
             && IsContainingTypeGeneric == other.IsContainingTypeGeneric
+            && IsContainingTypeValueType == other.IsContainingTypeValueType
             && IsStatic == other.IsStatic
             && PropertyTypeAsTypeParameter == other.PropertyTypeAsTypeParameter
             && IsValueType == other.IsValueType
@@ -183,6 +187,7 @@ internal sealed record PropertyDataSourceModel : IEquatable<PropertyDataSourceMo
             hash = (hash * 397) ^ (GenericTypeConstraints?.GetHashCode() ?? 0);
             hash = (hash * 397) ^ IsInitOnly.GetHashCode();
             hash = (hash * 397) ^ IsContainingTypeGeneric.GetHashCode();
+            hash = (hash * 397) ^ IsContainingTypeValueType.GetHashCode();
             hash = (hash * 397) ^ IsStatic.GetHashCode();
             hash = (hash * 397) ^ (PropertyTypeAsTypeParameter?.GetHashCode() ?? 0);
             hash = (hash * 397) ^ IsValueType.GetHashCode();
