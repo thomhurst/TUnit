@@ -8363,7 +8363,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// resolution on the target type would discard a base overload once a derived one is applicable
     /// (https://github.com/thomhurst/TUnit/issues/7202).
     /// </summary>
-    private static ISymbol? ResolveMethodDataSourceMember(ITypeSymbol targetType, string memberName, AttributeData attr, Compilation compilation)
+    internal static ISymbol? ResolveMethodDataSourceMember(ITypeSymbol targetType, string memberName, AttributeData attr, Compilation compilation)
     {
         var argumentsProperty = attr.NamedArguments.FirstOrDefault(x => x.Key == "Arguments");
         var arguments = argumentsProperty is { Key: not null, Value: { IsNull: false, Kind: TypedConstantKind.Array } }
