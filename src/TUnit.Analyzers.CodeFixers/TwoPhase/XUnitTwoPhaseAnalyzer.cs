@@ -32,6 +32,8 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
     // Track assertions that are assigned to variables (should not be converted)
     private readonly HashSet<InvocationExpressionSyntax> _variableAssignedAssertions = new();
 
+    private HashSet<string>? _sourceIdentifiers;
+
     private static readonly HashSet<string> XUnitAttributeNames = new()
     {
         "Fact", "Theory", "InlineData", "MemberData", "ClassData",
@@ -368,7 +370,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             // Capture both arguments before enumeration, in their original evaluation order.
             // xUnit uses object.Equals(item, expected), including for non-generic collections.
             // Avoid introducing lambda parameters that shadow names in the migrated source.
-            var identifiers = new HashSet<string>(memberAccess.SyntaxTree.GetRoot().DescendantTokens()
+            var identifiers = _sourceIdentifiers ??= new HashSet<string>(memberAccess.SyntaxTree.GetRoot().DescendantTokens()
                 .Where(token => token.IsKind(SyntaxKind.IdentifierToken)).Select(token => token.ValueText));
             var pair = "singleArguments";
             while (identifiers.Contains(pair)) pair += "_";
@@ -376,7 +378,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             while (identifiers.Contains(item)) item += "_";
             var expected = args[1].Expression.ToString();
             return (AssertionConversionKind.Single,
-                $"await Assert.That(((global::System.Collections.IEnumerable)({collection}), (object)({expected}))).Satisfies({pair} => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>({pair}.Item1), {item} => global::System.Object.Equals({item}, {pair}.Item2)) == 1)",
+                $"await Assert.That(((global::System.Collections.IEnumerable)({collection}), (object)((({expected}))!))).Satisfies({pair} => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>({pair}.Item1), {item} => global::System.Object.Equals({item}, {pair}.Item2)) == 1)",
                 true, null);
         }
 

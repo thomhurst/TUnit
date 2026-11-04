@@ -46,11 +46,61 @@ public class XUnitMigrationAnalyzerTests
                 [Test]
                 public async Task MyTest()
                 {
-                    await Assert.That(((global::System.Collections.IEnumerable)({{collection}}), (object)({{expected}}))).Satisfies(singleArguments_ => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments_.Item1), singleItem_ => global::System.Object.Equals(singleItem_, singleArguments_.Item2)) == 1);
+                    await Assert.That(((global::System.Collections.IEnumerable)({{collection}}), (object)((({{expected}}))!))).Satisfies(singleArguments_ => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments_.Item1), singleItem_ => global::System.Object.Equals(singleItem_, singleArguments_.Item2)) == 1);
                 }
             }
             """,
             ConfigureXUnitTest);
+    }
+
+    [Arguments("expected")]
+    [Arguments("true ? expected : new object()")]
+    [Arguments("null")]
+    [Arguments("new()")]
+    [Test]
+    public async Task XUnit_Single_Nullable_Expected_Compiles(string expected)
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            $$"""
+            #nullable enable
+            {|#0:using Xunit;
+            using Assert = Xunit.Assert;
+
+            public class MyClass
+            {
+                [Fact]
+                public void MyTest()
+                {
+                    object? expected = null;
+                    Assert.Single((System.Collections.IEnumerable)new object?[] { null, 2 }, {{expected}});
+                }
+            }|}
+            """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            $$"""
+            using System.Threading.Tasks;
+            #nullable enable
+
+            public class MyClass
+            {
+                [Test]
+                public async Task MyTest()
+                {
+                    object? expected = null;
+                    await Assert.That(((global::System.Collections.IEnumerable)((System.Collections.IEnumerable)new object?[] { null, 2 }), (object)((({{expected}}))!))).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.Item1), singleItem => global::System.Object.Equals(singleItem, singleArguments.Item2)) == 1);
+                }
+            }
+            """,
+            test =>
+            {
+                ConfigureXUnitTest(test);
+                test.CompilerDiagnostics = CompilerDiagnostics.Errors;
+                test.ReferenceAssemblies = new ReferenceAssemblies("net10.0",
+                    new PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"), "ref/net10.0");
+                test.TestState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
+                test.TestState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
+                test.FixedState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
+            });
     }
 
     [Arguments(0, false, false)]
