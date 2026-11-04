@@ -8491,23 +8491,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         var innerType = namedReturnType.TypeArguments[0];
-        INamedTypeSymbol? dataType = null;
-
-        // Check if it's IEnumerable<Func<T>>
-        if (innerType is INamedTypeSymbol { Name: "Func", TypeArguments.Length: 1 } funcType)
-        {
-            dataType = funcType.TypeArguments[0] as INamedTypeSymbol;
-        }
-        // Or direct IEnumerable<T>
-        else if (innerType is INamedTypeSymbol directType)
-        {
-            dataType = directType;
-        }
-
-        if (dataType == null)
-        {
-            return null;
-        }
+        // Rows can be arrays as well as named types, including inside a factory.
+        var dataType = innerType is INamedTypeSymbol { Name: "Func", TypeArguments.Length: 1 } funcType
+            ? funcType.TypeArguments[0]
+            : innerType;
 
         // Get class type parameters
         var classTypeParams = testMethod.TypeSymbol.TypeParameters;
@@ -8516,9 +8503,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var testMethodParams = GetDataParameters(testMethod.MethodSymbol);
 
         // If it's a tuple, map tuple elements to method parameters
-        if (dataType.IsTupleType)
+        if (dataType is INamedTypeSymbol { IsTupleType: true } tupleType)
         {
-            var tupleElements = dataType.TupleElements;
+            var tupleElements = tupleType.TupleElements;
 
             for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
             {

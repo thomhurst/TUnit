@@ -79,3 +79,26 @@ public static class NullableClassRowsProvider
 {
     public static IEnumerable<int> ExternalRows() => [3];
 }
+
+[EngineTest(ExpectedResult.Pass)]
+public class ArrayClassMethodRows<T>
+{
+    public static IEnumerable<int[]> Rows() => [new[] { 42 }];
+    public static IEnumerable<Func<int[]>> Factories() => [() => new[] { 42 }];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task DirectArray(T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values).Count().IsEqualTo(1);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(Factories))]
+    public async Task FactoryArray(T[] values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values).Count().IsEqualTo(1);
+    }
+}
