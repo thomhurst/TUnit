@@ -1,0 +1,7 @@
+<linker>
+  <assembly fullname="FSharp.Core">
+    <type fullname="Microsoft.FSharp.Control.FSharpAsync">
+      <method name="StartAsTask" />
+    </type>
+  </assembly>
+</linker>

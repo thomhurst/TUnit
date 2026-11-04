@@ -106,15 +106,14 @@ public static class AsyncConvert
         if (type.IsGenericType
             && type.GetGenericTypeDefinition().FullName == "Microsoft.FSharp.Control.FSharpAsync`1")
         {
-            // F# async support requires reflection and is not AOT-compatible
-            // Users should use Task-based APIs for AOT scenarios
+            // F# async support requires reflection; Native AOT is only supported for C# test projects
             await StartAsFSharpTaskSafely(invoke, type);
             return;
         }
     }
 
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicMethods, "Microsoft.FSharp.Control.FSharpAsync", "FSharp.Core")]
-    [DynamicDependency("StartAsTask", "Microsoft.FSharp.Control.FSharpAsync", "FSharp.Core")]
+    // TUnit.Core.targets preserves StartAsTask for trimmed JIT applications when FSharp.Core is referenced.
+    // A DynamicDependency would warn (IL2035) in C# AOT applications that do not reference FSharp.Core.
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with \'RequiresUnreferencedCodeAttribute\' require dynamic access otherwise can break functionality when trimming application code")]
     [UnconditionalSuppressMessage("Trimming", "IL2060:Call to \'System.Reflection.MethodInfo.MakeGenericMethod\' can not be statically analyzed. It\'s not possible to guarantee the availability of requirements of the generic method.")]
     [UnconditionalSuppressMessage("Trimming", "IL2072:Target parameter argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.")]
