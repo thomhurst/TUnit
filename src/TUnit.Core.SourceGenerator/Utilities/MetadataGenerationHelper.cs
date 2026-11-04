@@ -347,7 +347,7 @@ internal static class MetadataGenerationHelper
     private static string GetPropertyAccessor(INamedTypeSymbol namedTypeSymbol, IPropertySymbol property)
     {
         // For generic types with unresolved type parameters, we can't cast to the open generic type
-        // We need to use dynamic or reflection
+        // Resolve the closed declaring type from each instance and cache its reflected property.
         var hasUnresolvedTypeParameters = namedTypeSymbol.IsGenericType &&
                                          (namedTypeSymbol.TypeArguments.Any(t => t.TypeKind == TypeKind.TypeParameter) ||
                                           namedTypeSymbol.TypeArguments.OfType<ITypeParameterSymbol>().Any() ||
@@ -359,8 +359,8 @@ internal static class MetadataGenerationHelper
                 // Can't access static members on an unbound generic type like WebApplicationTest<,>
                 // Use reflection to get the value at runtime
                 ? $"_ => typeof({namedTypeSymbol.GloballyQualified()}).GetProperty(\"{property.Name}\")?.GetValue(null)"
-                // Use dynamic to avoid invalid cast to open generic type
-                : $"o => ((dynamic)o).{IdentifierHelper.Escape(property.Name)}";
+                // The factory roots public properties and caches reflection for each runtime type.
+                : $"global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof({namedTypeSymbol.GloballyQualified()}), \"{property.Name}\")";
         }
 
         var safeTypeName = namedTypeSymbol.GloballyQualified();

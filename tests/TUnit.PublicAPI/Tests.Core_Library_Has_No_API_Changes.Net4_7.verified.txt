@@ -1200,6 +1200,10 @@ namespace
         public <object, object?>? Setter { get; init; }
         public required  Type { get; init; }
     }
+    public static class PropertyMetadataFactory
+    {
+        public static <object?, object?> CreateGenericGetter( declaringType, string propertyName) { }
+    }
     public static class PropertySourceRegistry
     {
         public static .PropertyInjectionData[] DiscoverInjectableProperties( type) { }

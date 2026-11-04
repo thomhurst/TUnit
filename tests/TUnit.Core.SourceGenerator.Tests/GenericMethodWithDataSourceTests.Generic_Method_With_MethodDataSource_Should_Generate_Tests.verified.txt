@@ -1128,7 +1128,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassWithClassDataSour
                 Name = "DataSource",
                 IsStatic = false,
                 IsNullable = false,
-                Getter = o => ((dynamic)o).DataSource,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassWithClassDataSource<>), "DataSource"),
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
             }
@@ -1254,7 +1254,7 @@ internal static class TUnit_TestProject_Bugs__4431_GenericClassGenericMethodWith
                 Name = "DataSource",
                 IsStatic = false,
                 IsNullable = false,
-                Getter = o => ((dynamic)o).DataSource,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._4431.GenericClassGenericMethodWithDataSources<>), "DataSource"),
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
             }
