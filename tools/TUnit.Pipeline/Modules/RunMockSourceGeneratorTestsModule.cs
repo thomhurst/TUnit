@@ -8,6 +8,7 @@ using TUnit.Pipeline.Modules.Abstract;
 
 namespace TUnit.Pipeline.Modules;
 
+[ModuleCategory(PipelineCategories.PlatformNeutral)]
 [NotInParallel("SnapshotTests")]
 public class RunMockSourceGeneratorTestsModule : TestBaseModule
 {

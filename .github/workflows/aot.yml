@@ -32,7 +32,10 @@ jobs:
     name: AOT (${{ matrix.os }})
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # macOS runners are the scarcest, so pull requests leave them out: their macOS job is the
+        # dotnet.yml pipeline, which also runs the Reflection-mode engine tests. Pushes to main
+        # and manual runs keep macOS, so UploadToNuGetModule still waits for it before publishing.
+        os: ${{ fromJSON(github.event_name == 'pull_request' && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest","windows-latest","macos-latest"]') }}
       fail-fast: false
     runs-on: ${{ matrix.os }}
 
@@ -145,7 +148,8 @@ jobs:
     name: Engine tests (${{ matrix.os }})
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Same platforms as the aot job: on pull requests the macOS engine tests run in dotnet.yml.
+        os: ${{ fromJSON(github.event_name == 'pull_request' && '["ubuntu-latest","windows-latest"]' || '["ubuntu-latest","windows-latest","macos-latest"]') }}
       fail-fast: false
     runs-on: ${{ matrix.os }}
 

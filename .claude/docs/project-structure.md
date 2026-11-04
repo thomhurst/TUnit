@@ -1,6 +1,6 @@
 # Architecture and Source Locations
 
-Product projects live in `src/`, tests in `tests/`, and benchmarks in `benchmarks/`. Test project names generally match the product project. Examples are in `examples/`; build imports in `eng/`; developer scripts in `scripts/`; CI orchestration in `tools/TUnit.Pipeline`.
+Product projects live in `src/`, tests in `tests/`, and benchmarks in `benchmarks/`. Test project names generally match the product project. Examples are in `examples/`; build imports in `eng/`; developer scripts in `scripts/`; CI orchestration in `tools/TUnit.Pipeline`. Tag a new pipeline test module whose result cannot depend on the operating system with `[ModuleCategory(PipelineCategories.PlatformNeutral)]`: macOS skips those suites on pull requests because Ubuntu and Windows already run them.
 
 | Project under `src/` | Responsibility |
 | --- | --- |
