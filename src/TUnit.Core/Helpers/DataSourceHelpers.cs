@@ -192,6 +192,11 @@ public static class DataSourceHelpers
             return [null];
         }
 
+        if (value is TupleArgument argument)
+        {
+            return argument.Elements;
+        }
+
 #if NET5_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER
         // Try to use ITuple interface first for any ValueTuple type (available in .NET Core 3.0+)
         if (value is ITuple tuple)
@@ -501,9 +506,13 @@ public static class DataSourceHelpers
                 if (TupleHelper.IsTupleType(expectedTypes[0])
                     && (expectedTypes.Length == 1 || expectedTypes[0].IsInstanceOfType(item)))
                 {
-                    return RequiresFlattenedTupleBinding(item)
-                        ? UnwrapTupleAot(item)
-                        : [item];
+                    if (RequiresFlattenedTupleBinding(item))
+                    {
+                        var elements = UnwrapTupleAot(item);
+                        return expectedTypes.Length == 1 ? elements : [new TupleArgument(item.GetType(), elements)];
+                    }
+
+                    return [item];
                 }
 
                 return UnwrapTupleWithTypes(item, expectedTypes);
@@ -543,6 +552,11 @@ public static class DataSourceHelpers
 
     public static bool IsTuple(object? obj)
     {
+        if (obj is TupleArgument)
+        {
+            return true;
+        }
+
         if (obj is null)
         {
             return false;

@@ -959,6 +959,15 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return;
         }
 
+        if (item is Helpers.TupleArgument retained)
+        {
+            foreach (var element in retained.Elements)
+            {
+                ProcessRootObject(element, tryAdd, onRootObjectAdded, cancellationToken, tupleDepth + 1);
+            }
+            return;
+        }
+
 #if NET
         if (item is System.Runtime.CompilerServices.ITuple tuple)
         {

@@ -8,7 +8,7 @@ internal static class TupleArguments
     // previously saw them as separate data-row arguments. Ordinary rows allocate nothing.
     public static object?[] Expand(object?[] arguments)
     {
-        if (!Array.Exists(arguments, static argument => argument is not null && TupleHelper.IsTupleType(argument)))
+        if (!Array.Exists(arguments, static argument => argument is not null && (argument is TupleArgument || TupleHelper.IsTupleType(argument))))
         {
             return arguments;
         }
@@ -31,6 +31,14 @@ internal static class TupleArguments
             expanded.Add(argument);
             if (depth >= 50)
             {
+                return;
+            }
+            if (argument is TupleArgument retained)
+            {
+                foreach (var element in retained.Elements)
+                {
+                    Add(element, depth + 1);
+                }
                 return;
             }
 #if NET

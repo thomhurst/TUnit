@@ -955,6 +955,7 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             return false;
         }
 
+        // testParameterTypes and this parameter list both exclude engine-injected tokens.
         var cancellationToken = context.Compilation.GetTypeByMetadataName("System.Threading.CancellationToken");
         return method.Parameters.Where(parameter => !SymbolEqualityComparer.Default.Equals(parameter.Type, cancellationToken))
             .Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams);

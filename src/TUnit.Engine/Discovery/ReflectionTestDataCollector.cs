@@ -3728,10 +3728,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         if (GetTupleElementTypes(targetType) is { } targetElements
-            && GetTupleElementTypes(value.GetType()) is { } sourceElements
-            && targetElements.Length == sourceElements.Length)
+            && DataSourceHelpers.IsTuple(value)
+            && DataSourceHelpers.UnwrapTupleAot(value) is { } elements
+            && targetElements.Length == elements.Length)
         {
-            var elements = DataSourceHelpers.UnwrapTupleAot(value);
             var index = 0;
             return ConstructInvocationTuple(targetType, elements, ref index);
         }

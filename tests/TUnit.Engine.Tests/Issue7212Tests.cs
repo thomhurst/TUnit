@@ -15,8 +15,8 @@ public class Issue7212Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7212/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(18),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(18),
+                result => result.ResultSummary.Counters.Total.ShouldBe(33),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(33),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }

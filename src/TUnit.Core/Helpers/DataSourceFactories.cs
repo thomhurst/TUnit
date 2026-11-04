@@ -310,10 +310,10 @@ public static class DataSourceFactories
 
     // Preserve tuple-valued properties and distinguish null rows from tuples holding null.
     // Method arguments with struct initializers need flattened boxes for reconstruction after initialization.
-    private readonly record struct TupleRowBinding(bool Preserve, Type? MatchingType = null, bool IsProperty = false)
+    private readonly record struct TupleRowBinding(bool Preserve, Type? MatchingType = null, bool AllowMutableElements = false)
     {
         public static readonly TupleRowBinding Spread = new(false);
-        public static readonly TupleRowBinding PreserveWhole = new(true, IsProperty: true);
+        public static readonly TupleRowBinding PreserveWhole = new(true, AllowMutableElements: true);
         public static readonly TupleRowBinding PreserveUnlessInitializer = new(true);
     }
 
@@ -333,10 +333,15 @@ public static class DataSourceFactories
         {
             item = DataSourceHelpers.InvokeIfFunc(item);
             if (DataSourceHelpers.IsTuple(item)
-                && (tupleRowBinding.MatchingType is null || tupleRowBinding.MatchingType.IsInstanceOfType(item))
-                && (tupleRowBinding.IsProperty
-                    || !DataSourceHelpers.RequiresFlattenedTupleBinding(item!)))
+                && (tupleRowBinding.MatchingType is null || tupleRowBinding.MatchingType.IsInstanceOfType(item)))
             {
+                if (!tupleRowBinding.AllowMutableElements && DataSourceHelpers.RequiresFlattenedTupleBinding(item!))
+                {
+                    return tupleRowBinding.MatchingType is null
+                        ? DataSourceHelpers.UnwrapTupleAot(item)
+                        : [new TupleArgument(item!.GetType(), DataSourceHelpers.UnwrapTupleAot(item))];
+                }
+
                 return [item];
             }
         }

@@ -644,7 +644,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
 
                 [MethodDataSource(nameof(Rows))]
                 [Test]
-                public void MyTest((int, int) pair, int extra = 5)
+                public void MyTest((int, int) pair, {{tail}})
                 {
                 }
             }
