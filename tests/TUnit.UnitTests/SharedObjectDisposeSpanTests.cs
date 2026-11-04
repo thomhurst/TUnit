@@ -104,6 +104,46 @@ public class SharedObjectDisposeSpanTests
     }
 
     [Test]
+    public async Task Listener_Changes_Do_Not_Duplicate_Captured_Activities()
+    {
+        var context = CreateContext();
+        using var scope = new StoppedActivityScope(context);
+        using var source = new ActivitySource(TUnitActivitySource.LifecycleSourceName);
+        using var addedListener = new ActivityListener
+        {
+            ShouldListenTo = candidate => ReferenceEquals(candidate, source)
+        };
+        var listenerAdded = false;
+        using var changingListener = new ActivityListener
+        {
+            ShouldListenTo = candidate => ReferenceEquals(candidate, source),
+            ActivityStopped = _ =>
+            {
+                if (!listenerAdded)
+                {
+                    listenerAdded = true;
+                    ActivitySource.AddActivityListener(addedListener);
+                }
+            }
+        };
+        ActivitySource.AddActivityListener(changingListener);
+
+        const string name = "dispose listener-mutation";
+        using (source.StartActivity(name, ActivityKind.Internal, context.ClassContext.Activity!.Context))
+        {
+        }
+
+        await Assert.That(scope.Activities).HasCount(1);
+
+        // Separate disposal spans must remain separate, even with the same name and parent.
+        using (source.StartActivity(name, ActivityKind.Internal, context.ClassContext.Activity!.Context))
+        {
+        }
+
+        await Assert.That(scope.Activities).HasCount(2);
+    }
+
+    [Test]
     public async Task Overlapping_Listeners_Capture_Only_Their_Own_Parents_Without_ExecutionContext()
     {
         var firstContext = CreateContext();
@@ -231,7 +271,7 @@ public class SharedObjectDisposeSpanTests
     private sealed class StoppedActivityScope : IDisposable
     {
         private readonly ActivityListener _listener;
-        private readonly ConcurrentQueue<Activity> _activities = new();
+        private readonly ConcurrentDictionary<Activity, byte> _activities = new(ReferenceEqualityComparer.Instance);
 
         public StoppedActivityScope(TestContext testContext, string? parentIndependentOperationName = null)
         {
@@ -248,16 +288,18 @@ public class SharedObjectDisposeSpanTests
                          || activity.ParentSpanId == classSpanId || activity.ParentSpanId == assemblySpanId)
                         && activity.OperationName.StartsWith("dispose ", StringComparison.Ordinal))
                     {
-                        _activities.Enqueue(activity);
+                        // .NET 8 can repeat callbacks when another listener is added or removed
+                        // during notification. Count spans by identity, not callback invocations.
+                        _activities.TryAdd(activity, 0);
                     }
                 },
             };
             ActivitySource.AddActivityListener(_listener);
         }
 
-        public IReadOnlyCollection<Activity> Activities => _activities.ToArray();
+        public IReadOnlyCollection<Activity> Activities => _activities.Keys.ToArray();
 
-        public Activity Single(string name) => _activities.Single(a => a.OperationName == name);
+        public Activity Single(string name) => _activities.Keys.Single(a => a.OperationName == name);
 
         public void Dispose()
         {
