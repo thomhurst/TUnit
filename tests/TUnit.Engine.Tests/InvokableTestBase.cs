@@ -51,6 +51,13 @@ public abstract class InvokableTestBase(TestMode testMode)
         };
     }
 
+    protected Task RunTestsWithSourceGeneration(string filter,
+        List<Action<TestRun>> assertions,
+        [CallerArgumentExpression(nameof(assertions))] string assertionExpression = "")
+    {
+        return RunWithoutAot(filter, assertions, new RunOptions(), assertionExpression);
+    }
+
     private async Task RunWithoutAot(string filter,
         List<Action<TestRun>> assertions, RunOptions runOptions, string assertionExpression)
     {
