@@ -583,3 +583,20 @@ public class ExplicitInheritedDeferredConstructorRows<T>(int id, T value) : Inhe
         }
     }
 }
+
+[GenerateGenericTest(typeof(string))]
+[MethodDataSource(nameof(Rows))]
+public class ExplicitOnlyDeferredConstructorRows<T>(T value)
+{
+    public static IEnumerable<object> Rows() => ["constructor"];
+
+    [Test]
+    [Arguments("method")]
+    public void Test(T methodValue)
+    {
+        if (value is not "constructor" || methodValue is not "method")
+        {
+            throw new InvalidOperationException("Expected the sole deferred constructor provider row.");
+        }
+    }
+}

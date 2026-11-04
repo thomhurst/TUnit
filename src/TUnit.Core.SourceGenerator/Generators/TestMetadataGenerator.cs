@@ -2790,7 +2790,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine($"testDataSources: {dsWriter},");
         }
 
-        if (classDataSources.Length > 0)
+        if (classDataSources.Length > 0 || classDataSourcePartition is { AlwaysActiveSources.Length: > 0 })
         {
             var dsWriter = new CodeWriter(includeHeader: false);
             if (classDataSourcePartition is not null)
