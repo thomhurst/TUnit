@@ -357,6 +357,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                 }
             }
 
+            // Keep erased value-tuple rows whole so nested elements survive until binding.
             if (preserveGenericTuple)
             {
                 item = DataSourceHelpers.InvokeIfFunc(item);

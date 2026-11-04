@@ -16,8 +16,8 @@ public static class DataSourceHelpers
         => parameter.Type == typeof(object)
             && parameter.TypeInfo is ConstructedGeneric generic
             && generic.GenericDefinition.FullName is { } name
-            && (name.StartsWith("System.ValueTuple`", StringComparison.Ordinal)
-                || name.StartsWith("System.Tuple`", StringComparison.Ordinal));
+            // Reference tuples must stay flattened for element conversions in the invoker.
+            && name.StartsWith("System.ValueTuple`", StringComparison.Ordinal);
 
     private static readonly ConcurrentDictionary<Type, bool> TupleMutableElementShapes = new();
 

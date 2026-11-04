@@ -35,4 +35,12 @@ public class PreservedGenericTupleTests
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That(first).IsEqualTo((T)(object)1);
     }
+
+    public Tuple<string> ReferenceRow() => Tuple.Create("text");
+
+    [Test, GenerateGenericTest(typeof(object)), InstanceMethodDataSource(nameof(ReferenceRow))]
+    public async Task ReferenceElementConversion<T>(Tuple<T> row)
+    {
+        await Assert.That(row.Item1).IsEqualTo((T)(object)"text");
+    }
 }
