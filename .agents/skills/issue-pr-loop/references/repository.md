@@ -32,7 +32,7 @@ Draft CI: since #7345, the `.NET`, `AOT`, and other PR workflows skip draft PRs 
 
 ## Merge gate
 
-`main` branch protection requires `modularpipeline (ubuntu-latest)`, `modularpipeline (macos-latest)`, and resolved conversations, with no required approvals. It cannot read review bodies, so the scripts and you cover the rest:
+`main` branch protection requires `modularpipeline (ubuntu-latest)`, `modularpipeline (macos-latest)`, the three `Engine tests` and three `AOT` platform checks (Ubuntu, Windows, macOS), and resolved conversations, with no required approvals. It cannot read review bodies, so the scripts and you cover the rest:
 
 - `scripts/Assert-PrGreen.ps1 -Pr <N>` is the read-only gate. It requires an open, ready, `CLEAN` PR, every current check green (not only the required ones), a passing `claude-review` check on the head, and no unresolved threads. `-ForAutoMerge` lets CI checks be pending but still requires `claude-review` to have passed.
 - `scripts/Enable-AutoMerge.ps1 -Pr <N>` runs the `-ForAutoMerge` gate and arms squash auto-merge pinned to the head. GitHub merges once the required checks pass.

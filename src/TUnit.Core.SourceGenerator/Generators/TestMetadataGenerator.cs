@@ -9696,10 +9696,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        var constructor = classSymbol.Constructors
-            .Where(c => !c.IsStatic && c.DeclaredAccessibility == Accessibility.Public)
-            .OrderByDescending(c => c.Parameters.Length)
-            .FirstOrDefault();
+        var constructor = GetClassRowConstructor(classSymbol);
         if (constructor is not { Parameters.Length: > 0 })
         {
             return null;
