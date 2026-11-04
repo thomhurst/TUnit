@@ -109,24 +109,44 @@ public class HostedServiceStopOnceTests
         using var inner = new SynchronouslyBlockingStopHostedService();
         var wrapper = new FlowSuppressingHostedService(inner);
 
-        var first = Task.Run(() => wrapper.StopAsync(CancellationToken.None));
-        inner.WaitUntilEntered();
+        // The inner stop blocks synchronously. Dedicated threads keep both callers
+        // independent of thread-pool starvation under parallel CI load.
+        var first = Task.Factory.StartNew(
+            () => wrapper.StopAsync(CancellationToken.None),
+            CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+        Task? second = null;
 
         using var cancellationTokenSource = new CancellationTokenSource();
         cancellationTokenSource.Cancel();
 
         try
         {
-            var second = Task.Run(() => wrapper.StopAsync(cancellationTokenSource.Token));
-            await Assert.That(async () => await second.WaitAsync(TimeSpan.FromSeconds(1)))
+            inner.WaitUntilEntered();
+            second = Task.Factory.StartNew(
+                () => wrapper.StopAsync(cancellationTokenSource.Token),
+                CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+            await Assert.That(async () => await second.WaitAsync(TimeSpan.FromSeconds(5)))
                 .Throws<OperationCanceledException>();
         }
         finally
         {
             inner.Release();
+            // Drain callers before disposing the synchronization gates, even if
+            // the assertion or startup handshake fails.
+            await first;
+            if (second is not null)
+            {
+                try
+                {
+                    await second;
+                }
+                catch (OperationCanceledException) when (cancellationTokenSource.IsCancellationRequested)
+                {
+                    // Cancellation is asserted above while the inner stop is blocked.
+                }
+            }
         }
 
-        await first;
         await Assert.That(inner.StopCalls).IsEqualTo(1);
     }
 
