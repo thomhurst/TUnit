@@ -97,4 +97,25 @@ public class PreservedGenericTupleTests
         await Assert.That(row.Item1).IsNull();
     }
 
+    public ValueTuple<int> TypedSingletonRow() => new(1);
+
+    [Test, GenerateGenericTest(typeof(object)), InstanceMethodDataSource(nameof(TypedSingletonRow))]
+    public async Task SingletonValueTupleElementConversion<T>(ValueTuple<T> row)
+    {
+        await Assert.That(row.Item1 is int).IsTrue();
+        await Assert.That(row.Item1).IsEqualTo((T)(object)1);
+    }
+
+    [Test, GenerateGenericTest(typeof(int)), InstanceMethodDataSource(nameof(ValueTupleIntegerRow))]
+    public async Task SingletonValueTupleMatchingElement<T>(ValueTuple<T> row)
+    {
+        await Assert.That(row.Item1).IsEqualTo((T)(object)1);
+    }
+
+    [Test, GenerateGenericTest(typeof(object)), InstanceMethodDataSource(nameof(NullValueTupleRow))]
+    public async Task SingletonValueTupleNullElement<T>(ValueTuple<T> row)
+    {
+        await Assert.That(row.Item1).IsNull();
+    }
+
 }
