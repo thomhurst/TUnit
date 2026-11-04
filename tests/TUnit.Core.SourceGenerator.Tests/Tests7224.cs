@@ -14,10 +14,20 @@ internal class Tests7224 : TestsBase
             await Assert.That(generated).Contains("instance.WrappedDelegateArray<global::System.Func<int>>(");
             await Assert.That(generated).Contains("instance.WrappedDelegateArrayWithFirst<global::System.Func<int>>(");
             await Assert.That(generated).Contains("instance.ExternalWrappedArray<global::System.Uri>(");
-            foreach (var method in new[] { "ConstructorArray", "WrappedArrayPlainTrailing", "WrappedArrayEmptyPlainTrailing", "NestedWrappedTuple", "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "WrappedArrayPair", "WrappedArrayLaterParameter", "WrappedArrayOptional", "WrappedArraySuppliedOptional", "WrappedArrayEmptyParams", "WrappedArrayParams", "WrappedArrayLaterParams", "OptionalFillsMissingType", "ReferenceTuple", "Interface", "BaseType", "MixedSources" })
+            foreach (var method in new[] { "ScalarEmptyPlainTrailing", "TupleEmptyPlainTrailing", "ConstructorArray", "WrappedArrayPlainTrailing", "WrappedArrayEmptyPlainTrailing", "NestedWrappedTuple", "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "WrappedArrayPair", "WrappedArrayLaterParameter", "WrappedArrayOptional", "WrappedArraySuppliedOptional", "WrappedArrayEmptyParams", "WrappedArrayParams", "WrappedArrayLaterParams", "OptionalFillsMissingType", "ReferenceTuple", "Interface", "BaseType", "MixedSources" })
             {
                 await Assert.That(generated).Contains($"instance.{method}(");
             }
+        });
+
+    [Test]
+    public Task Wrapped_arrays_infer_constructor_scalar_types() => RunTest(
+        Path.Combine(Git.TestsDirectory.FullName, "TUnit.TestProject", "Bugs", "_7224", "WrappedArrayConstructorScalarInferenceTests.cs"),
+        async files =>
+        {
+            var generated = string.Join(Environment.NewLine, files);
+            await Assert.That(generated).Contains("WrappedArrayConstructorScalarInferenceTests<string>");
+            await Assert.That(generated).Contains("WrappedArrayConstructorPairInferenceTests<string, string>");
         });
 
     [Test]

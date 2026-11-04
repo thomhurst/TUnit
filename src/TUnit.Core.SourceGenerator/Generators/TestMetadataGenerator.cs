@@ -8120,10 +8120,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // every [GenerateGenericTest] instantiation, whatever the row's shape: IEnumerable<T>, object[], or a
             // tuple whose generic constructor column is declared as object, such as (object, string). A row that
             // names T in one column can still infer it from another: (int, T) on C<T>(T first, T second) infers int.
-            var rowType = GetMethodDataSourceRowType(member, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
+            var rowType = GetMethodDataSourceRowType(member, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation, out var spreadsReferenceArray);
             var inferred = rowType == null
                 ? null
-                : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType);
+                : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType, spreadsReferenceArray);
             if (GenericClassInferencePolicy.IncludesRow(inferred is null ? null : inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default), includeUninferred))
             {
                 yield return attribute;
@@ -8139,7 +8139,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// constructor's single tuple parameter whole. Null when a type argument stays unknown or would be
     /// <c>object</c>. Mirrors reflection mode's <c>InferClassTypeArgumentsFromOwnMemberRowType</c> (#7208).
     /// </summary>
-    private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType)
+    private static ITypeSymbol[]? InferClassTypesFromOwnMemberRowType(INamedTypeSymbol classSymbol, ITypeSymbol rowType, bool spreadsReferenceArray)
     {
         var constructors = classSymbol.InstanceConstructors
             .Where(constructor => constructor.DeclaredAccessibility == Accessibility.Public)
@@ -8150,17 +8150,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             attribute.AttributeClass?.ToDisplayString() == WellKnownFullyQualifiedClassNames.TestConstructorAttribute.WithoutGlobalPrefix));
         if (testConstructor != null)
         {
-            return InferClassTypesFromConstructorRow(testConstructor, rowType, classSymbol.TypeParameters);
+            return InferClassTypesFromConstructorRow(testConstructor, rowType, classSymbol.TypeParameters, spreadsReferenceArray);
         }
 
         if (constructors.Length > 0 && !constructors.Any(constructor => constructor.Parameters.Length == 0))
         {
-            return InferClassTypesFromConstructorRow(constructors[0], rowType, classSymbol.TypeParameters);
+            return InferClassTypesFromConstructorRow(constructors[0], rowType, classSymbol.TypeParameters, spreadsReferenceArray);
         }
 
         foreach (var constructor in constructors)
         {
-            if (InferClassTypesFromConstructorRow(constructor, rowType, classSymbol.TypeParameters) is { } typeArguments)
+            if (InferClassTypesFromConstructorRow(constructor, rowType, classSymbol.TypeParameters, spreadsReferenceArray) is { } typeArguments)
             {
                 return typeArguments;
             }
@@ -8169,11 +8169,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol rowType, ImmutableArray<ITypeParameterSymbol> typeParameters)
+    private static ITypeSymbol[]? InferClassTypesFromConstructorRow(IMethodSymbol constructor, ITypeSymbol rowType, ImmutableArray<ITypeParameterSymbol> typeParameters, bool spreadsReferenceArray)
     {
         // A tuple row fills one tuple parameter whole, as the runtime passes it, and otherwise spreads one column
         // per parameter. Like the runtime, which unwraps any ITuple, this treats a System.Tuple row as a value tuple one.
-        ITypeSymbol[] rowElements = (constructor.Parameters is not [{ Type: var single }] || GetTupleElementTypes(single) == null)
+        // A wrapped reference array supplies its element type to every parameter, including elements collected
+        // by a trailing array parameter.
+        ITypeSymbol[] rowElements = !spreadsReferenceArray && (constructor.Parameters is not [{ Type: var single }] || GetTupleElementTypes(single) == null)
             && GetTupleElementTypes(rowType) is { } tupleElements
             ? tupleElements
             : [rowType];
@@ -8181,10 +8183,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         for (var i = 0; i < typeParameters.Length; i++)
         {
-            for (var j = 0; j < constructor.Parameters.Length && j < rowElements.Length && typeArguments[i] == null; j++)
+            for (var j = 0; j < constructor.Parameters.Length && (spreadsReferenceArray || j < rowElements.Length) && typeArguments[i] == null; j++)
             {
-                if (rowElements[j].SpecialType != SpecialType.System_Object
-                    && MatchTypeParameter(constructor.Parameters[j].Type, rowElements[j], typeParameters[i]) is { } typeArgument
+                var elementType = spreadsReferenceArray ? rowType : rowElements[j];
+                if (elementType.SpecialType != SpecialType.System_Object
+                    && MatchTypeParameter(
+                        spreadsReferenceArray && j == constructor.Parameters.Length - 1 && constructor.Parameters[j].Type is IArrayTypeSymbol { IsSZArray: true } array
+                            ? array.ElementType
+                            : constructor.Parameters[j].Type, elementType, typeParameters[i]) is { } typeArgument
                     && !CodeGenerationHelpers.ContainsTypeParameter(typeArgument)
                     && typeArgument.SpecialType != SpecialType.System_Object)
                 {
@@ -8708,7 +8714,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// arguments (<c>object</c> or <c>object[]</c> rows, or a non-generic <c>IEnumerable</c>), since
     /// those are only known at runtime.
     /// </summary>
-    // Constructor matching needs the whole array; method matching additionally consumes its spread shape.
+    // Callers that do not consume spread metadata retain the original array type.
     private static ITypeSymbol? GetMethodDataSourceRowType(ISymbol dataSourceMember, MethodDataSourceRowTypes wellKnown, Compilation compilation)
         => GetMethodDataSourceRowType(dataSourceMember, wellKnown, compilation, out _, normalizeReferenceArray: false);
 

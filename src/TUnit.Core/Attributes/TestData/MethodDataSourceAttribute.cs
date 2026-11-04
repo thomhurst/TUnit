@@ -445,7 +445,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// (#7208). Keep it in step with <see cref="GetRowsFromRuntimeValueAsync"/>; MethodDataSourceDeclaredRowTypeTests
     /// checks the two against each other.
     /// </summary>
-    // Constructor inference consumes the array as a whole; method inference also needs its spread shape.
+    // Callers that do not consume spread metadata retain the original array type.
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     internal static Type? GetDeclaredRowType(Type memberType)
         => GetDeclaredRowTypeCore(memberType, out _, out _, normalizeReferenceArray: false);

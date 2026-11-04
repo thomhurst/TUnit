@@ -2568,7 +2568,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             if (!parameter.IsOptional
                 && !parameter.HasDefaultValue
                 && !parameter.IsDefined(typeof(ParamArrayAttribute), false)
-                && !IsParamCollection(parameter))
+                && !IsParamCollection(parameter)
+                && !(parameter == dataParameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
             {
                 requiredCount++;
             }
@@ -2909,7 +2910,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         constructor = null;
         if (methodDataSource.GetDeclaredMemberType(genericTypeDefinition) is not { } memberType
-            || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType)
+            || MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is not { } rowType)
         {
             return null;
         }
@@ -2923,7 +2924,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             if (candidate.IsDefined(typeof(TestConstructorAttribute), inherit: false))
             {
                 constructor = candidate;
-                return InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters);
+                return InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters, spreadsReferenceArray);
             }
         }
 
@@ -2931,12 +2932,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         if (constructors.Length > 0 && !HasParameterlessConstructor(constructors))
         {
             constructor = constructors[0];
-            return InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowType, typeParameters);
+            return InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowType, typeParameters, spreadsReferenceArray);
         }
 
         foreach (var candidate in constructors)
         {
-            if (InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters) is { } typeArguments)
+            if (InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters, spreadsReferenceArray) is { } typeArguments)
             {
                 constructor = candidate;
                 return typeArguments;
@@ -2991,22 +2992,27 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
-    private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type rowType, Type[] typeParameters)
+    private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type rowType, Type[] typeParameters, bool spreadsReferenceArray)
     {
         // A tuple row fills one tuple parameter whole, as DataSourceHelpers.ToObjectArrayWithTypes passes it, and
         // otherwise spreads one column per parameter. Like that reader, which unwraps any ITuple, this treats a
-        // System.Tuple row as a value tuple one.
-        Type[] rowElements = parameters is [{ ParameterType: var single }] && GetTupleElementTypes(single) != null
+        // System.Tuple row as a value tuple one. A wrapped reference array supplies its element type to each
+        // parameter, with the final array parameter collecting elements rather than taking the whole array.
+        Type[] rowElements = spreadsReferenceArray || parameters is [{ ParameterType: var single }] && GetTupleElementTypes(single) != null
             ? [rowType]
             : GetTupleElementTypes(rowType) ?? [rowType];
         var typeArguments = new Type[typeParameters.Length];
 
         for (var i = 0; i < typeParameters.Length; i++)
         {
-            for (var j = 0; j < parameters.Length && j < rowElements.Length && typeArguments[i] == null; j++)
+            for (var j = 0; j < parameters.Length && (spreadsReferenceArray || j < rowElements.Length) && typeArguments[i] == null; j++)
             {
-                if (rowElements[j] != typeof(object)
-                    && ReflectionGenericTypeResolver.MatchTypeParameter(parameters[j].ParameterType, rowElements[j], typeParameters[i]) is { ContainsGenericParameters: false } typeArgument
+                var elementType = spreadsReferenceArray ? rowType : rowElements[j];
+                if (elementType != typeof(object)
+                    && ReflectionGenericTypeResolver.MatchTypeParameter(
+                        spreadsReferenceArray && j == parameters.Length - 1 && IsSingleDimensionalZeroBasedArray(parameters[j].ParameterType)
+                            ? parameters[j].ParameterType.GetElementType()!
+                            : parameters[j].ParameterType, elementType, typeParameters[i]) is { ContainsGenericParameters: false } typeArgument
                     && typeArgument != typeof(object))
                 {
                     typeArguments[i] = typeArgument;
