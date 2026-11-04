@@ -23,6 +23,14 @@ internal class NullableClassMethodRowsTests : TestsBase
             await Assert.That(generated.Contains("__mm_1")).IsFalse();
         }
 
+        var partitionedSources = generatedFiles.Single(file => file.Contains("\"PartitionsBesideLiteral\""));
+        var intSources = partitionedSources.Split("testDataSources:")[1].Split("classDataSources:")[0];
+        await Assert.That(intSources.Contains(".IntRows()")).IsTrue();
+        await Assert.That(intSources.Contains(".DoubleRows()")).IsFalse();
+        var doubleSources = partitionedSources.Split("testDataSources:")[2].Split("classDataSources:")[0];
+        await Assert.That(doubleSources.Contains(".DoubleRows()")).IsTrue();
+        await Assert.That(doubleSources.Contains(".IntRows()")).IsFalse();
+
         var constructorSources = generatedFiles.Single(file => file.Contains("\"RetainsInstanceBesideConstructor\""));
         await Assert.That(constructorSources.Contains(".InstanceRows()")).IsTrue();
         var untypedSources = generatedFiles.Single(file => file.Contains("\"RetainsUntypedSource\""));

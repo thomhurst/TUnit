@@ -1424,6 +1424,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // As in reflection discovery, each source belongs to the class types its row infers.
                     // Sources inferring the same types join the existing instantiation.
                     TryAddInstantiation(inferredTypes, scopesClassMethodSources ? mdsAttr : null);
+                    if (scopesClassMethodSources)
+                    {
+                        uninferredMethodDataSources?.Remove(mdsAttr);
+                    }
                 }
                 else
                 {

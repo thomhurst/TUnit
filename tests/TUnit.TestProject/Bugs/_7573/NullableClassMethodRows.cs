@@ -238,3 +238,27 @@ public class AdditionalUntypedRowAttribute : UntypedDataSourceGeneratorAttribute
     protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata metadata)
         => [() => [2]];
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+public class LiteralAndMethodClassRows<T> where T : struct
+{
+    public static IEnumerable<int> IntRows() => [42];
+    public static IEnumerable<double> DoubleRows() => [84d];
+
+    [Test]
+    [Arguments(null)]
+    [MethodDataSource(nameof(IntRows))]
+    [MethodDataSource(nameof(DoubleRows))]
+    public async Task PartitionsBesideLiteral(T? value)
+    {
+        if (value is null)
+        {
+            await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        }
+        else
+        {
+            await Assert.That(value).IsEqualTo(typeof(T) == typeof(int) ? (T)(object)42 : (T)(object)84d);
+        }
+    }
+}
