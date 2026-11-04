@@ -1384,7 +1384,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// constructor parameters that do not use the class's type parameters, as <c>[Arguments(42)]</c> on
     /// <c>C&lt;T&gt;(int number)</c>, or that have no values, and returns them, or null when there are none. Such a row supplies no class
     /// type argument (#7209). Rows that mention only some class type parameters are also split off:
-    /// they cannot create a closed class and need method rows to infer its types. Mirrors
+    /// unless the existing row-value fallback can close them, they need method rows to infer their types. Mirrors
     /// <c>TestMetadataGenerator.ClassRowSuppliesNoTypeArguments</c> with partial rows enabled.
     /// </summary>
     private static IDataSourceAttribute[]? SplitTypeFreeClassRows(Type genericTypeDefinition, ref IDataSourceAttribute[] classDataSources)
@@ -1476,7 +1476,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 if (!supplied)
                 {
-                    return true;
+                    // Preserve the row-value fallback used by DetermineGenericTypeArguments before
+                    // treating a partial constructor row as needing method inference.
+                    return !hasClassTypeParameter || dataSource is not ArgumentsAttribute row
+                        || GenericClassRowPartition.InferClassTypeArguments(row.Values, genericTypeDefinition.GetGenericArguments().Length) is null;
                 }
             }
         }

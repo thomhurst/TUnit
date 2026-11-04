@@ -7068,11 +7068,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (includePartialRows && classSymbol.TypeParameters.Any(typeParameter =>
                 !primaryConstructor.Parameters.Take(boundCount).Any(parameter => ContainsTypeParameter(parameter.Type, typeParameter))))
         {
-            return true;
+            return !hasClassTypeParameter || !ClassRowHasValueTypeFallback(classSymbol, argAttr);
         }
 
         return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(
             valueCount: valueCount, boundCount: boundCount, hasClassTypeParameter: hasClassTypeParameter);
+    }
+
+    // Reflection's row-value fallback can close a partial constructor row when each class
+    // parameter has a corresponding non-null value. Type-free rows retain their existing policy.
+    private static bool ClassRowHasValueTypeFallback(INamedTypeSymbol classSymbol, AttributeData attribute)
+    {
+        return HasArgumentsArray(attribute) && !IsNullArgumentsArray(attribute)
+            && attribute.ConstructorArguments[0].Values.Length >= classSymbol.TypeParameters.Length
+            && attribute.ConstructorArguments[0].Values.Take(classSymbol.TypeParameters.Length)
+                .All(value => !value.IsNull && value.Type is not null);
     }
 
     private static bool ContainsTypeParameter(ITypeSymbol type, ITypeParameterSymbol parameter) => type switch
@@ -7440,6 +7450,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
             return result;
+        }
+
+        // Match reflection's row-value fallback for partial constructor inference. Rows that
+        // bind no class parameter still rely on method rows, as before.
+        if (inferredTypes.Count > 0 && ClassRowHasValueTypeFallback(classSymbol, argAttr))
+        {
+            return argumentValues.Take(typeParameters.Length).Select(value => value.Type!).ToArray();
         }
 
         return null;

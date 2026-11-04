@@ -296,3 +296,32 @@ public class PartialConstructorNullableClassRows<T, U>(T seed) where T : struct
         await Assert.That(label!.ToString()).IsEqualTo("label");
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments("seed", 42)]
+public class PartialConstructorValueFallback<T, U>(T seed, int count)
+{
+    [Test]
+    public async Task RetainsConstructorValueFallback()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(typeof(U)).IsEqualTo(typeof(int));
+        await Assert.That(seed!.ToString()).IsEqualTo("seed");
+        await Assert.That(count).IsEqualTo(42);
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class RepeatedNullableClassParameter<T> where T : struct
+{
+    public static IEnumerable<(int, long)> Rows() => [(1, 2L)];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task LastOccurrenceInfersClassType(T first, T? second)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(long));
+        await Assert.That(first).IsEqualTo((T)(object)1L);
+        await Assert.That(second).IsEqualTo((T)(object)2L);
+    }
+}
