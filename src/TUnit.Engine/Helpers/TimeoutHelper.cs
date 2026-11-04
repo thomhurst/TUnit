@@ -108,7 +108,19 @@ internal static class TimeoutHelper
             timeoutCts.CancelAfter(timeout);
         }
 
-        var executionTask = taskFactory(timeoutCts.Token);
+        Task executionTask;
+        try
+        {
+            executionTask = taskFactory(timeoutCts.Token);
+        }
+        catch (OperationCanceledException exception)
+            when (timeoutCts.IsCancellationRequested
+                && IsTimeoutCancellationToken(exception.CancellationToken, timeoutCts.Token, testContext))
+        {
+            // A factory can observe cancellation before returning a task. Preserve its exception
+            // for the same classification and diagnostic handling as a returned faulted task.
+            executionTask = Task.FromException(exception);
+        }
 
         var winner = await Task.WhenAny(executionTask, cancelledTcs.Task).ConfigureAwait(false);
 
