@@ -133,7 +133,19 @@ internal class DataUnwrapper
             return DataSourceHelpers.UnwrapTupleAot(values[0]);
         }
 
-        var lastDataParameterType = expectedParameters[lastDataParameterIndex].Type;
+        var lastDataParameter = expectedParameters[lastDataParameterIndex];
+        var lastDataParameterType = lastDataParameter.Type;
+
+        // Generated metadata erases a parameter containing type parameters to object,
+        // but TypeInfo retains its tuple shape. Preserve all elements until the invoker
+        // closes the type; mutable elements still need the usual flattened binding.
+        if (dataParameterCount == 1
+            && DataSourceHelpers.IsErasedGenericTupleParameter(lastDataParameter))
+        {
+            return DataSourceHelpers.RequiresFlattenedTupleBinding(values[0]!)
+                ? DataSourceHelpers.UnwrapTupleAot(values[0])
+                : values;
+        }
 
         // Keep compatible tuples whole (including one-element tuples holding null).
         // Otherwise the invoker needs every element to reconstruct the target tuple

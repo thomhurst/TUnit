@@ -342,6 +342,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Use MembersToGenerate which contains the correct parameters for this data generator type
         // (constructor params for class-level, method params for method-level)
         var paramTypes = GetMemberTypes(dataGeneratorMetadata.MembersToGenerate);
+        var preserveGenericTuple = HasSingleErasedGenericTupleParameter(dataGeneratorMetadata.MembersToGenerate);
 
         object?[] ToRow(object? item)
         {
@@ -355,6 +356,23 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                     return [item];
                 }
             }
+
+            if (preserveGenericTuple)
+            {
+                item = DataSourceHelpers.InvokeIfFunc(item);
+                if (DataSourceHelpers.IsTuple(item))
+                {
+                    return DataSourceHelpers.RequiresFlattenedTupleBinding(item!)
+                        ? DataSourceHelpers.UnwrapTupleAot(item)
+                        : [item];
+                }
+
+                // Invoke only the outer factory, matching ToObjectArrayWithTypes.
+                return item is object?[] array && item.GetType() == typeof(object[])
+                    ? array
+                    : [item];
+            }
+
             return item.ToObjectArrayWithTypes(paramTypes);
         }
 
@@ -774,6 +792,32 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
         }
         return args;
+    }
+
+    private static bool HasSingleErasedGenericTupleParameter(IMemberMetadata[]? members)
+    {
+        ParameterMetadata? dataParameter = null;
+        foreach (var member in members ?? [])
+        {
+            if (member is not ParameterMetadata parameter)
+            {
+                return false;
+            }
+
+            if (parameter.Type == typeof(CancellationToken))
+            {
+                continue;
+            }
+
+            if (dataParameter is not null)
+            {
+                return false;
+            }
+
+            dataParameter = parameter;
+        }
+
+        return dataParameter is not null && DataSourceHelpers.IsErasedGenericTupleParameter(dataParameter);
     }
 
     private static Type[]? GetMemberTypes(IMemberMetadata[]? members)

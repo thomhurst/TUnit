@@ -12,6 +12,13 @@ namespace TUnit.Core.Helpers;
 /// </summary>
 public static class DataSourceHelpers
 {
+    internal static bool IsErasedGenericTupleParameter(ParameterMetadata parameter)
+        => parameter.Type == typeof(object)
+            && parameter.TypeInfo is ConstructedGeneric generic
+            && generic.GenericDefinition.FullName is { } name
+            && (name.StartsWith("System.ValueTuple`", StringComparison.Ordinal)
+                || name.StartsWith("System.Tuple`", StringComparison.Ordinal));
+
     private static readonly ConcurrentDictionary<Type, bool> TupleMutableElementShapes = new();
 
     // Property injection, initialization, and event callbacks mutate boxed structs.
