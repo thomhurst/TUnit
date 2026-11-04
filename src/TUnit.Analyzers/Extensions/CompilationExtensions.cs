@@ -56,6 +56,7 @@ public static class CompilationExtensions
         return compilation.HasImplicitConversion(argumentType?.OriginalDefinition, parameterType?.OriginalDefinition);
     }
 
+    // Nested generic arguments deliberately retain the existing inference behavior (#7520).
     private static bool ContainsArray(ITypeSymbol type) => type switch
     {
         IArrayTypeSymbol => true,
@@ -113,7 +114,7 @@ public static class CompilationExtensions
         // use the numeric or reference conversions available to a standalone tuple.
         if (requiresIdentity)
         {
-            return SymbolEqualityComparer.Default.Equals(argumentType, parameterType);
+            return compilation.ClassifyConversion(argumentType, parameterType).IsIdentity;
         }
 
         return compilation.HasImplicitConversionOrGenericParameter(argumentType, parameterType);
