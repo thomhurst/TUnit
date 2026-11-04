@@ -118,11 +118,14 @@ public class CleanupHooks
     [After(TestSession)]
     public static async Task VerifyCompletion()
     {
-        if (TrackedResource.Instance is null)
+        // Discovery constructs data rows even when this regression is filtered out.
+        // Only the dedicated child runs opt in to these session-wide assertions.
+        if (Environment.GetEnvironmentVariable("TUNIT_7338_COMPLETION_PATH") is not { } completionPath)
         {
             return;
         }
 
+        await Assert.That(TrackedResource.Instance).IsNotNull();
         await Assert.That(TrackedResource.Instance.DisposeCount).IsEqualTo(1);
         await Assert.That(TrackedRowAttribute.OnDisposeCount).IsEqualTo(1);
         await Assert.That(DependencySkippedCleanupTests.AfterClassCount).IsEqualTo(1);
@@ -131,9 +134,6 @@ public class CleanupHooks
         await Assert.That(TrackedResource.LastInAssembly).IsEqualTo(1);
         await Assert.That(TrackedResource.LastInSession).IsEqualTo(1);
 
-        if (Environment.GetEnvironmentVariable("TUNIT_7338_COMPLETION_PATH") is { } completionPath)
-        {
-            await File.WriteAllTextAsync(completionPath, "completed");
-        }
+        await File.WriteAllTextAsync(completionPath, "completed");
     }
 }
