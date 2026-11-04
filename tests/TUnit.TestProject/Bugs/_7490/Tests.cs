@@ -191,3 +191,56 @@ public class InheritedDeclaredRowPartition<T>(T value) : InheritedDeclaredRowBas
         }
     }
 }
+
+
+[Arguments(42)]
+[MethodDataSource(nameof(Rows))]
+public class DirectDeclaredRowPartition<T>(T value)
+{
+    public static IEnumerable<IComparable> Rows() => [43];
+
+    [Test]
+    public void Test()
+    {
+        if ((typeof(T) != typeof(int) || value is not 42)
+            && (typeof(T) != typeof(IComparable) || value is not 43))
+        {
+            throw new InvalidOperationException("Expected direct member rows to retain their declared interface type.");
+        }
+    }
+}
+
+[MethodDataSource(nameof(Rows), SkipIfEmpty = true)]
+public abstract class InheritedEmptyDeclaredRowBase
+{
+    public static IEnumerable<string> Rows() => [];
+}
+
+[Arguments(42)]
+public class InheritedEmptyDeclaredRowPartition<T>(T value) : InheritedEmptyDeclaredRowBase
+{
+    [Test]
+    public void Test()
+    {
+        if (typeof(T) != typeof(int) || value is not 42)
+        {
+            throw new InvalidOperationException("An empty inherited source must not fabricate a constructor row.");
+        }
+    }
+}
+
+[Arguments(42)]
+[MethodDataSource(nameof(Rows), SkipIfEmpty = true)]
+public class DirectEmptyDeclaredRowPartition<T>(T value)
+{
+    public static IEnumerable<string> Rows() => [];
+
+    [Test]
+    public void Test()
+    {
+        if (typeof(T) != typeof(int) || value is not 42)
+        {
+            throw new InvalidOperationException("An empty direct source must not fabricate a constructor row.");
+        }
+    }
+}

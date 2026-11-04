@@ -604,6 +604,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedOnlyArguments_T_Test
             fullyQualifiedName: "TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<int>.Test",
             filePath: "",
             lineNumber: 38,
+            hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(42),
@@ -647,6 +648,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedOnlyArguments_T_Test
             fullyQualifiedName: "TUnit.TestProject.Bugs._7490.InheritedOnlyArguments<string>.Test",
             filePath: "",
             lineNumber: 38,
+            hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute("base"),
@@ -986,7 +988,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "methodValue"
 {
     new global::TUnit.Core.ArgumentsAttribute(null),
 },
-            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(string) }, global::TUnit.Core.GenericClassRowFallback.AllRows, new global::TUnit.Core.IDataSourceAttribute[]
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(string) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
 {
     global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
 {
@@ -1066,6 +1068,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedExternalSource_T_Tes
             fullyQualifiedName: "TUnit.TestProject.Bugs._7490.InheritedExternalSource<string>.Test",
             filePath: "",
             lineNumber: 131,
+            hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7490.ExternalComparableRows), "Rows")
@@ -1146,6 +1149,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedConstrainedExternalS
             fullyQualifiedName: "TUnit.TestProject.Bugs._7490.InheritedConstrainedExternalSource<string>.Test",
             filePath: "",
             lineNumber: 145,
+            hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7490.ExternalComparableRows), "Rows")
@@ -1226,6 +1230,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedPrivateRowSource_T_T
             fullyQualifiedName: "TUnit.TestProject.Bugs._7490.InheritedPrivateRowSource<object>.Test",
             filePath: "",
             lineNumber: 165,
+            hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute(typeof(global::TUnit.TestProject.Bugs._7490.PrivateRowSourceBase), "Rows")
@@ -1306,6 +1311,7 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedDeclaredRowPartition
             fullyQualifiedName: "TUnit.TestProject.Bugs._7490.InheritedDeclaredRowPartition<int>.Test",
             filePath: "",
             lineNumber: 184,
+            hasDataSource: true,
             classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(int) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.ArgumentsAttribute(42),
@@ -1323,7 +1329,6 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedDeclaredRowPartition
     };
     private static global::TUnit.TestProject.Bugs._7490.InheritedDeclaredRowPartition<global::System.IComparable> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
     {
-        if (args.Length == 0) throw new global::System.InvalidOperationException("This method-level [Arguments] row infers class type arguments that none of the class-level data rows infer, so no class row supplies the constructor arguments for this instantiation. Add a class-level row with matching types, or change the method row to match an existing class row.");
         return new global::TUnit.TestProject.Bugs._7490.InheritedDeclaredRowPartition<global::System.IComparable>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.IComparable>(args[0]));
     }
     private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7490.InheritedDeclaredRowPartition<global::System.IComparable> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
@@ -1354,7 +1359,8 @@ internal static class TUnit_TestProject_Bugs__7490_InheritedDeclaredRowPartition
             fullyQualifiedName: "TUnit.TestProject.Bugs._7490.InheritedDeclaredRowPartition<IComparable>.Test",
             filePath: "",
             lineNumber: 184,
-            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(global::System.IComparable) }, global::TUnit.Core.GenericClassRowFallback.NoClassRow, new global::TUnit.Core.IDataSourceAttribute[]
+            hasDataSource: true,
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(global::System.IComparable) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
 {
     global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
 {
@@ -1376,4 +1382,411 @@ internal static partial class TUnit_TestRegistration
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_Bugs__7490_InheritedDeclaredRowPartition_T_Test_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7490.InheritedDeclaredRowPartition<global::System.IComparable>>(static () => TUnit_TestProject_Bugs__7490_InheritedDeclaredRowPartition_T_Test_TestSource.Entries_1);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7490_DirectDeclaredRowPartition_T_Test_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "DirectDeclaredRowPartition",
+        Namespace = "TUnit.TestProject.Bugs._7490",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata);
+    private static global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            instance.Test();
+            return default(global::System.Threading.Tasks.ValueTask);
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(42),
+            new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<int>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<int>.Test",
+            filePath: "",
+            lineNumber: 202,
+            hasDataSource: true,
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(int) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(42),
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+{
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<int>.Rows()),
+}, false, typeof(global::System.IComparable)),
+}, 1),
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+    private static global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<global::System.IComparable> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<global::System.IComparable>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.IComparable>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<global::System.IComparable> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            instance.Test();
+            return default(global::System.Threading.Tasks.ValueTask);
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_1(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(42),
+            new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<global::System.IComparable>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<global::System.IComparable>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<global::System.IComparable>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<IComparable>.Test",
+            filePath: "",
+            lineNumber: 202,
+            hasDataSource: true,
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(global::System.IComparable) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+{
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<global::System.IComparable>.Rows()),
+}, false, typeof(global::System.IComparable)),
+}, 0),
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7490_DirectDeclaredRowPartition_T_Test_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<int>>(static () => TUnit_TestProject_Bugs__7490_DirectDeclaredRowPartition_T_Test_TestSource.Entries_0);
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7490_DirectDeclaredRowPartition_T_Test_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7490.DirectDeclaredRowPartition<global::System.IComparable>>(static () => TUnit_TestProject_Bugs__7490_DirectDeclaredRowPartition_T_Test_TestSource.Entries_1);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7490_InheritedEmptyDeclaredRowPartition_T_Test_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "InheritedEmptyDeclaredRowPartition",
+        Namespace = "TUnit.TestProject.Bugs._7490",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata);
+    private static global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            instance.Test();
+            return default(global::System.Threading.Tasks.ValueTask);
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(42),
+            new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+{SkipIfEmpty = true,}
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<int>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<int>.Test",
+            filePath: "",
+            lineNumber: 222,
+            hasDataSource: true,
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(int) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(42),
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+{
+    SkipIfEmpty = true,
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<int>.Rows()),
+}, false, typeof(string)),
+}, 1),
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+    private static global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<string> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            instance.Test();
+            return default(global::System.Threading.Tasks.ValueTask);
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_1(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(42),
+            new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+{SkipIfEmpty = true,}
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<string>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<string>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<string>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<string>.Test",
+            filePath: "",
+            lineNumber: 222,
+            hasDataSource: true,
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(string) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+{
+    SkipIfEmpty = true,
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<string>.Rows()),
+}, false, typeof(string)),
+}, 0),
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7490_InheritedEmptyDeclaredRowPartition_T_Test_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<int>>(static () => TUnit_TestProject_Bugs__7490_InheritedEmptyDeclaredRowPartition_T_Test_TestSource.Entries_0);
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7490_InheritedEmptyDeclaredRowPartition_T_Test_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7490.InheritedEmptyDeclaredRowPartition<string>>(static () => TUnit_TestProject_Bugs__7490_InheritedEmptyDeclaredRowPartition_T_Test_TestSource.Entries_1);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7490_DirectEmptyDeclaredRowPartition_T_Test_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "DirectEmptyDeclaredRowPartition",
+        Namespace = "TUnit.TestProject.Bugs._7490",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Test", __classType, typeof(void), __classMetadata);
+    private static global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            instance.Test();
+            return default(global::System.Threading.Tasks.ValueTask);
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(42),
+            new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+{SkipIfEmpty = true,}
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<int>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<int>.Test",
+            filePath: "",
+            lineNumber: 238,
+            hasDataSource: true,
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(int) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(42),
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+{
+    SkipIfEmpty = true,
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<int>.Rows()),
+}, false, typeof(string)),
+}, 1),
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+    private static global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<string> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            instance.Test();
+            return default(global::System.Threading.Tasks.ValueTask);
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_1(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.ArgumentsAttribute(42),
+            new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+{SkipIfEmpty = true,}
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<string>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<string>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<string>>(
+            methodName: "Test",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<string>.Test",
+            filePath: "",
+            lineNumber: 238,
+            hasDataSource: true,
+            classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(string) }, global::TUnit.Core.GenericClassRowFallback.None, new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericClassRowPartition.ConfigureInferredSource(new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+{
+    SkipIfEmpty = true,
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<string>.Rows()),
+}, false, typeof(string)),
+}, 0),
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7490_DirectEmptyDeclaredRowPartition_T_Test_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<int>>(static () => TUnit_TestProject_Bugs__7490_DirectEmptyDeclaredRowPartition_T_Test_TestSource.Entries_0);
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7490_DirectEmptyDeclaredRowPartition_T_Test_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7490.DirectEmptyDeclaredRowPartition<string>>(static () => TUnit_TestProject_Bugs__7490_DirectEmptyDeclaredRowPartition_T_Test_TestSource.Entries_1);
 }

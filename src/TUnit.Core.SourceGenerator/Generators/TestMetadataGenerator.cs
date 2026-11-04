@@ -1309,19 +1309,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Inherited member sources must establish their constructor types before a null method row
+        // Own-member sources must establish their constructor types before a null method row
         // defers inference to them. Only untyped providers read members on the open generic class;
         // external providers infer from runtime row values instead, matching reflection discovery.
         if (testMethod is { IsGenericType: true, IsGenericMethod: false })
         {
-            foreach (var baseType in testMethod.TypeSymbol.GetBaseTypes())
+            foreach (var attribute in testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
             {
-                foreach (var attribute in baseType.GetAttributes())
+                if (InferClassTypesFromOwnMethodDataSource(testMethod, attribute) is { } classTypes)
                 {
-                    if (InferClassTypesFromOwnMethodDataSource(testMethod, attribute) is { } classTypes)
-                    {
-                        TryAddInstantiation(classTypes, attribute, reportClassViolationAs: ClassViolationSource.ClassArguments, isClassRow: true);
-                    }
+                    TryAddInstantiation(classTypes, attribute, reportClassViolationAs: ClassViolationSource.ClassArguments, isClassRow: true);
                 }
             }
         }
@@ -2811,7 +2808,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var dataSources = new List<AttributeData>(allClassDataSources.Length);
         var partitionedIndices = new List<int>();
-        var hasCompileTimeClassRow = false;
+        // A declared own-member source establishes this instantiation even when it has no rows.
+        // In that case reflection creates no group; do not fabricate a NoClassRow fallback.
+        var hasCompileTimeClassRow = allClassDataSources.Any(source =>
+            InferClassTypesFromOwnMethodDataSource(testMethod, source) is { } declaredTypes
+            && InferredTypesMatch(declaredTypes, entry.ClassTypeArgs));
 
         if (entry.HasClassRows || entry.HasNoClassRow)
         {
@@ -4875,8 +4876,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        // Check for data source attributes on the class
-        foreach (var attr in testMethod.TypeSymbol.GetAttributes())
+        // Class data sources can be inherited, just like the rows used during inference.
+        foreach (var attr in testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
         {
             if (DataSourceAttributeHelper.IsDataSourceAttribute(attr.AttributeClass))
             {
