@@ -786,7 +786,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             Type[]? memberTypeArguments = null;
             if (ReadsMemberOfOpenClass(dataSource))
             {
-                memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, (MethodDataSourceAttribute)dataSource, out var inferenceConstructor);
+                memberTypeArguments = InferClassTypeArgumentsFromOwnMemberRowType(genericTypeDefinition, (MethodDataSourceAttribute)dataSource, out var inferenceConstructor, hasExplicitTypes: deferredOwnSources != null);
                 if (memberTypeArguments == null && deferredOwnSources != null)
                 {
                     // [GenerateGenericTest] supplies the types, and its instantiations read this source on the
@@ -2906,7 +2906,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// types, whose parameters the rows are read against.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
-    private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor)
+    private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor, bool hasExplicitTypes)
     {
         constructor = null;
         if (methodDataSource.GetDeclaredMemberType(genericTypeDefinition) is not { } memberType
@@ -2924,7 +2924,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             if (candidate.IsDefined(typeof(TestConstructorAttribute), inherit: false))
             {
                 constructor = candidate;
-                return InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters, spreadsReferenceArray);
+                return InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters, spreadsReferenceArray, hasExplicitTypes);
             }
         }
 
@@ -2932,12 +2932,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         if (constructors.Length > 0 && !HasParameterlessConstructor(constructors))
         {
             constructor = constructors[0];
-            return InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowType, typeParameters, spreadsReferenceArray);
+            return InferTypeArgumentsFromConstructorRow(constructor.GetParameters(), rowType, typeParameters, spreadsReferenceArray, hasExplicitTypes);
         }
 
         foreach (var candidate in constructors)
         {
-            if (InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters, spreadsReferenceArray) is { } typeArguments)
+            if (InferTypeArgumentsFromConstructorRow(candidate.GetParameters(), rowType, typeParameters, spreadsReferenceArray, hasExplicitTypes) is { } typeArguments)
             {
                 constructor = candidate;
                 return typeArguments;
@@ -2992,7 +2992,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
-    private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type rowType, Type[] typeParameters, bool spreadsReferenceArray)
+    private static Type[]? InferTypeArgumentsFromConstructorRow(ParameterInfo[] parameters, Type rowType, Type[] typeParameters, bool spreadsReferenceArray, bool hasExplicitTypes)
     {
         // A tuple row fills one tuple parameter whole, as DataSourceHelpers.ToObjectArrayWithTypes passes it, and
         // otherwise spreads one column per parameter. Like that reader, which unwraps any ITuple, this treats a
@@ -3007,6 +3007,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             for (var j = 0; j < parameters.Length && (spreadsReferenceArray || j < rowElements.Length) && typeArguments[i] == null; j++)
             {
+                // A spread array may omit its trailing collecting parameter. Explicit class types must
+                // remain available when only that potentially absent value would infer a type argument.
+                if (spreadsReferenceArray && hasExplicitTypes && j == parameters.Length - 1
+                    && IsSingleDimensionalZeroBasedArray(parameters[j].ParameterType))
+                {
+                    continue;
+                }
+
                 var elementType = spreadsReferenceArray ? rowType : rowElements[j];
                 if (elementType != typeof(object)
                     && ReflectionGenericTypeResolver.MatchTypeParameter(

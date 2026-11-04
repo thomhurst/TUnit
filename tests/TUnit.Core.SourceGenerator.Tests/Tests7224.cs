@@ -28,6 +28,8 @@ internal class Tests7224 : TestsBase
             var generated = string.Join(Environment.NewLine, files);
             await Assert.That(generated).Contains("WrappedArrayConstructorScalarInferenceTests<string>");
             await Assert.That(generated).Contains("WrappedArrayConstructorPairInferenceTests<string, string>");
+            await Assert.That(generated).Contains("WrappedArrayConstructorOmittedArrayTests<string, int>");
+            await Assert.That(generated).Contains("instance.ExplicitTypesPreserveOmittedArray(");
         });
 
     [Test]

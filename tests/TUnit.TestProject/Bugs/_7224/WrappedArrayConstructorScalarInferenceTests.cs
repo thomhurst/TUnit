@@ -32,3 +32,20 @@ public class WrappedArrayConstructorPairInferenceTests<T, U>(T first, U second)
         await Assert.That(second).IsEqualTo((U)(object)"two");
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(string), typeof(int))]
+[MethodDataSource(nameof(Rows))]
+public class WrappedArrayConstructorOmittedArrayTests<T, U>(T first, U[] rest) where U : struct
+{
+    public static IEnumerable<TestDataRow<string[]>> Rows() => [new(new[] { "one" })];
+
+    [Test]
+    public async Task ExplicitTypesPreserveOmittedArray()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(typeof(U)).IsEqualTo(typeof(int));
+        await Assert.That(first).IsEqualTo((T)(object)"one");
+        await Assert.That(rest).IsEmpty();
+    }
+}
