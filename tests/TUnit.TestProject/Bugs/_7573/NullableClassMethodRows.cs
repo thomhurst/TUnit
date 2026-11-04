@@ -325,3 +325,17 @@ public class RepeatedNullableClassParameter<T> where T : struct
         await Assert.That(second).IsEqualTo((T)(object)2L);
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+public class NullableConstructedStructArrayRows<T>
+{
+    public static IEnumerable<Func<KeyValuePair<string, int>[]?>> Rows() => [() => null];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task InfersThroughNullableConstructedStruct(KeyValuePair<T, int>?[]? values)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+        await Assert.That(values).IsNull();
+    }
+}
