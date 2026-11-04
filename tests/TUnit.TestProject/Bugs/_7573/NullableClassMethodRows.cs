@@ -150,3 +150,51 @@ public class ArgumentOverloadClassRows<T>
         await Assert.That(value).IsEqualTo((T)(object)42d);
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments("seed")]
+public class TypeFreeConstructorNullableRows<T>(string seed) where T : struct
+{
+    public static IEnumerable<int> Rows() => [42];
+    public static IEnumerable<double> DoubleRows() => [84d];
+    public static IEnumerable<int> MoreRows() => [42];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    [MethodDataSource(nameof(DoubleRows))]
+    [MethodDataSource(nameof(MoreRows))]
+    public async Task PartitionsBesideConstructor(T? value)
+    {
+        await Assert.That(seed).IsEqualTo("seed");
+        await Assert.That(value).IsEqualTo(typeof(T) == typeof(int) ? (T)(object)42 : (T)(object)84d);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task InfersBesideConstructor(T? value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(seed).IsEqualTo("seed");
+        await Assert.That(value).IsEqualTo((T)(object)42);
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(double))]
+public class GenericProviderNullableRows<T> where T : struct
+{
+    public static IEnumerable<int> Rows() => [1];
+
+    [Test]
+    [MethodDataSource<DoubleNullableRowsProvider>(nameof(DoubleNullableRowsProvider.Rows))]
+    public async Task UsesExternalProvider(T? value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(double));
+        await Assert.That(value).IsEqualTo((T)(object)42d);
+    }
+}
+
+public class DoubleNullableRowsProvider
+{
+    public static IEnumerable<double> Rows() => [42d];
+}

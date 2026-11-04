@@ -893,11 +893,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var joinsDuplicateMethodSources = testMethod is { IsGenericMethod: true, IsGenericType: false }
             && !testMethod.MethodAttributes.Any(static a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
 
-        // Without constructor data, method sources supply the class types and partition their rows,
-        // matching reflection's BuildTestsFromMethodRows. Constructor sources keep their own policy.
+        // Without constructor-supplied types, method sources supply the class types and partition
+        // their rows. Type-free constructor arguments supply values on those instantiations.
         var scopesClassMethodSources = testMethod is { IsGenericType: true, IsGenericMethod: false }
             && !testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
-                a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass));
+                a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
+                && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a)));
 
         // A generic class whose widest public constructor takes arguments
         var hasParameterizedConstructor = testMethod.IsGenericType
@@ -8454,7 +8455,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static ITypeSymbol[]? InferClassTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
-        if (mdsAttr.ConstructorArguments.Length == 0
+        if (mdsAttr.AttributeClass is { IsGenericType: true }
+            || mdsAttr.ConstructorArguments.Length == 0
             || mdsAttr.NamedArguments.Any(a => a.Key == "Arguments" && a.Value.Kind == TypedConstantKind.Array
                 && !a.Value.IsNull && a.Value.Values.Length > 0))
         {
@@ -8498,13 +8500,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? funcType.TypeArguments[0]
             : innerType;
 
-        // Constructor data supplies nullable class parameters independently of the method row.
+        // Constructor data that supplies class types takes precedence over nullable method rows.
+        // Type-free constructor arguments still need their class types inferred from the method.
         // Keep the source on that class instead of creating a second row-inferred class.
         if (GetDataParameters(testMethod.MethodSymbol).Any(p =>
                 p.Type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
                     TypeArguments: [ITypeParameterSymbol { TypeParameterKind: TypeParameterKind.Type }] })
             && testClass.GetAttributesIncludingBaseTypes().Any(a =>
-                a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)))
+                a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
+                && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testClass, a))))
         {
             return null;
         }

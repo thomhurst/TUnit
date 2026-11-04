@@ -8,6 +8,8 @@ internal class NullableClassMethodRowsTests : TestsBase
     {
         foreach (var (method, closedType) in new[]
                  {
+                     ("InfersBesideConstructor", "TypeFreeConstructorNullableRows<int>"),
+                     ("UsesExternalProvider", "GenericProviderNullableRows<double>"),
                      ("OpenRow", "OpenClassMethodRows<int>"),
                      ("OpenArray", "OpenClassMethodRows<int>"),
                      ("ConstructorType", "ConstructorNullableClassRows<double>"),

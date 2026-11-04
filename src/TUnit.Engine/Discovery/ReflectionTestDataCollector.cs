@@ -563,7 +563,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // infer (#7118)
         var methodRowClassTypeArguments = methodRowTests == null
             ? InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods, classDataSources.Length + (typeFreeClassRows?.Length ?? 0),
-                nullValuesArrayInfersObject: GenericClassInferencePolicy.NullMethodRowInfersObject(classDataSources.Length > 0, generateGenericTestAttributes.Length > 0))
+                nullValuesArrayInfersObject: GenericClassInferencePolicy.NullMethodRowInfersObject(classDataSources.Length > 0, generateGenericTestAttributes.Length > 0),
+                inferMethodSources: classDataSources.Length == 0 && typeFreeClassRows != null)
             : null;
 
         // [GenerateGenericTest] types' class constraint violations are reported before the class rows'
@@ -1156,14 +1157,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     /// <summary>
     /// For each test method of a generic class with class-level data sources, the class type arguments
-    /// each of its method data sources' [Arguments] rows infers, indexed like the method's data sources (null
+    /// each of its method data sources' [Arguments] rows infers (also declared method-source row types when
+    /// every constructor row is type-free), indexed like the method's data sources (null
     /// for a source that infers none). A method's entry is null when none of its rows infers any, for example
     /// when it is a generic method or its parameters do not use the class's type parameters. Null when the
     /// class has no class-level data source. The source generator infers an instantiation from each such row
     /// whatever the class data sources are, since it cannot know the types a [MethodDataSource] or other
     /// run-time source yields (#7161).
     /// </summary>
-    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool nullValuesArrayInfersObject)
+    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool nullValuesArrayInfersObject, bool inferMethodSources)
     {
         if (classDataSourceCount == 0)
         {
@@ -1195,8 +1197,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 // Class rows supply the instantiations, so [Arguments(null)] infers none and runs on each (#7141),
                 // unless every class row goes to no type parameter (#7209)
-                if (methodDataSources[i] is ArgumentsAttribute arguments
-                    && InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject) is { } typeArguments)
+                // A type-free constructor row supplies values, but leaves class types to method rows.
+                var typeArguments = methodDataSources[i] switch
+                {
+                    ArgumentsAttribute arguments => InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject),
+                    MethodDataSourceAttribute source when inferMethodSources => InferClassTypesFromMethodDataSource(genericTypeDefinition, source, parameters, classGenericParameters),
+                    _ => null
+                };
+                if (typeArguments != null)
                 {
                     // A plain local, not `(rowTypeArguments ??= ...)[i] = ...`: the .NET 8 trim analyzer
                     // crashes (AD0001) on an array element write through a null-coalescing assignment.
