@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace TUnit.Core.PropertyInjection;
@@ -9,6 +10,8 @@ namespace TUnit.Core.PropertyInjection;
 /// </summary>
 internal static class ClassMetadataHelper
 {
+    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> Properties = new();
+
     /// <summary>
     /// Gets or creates ClassMetadata for the specified type.
     /// </summary>
@@ -33,7 +36,7 @@ internal static class ClassMetadataHelper
                 ReflectionInfo = p
             }).ToArray() ?? [];
 
-            return new ClassMetadata
+            return WithProperties(new ClassMetadata
             {
                 Type = type,
                 TypeInfo = new ConcreteType(type),
@@ -48,8 +51,43 @@ internal static class ClassMetadataHelper
                 Properties = [],
                 Parameters = constructorParameters,
                 Parent = type.DeclaringType != null ? GetOrCreateClassMetadata(type.DeclaringType) : null
-            };
+            });
         });
+    }
+
+    // Match generated metadata: properties declared on this type, including static properties.
+    // Called inside the class cache factory, so back-references never recurse through that cache.
+    #if NET8_0_OR_GREATER
+    [RequiresUnreferencedCode("Property metadata creation requires reflection")]
+    #endif
+    public static ClassMetadata WithProperties(ClassMetadata metadata)
+    {
+        if (!Properties.TryGetValue(metadata.Type, out var properties))
+        {
+            properties = metadata.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                .Where(p => p.Name != "EqualityContract").ToArray();
+            properties = Properties.GetOrAdd(metadata.Type, properties);
+        }
+        var result = metadata with
+        {
+            Properties = properties.Select(p => new PropertyMetadata
+            {
+                Name = p.Name,
+                Type = p.PropertyType,
+                ReflectionInfo = p,
+                IsStatic = (p.GetMethod ?? p.SetMethod)!.IsStatic,
+                IsNullable = Nullable.GetUnderlyingType(p.PropertyType) != null,
+                Getter = instance => p.GetValue(instance),
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }).ToArray()
+        };
+        foreach (var property in result.Properties)
+        {
+            property.ClassMetadata = result;
+            property.ContainingTypeMetadata = result;
+        }
+        return result;
     }
 
     /// <summary>

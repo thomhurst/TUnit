@@ -21,5 +21,10 @@ public class GenericPropertyMetadataTests<T>(T value)
         await Assert.That(valueGetter(this)).IsEqualTo(Value);
         await Assert.That(labelGetter(this)).IsEqualTo("label");
         await Assert.That(optionalGetter(this)).IsEqualTo(Optional);
+
+        var properties = TestContext.Current!.Metadata.TestDetails.MethodMetadata.Class.Properties;
+        await Assert.That(properties.Single(p => p.Name == nameof(Value)).Getter(this)).IsEqualTo(Value);
+        await Assert.That(properties.Single(p => p.Name == nameof(Label)).Getter(this)).IsEqualTo(Label);
+        await Assert.That(properties.Single(p => p.Name == nameof(Optional)).Getter(this)).IsEqualTo(Optional);
     }
 }
