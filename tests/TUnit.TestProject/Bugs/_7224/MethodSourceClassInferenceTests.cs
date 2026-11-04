@@ -20,12 +20,20 @@ public class MethodSourceClassInferenceTests<T>
     public static IEnumerable<string> OverloadedRows(string value) => [value];
 
     public static IEnumerable<TestDataRow<string[]>> WrappedRows() => [new(new[] { "one" })];
+    public static IEnumerable<TestDataRow<string[]>> WrappedPairRows() => [new(new[] { "one", "two" })];
     public static IEnumerable<List<int>> ListRows() => [new() { 1 }];
     public static IEnumerable<InferenceDerived<int>> DerivedRows() => [new()];
     public static IEnumerable<object> UntypedRows() => [1];
 
     [Test, MethodDataSource(nameof(WrappedRows))]
     public async Task WrappedArray(T value) => await Assert.That(value).IsEqualTo((T)(object)"one");
+
+    [Test, MethodDataSource(nameof(WrappedPairRows))]
+    public async Task WrappedArrayPair(T first, T second)
+    {
+        await Assert.That(first).IsEqualTo((T)(object)"one");
+        await Assert.That(second).IsEqualTo((T)(object)"two");
+    }
 
     [Test, MethodDataSource(nameof(ListRows))]
     public async Task Interface(IEnumerable<T> values) => await Assert.That(values.Single()).IsEqualTo((T)(object)1);

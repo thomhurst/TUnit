@@ -1593,10 +1593,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         if (source is MethodDataSourceAttribute memberSource
             && memberSource.GetDeclaredMemberType(memberSource.ClassProvidingDataSource ?? method.DeclaringType!) is { } memberType
-            && MethodDataSourceAttribute.GetDeclaredRowType(memberType) is { } rowType
+            && MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is { } rowType
             && rowType != typeof(object))
         {
-            var inferred = InferTypesFromTypedRow(method, rowType, classParameters.Length, scope: GenericParameterScope.Class);
+            var inferred = InferTypesFromTypedRowCore(method, rowType, classParameters.Length, GenericParameterScope.Class, spreadsReferenceArray);
             return inferred is not null && !Array.Exists(inferred, static type => type.ContainsGenericParameters) ? inferred : null;
         }
 
@@ -2504,7 +2504,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// T, since they are invoked and unwrapped before invocation, and a reference-type array T there spreads, so its element binds. A T? parameter takes a value of its underlying type. Each parameter type is matched against its value type, including
     /// type arguments nested in generic parameter types. Every type parameter must be inferred, each to one type.
     /// </summary>
-    private static Type[]? InferTypesFromTypedRow(MethodInfo method, Type rowType, int genericParameterCount, GenericParameterScope scope = GenericParameterScope.Method)
+    private static Type[]? InferTypesFromTypedRow(MethodInfo method, Type rowType, int genericParameterCount)
+        => InferTypesFromTypedRowCore(method, rowType, genericParameterCount, GenericParameterScope.Method, spreadsReferenceArray: false);
+
+    private static Type[]? InferTypesFromTypedRowCore(MethodInfo method, Type rowType, int genericParameterCount, GenericParameterScope scope, bool spreadsReferenceArray)
     {
         // The row reaches the method as ToObjectArray and TestDataRowUnwrapper.UnwrapArray produce it: a
         // Func<T> row is invoked once, a TestDataRow<T> row is unwrapped, and a Func<T> inside it is invoked
@@ -2519,7 +2522,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return null;
         }
 
-        var spreadsReferenceArray = false;
         var testDataRowType = scope == GenericParameterScope.Class ? null : FindTestDataRowType(rowType);
         var isTestDataRow = testDataRowType is not null;
         if (testDataRowType is not null)
@@ -2576,7 +2578,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // reference array spread) like a whole TestDataRow<T> row.
             if (!isTestDataRow && tupleElements.Length == 1 && FindTestDataRowType(tupleElements[0]) is not null)
             {
-                return InferTypesFromTypedRow(method, tupleElements[0], genericParameterCount, scope);
+                return InferTypesFromTypedRowCore(method, tupleElements[0], genericParameterCount, scope, spreadsReferenceArray: false);
             }
 
             if (tupleElements.Length < requiredCount || tupleElements.Length > dataParameters.Length)
@@ -2609,9 +2611,10 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return null;
             }
         }
-        else if (dataParameters.Length > 1 && requiredCount <= 1)
+        else if (dataParameters.Length > 1 && (spreadsReferenceArray || requiredCount <= 1))
         {
-            // A scalar row binds to the first data parameter; the rest are optional.
+            // A scalar row binds to the first data parameter; the rest are optional. A wrapped reference
+            // array can supply multiple required parameters of its declared element type.
             if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, scope))
             {
                 return null;
@@ -2665,7 +2668,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <see cref="InferTypesFromTypedRow"/>, recording each method type parameter it binds. Returns false when
     /// one type parameter binds two different types.
     /// </summary>
-    private static bool MapTypedRowParameters(Type parameterType, Type valueType, Type?[] typeArguments, GenericParameterScope scope = GenericParameterScope.Method)
+    private static bool MapTypedRowParameters(Type parameterType, Type valueType, Type?[] typeArguments, GenericParameterScope scope)
     {
         if (parameterType.IsGenericParameter)
         {

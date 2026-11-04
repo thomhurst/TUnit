@@ -447,7 +447,14 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     internal static Type? GetDeclaredRowType(Type memberType)
+        => GetDeclaredRowType(memberType, out _);
+
+    // Keep the spread shape alongside the element type: unlike a scalar row, a wrapped reference array
+    // can supply more than one required method parameter.
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    internal static Type? GetDeclaredRowType(Type memberType, out bool spreadsReferenceArray)
     {
+        spreadsReferenceArray = false;
         if (memberType == typeof(Task) || memberType == typeof(ValueTask))
         {
             return null;
@@ -498,10 +505,11 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             if (rowType is { IsArray: true } && rowType.Name.EndsWith("[]", StringComparison.Ordinal) && rowType.GetElementType() is { IsValueType: false, IsPointer: false } elementType)
             {
                 rowType = elementType;
+                spreadsReferenceArray = true;
             }
         }
 
-        return rowType == null || rowType == typeof(object[]) ? null : rowType;
+        return rowType == null || rowType == typeof(object[]) || spreadsReferenceArray && rowType == typeof(object) ? null : rowType;
     }
 
     private static Type? UnwrapFunc(Type? type) =>

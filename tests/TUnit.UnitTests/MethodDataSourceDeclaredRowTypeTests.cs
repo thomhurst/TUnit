@@ -61,6 +61,17 @@ public class MethodDataSourceDeclaredRowTypeTests
     }
 
     [Test]
+    public async Task Wrapped_Reference_Array_Preserves_Its_Spread_Shape()
+    {
+        var rowType = MethodDataSourceAttribute.GetDeclaredRowType(typeof(IEnumerable<TestDataRow<string[]>>), out var spreadsReferenceArray);
+        await Assert.That(rowType).IsEqualTo(typeof(string));
+        await Assert.That(spreadsReferenceArray).IsTrue();
+
+        MethodDataSourceAttribute.GetDeclaredRowType(typeof(IEnumerable<string[]>), out var spreadsBareArray);
+        await Assert.That(spreadsBareArray).IsFalse();
+    }
+
+    [Test]
     [Arguments(typeof(Task))]
     [Arguments(typeof(ValueTask))]
     [Arguments(typeof(object[][]))]

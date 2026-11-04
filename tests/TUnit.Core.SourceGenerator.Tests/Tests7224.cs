@@ -9,7 +9,7 @@ internal class Tests7224 : TestsBase
         {
             var generated = string.Join(Environment.NewLine, files);
             await Assert.That(generated).Contains("MethodSourceClassInferenceTests<int>");
-            foreach (var method in new[] { "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "Interface", "BaseType", "MixedSources" })
+            foreach (var method in new[] { "Single", "Tuple", "Array", "Field", "TaskSource", "ValueTaskSource", "AsyncSource", "Overloaded", "External", "WrappedArray", "WrappedArrayPair", "Interface", "BaseType", "MixedSources" })
             {
                 await Assert.That(generated).Contains($"instance.{method}(");
             }
