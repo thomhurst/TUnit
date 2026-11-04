@@ -6,6 +6,19 @@ internal class NullableClassMethodRowsTests : TestsBase
     public Task Generates_Nullable_Class_From_Method_Rows() => RunTest(Path.Combine(Git.TestsDirectory.FullName,
         "TUnit.TestProject", "Bugs", "_7573", "NullableClassMethodRows.cs"), async generatedFiles =>
     {
+        foreach (var (method, closedType) in new[]
+                 {
+                     ("OpenRow", "OpenClassMethodRows<int>"),
+                     ("OpenArray", "OpenClassMethodRows<int>"),
+                     ("ConstructorType", "ConstructorNullableClassRows<double>"),
+                     ("SelectedOverload", "ArgumentOverloadClassRows<double>")
+                 })
+        {
+            var generated = generatedFiles.Single(file => file.Contains($"\"{method}\""));
+            await Assert.That(generated.Contains(closedType)).IsTrue();
+            await Assert.That(generated.Contains("__mm_1")).IsFalse();
+        }
+
         foreach (var method in new[] { "DirectArray", "FactoryArray" })
         {
             await Assert.That(generatedFiles.Any(file => file.Contains($"ArrayClassMethodRows_T_{method}_")

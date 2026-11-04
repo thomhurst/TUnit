@@ -1424,10 +1424,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Sources inferring the same types join the existing instantiation.
                     TryAddInstantiation(inferredTypes, scopesClassMethodSources ? mdsAttr : null);
                 }
-                else if (scopesClassMethodSources)
+                else
                 {
-                    // Explicit class types also run sources whose declared rows cannot infer the class
-                    // (including instance and external sources), even when an inferred entry exists.
+                    // Explicit or constructor-supplied class types also run sources whose declared
+                    // rows cannot infer the class, including instance and external sources.
                     (uninferredMethodDataSources ??= []).Add(mdsAttr);
                 }
             }
@@ -8454,7 +8454,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static ITypeSymbol[]? InferClassTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
-        if (mdsAttr.ConstructorArguments.Length == 0)
+        if (mdsAttr.ConstructorArguments.Length == 0
+            || mdsAttr.NamedArguments.Any(a => a.Key == "Arguments" && a.Value.Kind == TypedConstantKind.Array
+                && !a.Value.IsNull && a.Value.Values.Length > 0))
         {
             return null;
         }
@@ -8496,6 +8498,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             ? funcType.TypeArguments[0]
             : innerType;
 
+        // Constructor data supplies nullable class parameters independently of the method row.
+        // Keep the source on that class instead of creating a second row-inferred class.
+        if (GetDataParameters(testMethod.MethodSymbol).Any(p =>
+                p.Type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+                    TypeArguments: [ITypeParameterSymbol { TypeParameterKind: TypeParameterKind.Type }] })
+            && testClass.GetAttributesIncludingBaseTypes().Any(a =>
+                a.AttributeClass is { } attributeClass && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)))
+        {
+            return null;
+        }
+
         // Get class type parameters
         var classTypeParams = testMethod.TypeSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
@@ -8527,7 +8540,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var inferredTypes = new ITypeSymbol[classTypeParams.Length];
         for (var i = 0; i < classTypeParams.Length; i++)
         {
-            if (!genericParamMap.TryGetValue(classTypeParams[i].Name, out var inferredType))
+            if (!genericParamMap.TryGetValue(classTypeParams[i].Name, out var inferredType)
+                || CodeGenerationHelpers.ContainsTypeParameter(inferredType))
             {
                 return null;
             }

@@ -2731,7 +2731,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     {
         // Only infer from sources declared on the test class; an external provider must never
         // accidentally select a same-named member of the test class.
-        if (source.ClassProvidingDataSource is not null)
+        if (source.ClassProvidingDataSource is not null || source.Arguments is { Length: > 0 })
         {
             return null;
         }

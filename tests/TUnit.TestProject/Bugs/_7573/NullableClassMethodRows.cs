@@ -102,3 +102,51 @@ public class ArrayClassMethodRows<T>
         await Assert.That(values).Count().IsEqualTo(1);
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+public class OpenClassMethodRows<T>
+{
+    public static IEnumerable<T> Rows() => [default!];
+    public static IEnumerable<T[]> Arrays() => [new T[1]];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task OpenRow(T value) => await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+
+    [Test]
+    [MethodDataSource(nameof(Arrays))]
+    public async Task OpenArray(T[] values) => await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1d)]
+public class ConstructorNullableClassRows<T>(T seed) where T : struct
+{
+    public static IEnumerable<int> Rows() => [42];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task ConstructorType(T? value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(double));
+        await Assert.That(seed).IsEqualTo((T)(object)1d);
+        await Assert.That(value).IsEqualTo((T)(object)42d);
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(double))]
+public class ArgumentOverloadClassRows<T>
+{
+    public static IEnumerable<int> Rows() => [1];
+    public static IEnumerable<double> Rows(string text) => [42d];
+
+    [Test]
+    [MethodDataSource(nameof(Rows), Arguments = new object[] { "hello" })]
+    public async Task SelectedOverload(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(double));
+        await Assert.That(value).IsEqualTo((T)(object)42d);
+    }
+}
