@@ -218,6 +218,16 @@ internal static class OpenArrayMatcher
             return CanArraySubtypeImplement(compilation, otherArray, otherInterface);
         }
 
+        // Delegate variance can share a constructed subtype only within the same
+        // delegate definition. Delegates cannot gain other bases or interfaces;
+        // conversions to Delegate, MulticastDelegate and ICloneable passed above.
+        if (left.TypeKind == TypeKind.Delegate || right.TypeKind == TypeKind.Delegate)
+        {
+            return left is INamedTypeSymbol { TypeKind: TypeKind.Delegate } leftDelegate
+                && right is INamedTypeSymbol { TypeKind: TypeKind.Delegate } rightDelegate
+                && SymbolEqualityComparer.Default.Equals(leftDelegate.OriginalDefinition, rightDelegate.OriginalDefinition);
+        }
+
         var leftSealedClass = left.IsSealed && left.TypeKind is not (TypeKind.Array or TypeKind.Delegate);
         var rightSealedClass = right.IsSealed && right.TypeKind is not (TypeKind.Array or TypeKind.Delegate);
         return !leftSealedClass && !rightSealedClass
