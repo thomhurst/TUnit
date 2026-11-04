@@ -14,6 +14,50 @@ public class GenericClassSourceRuntimeTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
+    public async Task Optional_Partition_Retains_Full_Null_And_Convertible_Rows(bool generated)
+    {
+        foreach (var numeric in new[] { false, true })
+        {
+            Type[] arguments = numeric ? [typeof(long), typeof(int)] : [typeof(int), typeof(string)];
+            IMemberMetadata[] parameters =
+            [
+                new ParameterMetadata(arguments[0]) { Name = "first", TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(arguments[0]), CachedIsOptional = false },
+                new ParameterMetadata(arguments[1]) { Name = "second", TypeInfo = generated ? new GenericParameter(1, false) : new ConcreteType(arguments[1]), CachedIsOptional = true }
+            ];
+            object?[][] original = numeric ? [[1L], [1], [2, 3]] : [[1], [2, null]];
+            var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+            var partition = GenericClassRowPartition.Create(arguments, GenericClassRowFallback.AllRows, [source], 0);
+            var metadata = new DataGeneratorMetadata
+            {
+                TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+                Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+                TestClassInstance = null, ClassInstanceArguments = null
+            };
+            var rows = new List<object?[]?>();
+            await foreach (var factory in partition[0].GetDataRowsAsync(metadata))
+            {
+                rows.Add(await factory());
+            }
+            await Assert.That(rows.Count).IsEqualTo(original.Length);
+            for (var i = 0; i < rows.Count; i++)
+            {
+                await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+            }
+
+            async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+            {
+                foreach (var row in original)
+                {
+                    yield return () => Task.FromResult<object?[]?>(row);
+                }
+                await Task.CompletedTask;
+            }
+        }
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task Partition_Preserves_Supplied_And_Omitted_Optional_Values(bool supplied)
     {
         object?[] original = supplied ? [7, "supplied"] : [7];
@@ -43,8 +87,8 @@ public class GenericClassSourceRuntimeTests
             },
             new ParameterMetadata(typeof(int)) { Name = "second", TypeInfo = new ConcreteType(typeof(int)), CachedIsOptional = true }
         ];
-        await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([new List<List<string>>()], parameters, [])).IsTrue();
-        await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([new List<List<int>>()], parameters, [])).IsFalse();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new List<List<string>>()], parameters, [])).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new List<List<int>>()], parameters, [])).IsFalse();
     }
 
     [Test]
@@ -65,9 +109,9 @@ public class GenericClassSourceRuntimeTests
         object invalid = shape switch { 1 => new string[1, 1], 2 => new[] { new[] { "bad" } }, 3 => new List<string[]> { new[] { "bad" } }, _ => new[] { "bad" } };
         foreach (var parameters in new IMemberMetadata[][] { generated, reflected })
         {
-            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([valid], parameters, [typeof(int), typeof(int)])).IsTrue();
-            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([invalid], parameters, [typeof(int), typeof(int)])).IsFalse();
-            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([new int[1, 1, 1]], parameters, [typeof(int), typeof(int)])).IsFalse();
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([valid], parameters, [typeof(int), typeof(int)])).IsTrue();
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([invalid], parameters, [typeof(int), typeof(int)])).IsFalse();
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new int[1, 1, 1]], parameters, [typeof(int), typeof(int)])).IsFalse();
             var source = new MethodDataSourceAttribute("Rows")
             {
                 Factory = _ => OneRow(() => Task.FromResult<object?[]?>([invalid]))
@@ -85,7 +129,7 @@ public class GenericClassSourceRuntimeTests
 
         // An own-class TestDataRow<string[][]> spreads to a string[] constructor value.
         var (values, _) = TUnit.Core.Helpers.TestDataRowUnwrapper.UnwrapArray([new TestDataRow<string[][]>([["bad"]])]);
-        await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow(values, generated, [typeof(int), typeof(int)])).IsFalse();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow(values, generated, [typeof(int), typeof(int)])).IsFalse();
     }
 
     public sealed class ArrayComparerConstructor<T, U>(IComparer<T[]> first, U second = default!);
@@ -175,7 +219,7 @@ public class GenericClassSourceRuntimeTests
             }
         ];
 
-        var matches = GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([first], parameters, []);
+        var matches = GenericClassRowPartition.MatchesConstructorRow([first], parameters, []);
         await Assert.That(matches).IsEqualTo(expectedMatch);
 
         // Reflection metadata contains the closed type, while generated metadata describes its structure.
@@ -186,7 +230,7 @@ public class GenericClassSourceRuntimeTests
             TypeInfo = new ConcreteType(closedType),
             CachedIsOptional = false
         };
-        var reflectionMatches = GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([first], parameters, []);
+        var reflectionMatches = GenericClassRowPartition.MatchesConstructorRow([first], parameters, []);
         await Assert.That(reflectionMatches).IsEqualTo(expectedMatch);
     }
 
@@ -209,8 +253,8 @@ public class GenericClassSourceRuntimeTests
                 new ParameterMetadata(closed) { Name = "first", TypeInfo = description, CachedIsOptional = false },
                 new ParameterMetadata(typeof(int)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true }
             ];
-            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([valid], parameters, [typeof(int), typeof(int)])).IsTrue();
-            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([invalid], parameters, [typeof(int), typeof(int)])).IsFalse();
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([valid], parameters, [typeof(int), typeof(int)])).IsTrue();
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([invalid], parameters, [typeof(int), typeof(int)])).IsFalse();
             var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
             var partition = GenericClassRowPartition.Create([typeof(int), typeof(int)], GenericClassRowFallback.AllRows, [source], 0);
             var metadata = new DataGeneratorMetadata
@@ -253,8 +297,8 @@ public class GenericClassSourceRuntimeTests
                 new ParameterMetadata(closed) { Name = "first", TypeInfo = description, CachedIsOptional = false },
                 new ParameterMetadata(typeof(int)) { Name = "second", TypeInfo = new ConcreteType(typeof(int)), CachedIsOptional = true }
             ];
-            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([Comparer<IEnumerable<object>>.Default], parameters, [typeof(string)])).IsTrue();
-            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([Comparer<IEnumerable<int>>.Default], parameters, [typeof(string)])).IsFalse();
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([Comparer<IEnumerable<object>>.Default], parameters, [typeof(string)])).IsTrue();
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([Comparer<IEnumerable<int>>.Default], parameters, [typeof(string)])).IsFalse();
         }
     }
 

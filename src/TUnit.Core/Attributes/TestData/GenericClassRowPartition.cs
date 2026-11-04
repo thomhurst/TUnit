@@ -296,7 +296,7 @@ public static class GenericClassRowPartition
                         // Retain declared constructor-position and own-class null inference.
                         var infers = RowInfers(dataSources[index], row, ClassTypeArguments)
                             || (dataSources[index] is MethodDataSourceAttribute { ClassProvidingDataSource: null }
-                                && MatchesOmittedOptionalConstructorRow(row, dataGeneratorMetadata.MembersToGenerate, ClassTypeArguments));
+                                && MatchesConstructorRow(row, dataGeneratorMetadata.MembersToGenerate, ClassTypeArguments));
                         anyRowInfers |= infers;
                         rows.Add(new EvaluatedRow(new EvaluatedDataRow(row, rowFactory), infers));
                     }
@@ -317,9 +317,9 @@ public static class GenericClassRowPartition
         }
     }
 
-    // A declared reference-array row cannot tell us whether optional constructor values are present.
+    // A declared reference-array row cannot tell us whether constructor values infer every type argument.
     // An explicit instantiation may supply their types, but every supplied value must still fit it.
-    internal static bool MatchesOmittedOptionalConstructorRow(object?[]? row, IMemberMetadata[] parameters, Type[] classTypeArguments)
+    internal static bool MatchesConstructorRow(object?[]? row, IMemberMetadata[] parameters, Type[] classTypeArguments)
     {
         if (row is null)
         {
@@ -327,7 +327,7 @@ public static class GenericClassRowPartition
         }
 
         var (values, _) = TestDataRowUnwrapper.UnwrapArray(row);
-        if (values.Length == 0 || values.Length >= parameters.Length)
+        if (values.Length == 0 || values.Length > parameters.Length)
         {
             return false;
         }
@@ -349,7 +349,8 @@ public static class GenericClassRowPartition
 
             if (values[i] is { } value)
             {
-                if (!MatchesConstructorParameterType(GetConstructorTypeInfo(parameter), value.GetType(), classTypeArguments, direction: 1))
+                if (!MatchesConstructorParameterType(GetConstructorTypeInfo(parameter), value.GetType(), classTypeArguments, direction: 1)
+                    && !MayConvertConstructorValue(GetConstructorTypeInfo(parameter), value, classTypeArguments))
                 {
                     return false;
                 }
@@ -371,6 +372,52 @@ public static class GenericClassRowPartition
         }
 
         return true;
+    }
+
+    // Conversion belongs to the binder. Do not execute user converters while partitioning;
+    // retain candidates for registered conversions and the primitive CastHelper path.
+    private static bool MayConvertConstructorValue(TypeInfo description, object value, Type[] classTypeArguments)
+    {
+        var target = description switch
+        {
+            GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
+            ConcreteType concrete => concrete.Type,
+            ConstructedGeneric { GenericDefinition: var definition, TypeArguments: [var underlying] }
+                when definition == typeof(Nullable<>) => underlying switch
+                {
+                    GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
+                    ConcreteType concrete => concrete.Type,
+                    _ => null
+                },
+            _ => null
+        };
+        if (target is null)
+        {
+            return false;
+        }
+
+        target = Nullable.GetUnderlyingType(target) ?? target;
+        if (Converters.AotConverterRegistry.TryGetConverter(value.GetType(), target, out _))
+        {
+            return true;
+        }
+
+        var source = value.GetType();
+        if ((source.IsPrimitive || source == typeof(string) || source == typeof(decimal))
+            && (target.IsPrimitive || target == typeof(decimal)))
+        {
+            try
+            {
+                _ = Convert.ChangeType(value, target);
+                return true;
+            }
+            catch (Exception exception) when (exception is InvalidCastException or FormatException or OverflowException)
+            {
+                return false;
+            }
+        }
+
+        return false;
     }
 
     // Array descriptions emitted outside a generic class erase T[] to object. The existing lazy
