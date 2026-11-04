@@ -9,6 +9,36 @@ namespace TUnit.UnitTests;
 public class DataSourceHelpersTests
 {
     [Test]
+    [Arguments(null, false)]
+    [Arguments("text", true)]
+    public async Task SingletonReferenceTupleDecision_DoesNotAllocateElementArray(string? element, bool expectedFlatten)
+    {
+        var row = Tuple.Create(element);
+        var parameter = new ParameterMetadata(typeof(object))
+        {
+            Name = "row",
+            TypeInfo = new ConstructedGeneric(typeof(Tuple<>), [new GenericParameter(0, false, "T")])
+        };
+
+        // Warm type metadata and JIT before measuring the binding decision alone.
+        for (var i = 0; i < 100; i++)
+        {
+            DataSourceHelpers.ShouldFlattenErasedTuple(row, parameter);
+        }
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var flattened = false;
+        for (var i = 0; i < 100; i++)
+        {
+            flattened = DataSourceHelpers.ShouldFlattenErasedTuple(row, parameter);
+        }
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+        await Assert.That(flattened).IsEqualTo(expectedFlatten);
+        await Assert.That(allocated).IsEqualTo(0L);
+    }
+
+    [Test]
     public async Task UnwrapTuple_LongValueTuple_FlattensMultipleRestLevels()
     {
         object value = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, (15, 16));
