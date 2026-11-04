@@ -35,6 +35,13 @@ public class MethodSourceClassInferenceTests<T>
         await Assert.That(second).IsEqualTo((T)(object)"two");
     }
 
+    [Test, MethodDataSource(nameof(WrappedPairRows))]
+    public async Task WrappedArrayLaterParameter(string label, T value)
+    {
+        await Assert.That(label).IsEqualTo("one");
+        await Assert.That(value).IsEqualTo((T)(object)"two");
+    }
+
     [Test, MethodDataSource(nameof(ListRows))]
     public async Task Interface(IEnumerable<T> values) => await Assert.That(values.Single()).IsEqualTo((T)(object)1);
 

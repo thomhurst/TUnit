@@ -192,6 +192,100 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7224_MethodSourceClassInferenceTests_T_WrappedArrayLaterParame_83BC128C_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]),
+        Name = "MethodSourceClassInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7224",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = new global::TUnit.Core.PropertyMetadata[]
+        {
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<>).GetProperty("ArrayRows", typeof(int[])),
+                Type = typeof(int[]),
+                Name = "ArrayRows",
+                IsStatic = true,
+                IsNullable = false,
+                Getter = _ => typeof(global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<>).GetProperty("ArrayRows")?.GetValue(null),
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("WrappedArrayLaterParameter", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<>), "WrappedArrayLaterParameter", false, 0, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "label", new global::TUnit.Core.ConcreteType(typeof(string)), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<string>();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            return new global::System.Threading.Tasks.ValueTask(instance.WrappedArrayLaterParameter(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])));
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("WrappedPairRows"),
+            new global::TUnit.TestProject.Attributes.EngineTest(global::TUnit.TestProject.Attributes.ExpectedResult.Pass)
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<string>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<string>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<string>>(
+            methodName: "WrappedArrayLaterParameter",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<string>.WrappedArrayLaterParameter",
+            filePath: "",
+            lineNumber: 38,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("WrappedPairRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<string>.WrappedPairRows()),
+    },
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7224_MethodSourceClassInferenceTests_T_WrappedArrayLaterParame_83BC128C_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<string>>(static () => TUnit_TestProject_Bugs__7224_MethodSourceClassInferenceTests_T_WrappedArrayLaterParame_83BC128C_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7224_MethodSourceClassInferenceTests_T_Interface__IEnumerable_T__TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<>", new global::TUnit.Core.ClassMetadata
@@ -253,7 +347,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             methodName: "Interface",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.Interface",
             filePath: "",
-            lineNumber: 38,
+            lineNumber: 45,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -346,7 +440,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "BaseType",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.BaseType",
             filePath: "",
-            lineNumber: 41,
+            lineNumber: 48,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -440,7 +534,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "MixedSources",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.MixedSources",
             filePath: "",
-            lineNumber: 44,
+            lineNumber: 51,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -530,7 +624,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Single",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.Single",
             filePath: "",
-            lineNumber: 47,
+            lineNumber: 54,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -625,7 +719,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "name", new g
             methodName: "Tuple",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.Tuple",
             filePath: "",
-            lineNumber: 50,
+            lineNumber: 57,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -718,7 +812,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Array",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.Array",
             filePath: "",
-            lineNumber: 58,
+            lineNumber: 65,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -811,7 +905,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Field",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.Field",
             filePath: "",
-            lineNumber: 61,
+            lineNumber: 68,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -904,7 +998,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "TaskSource",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.TaskSource",
             filePath: "",
-            lineNumber: 64,
+            lineNumber: 71,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -997,7 +1091,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "ValueTaskSource",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.ValueTaskSource",
             filePath: "",
-            lineNumber: 67,
+            lineNumber: 74,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1090,7 +1184,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "AsyncSource",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.AsyncSource",
             filePath: "",
-            lineNumber: 70,
+            lineNumber: 77,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1184,7 +1278,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Overloaded",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.Overloaded",
             filePath: "",
-            lineNumber: 73,
+            lineNumber: 80,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1282,7 +1376,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "External",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MethodSourceClassInferenceTests<int>.External",
             filePath: "",
-            lineNumber: 76,
+            lineNumber: 83,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1363,7 +1457,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "SeparateInstantiations",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MultipleMethodSourceClassInferenceTests<int>.SeparateInstantiations",
             filePath: "",
-            lineNumber: 92,
+            lineNumber: 99,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1410,7 +1504,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "SeparateInstantiations",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MultipleMethodSourceClassInferenceTests<string>.SeparateInstantiations",
             filePath: "",
-            lineNumber: 92,
+            lineNumber: 99,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1495,7 +1589,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "SameInstantiation",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.MultipleMethodSourceClassInferenceTests<int>.SameInstantiation",
             filePath: "",
-            lineNumber: 95,
+            lineNumber: 102,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1579,7 +1673,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "NullableValue",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7224.NullableMethodSourceClassInferenceTests<int>.NullableValue",
             filePath: "",
-            lineNumber: 108,
+            lineNumber: 115,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

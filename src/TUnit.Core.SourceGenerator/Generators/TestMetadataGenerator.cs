@@ -8267,7 +8267,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         var compilation = testMethod.CompilationContext.Compilation;
         var dataSourceMember = ResolveMethodDataSourceMember(providerType, methodName, mdsAttr, compilation);
-        var rowType = dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation);
+        var spreadsReferenceArray = false;
+        var rowType = dataSourceMember == null ? null : GetMethodDataSourceRowType(dataSourceMember, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation, out spreadsReferenceArray);
         if (rowType == null)
         {
             return null;
@@ -8277,7 +8278,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var testMethodParams = GetDataParameters(testMethod.MethodSymbol);
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
-        if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType
+        if (!spreadsReferenceArray && rowType is INamedTypeSymbol { IsTupleType: true } tupleType
             && !(testMethodParams.Length == 1 && testMethodParams[0].Type.IsTupleType))
         {
             // A tuple row is spread across the test method's parameters
@@ -8292,11 +8293,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else if (testMethodParams.Length > 0)
         {
-            // Any other row is a single value for the first parameter. This includes typed arrays
-            // such as int[]: only object[] rows are spread (DataSourceHelpers.ToObjectArray).
-            if (!ProcessTypeForGenerics(testMethodParams[0].Type, rowType, genericParams, genericParamMap))
+            // Wrapped reference arrays spread over every data parameter. Other rows bind whole
+            // to the first parameter, including bare typed arrays such as int[].
+            var suppliedParameterCount = spreadsReferenceArray ? testMethodParams.Length : 1;
+            for (var i = 0; i < suppliedParameterCount; i++)
             {
-                return null;
+                if (!ProcessTypeForGenerics(testMethodParams[i].Type, rowType, genericParams, genericParamMap))
+                {
+                    return null;
+                }
             }
         }
 
@@ -8677,7 +8682,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// those are only known at runtime.
     /// </summary>
     private static ITypeSymbol? GetMethodDataSourceRowType(ISymbol dataSourceMember, MethodDataSourceRowTypes wellKnown, Compilation compilation)
+        => GetMethodDataSourceRowType(dataSourceMember, wellKnown, compilation, out _);
+
+    private static ITypeSymbol? GetMethodDataSourceRowType(ISymbol dataSourceMember, MethodDataSourceRowTypes wellKnown, Compilation compilation, out bool spreadsReferenceArray)
     {
+        spreadsReferenceArray = false;
         var type = dataSourceMember switch
         {
             IMethodSymbol method => method.ReturnType,
@@ -8741,6 +8750,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (type is IArrayTypeSymbol { IsSZArray: true, ElementType.IsReferenceType: true } referenceArray)
             {
                 type = referenceArray.ElementType;
+                spreadsReferenceArray = true;
             }
         }
 

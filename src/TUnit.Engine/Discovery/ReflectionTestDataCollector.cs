@@ -1052,11 +1052,6 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
 
             var parameters = genericMethod.GetParameters();
-            if (!Array.Exists(parameters, static p => p.ParameterType.ContainsGenericParameters))
-            {
-                continue;
-            }
-
             var methodDataSources = ReflectionAttributeExtractor.ExtractDataSources(genericMethod);
             var typeArgumentGroups = new List<Type[]>();
 
@@ -2613,11 +2608,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
         else if (dataParameters.Length > 1 && (spreadsReferenceArray || requiredCount <= 1))
         {
-            // A scalar row binds to the first data parameter; the rest are optional. A wrapped reference
-            // array can supply multiple required parameters of its declared element type.
-            if (!MapTypedRowParameters(dataParameters[0].ParameterType, rowType, typeArguments, scope))
+            // A scalar binds only to the first parameter. A wrapped reference array spreads its
+            // elements across the data parameters, including generic parameters after the first.
+            var suppliedParameterCount = spreadsReferenceArray ? dataParameters.Length : 1;
+            for (var i = 0; i < suppliedParameterCount; i++)
             {
-                return null;
+                if (!MapTypedRowParameters(dataParameters[i].ParameterType, rowType, typeArguments, scope))
+                {
+                    return null;
+                }
             }
         }
         else

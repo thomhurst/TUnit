@@ -47,3 +47,12 @@ public class AmbiguousMethodSourceClassTests<T>
     [Test, MethodDataSource(nameof(ReversedRows))]
     public void CannotInferReversed(IInferenceMarker<T> value) { }
 }
+
+[EngineTest(ExpectedResult.Failure)]
+public class UnusedClassTypeMethodSourceTests<T>
+{
+    public static IEnumerable<int> Rows() => [1];
+
+    [Test, MethodDataSource(nameof(Rows))]
+    public void CannotInferUnusedType(int value) { }
+}
