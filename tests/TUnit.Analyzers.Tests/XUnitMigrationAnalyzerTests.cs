@@ -8,6 +8,250 @@ namespace TUnit.Analyzers.Tests;
 
 public class XUnitMigrationAnalyzerTests
 {
+    [Arguments("new object[] { 1, 2 }", "1")]
+    [Arguments("new object[] { 2 }", "1")]
+    [Arguments("new object[] { 1, 1 }", "1")]
+    [Arguments("new object[] { null, 2 }", "(object)null")]
+    [Arguments("new System.Collections.ArrayList { 1, 2 }", "1")]
+    [Arguments("singleArguments()", "singleItem()")]
+    [Arguments("new System.Collections.ArrayList { new object() }", "new()")]
+    [Test]
+    public async Task XUnit_Single_Expected_Value_Converted(string collection, string expected)
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            $$"""
+            {|#0:using Xunit;
+
+            public class MyClass
+            {
+                private object[] singleArguments() => new object[] { 1, 2 };
+                private object singleItem() => 1;
+
+                [Fact]
+                public void MyTest()
+                {
+                    Assert.Single({{collection}}, {{expected}});
+                }
+            }|}
+            """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            $$"""
+            using System.Threading.Tasks;
+
+            public class MyClass
+            {
+                private object[] singleArguments() => new object[] { 1, 2 };
+                private object singleItem() => 1;
+
+                [Test]
+                public async Task MyTest()
+                {
+                    await Assert.That(((global::System.Collections.IEnumerable)({{collection}}), (object)((({{expected}}))!))).Satisfies(singleArguments_ => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments_.Item1), singleItem_ => global::System.Object.Equals(singleItem_, singleArguments_.Item2)) == 1);
+                }
+            }
+            """,
+            ConfigureXUnitTest);
+    }
+
+    [Arguments(false)]
+    [Arguments(true)]
+    [Test]
+    public async Task XUnit_Single_Named_Arguments_Converted_In_Source_Order(bool expectedFirst)
+    {
+        var arguments = expectedFirst
+            ? "expected: GetExpected(), collection: GetCollection()"
+            : "collection: GetCollection(), expected: GetExpected()";
+        var captures = expectedFirst
+            ? "(object)(((GetExpected()))!), (global::System.Collections.IEnumerable)(GetCollection())"
+            : "(global::System.Collections.IEnumerable)(GetCollection()), (object)(((GetExpected()))!)";
+        var collectionItem = expectedFirst ? "Item2" : "Item1";
+        var expectedItem = expectedFirst ? "Item1" : "Item2";
+        await CodeFixer.VerifyCodeFixAsync(
+            $$"""
+            {|#0:using Xunit;
+            using Assert = Xunit.Assert;
+
+            public class MyClass
+            {
+                private object[] GetCollection() => new object[] { 1, 2 };
+                private object GetExpected() => 1;
+
+                [Fact]
+                public void MyTest()
+                {
+                    Assert.Single({{arguments}});
+                }
+            }|}
+            """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            $$"""
+            using System.Threading.Tasks;
+
+            public class MyClass
+            {
+                private object[] GetCollection() => new object[] { 1, 2 };
+                private object GetExpected() => 1;
+
+                [Test]
+                public async Task MyTest()
+                {
+                    await Assert.That(({{captures}})).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.{{collectionItem}}), singleItem => global::System.Object.Equals(singleItem, singleArguments.{{expectedItem}})) == 1);
+                }
+            }
+            """,
+            test =>
+            {
+                ConfigureXUnitTest(test);
+                test.CompilerDiagnostics = CompilerDiagnostics.Errors;
+                test.ReferenceAssemblies = new ReferenceAssemblies("net10.0",
+                    new PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"), "ref/net10.0");
+                test.TestState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
+                test.TestState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
+                test.FixedState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
+            });
+    }
+
+    [Arguments("expected")]
+    [Arguments("true ? expected : new object()")]
+    [Arguments("null")]
+    [Arguments("new()")]
+    [Test]
+    public async Task XUnit_Single_Nullable_Expected_Compiles(string expected)
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            $$"""
+            #nullable enable
+            {|#0:using Xunit;
+            using Assert = Xunit.Assert;
+
+            public class MyClass
+            {
+                [Fact]
+                public void MyTest()
+                {
+                    object? expected = null;
+                    Assert.Single((System.Collections.IEnumerable)new object?[] { null, 2 }, {{expected}});
+                }
+            }|}
+            """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            $$"""
+            using System.Threading.Tasks;
+            #nullable enable
+
+            public class MyClass
+            {
+                [Test]
+                public async Task MyTest()
+                {
+                    object? expected = null;
+                    await Assert.That(((global::System.Collections.IEnumerable)((System.Collections.IEnumerable)new object?[] { null, 2 }), (object)((({{expected}}))!))).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.Item1), singleItem => global::System.Object.Equals(singleItem, singleArguments.Item2)) == 1);
+                }
+            }
+            """,
+            test =>
+            {
+                ConfigureXUnitTest(test);
+                // The shared verifier promotes all nullable warnings to errors.
+                test.CompilerDiagnostics = CompilerDiagnostics.Errors;
+                test.ReferenceAssemblies = new ReferenceAssemblies("net10.0",
+                    new PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"), "ref/net10.0");
+                test.TestState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
+                test.TestState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
+                test.FixedState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
+            });
+    }
+
+    [Arguments(0, false, false)]
+    [Arguments(1, true, false)]
+    [Arguments(2, false, false)]
+    [Arguments(0, false, true)]
+    [Arguments(1, true, true)]
+    [Arguments(2, false, true)]
+    [Test]
+    [Arguments(1, true, false, true)]
+    public async Task XUnit_Single_Expected_Value_Semantics(int matches, bool shouldPass, bool nullExpected, bool expectedFirst = false)
+    {
+        var calls = new List<string>();
+        object? expectedValue = nullExpected ? null : new SingleEqualityItem();
+        System.Collections.IEnumerable GetCollection()
+        {
+            calls.Add("collection");
+            return Enumerate();
+        }
+        IEnumerable<object?> Enumerate()
+        {
+            calls.Add("enumeration");
+            yield return new SingleEqualityItem();
+            yield return 2;
+            for (var i = 0; i < matches; i++)
+            {
+                yield return expectedValue;
+            }
+        }
+        object? GetExpected()
+        {
+            calls.Add("expected");
+            return expectedValue;
+        }
+
+        // The generated expression must evaluate each argument once before enumeration.
+        async Task CheckCollectionFirstAsync() => await TUnit.Assertions.Assert.That(((global::System.Collections.IEnumerable)(GetCollection()), (object?)(GetExpected()))).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.Item1), singleItem => global::System.Object.Equals(singleItem, singleArguments.Item2)) == 1);
+        async Task CheckExpectedFirstAsync() => await TUnit.Assertions.Assert.That(((object?)(GetExpected()), (global::System.Collections.IEnumerable)(GetCollection()))).Satisfies(singleArguments => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>(singleArguments.Item2), singleItem => global::System.Object.Equals(singleItem, singleArguments.Item1)) == 1);
+        Task CheckAsync() => expectedFirst ? CheckExpectedFirstAsync() : CheckCollectionFirstAsync();
+        if (shouldPass)
+        {
+            await CheckAsync();
+        }
+        else
+        {
+            await TUnit.Assertions.Assert.That(() => CheckAsync()).Throws<TUnit.Assertions.Exceptions.AssertionException>();
+        }
+        await TUnit.Assertions.Assert.That(calls.SequenceEqual(expectedFirst ? new[] { "expected", "collection", "enumeration" } : new[] { "collection", "expected", "enumeration" })).IsTrue();
+    }
+
+    // IEquatable<T> must not replace object equality (the expected overload is non-generic).
+    private sealed class SingleEqualityItem : IEquatable<SingleEqualityItem>
+    {
+        public bool Equals(SingleEqualityItem? other) => true;
+        public override bool Equals(object? obj) => false;
+        public override int GetHashCode() => 0;
+    }
+
+    [Arguments("", "")]
+    [Arguments(", item => item == 1", "item => item == 1")]
+    [Test]
+    public async Task XUnit_Single_Other_Overloads_Retained(string argument, string predicate)
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            $$"""
+            {|#0:using Xunit;
+
+            public class MyClass
+            {
+                [Fact]
+                public void MyTest()
+                {
+                    Assert.Single(new[] { 1 }{{argument}});
+                }
+            }|}
+            """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            $$"""
+            using System.Threading.Tasks;
+
+            public class MyClass
+            {
+                [Test]
+                public async Task MyTest()
+                {
+                    await Assert.That(new[] { 1 }).HasSingleItem({{predicate}});
+                }
+            }
+            """,
+            ConfigureXUnitTest);
+    }
+
     [Arguments("Fact")]
     [Arguments("Theory")]
     [Arguments("Xunit.Fact")]

@@ -32,6 +32,8 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
     // Track assertions that are assigned to variables (should not be converted)
     private readonly HashSet<InvocationExpressionSyntax> _variableAssignedAssertions = new();
 
+    private HashSet<string>? _sourceIdentifiers;
+
     private static readonly HashSet<string> XUnitAttributeNames = new()
     {
         "Fact", "Theory", "InlineData", "MemberData", "ClassData",
@@ -356,7 +358,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             // xUnit has two overloads with a second parameter:
             //   Assert.Single<T>(IEnumerable<T>, Predicate<T>) - predicate overload
             //   Assert.Single(IEnumerable, object?) - expected value overload
-            // Only convert the predicate overload to HasSingleItem(predicate).
+            // The predicate overload can use HasSingleItem(predicate) directly.
             var symbol = SemanticModel.GetSymbolInfo(memberAccess).Symbol;
             if (symbol is IMethodSymbol { Parameters.Length: 2 } methodSymbol &&
                 methodSymbol.Parameters[1].Type is INamedTypeSymbol { DelegateInvokeMethod: not null })
@@ -365,9 +367,28 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
                 return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem({predicate})", true, null);
             }
 
-            // For the expected value overload, fall back to HasSingleItem() without predicate
-            return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem()", true,
-                "// TODO: xUnit Assert.Single(collection, expected) matched by value - verify conversion");
+            // Capture both arguments before enumeration, in their original evaluation order.
+            // xUnit uses object.Equals(item, expected), including for non-generic collections.
+            // Avoid introducing lambda parameters that shadow names in the migrated source.
+            var identifiers = _sourceIdentifiers ??= new HashSet<string>(memberAccess.SyntaxTree.GetRoot().DescendantTokens()
+                .Where(token => token.IsKind(SyntaxKind.IdentifierToken)).Select(token => token.ValueText));
+            var pair = "singleArguments";
+            while (identifiers.Contains(pair)) pair += "_";
+            var item = "singleItem";
+            while (identifiers.Contains(item)) item += "_";
+            var expectedFirst = args[0].NameColon?.Name.Identifier.ValueText == "expected";
+            collection = args[expectedFirst ? 1 : 0].Expression.ToString();
+            var expected = args[expectedFirst ? 0 : 1].Expression.ToString();
+            var collectionCapture = $"(global::System.Collections.IEnumerable)({collection})";
+            var expectedCapture = $"(object)((({expected}))!)";
+            var captures = expectedFirst
+                ? $"{expectedCapture}, {collectionCapture}"
+                : $"{collectionCapture}, {expectedCapture}";
+            var collectionItem = expectedFirst ? "Item2" : "Item1";
+            var expectedItem = expectedFirst ? "Item1" : "Item2";
+            return (AssertionConversionKind.Single,
+                $"await Assert.That(({captures})).Satisfies({pair} => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>({pair}.{collectionItem}), {item} => global::System.Object.Equals({item}, {pair}.{expectedItem})) == 1)",
+                true, null);
         }
 
         return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem()", true, null);
