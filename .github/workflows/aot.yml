@@ -342,7 +342,7 @@ jobs:
             $targetCommands = @('.reload')
             $threadIndex = $null
             foreach ($line in Get-Content analysis/native-stacks.txt) {
-              if ($line -match '^\s*(\d+)\s+Id:') {
+              if ($line -match '^\s*[.#]?\s*(\d+)\s+Id:') {
                 $threadIndex = $Matches[1]
               } elseif ($null -ne $threadIndex -and $line -match '^\s*([0-9a-fA-F]+)\s+.*coreclr!ThreadNative_Start\+') {
                 $frameIndex = $Matches[1]
