@@ -109,6 +109,16 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     [Arguments("(Box<string>[], Box<int>[])", "(T[], Box<T>[])", true)]
     [Arguments("(Box<int>[], int[])", "(Box<T>[], T[])", false)]
     [Arguments("(string[], Box<object>[])", "(T[], Box<T>[])", false)]
+    [Arguments("IContravariant<Func<string>, Func<Uri>>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Func<Uri>, Func<string>>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Func<int>, Func<object>>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Action<int>, Action<object>>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<InvariantDelegate<string>, InvariantDelegate<object>>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Func<string>[], Func<Uri>[]>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Func<Base>, Func<Derived>>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<Func<IDisposable>, Func<ICloneable>>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<Func<string, IDisposable>, Func<Uri, ICloneable>>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<Func<int>, Func<int>>[]", "IContravariant<T, T>[]", false)]
     [Arguments("IContravariant<Action, Func<int>>[]", "IContravariant<T, T>[]", true)]
     [Arguments("IContravariant<Func<int>, Action>[]", "IContravariant<T, T>[]", true)]
     [Arguments("IContravariant<Action<string>, Func<string>>[]", "IContravariant<T, T>[]", true)]
@@ -208,6 +218,7 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
             using TUnit.Core;
             using TUnit.Core.Interfaces;
             public interface IContravariant<in A, in B> { }
+            public delegate void InvariantDelegate<A>(A value);
             public class Base { }
             public class Derived : Base { }
             public class OtherBase { }

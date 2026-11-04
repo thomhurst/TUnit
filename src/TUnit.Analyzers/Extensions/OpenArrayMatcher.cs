@@ -223,9 +223,36 @@ internal static class OpenArrayMatcher
         // conversions to Delegate, MulticastDelegate and ICloneable passed above.
         if (left.TypeKind == TypeKind.Delegate || right.TypeKind == TypeKind.Delegate)
         {
-            return left is INamedTypeSymbol { TypeKind: TypeKind.Delegate } leftDelegate
-                && right is INamedTypeSymbol { TypeKind: TypeKind.Delegate } rightDelegate
-                && SymbolEqualityComparer.Default.Equals(leftDelegate.OriginalDefinition, rightDelegate.OriginalDefinition);
+            if (left is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } leftDelegate
+                || right is not INamedTypeSymbol { TypeKind: TypeKind.Delegate } rightDelegate
+                || !SymbolEqualityComparer.Default.Equals(leftDelegate.OriginalDefinition, rightDelegate.OriginalDefinition))
+            {
+                return false;
+            }
+
+            for (var i = 0; i < leftDelegate.TypeArguments.Length; i++)
+            {
+                var leftArgument = leftDelegate.TypeArguments[i];
+                var rightArgument = rightDelegate.TypeArguments[i];
+                if (SymbolEqualityComparer.Default.Equals(leftArgument, rightArgument))
+                {
+                    continue;
+                }
+
+                // Value arguments and invariant positions require identity. Covariant
+                // positions need a shared subtype; contravariant positions can use object
+                // as a common reference supertype (e.g. Action<string>/Action<Uri>).
+                var variance = leftDelegate.TypeParameters[i].Variance;
+                if (!leftArgument.IsReferenceType || !rightArgument.IsReferenceType
+                    || variance == VarianceKind.None
+                    || (variance == VarianceKind.Out
+                        && !CanShareReferenceSubtype(compilation, leftArgument, rightArgument)))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         var leftSealedClass = left.IsSealed && left.TypeKind is not (TypeKind.Array or TypeKind.Delegate);
