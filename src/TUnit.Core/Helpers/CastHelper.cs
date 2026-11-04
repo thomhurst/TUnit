@@ -191,6 +191,18 @@ public static class CastHelper
 
     private static bool TryAotSafeConversion(Type targetType, Type sourceType, object value, out object? result)
     {
+        // Decimal operators truncate integral results, whereas the primitive fallback
+        // rounds to nearest even. Keep the same policy whether a generated converter
+        // was registered or metadata was collected through reflection.
+        if (value is decimal && (targetType == typeof(sbyte) || targetType == typeof(byte) ||
+            targetType == typeof(short) || targetType == typeof(ushort) ||
+            targetType == typeof(int) || targetType == typeof(uint) ||
+            targetType == typeof(long) || targetType == typeof(ulong)))
+        {
+            result = Convert.ChangeType(value, targetType);
+            return true;
+        }
+
         // Try AOT converter registry first
         if (AotConverterRegistry.TryConvert(sourceType, targetType, value, out result))
         {

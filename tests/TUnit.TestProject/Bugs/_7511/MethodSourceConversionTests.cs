@@ -111,3 +111,73 @@ public class PropertySourceConversionTests : PropertySourceBase
     [Test]
     public async Task ConvertsInheritedProperty() => await Assert.That(Value).IsEqualTo(49);
 }
+
+public class DecimalSourceConversionTests
+{
+    public static (decimal, int)[] Rows() => [(1.9m, 2), (2.5m, 2), (3.5m, 4)];
+
+#pragma warning disable TUnit0001
+    [Test, MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public async Task ConvertsToSbyte(sbyte value, int expected)
+    {
+        await Assert.That((long)value).IsEqualTo(expected);
+    }
+
+#pragma warning disable TUnit0001
+    [Test, MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public async Task ConvertsToByte(byte value, int expected)
+    {
+        await Assert.That((long)value).IsEqualTo(expected);
+    }
+
+#pragma warning disable TUnit0001
+    [Test, MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public async Task ConvertsToShort(short value, int expected)
+    {
+        await Assert.That((long)value).IsEqualTo(expected);
+    }
+
+#pragma warning disable TUnit0001
+    [Test, MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public async Task ConvertsToUshort(ushort value, int expected)
+    {
+        await Assert.That((long)value).IsEqualTo(expected);
+    }
+
+#pragma warning disable TUnit0001
+    [Test, MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public async Task ConvertsToInt(int value, int expected)
+    {
+        await Assert.That((long)value).IsEqualTo(expected);
+    }
+
+#pragma warning disable TUnit0001
+    [Test, MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public async Task ConvertsToUint(uint value, int expected)
+    {
+        await Assert.That((long)value).IsEqualTo(expected);
+    }
+
+#pragma warning disable TUnit0001
+    [Test, MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public async Task ConvertsToLong(long value, int expected)
+    {
+        await Assert.That((long)value).IsEqualTo(expected);
+    }
+
+#pragma warning disable TUnit0001
+    [Test, MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public async Task ConvertsToUlong(ulong value, int expected)
+    {
+        await Assert.That((long)value).IsEqualTo(expected);
+    }
+
+}
