@@ -342,6 +342,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         // Use MembersToGenerate which contains the correct parameters for this data generator type
         // (constructor params for class-level, method params for method-level)
         var paramTypes = GetMemberTypes(dataGeneratorMetadata.MembersToGenerate);
+        var genericTupleParameter = GetSingleErasedGenericTupleParameter(dataGeneratorMetadata.MembersToGenerate);
 
         object?[] ToRow(object? item)
         {
@@ -355,6 +356,24 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
                     return [item];
                 }
             }
+
+            // Retain nested value tuples, or all reference-tuple elements, until binding.
+            if (genericTupleParameter is not null)
+            {
+                item = DataSourceHelpers.InvokeIfFunc(item);
+                if (DataSourceHelpers.IsTuple(item))
+                {
+                    return DataSourceHelpers.ShouldFlattenErasedTuple(item!, genericTupleParameter)
+                        ? DataSourceHelpers.UnwrapTupleAot(item)
+                        : [item];
+                }
+
+                // Invoke only the outer factory, matching ToObjectArrayWithTypes.
+                return item is object?[] array && item.GetType() == typeof(object[])
+                    ? array
+                    : [item];
+            }
+
             return item.ToObjectArrayWithTypes(paramTypes);
         }
 
@@ -774,6 +793,34 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
         }
         return args;
+    }
+
+    private static ParameterMetadata? GetSingleErasedGenericTupleParameter(IMemberMetadata[]? members)
+    {
+        ParameterMetadata? dataParameter = null;
+        foreach (var member in members ?? [])
+        {
+            if (member is not ParameterMetadata parameter)
+            {
+                return null;
+            }
+
+            if (parameter.Type == typeof(CancellationToken))
+            {
+                continue;
+            }
+
+            if (dataParameter is not null)
+            {
+                return null;
+            }
+
+            dataParameter = parameter;
+        }
+
+        return dataParameter is not null && DataSourceHelpers.IsErasedGenericTupleParameter(dataParameter)
+            ? dataParameter
+            : null;
     }
 
     private static Type[]? GetMemberTypes(IMemberMetadata[]? members)

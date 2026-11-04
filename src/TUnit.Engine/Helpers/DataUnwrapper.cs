@@ -133,7 +133,19 @@ internal class DataUnwrapper
             return DataSourceHelpers.UnwrapTupleAot(values[0]);
         }
 
-        var lastDataParameterType = expectedParameters[lastDataParameterIndex].Type;
+        var lastDataParameter = expectedParameters[lastDataParameterIndex];
+        var lastDataParameterType = lastDataParameter.Type;
+
+        // Generated metadata erases a parameter containing type parameters to object,
+        // but TypeInfo retains its tuple shape. Preserve all elements until the invoker
+        // closes the type; reference tuples and mutable elements need flattened binding.
+        if (dataParameterCount == 1
+            && DataSourceHelpers.IsErasedGenericTupleParameter(lastDataParameter))
+        {
+            return DataSourceHelpers.ShouldFlattenErasedTuple(values[0]!, lastDataParameter)
+                ? DataSourceHelpers.UnwrapTupleAot(values[0])
+                : values;
+        }
 
         // Keep compatible tuples whole (including one-element tuples holding null).
         // Otherwise the invoker needs every element to reconstruct the target tuple
@@ -141,8 +153,11 @@ internal class DataUnwrapper
         if (dataParameterCount == 1 && TupleHelper.IsTupleType(lastDataParameterType))
         {
             // Keep the runtime tuple intact until generic inference closes the parameter type.
+            // Singleton value-tuple conversion also needs the outer container: its element
+            // can itself be a tuple, indistinguishable from a preserved row after flattening.
             if (!DataSourceHelpers.RequiresFlattenedTupleBinding(values[0]!)
-                && (lastDataParameterType.ContainsGenericParameters || lastDataParameterType.IsInstanceOfType(values[0])))
+                && (lastDataParameterType.ContainsGenericParameters || lastDataParameterType.IsInstanceOfType(values[0])
+                    || lastDataParameterType.IsGenericType && lastDataParameterType.GetGenericTypeDefinition() == typeof(ValueTuple<>)))
             {
                 return values;
             }

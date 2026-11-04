@@ -4519,9 +4519,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             writer.AppendLine("// Special handling for single tuple parameter");
             // Factories preserve one-element tuple rows, so a matching tuple is the whole row,
-            // even when its element is another tuple of the same type.
+            // even when its element is another tuple of the same type. Incompatible singleton
+            // containers also need element-wise conversion through the wrapped-row path.
             var unwrappedCheck = singleTupleParam.TupleElements.Length == 1
-                ? $" && args[0] is not {singleTupleParam.GloballyQualified()}"
+                ? " && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 }"
                 : "";
             writer.AppendLine($"if (args.Length == {singleTupleParam.TupleElements.Length.ToString(CultureInfo.InvariantCulture)}{unwrappedCheck})");
             writer.AppendLine("{");

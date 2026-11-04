@@ -32,7 +32,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
         try
         {
             // Special handling for single tuple parameter
-            if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+            if (args.Length == 1 && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 })
             {
                 // Arguments are unwrapped tuple elements, reconstruct the tuple
                 return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedElement<global::System.ValueTuple<object>>(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
@@ -128,7 +128,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
         try
         {
             // Special handling for single tuple parameter
-            if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+            if (args.Length == 1 && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 })
             {
                 // Arguments are unwrapped tuple elements, reconstruct the tuple
                 return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedElementFromInstance<global::System.ValueTuple<object>>(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
@@ -224,7 +224,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                 case 0:
                 {
                     // Special handling for single tuple parameter
-                    if (args.Length == 1 && args[0] is not global::System.ValueTuple<string>)
+                    if (args.Length == 1 && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 })
                     {
                         // Arguments are unwrapped tuple elements, reconstruct the tuple
                         return new global::System.Threading.Tasks.ValueTask(instance.SingleElementFromInstance(new global::System.ValueTuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]))));
@@ -242,7 +242,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                 case 1:
                 {
                     // Special handling for single tuple parameter
-                    if (args.Length == 1 && args[0] is not global::System.ValueTuple<string>)
+                    if (args.Length == 1 && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 })
                     {
                         // Arguments are unwrapped tuple elements, reconstruct the tuple
                         return new global::System.Threading.Tasks.ValueTask(instance.SingleElement(new global::System.ValueTuple<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]))));
@@ -260,7 +260,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                 case 2:
                 {
                     // Special handling for single tuple parameter
-                    if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+                    if (args.Length == 1 && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 })
                     {
                         // Arguments are unwrapped tuple elements, reconstruct the tuple
                         return new global::System.Threading.Tasks.ValueTask(instance.NestedElement(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
@@ -278,7 +278,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                 case 3:
                 {
                     // Special handling for single tuple parameter
-                    if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+                    if (args.Length == 1 && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 })
                     {
                         // Arguments are unwrapped tuple elements, reconstruct the tuple
                         return new global::System.Threading.Tasks.ValueTask(instance.NestedElementFromInstance(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
@@ -296,7 +296,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                 case 4:
                 {
                     // Special handling for single tuple parameter
-                    if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+                    if (args.Length == 1 && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 })
                     {
                         // Arguments are unwrapped tuple elements, reconstruct the tuple
                         return new global::System.Threading.Tasks.ValueTask(instance.WrappedNestedElement(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
@@ -314,7 +314,7 @@ internal static class TUnit_TestProject_OneElementValueTupleTests__TestSource
                 case 5:
                 {
                     // Special handling for single tuple parameter
-                    if (args.Length == 1 && args[0] is not global::System.ValueTuple<object>)
+                    if (args.Length == 1 && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 })
                     {
                         // Arguments are unwrapped tuple elements, reconstruct the tuple
                         return new global::System.Threading.Tasks.ValueTask(instance.WrappedNestedElementFromInstance(new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]))));
