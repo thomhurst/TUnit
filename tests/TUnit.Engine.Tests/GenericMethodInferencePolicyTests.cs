@@ -41,7 +41,6 @@ public class GenericMethodInferencePolicyTests(TestMode testMode) : InvokableTes
     [Arguments("_7164/ClassRowTypedSourceAndMethodGenerateGenericTest*/*", 2)]
     [Arguments("_7164/DuplicateTypedSourcesOnGenericClass*/*", 1)]
     [Arguments("_7164/DuplicateArgumentsAndTypedSourceOnClassRow*/*", 1)]
-    [Arguments("_7451/ClassAndMethodParameterInference*/*", 4)]
     public async Task Sources_Respect_Precedence_And_Scope(string fixture, int expectedTests)
     {
         await RunTestsWithFilter(
@@ -51,6 +50,33 @@ public class GenericMethodInferencePolicyTests(TestMode testMode) : InvokableTes
                 result => result.ResultSummary.Counters.Total.ShouldBe(expectedTests),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(expectedTests),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+            ]);
+    }
+
+    [Test]
+    public async Task Each_Class_And_Method_Row_Pair_Runs_Exactly_Once()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7451/ClassAndMethodParameterInference*/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0),
+                // Compare the full collection, without Distinct: a duplicate replacing a missing
+                // pair must fail even when all four tests pass. Output belongs to each test, so
+                // concurrent execution cannot race on shared fixture state.
+                result => result.Results
+                    .SelectMany(x => (x.Output?.StdOut ?? "").Split('\n'))
+                    .Select(line => line.Trim())
+                    .Where(line => line.StartsWith("Issue7451 class/method pair:", StringComparison.Ordinal))
+                    .OrderBy(line => line, StringComparer.Ordinal)
+                    .ShouldBe([
+                        "Issue7451 class/method pair: first,3",
+                        "Issue7451 class/method pair: first,4",
+                        "Issue7451 class/method pair: second,3",
+                        "Issue7451 class/method pair: second,4"
+                    ])
             ]);
     }
 

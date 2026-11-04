@@ -17,6 +17,8 @@ public class ClassAndMethodParameterInference<T>(T classValue)
     [MatrixDataSource]
     public async Task Run<TMethod>([Matrix<int>(3, 4)] TMethod value)
     {
+        Console.WriteLine($"Issue7451 class/method pair: {classValue},{value}");
+
         await Assert.That(typeof(T)).IsEqualTo(typeof(string));
         await Assert.That((object?)classValue is "first" or "second").IsTrue();
         await Assert.That(typeof(TMethod)).IsEqualTo(typeof(int));
