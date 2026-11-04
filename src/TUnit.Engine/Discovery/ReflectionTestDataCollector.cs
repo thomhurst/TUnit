@@ -2181,22 +2181,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var typeArguments = InferTypesFromTypedDataSource(dataSource, method, method.GetGenericArguments().Length, classGenericParameterCount);
         // Wrapped reference arrays spread into loose values. Close the method here so a trailing
         // params array can infer from the declared element type before runtime argument binding.
-        if (typeArguments is null && dataSource is MethodDataSourceAttribute methodSource)
+        if (typeArguments is null
+            && dataSource is MethodDataSourceAttribute methodSource
+            && methodSource.GetDeclaredMemberType(methodSource.ClassProvidingDataSource ?? concreteClassType) is { } memberType
+            && MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is { } rowType
+            && spreadsReferenceArray)
         {
-            try
-            {
-                if (methodSource.GetDeclaredMemberType(methodSource.ClassProvidingDataSource ?? concreteClassType) is { } memberType
-                    && MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is { } rowType
-                    && spreadsReferenceArray)
-                {
-                    typeArguments = InferTypesFromDeclaredRow(method, rowType, method.GetGenericArguments().Length,
-                        GenericParameterScope.Method, spreadsReferenceArray: true);
-                }
-            }
-            catch (AmbiguousMatchException)
-            {
-                // Keep the source uninferred; reading it later reports its own failure without aborting discovery.
-            }
+            typeArguments = InferTypesFromDeclaredRow(method, rowType, method.GetGenericArguments().Length,
+                GenericParameterScope.Method, spreadsReferenceArray: true);
         }
 
         if (typeArguments is null)
