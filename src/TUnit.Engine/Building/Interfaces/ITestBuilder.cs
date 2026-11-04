@@ -30,19 +30,6 @@ internal interface ITestBuilder
     ValueTask<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Streaming version that yields tests as they're built without buffering
-    /// </summary>
-    /// <param name="metadata">The test metadata with DataCombinationGenerator</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Stream of executable tests for all data combinations</returns>
-#if NET8_0_OR_GREATER
-    [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
-#endif
-    IAsyncEnumerable<AbstractExecutableTest> BuildTestsStreamingAsync(
-        TestMetadata metadata,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Invokes event receivers after dependencies have been resolved.
     /// This populates TestContext._dependencies and fires ITestRegisteredEventReceiver
     /// and ITestDiscoveryEventReceiver events.
