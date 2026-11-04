@@ -8243,7 +8243,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static IEnumerable<AttributeData> GetOwnClassMethodDataSourcesForInstantiation(TestMethodMetadata testMethod, ITypeSymbol[] classTypeArgs, bool includeUninferred = true)
     {
         var compilation = testMethod.CompilationContext.Compilation;
-        foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
+        foreach (var attribute in testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
         {
             if (attribute.AttributeClass is not { Name: "MethodDataSourceAttribute", IsGenericType: false }
                 || attribute.ConstructorArguments is not [{ Value: string memberName }])

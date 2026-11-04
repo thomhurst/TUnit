@@ -561,3 +561,25 @@ public class ExplicitDeclaredAndDeferredRows<T>(T value)
         }
     }
 }
+
+[Arguments(1, "literal")]
+[MethodDataSource(nameof(Rows))]
+public abstract class InheritedDeferredConstructorRowsBase
+{
+    public static IEnumerable<(int, object)> Rows() => [(2, "source")];
+}
+
+[GenerateGenericTest(typeof(string))]
+public class ExplicitInheritedDeferredConstructorRows<T>(int id, T value) : InheritedDeferredConstructorRowsBase
+{
+    [Test]
+    [Arguments(null)]
+    public void Test(T? methodValue)
+    {
+        if (typeof(T) != typeof(string) || methodValue is not null
+            || (id == 1 ? value is not "literal" : id != 2 || value is not "source"))
+        {
+            throw new InvalidOperationException("Expected inherited literal and deferred constructor provider rows.");
+        }
+    }
+}
