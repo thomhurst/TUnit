@@ -325,7 +325,7 @@ internal static class DataGeneratorMetadataCreator
                 ReflectionInfo = p
             }).ToArray() ?? [];
 
-            return new ClassMetadata
+            return PropertyInjection.ClassMetadataHelper.WithProperties(new ClassMetadata
             {
                 Type = type,
                 TypeInfo = new ConcreteType(type),
@@ -338,7 +338,7 @@ internal static class DataGeneratorMetadataCreator
                 Properties = [],
                 Parameters = constructorParameters,
                 Parent = type.DeclaringType != null ? GetClassMetadataForType(type.DeclaringType) : null
-            };
+            });
         });
     }
 }

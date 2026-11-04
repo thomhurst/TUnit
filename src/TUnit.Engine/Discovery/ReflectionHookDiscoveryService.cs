@@ -895,7 +895,7 @@ internal sealed class ReflectionHookDiscoveryService
 
     private static ClassMetadata CreateClassMetadata(Type type)
     {
-        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => new ClassMetadata
+        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => TUnit.Core.PropertyInjection.ClassMetadataHelper.WithProperties(new ClassMetadata
         {
             Name = TypeNameFormatter.GetNameWithoutGenericArity(type),
             Type = type,
@@ -908,7 +908,7 @@ internal sealed class ReflectionHookDiscoveryService
             Parameters = [],
             Properties = [],
             Parent = type.DeclaringType != null ? CreateClassMetadata(type.DeclaringType) : null
-        });
+        }));
     }
 
     private static Func<object, TestContext, CancellationToken, ValueTask> CreateInstanceHookDelegate(Type type, MethodInfo method)

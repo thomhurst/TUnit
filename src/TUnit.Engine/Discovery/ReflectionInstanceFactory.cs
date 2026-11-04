@@ -167,7 +167,7 @@ internal static class ReflectionInstanceFactory
 
     private static ClassMetadata CreateClassMetadata(Type type)
     {
-        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => new ClassMetadata
+        return ClassMetadata.GetOrAdd(type.FullName ?? type.Name, () => TUnit.Core.PropertyInjection.ClassMetadataHelper.WithProperties(new ClassMetadata
         {
             Type = type,
             TypeInfo = new ConcreteType(type),
@@ -180,7 +180,7 @@ internal static class ReflectionInstanceFactory
             Properties = [],
             Parameters = [],
             Parent = type.DeclaringType != null ? CreateClassMetadata(type.DeclaringType) : null
-        });
+        }));
     }
 
     private static bool IsFunc(Type type)

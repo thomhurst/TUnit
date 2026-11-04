@@ -61,7 +61,7 @@ internal static class ReflectionMetadataBuilder
                 ? []
                 : ParameterMetadataFactory.Build(constructor.GetParameters(), nameFallback: null, computeIsNullable: true);
 
-            return new ClassMetadata
+            return TUnit.Core.PropertyInjection.ClassMetadataHelper.WithProperties(new ClassMetadata
             {
                 Name = TypeNameFormatter.GetNameWithoutGenericArity(type),
                 Type = type,
@@ -74,7 +74,7 @@ internal static class ReflectionMetadataBuilder
                 Parameters = constructorParameters,
                 Properties = [],
                 Parent = type.DeclaringType != null ? CreateClassMetadata(type.DeclaringType) : null
-            };
+            });
         });
     }
 }
