@@ -76,7 +76,7 @@ internal static class ClassMetadataHelper
                 Type = p.PropertyType,
                 ReflectionInfo = p,
                 IsStatic = (p.GetMethod ?? p.SetMethod)!.IsStatic,
-                IsNullable = Nullable.GetUnderlyingType(p.PropertyType) != null,
+                IsNullable = IsNullable(p),
                 Getter = instance => p.GetValue(instance),
                 ClassMetadata = null!,
                 ContainingTypeMetadata = null!
@@ -88,6 +88,53 @@ internal static class ClassMetadataHelper
             property.ContainingTypeMetadata = result;
         }
         return result;
+    }
+
+    // Read compiler annotations directly so the netstandard build has the same behavior
+    // without adding a dependency on NullabilityInfoContext (unavailable on that target).
+    private static bool IsNullable(PropertyInfo property)
+    {
+        if (property.PropertyType.IsValueType)
+        {
+            return Nullable.GetUnderlyingType(property.PropertyType) != null;
+        }
+
+        var annotation = GetNullableFlag(property.GetCustomAttributesData(), "System.Runtime.CompilerServices.NullableAttribute");
+        if (annotation != null)
+        {
+            return annotation == 2;
+        }
+
+        if (property.GetMethod != null)
+        {
+            annotation = GetNullableFlag(property.GetMethod.GetCustomAttributesData(), "System.Runtime.CompilerServices.NullableContextAttribute");
+        }
+        for (var type = property.DeclaringType; annotation == null && type != null; type = type.DeclaringType)
+        {
+            annotation = GetNullableFlag(type.GetCustomAttributesData(), "System.Runtime.CompilerServices.NullableContextAttribute");
+        }
+        return annotation == 2;
+    }
+
+    private static byte? GetNullableFlag(IList<CustomAttributeData> attributes, string attributeName)
+    {
+        foreach (var attribute in attributes)
+        {
+            if (attribute.AttributeType.FullName != attributeName || attribute.ConstructorArguments.Count != 1)
+            {
+                continue;
+            }
+            var value = attribute.ConstructorArguments[0].Value;
+            if (value is byte flag)
+            {
+                return flag;
+            }
+            if (value is IList<CustomAttributeTypedArgument> flags && flags.Count > 0 && flags[0].Value is byte first)
+            {
+                return first;
+            }
+        }
+        return null;
     }
 
     /// <summary>

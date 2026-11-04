@@ -21,6 +21,37 @@ public class ClassMetadataHelperTests
         await Assert.That(ReferenceEquals(metadata, ClassMetadataHelper.GetOrCreateClassMetadata(typeof(Derived)))).IsTrue();
     }
 
+    [Test]
+    public async Task InjectionFirstPopulatesTheSharedClassCache()
+    {
+        var data = DataGeneratorMetadataCreator.CreateForPropertyInjection(
+            typeof(Injected).GetProperty(nameof(Injected.Value))!, typeof(Injected), null,
+            new ArgumentsAttribute("injected"), "metadata-regression");
+        var property = (PropertyMetadata)data.MembersToGenerate.Single();
+        var metadata = property.ClassMetadata;
+        await Assert.That(metadata.Properties.Length).IsEqualTo(1);
+        await Assert.That(metadata.Properties[0].Getter(new Injected())).IsEqualTo("injected");
+        await Assert.That(ReferenceEquals(metadata.Properties[0].ClassMetadata, metadata)).IsTrue();
+        await Assert.That(ReferenceEquals(metadata, ClassMetadataHelper.GetOrCreateClassMetadata(typeof(Injected)))).IsTrue();
+    }
+
+    [Test]
+    public async Task NullableContextAppliesWhenThePropertyHasNoExplicitAnnotation()
+    {
+        var metadata = ClassMetadataHelper.GetOrCreateClassMetadata(typeof(NullableContextFixture));
+        await Assert.That(metadata.Properties.Single().IsNullable).IsTrue();
+    }
+
+    public class NullableContextFixture
+    {
+        public string? Value => null;
+    }
+
+    public class Injected
+    {
+        public string Value => "injected";
+    }
+
     public class Base
     {
         public string Inherited => "inherited";

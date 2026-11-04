@@ -8,13 +8,15 @@ public class PropertyMetadataTests
     public string Value => "value";
     public static int StaticValue => 42;
     public int? Optional => null;
+    public string? OptionalText => null;
+    public List<string?> Items => [];
     private string Hidden => "hidden";
 
     [Test]
     public async Task PublicPropertiesHaveUsableMetadata()
     {
         var metadata = TestContext.Current!.Metadata.TestDetails.MethodMetadata.Class;
-        await Assert.That(metadata.Properties.Length).IsEqualTo(3);
+        await Assert.That(metadata.Properties.Length).IsEqualTo(5);
         foreach (var property in metadata.Properties)
         {
             await Assert.That(ReferenceEquals(property.ClassMetadata, metadata)).IsTrue();
@@ -25,6 +27,9 @@ public class PropertyMetadataTests
         await Assert.That(value.Type).IsEqualTo(typeof(string));
         await Assert.That(value.Getter(this)).IsEqualTo("value");
         await Assert.That(value.IsStatic).IsFalse();
+        await Assert.That(value.IsNullable).IsFalse();
+        await Assert.That(metadata.Properties.Single(p => p.Name == nameof(OptionalText)).IsNullable).IsTrue();
+        await Assert.That(metadata.Properties.Single(p => p.Name == nameof(Items)).IsNullable).IsFalse();
         var staticValue = metadata.Properties.Single(p => p.Name == nameof(StaticValue));
         await Assert.That(staticValue.IsStatic).IsTrue();
         await Assert.That(staticValue.Getter(null)).IsEqualTo(42);
