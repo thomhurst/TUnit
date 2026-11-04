@@ -2858,50 +2858,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         };
     }
 
-    private static void GenerateMetadata(CodeWriter writer, TestMethodMetadata testMethod, bool useNamedMethods = false)
-    {
-        var compilation = testMethod.CompilationContext.Compilation;
-        var methodSymbol = testMethod.MethodSymbol;
-
-        GenerateDependencies(writer, methodSymbol);
-
-        if (useNamedMethods)
-        {
-            writer.AppendLine("AttributeFactory = __CreateAttributes,");
-        }
-        else
-        {
-            writer.AppendLine("AttributeFactory = static () =>");
-            writer.AppendLine("[");
-            writer.Indent();
-
-            testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, GetTestAttributes(testMethod));
-
-            writer.Unindent();
-            writer.AppendLine("],");
-        }
-
-        // Extract and emit RepeatCount if present
-        var repeatCount = ExtractRepeatCount(methodSymbol, testMethod.TypeSymbol);
-        if (repeatCount.HasValue)
-        {
-            writer.AppendLine($"RepeatCount = {repeatCount.Value.ToString(CultureInfo.InvariantCulture)},");
-        }
-
-        GenerateDataSources(writer, testMethod);
-
-        GeneratePropertyInjections(writer, testMethod.TypeSymbol, testMethod.TypeSymbol.GloballyQualified());
-
-        // Inheritance depth
-        writer.AppendLine($"InheritanceDepth = {testMethod.InheritanceDepth.ToString(CultureInfo.InvariantCulture)},");
-
-        WriteSourceLocationMetadata(writer, testMethod);
-
-        // Method metadata
-        writer.Append("MethodMetadata = ");
-        SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
-    }
-
     private static void WriteSourceLocationMetadata(CodeWriter writer, TestMethodMetadata testMethod)
     {
         // Emit the path via Roslyn's literal formatter rather than hand-rolling escaping. The
@@ -2983,65 +2939,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Method metadata
         writer.Append("MethodMetadata = ");
         SourceInformationWriter.GenerateMethodInformation(writer, compilation, testMethod.TypeSymbol, testMethod.MethodSymbol, null, ',');
-    }
-
-    private static void GenerateDataSources(CodeWriter writer, TestMethodMetadata testMethod)
-    {
-        var methodSymbol = testMethod.MethodSymbol;
-        var typeSymbol = testMethod.TypeSymbol;
-
-        // Extract data source attributes from method
-        var methodDataSources = methodSymbol.GetAttributes()
-            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
-            .ToArray();
-
-        // Extract data source attributes from class
-        var classDataSources = typeSymbol.GetAttributesIncludingBaseTypes()
-            .Where(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass))
-            .ToArray();
-
-        // Generate method data sources
-        if (methodDataSources.Length == 0)
-        {
-            writer.AppendLine("DataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
-        }
-        else
-        {
-            writer.AppendLine("DataSources = new global::TUnit.Core.IDataSourceAttribute[]");
-            writer.AppendLine("{");
-            writer.Indent();
-
-            foreach (var attr in methodDataSources)
-            {
-                GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, methodSymbol, typeSymbol);
-            }
-
-            writer.Unindent();
-            writer.AppendLine("},");
-        }
-
-        // Generate class data sources
-        if (classDataSources.Length == 0)
-        {
-            writer.AppendLine("ClassDataSources = global::System.Array.Empty<global::TUnit.Core.IDataSourceAttribute>(),");
-        }
-        else
-        {
-            writer.AppendLine("ClassDataSources = new global::TUnit.Core.IDataSourceAttribute[]");
-            writer.AppendLine("{");
-            writer.Indent();
-
-            foreach (var attr in classDataSources)
-            {
-                GenerateDataSourceAttribute(writer, testMethod.CompilationContext, attr, GetClassRowConstructor(typeSymbol), typeSymbol);
-            }
-
-            writer.Unindent();
-            writer.AppendLine("},");
-        }
-
-        // Generate property data sources
-        GeneratePropertyDataSources(writer, testMethod);
     }
 
     private static void GenerateDataSourceAttribute(CodeWriter writer, CompilationContext compilationContext, AttributeData attr, IMethodSymbol? methodSymbol, INamedTypeSymbol typeSymbol, bool? keepSingleElementTupleWhole = null)
@@ -5221,61 +5118,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     /// <summary>
-    /// Appends optional named parameters to a TestMetadataFactory.Create call.
-    /// Only includes parameters that differ from the factory defaults (null/empty).
-    /// </summary>
-    private static void AppendOptionalFactoryParameters(CodeWriter writer, TestMethodMetadata testMethod, string className)
-    {
-        // Dependencies
-        var deps = PreGenerateDependenciesExpression(testMethod.MethodSymbol);
-        if (deps != null)
-        {
-            writer.AppendLine(",");
-            writer.Append($"dependencies: {deps}");
-        }
-
-        // Method-level data sources
-        var methodDS = PreGenerateMethodDataSourcesExpression(testMethod);
-        if (methodDS != null)
-        {
-            writer.AppendLine(",");
-            writer.Append($"dataSources: {methodDS}");
-        }
-
-        // Class-level data sources
-        var classDS = PreGenerateClassDataSourcesExpression(testMethod);
-        if (classDS != null)
-        {
-            writer.AppendLine(",");
-            writer.Append($"classDataSources: {classDS}");
-        }
-
-        // Property data sources
-        var propDS = PreGeneratePropertyDataSourcesExpression(testMethod);
-        if (propDS != null)
-        {
-            writer.AppendLine(",");
-            writer.Append($"propertyDataSources: {propDS}");
-        }
-
-        // Property injections
-        var propInj = GeneratePropertyInjectionsExpression(testMethod.TypeSymbol, className);
-        if (propInj != null)
-        {
-            writer.AppendLine(",");
-            writer.Append($"propertyInjections: {propInj}");
-        }
-
-        // RepeatCount
-        var repeatCount = ExtractRepeatCount(testMethod.MethodSymbol, testMethod.TypeSymbol);
-        if (repeatCount.HasValue)
-        {
-            writer.AppendLine(",");
-            writer.Append($"repeatCount: {repeatCount.Value.ToString(CultureInfo.InvariantCulture)}");
-        }
-    }
-
-    /// <summary>
     /// Returns a TestDependency[] expression, or null if empty (factory default).
     /// </summary>
     private static string? PreGenerateDependenciesExpression(IMethodSymbol methodSymbol)
@@ -5363,64 +5205,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return writer.ToString();
     }
 
-    /// <summary>
-    /// Returns a PropertyDataSource[] expression, or null if empty.
-    /// </summary>
-    private static string? PreGeneratePropertyDataSourcesExpression(TestMethodMetadata testMethod)
-    {
-        var typeSymbol = testMethod.TypeSymbol;
-        var processedNames = new HashSet<string>();
-        var qualifyingProperties = new List<(IPropertySymbol Property, AttributeData DataSourceAttr)>();
-
-        // Single pass: collect qualifying properties with their data source attributes
-        var currentType = typeSymbol;
-        while (currentType != null)
-        {
-            foreach (var member in currentType.GetMembers())
-            {
-                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsStatic: false } property &&
-                    !processedNames.Contains(property.Name))
-                {
-                    var dataSourceAttr = property.GetAttributes()
-                        .FirstOrDefault(a => DataSourceAttributeHelper.IsDataSourceAttribute(a.AttributeClass));
-
-                    if (dataSourceAttr != null)
-                    {
-                        processedNames.Add(property.Name);
-                        qualifyingProperties.Add((property, dataSourceAttr));
-                    }
-                }
-            }
-            currentType = currentType.BaseType;
-        }
-
-        if (qualifyingProperties.Count == 0)
-        {
-            return null;
-        }
-
-        var writer = new CodeWriter(includeHeader: false);
-        writer.AppendLine("new global::TUnit.Core.PropertyDataSource[]");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        foreach (var (property, dataSourceAttr) in qualifyingProperties)
-        {
-            writer.AppendLine("new global::TUnit.Core.PropertyDataSource");
-            writer.AppendLine("{");
-            writer.Indent();
-            writer.AppendLine($"PropertyName = \"{property.Name}\",");
-            writer.AppendLine($"PropertyType = typeof({property.Type.GloballyQualified()}),");
-            writer.Append("DataSource = ");
-            GenerateDataSourceAttribute(writer, testMethod.CompilationContext, dataSourceAttr, testMethod.MethodSymbol, typeSymbol);
-            writer.Unindent();
-            writer.AppendLine("},");
-        }
-
-        writer.Unindent();
-        writer.Append("}");
-        return writer.ToString();
-    }
 
     /// <summary>
     /// Pre-generates UnsafeAccessor declarations for init-only properties.
@@ -6374,17 +6158,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return typeName;
     }
 
-    private static string GenerateTypeReference(INamedTypeSymbol typeSymbol, bool isGeneric)
-    {
-        if (isGeneric)
-        {
-            var openGenericTypeName = GetOpenGenericTypeName(typeSymbol);
-            return $"typeof({openGenericTypeName})";
-        }
-        var fullyQualifiedName = typeSymbol.GloballyQualified();
-        return $"typeof({fullyQualifiedName})";
-    }
-
     private static string BuildTypeKey(IEnumerable<ITypeSymbol> types)
     {
         var typesList = types as IList<ITypeSymbol> ?? types.ToArray();
@@ -6409,110 +6182,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         var typeString = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
         return $"(typeof({typeString}).FullName ?? typeof({typeString}).Name)";
-    }
-
-    private static void GenerateGenericTypeInfo(CodeWriter writer, INamedTypeSymbol typeSymbol)
-    {
-        writer.AppendLine("GenericTypeInfo = new global::TUnit.Core.GenericTypeInfo");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Generate type parameter names
-        writer.AppendLine("ParameterNames = new string[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var typeParam in typeSymbol.TypeParameters)
-        {
-            writer.AppendLine($"\"{typeParam.Name}\",");
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        // Generate constraints
-        writer.AppendLine("Constraints = new global::TUnit.Core.GenericParameterConstraints[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var typeParam in typeSymbol.TypeParameters)
-        {
-            GenerateGenericParameterConstraints(writer, typeParam);
-        }
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        writer.Unindent();
-        writer.AppendLine("},");
-    }
-
-    private static void GenerateGenericMethodInfo(CodeWriter writer, IMethodSymbol methodSymbol)
-    {
-        writer.AppendLine("GenericMethodInfo = new global::TUnit.Core.GenericMethodInfo");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        // Generate type parameter names
-        writer.AppendLine("ParameterNames = new string[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var typeParam in methodSymbol.TypeParameters)
-        {
-            writer.AppendLine($"\"{typeParam.Name}\",");
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        // Generate constraints
-        writer.AppendLine("Constraints = new global::TUnit.Core.GenericParameterConstraints[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var typeParam in methodSymbol.TypeParameters)
-        {
-            GenerateGenericParameterConstraints(writer, typeParam);
-        }
-        writer.Unindent();
-        writer.AppendLine("},");
-
-        // Generate parameter positions (for type inference)
-        writer.AppendLine("ParameterPositions = new int[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        writer.Unindent();
-        writer.AppendLine("},");
-    }
-
-    private static void GenerateGenericParameterConstraints(CodeWriter writer, ITypeParameterSymbol typeParam)
-    {
-        writer.AppendLine("new global::TUnit.Core.GenericParameterConstraints");
-        writer.AppendLine("{");
-        writer.Indent();
-
-        writer.AppendLine($"ParameterName = \"{typeParam.Name}\",");
-        writer.AppendLine($"HasDefaultConstructorConstraint = {typeParam.HasConstructorConstraint.ToString().ToLowerInvariant()},");
-
-        // Find base type constraint (class constraint)
-        var baseTypeConstraint = typeParam.ConstraintTypes.FirstOrDefault(c => c.TypeKind == TypeKind.Class);
-        if (baseTypeConstraint != null)
-        {
-            writer.AppendLine($"BaseTypeConstraint = typeof({baseTypeConstraint.GloballyQualified()}),");
-        }
-
-        // Generate interface constraints
-        var interfaceConstraints = typeParam.ConstraintTypes.Where(c => c.TypeKind == TypeKind.Interface);
-        writer.AppendLine("InterfaceConstraints = new global::System.Type[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        foreach (var constraintType in interfaceConstraints)
-        {
-            var constraintTypeName = constraintType.GloballyQualified();
-            writer.AppendLine($"typeof({constraintTypeName}),");
-        }
-        writer.Unindent();
-        writer.AppendLine("}");
-
-        writer.Unindent();
-        writer.AppendLine("},");
     }
 
     private static void GenerateGenericTestWithConcreteTypes(
