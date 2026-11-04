@@ -380,6 +380,10 @@ public class AotConverterGenerator : IIncrementalGenerator
             TargetType = ToTypeMetadata(conversion.TargetType),
             TypesAreDifferent = !SymbolEqualityComparer.Default.Equals(conversion.SourceType, conversion.TargetType),
             IsImplicit = conversion.IsImplicit,
+            RoundsDecimalToIntegral = conversion.SourceType.SpecialType == SpecialType.System_Decimal &&
+                conversion.TargetType.SpecialType is SpecialType.System_SByte or SpecialType.System_Byte or
+                    SpecialType.System_Int16 or SpecialType.System_UInt16 or SpecialType.System_Int32 or
+                    SpecialType.System_UInt32 or SpecialType.System_Int64 or SpecialType.System_UInt64,
         });
     }
 
@@ -660,7 +664,12 @@ public class AotConverterGenerator : IIncrementalGenerator
                 writer.Indent();
                 // For explicit conversions, we need to use an explicit cast
                 // For implicit conversions, variable assignment works fine
-                if (conversion.IsImplicit)
+                if (conversion.RoundsDecimalToIntegral)
+                {
+                    // Match CastHelper's primitive fallback while preserving registered-converter priority.
+                    writer.AppendLine($"{targetTypeName} converted = ({targetTypeName})global::System.Convert.ChangeType(sourceTypedValue, typeof({targetTypeName}));");
+                }
+                else if (conversion.IsImplicit)
                 {
                     writer.AppendLine($"{targetTypeName} converted = sourceTypedValue;");
                 }
@@ -728,6 +737,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         public required TypeMetadata TargetType { get; init; }
         public required bool TypesAreDifferent { get; init; }
         public required bool IsImplicit { get; init; }
+        public bool RoundsDecimalToIntegral { get; init; }
     }
 
     /// <summary>

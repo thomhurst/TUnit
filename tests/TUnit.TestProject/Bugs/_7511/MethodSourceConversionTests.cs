@@ -114,6 +114,13 @@ public class PropertySourceConversionTests : PropertySourceBase
 
 public class DecimalSourceConversionTests
 {
+    [Test]
+    public async Task DecimalOverflowThrows()
+    {
+        await Assert.That(() => TUnit.Core.Helpers.CastHelper.Cast<int>(decimal.MaxValue))
+            .Throws<OverflowException>();
+    }
+
     public static (decimal, int)[] Rows() => [(1.9m, 2), (2.5m, 2), (3.5m, 4)];
 
 #pragma warning disable TUnit0001

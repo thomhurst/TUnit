@@ -124,6 +124,8 @@ public static class CastHelper
     /// 1. Fast path: null handling, direct cast, nullable unwrapping
     /// 2. AOT-safe: AotConverterRegistry, primitives, enums
     /// 3. Reflection fallback: custom operators, arrays (throws in AOT)
+    /// Built-in decimal-to-integral conversions round midpoint values to even and throw
+    /// OverflowException for out-of-range values. Explicitly registered converters take priority.
     /// </summary>
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] Type type, object? value)
@@ -191,21 +193,21 @@ public static class CastHelper
 
     private static bool TryAotSafeConversion(Type targetType, Type sourceType, object value, out object? result)
     {
+        // Try AOT converter registry first
+        if (AotConverterRegistry.TryConvert(sourceType, targetType, value, out result))
+        {
+            return true;
+        }
+
         // Decimal operators truncate integral results, whereas the primitive fallback
-        // rounds to nearest even. Keep the same policy whether a generated converter
-        // was registered or metadata was collected through reflection.
+        // rounds to nearest even. Generated numeric converters use this same policy;
+        // explicitly registered converters retain priority above.
         if (value is decimal && (targetType == typeof(sbyte) || targetType == typeof(byte) ||
             targetType == typeof(short) || targetType == typeof(ushort) ||
             targetType == typeof(int) || targetType == typeof(uint) ||
             targetType == typeof(long) || targetType == typeof(ulong)))
         {
             result = Convert.ChangeType(value, targetType);
-            return true;
-        }
-
-        // Try AOT converter registry first
-        if (AotConverterRegistry.TryConvert(sourceType, targetType, value, out result))
-        {
             return true;
         }
 

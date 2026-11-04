@@ -7,6 +7,14 @@ namespace TUnit.Core.SourceGenerator.Tests;
 public class AotConverterScanTests
 {
     [Test]
+    public async Task ExplicitDecimalConverterTakesPriority()
+    {
+        // This assembly has no decimal data sources, so the converter is registered manually.
+        TUnit.Core.Converters.AotConverterRegistry.Register<decimal, int>(value => (int)value);
+        await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<int>(1.9m)).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task PreservesBuiltInDecimalConversions()
     {
         const string source = """
@@ -30,6 +38,7 @@ public class AotConverterScanTests
         var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
         await Assert.That(System.Text.RegularExpressions.Regex.IsMatch(generated, @"SourceType => typeof\(char\);\s+public Type TargetType => typeof\(decimal\);")).IsTrue();
         await Assert.That(System.Text.RegularExpressions.Regex.IsMatch(generated, @"SourceType => typeof\(decimal\);\s+public Type TargetType => typeof\(char\);")).IsTrue();
+        await Assert.That(generated.Contains("int converted = (int)global::System.Convert.ChangeType(sourceTypedValue, typeof(int));")).IsTrue();
     }
 
     [Test]
