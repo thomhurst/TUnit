@@ -109,6 +109,14 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
     [Arguments("(Box<string>[], Box<int>[])", "(T[], Box<T>[])", true)]
     [Arguments("(Box<int>[], int[])", "(Box<T>[], T[])", false)]
     [Arguments("(string[], Box<object>[])", "(T[], Box<T>[])", false)]
+    [Arguments("IContravariant<Outer<string>.D, Outer<object>.D>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Outer<object>.D, Outer<string>.D>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Outer<string>.D[], Outer<object>.D[]>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Outer<string>.Inner<int>.D, Outer<object>.Inner<int>.D>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Outer<string>.D, Outer<string>.D>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<Outer<string>.Variant<string>, Outer<string>.Variant<Uri>>[]", "IContravariant<T, T>[]", false)]
+    [Arguments("IContravariant<Outer<string>.Variant<string>, Outer<object>.Variant<Uri>>[]", "IContravariant<T, T>[]", true)]
+    [Arguments("IContravariant<Outer<string>.Inner<int>.D, Outer<string>.Inner<int>.D>[]", "IContravariant<T, T>[]", false)]
     [Arguments("IContravariant<Func<string>, Func<Uri>>[]", "IContravariant<T, T>[]", true)]
     [Arguments("IContravariant<Func<Uri>, Func<string>>[]", "IContravariant<T, T>[]", true)]
     [Arguments("IContravariant<Func<int>, Func<object>>[]", "IContravariant<T, T>[]", true)]
@@ -231,7 +239,12 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
             public class Alternative : IInvariant<int, string>, IInvariant<string, string> { }
             public class Pair<A, B> { }
             public class Box<A> { }
-            public class Outer<A> { public class Inner<B> { } }
+            public class Outer<A>
+            {
+                public delegate void D();
+                public delegate void Variant<in B>(B value);
+                public class Inner<B> { public delegate void D(); }
+            }
             public class C
             {
                 public static (Fixture, CancellationToken, {{sourceElement}}) Row() => default;
@@ -247,7 +260,8 @@ public class GenericTupleArrayMethodDataSourceTests : BaseAnalyzerTests
         if (expectDiagnostic)
         {
             // Diagnostics display the nested type name without its containing construction.
-            var displayedSource = sourceElement.Replace("Outer<string>.", "").Replace("Outer<int>.", "");
+            var displayedSource = sourceElement.Replace("Outer<string>.", "").Replace("Outer<int>.", "")
+                .Replace("Outer<object>.", "").Replace("Inner<int>.D", "D");
             var displayedTarget = targetElement.Replace("Outer<object>.", "").Replace("Outer<string>.", "").Replace("Outer<T>.", "");
             await Verifier.VerifyAnalyzerAsync(source,
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)

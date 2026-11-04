@@ -230,6 +230,13 @@ internal static class OpenArrayMatcher
                 return false;
             }
 
+            // Containing constructions are invariant even when the delegate's own
+            // arguments support variance (Outer<string>.D and Outer<object>.D differ).
+            if (!SymbolEqualityComparer.Default.Equals(leftDelegate.ContainingType, rightDelegate.ContainingType))
+            {
+                return false;
+            }
+
             for (var i = 0; i < leftDelegate.TypeArguments.Length; i++)
             {
                 var leftArgument = leftDelegate.TypeArguments[i];
