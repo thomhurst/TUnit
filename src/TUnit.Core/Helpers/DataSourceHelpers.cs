@@ -28,7 +28,7 @@ public static class DataSourceHelpers
 
         // A flattened [null] is indistinguishable from a null row. The reference-tuple
         // invoker can reconstruct a preserved singleton containing null, including conversions.
-        if (targetName == "System.Tuple`1" && UnwrapTupleAot(tuple) is [null])
+        if (targetName == "System.Tuple`1" && IsSingletonTupleContainingNull(tuple))
         {
             return false;
         }
@@ -43,6 +43,19 @@ public static class DataSourceHelpers
         return targetIsReferenceTuple
             || !tuple.GetType().IsValueType
             || RequiresFlattenedTupleBinding(tuple);
+    }
+
+    private static bool IsSingletonTupleContainingNull(object value)
+    {
+#if NET5_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+        // Inspect only the singleton element, without copying the row into a temporary array.
+        if (value is ITuple tuple)
+        {
+            return tuple.Length == 1 && tuple[0] is null;
+        }
+#endif
+
+        return UnwrapTupleAot(value) is [null];
     }
 
     private static readonly ConcurrentDictionary<Type, bool> TupleMutableElementShapes = new();
