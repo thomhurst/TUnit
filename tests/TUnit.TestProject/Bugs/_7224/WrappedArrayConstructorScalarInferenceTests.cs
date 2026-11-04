@@ -66,3 +66,28 @@ public class WrappedArrayConstructorExplicitAndInferredTests<T>(params T[] value
         await Assert.That(values[0]).IsEqualTo((T)(object)"one");
     }
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(string), typeof(int))]
+[Arguments("row", new int[0])]
+[Arguments(2, new int[0])]
+[MethodDataSource(nameof(Rows))]
+public class ExplicitClassDeferredRowTests<T, U>(T first, U[] rest) where U : struct
+{
+    public static IEnumerable<TestDataRow<string[]>> Rows() => [new(new[] { "deferred" })];
+
+    [Test, GenerateGenericTest(typeof(bool))]
+    public async Task GenericMethodPreservesExplicitClassRow<V>()
+    {
+        await Assert.That(typeof(V)).IsEqualTo(typeof(bool));
+        if (typeof(T) == typeof(int))
+        {
+            await Assert.That(first).IsEqualTo((T)(object)2);
+        }
+        else
+        {
+            await Assert.That((string)(object)first!).IsIn("row", "deferred");
+        }
+        await Assert.That(rest).IsEmpty();
+    }
+}

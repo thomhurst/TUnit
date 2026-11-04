@@ -5,6 +5,35 @@ namespace TUnit.TestProject.Bugs._7224;
 [EngineTest(ExpectedResult.Pass)]
 public class MethodSourceClassInferenceTests<T>
 {
+    public static IEnumerable<(int, int, int)> CollectingTupleRows() => [(1, 2, 3)];
+    public static IEnumerable<(string, int, int)> LaterCollectingTupleRows() => [("values", 2, 3)];
+
+    #pragma warning disable TUnit0001 // Excess tuple columns for collecting parameters: analyzer follow-up #7587.
+    [Test, MethodDataSource(nameof(CollectingTupleRows))]
+    public async Task TupleExcessParams(T first, params T[] rest)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(first).IsEqualTo((T)(object)1);
+        await Assert.That(rest.Cast<int>().ToArray()).IsEquivalentTo(new[] { 2, 3 });
+    }
+
+    [Test, MethodDataSource(nameof(CollectingTupleRows))]
+    public async Task TupleExcessPlainArray(T first, T[] rest)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(rest.Cast<int>().ToArray()).IsEquivalentTo(new[] { 2, 3 });
+    }
+
+    [Test, MethodDataSource(nameof(LaterCollectingTupleRows))]
+    public async Task TupleExcessParamsCollection(string label, params IReadOnlyList<T> rest)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(label).IsEqualTo("values");
+        await Assert.That(rest.Cast<int>().ToArray()).IsEquivalentTo(new[] { 2, 3 });
+    }
+
+    #pragma warning restore TUnit0001
+
     public static IEnumerable<TestDataRow<ValueTuple<TestDataRow<int>>>> NestedRows()
         => [new(new ValueTuple<TestDataRow<int>>(new(42)))];
 

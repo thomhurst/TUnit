@@ -517,8 +517,9 @@ public static class DataSourceHelpers
         // Try to use ITuple interface first for any ValueTuple type
         if (value is ITuple tuple)
         {
-            // Elements are copied 1:1, capped at the expected parameter count
-            return CopyTupleElements(tuple, Math.Min(tuple.Length, expectedTypes.Length));
+            // Keep every column: trailing collecting parameters consume excess values,
+            // and the binder must see invalid excess arguments rather than silently drop them.
+            return CopyTupleElements(tuple, tuple.Length);
         }
 #endif
 

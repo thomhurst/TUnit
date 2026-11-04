@@ -2181,14 +2181,22 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         var typeArguments = InferTypesFromTypedDataSource(dataSource, method, method.GetGenericArguments().Length, classGenericParameterCount);
         // Wrapped reference arrays spread into loose values. Close the method here so a trailing
         // params array can infer from the declared element type before runtime argument binding.
-        if (typeArguments is null
-            && dataSource is MethodDataSourceAttribute methodSource
-            && methodSource.GetDeclaredMemberType(methodSource.ClassProvidingDataSource ?? concreteClassType) is { } memberType
-            && MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is { } rowType
-            && spreadsReferenceArray)
+        if (typeArguments is null && dataSource is MethodDataSourceAttribute methodSource)
         {
-            typeArguments = InferTypesFromDeclaredRow(method, rowType, method.GetGenericArguments().Length,
-                GenericParameterScope.Method, spreadsReferenceArray: true);
+            try
+            {
+                if (methodSource.GetDeclaredMemberType(methodSource.ClassProvidingDataSource ?? concreteClassType) is { } memberType
+                    && MethodDataSourceAttribute.GetDeclaredRowType(memberType, out var spreadsReferenceArray) is { } rowType
+                    && spreadsReferenceArray)
+                {
+                    typeArguments = InferTypesFromDeclaredRow(method, rowType, method.GetGenericArguments().Length,
+                        GenericParameterScope.Method, spreadsReferenceArray: true);
+                }
+            }
+            catch (AmbiguousMatchException)
+            {
+                // Keep the source uninferred; reading it later reports its own failure without aborting discovery.
+            }
         }
 
         if (typeArguments is null)
@@ -2635,14 +2643,23 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 return InferTypesFromTypedRowCore(method, tupleElements[0], genericParameterCount, scope, spreadsReferenceArray: false, rowIsNormalized: false);
             }
 
-            if (tupleElements.Length < requiredCount || tupleElements.Length > dataParameters.Length)
+            var trailingElementType = scope == GenericParameterScope.Class && dataParameters.Length > 0
+                && (IsSingleDimensionalZeroBasedArray(dataParameters[^1].ParameterType) || IsParamCollection(dataParameters[^1]))
+                ? GetTrailingElementType(dataParameters[^1])
+                : null;
+            if (tupleElements.Length < requiredCount
+                || tupleElements.Length > dataParameters.Length && trailingElementType is null)
             {
                 return null;
             }
 
             for (var i = 0; i < tupleElements.Length; i++)
             {
-                if (!MapTypedRowParameters(dataParameters[i].ParameterType, tupleElements[i], typeArguments, scope))
+                // Excess columns are individual values collected by the final parameter.
+                var parameterType = tupleElements.Length > dataParameters.Length && i >= dataParameters.Length - 1
+                    ? trailingElementType!
+                    : dataParameters[i].ParameterType;
+                if (!MapTypedRowParameters(parameterType, tupleElements[i], typeArguments, scope))
                 {
                     return null;
                 }

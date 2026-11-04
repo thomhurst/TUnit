@@ -2754,7 +2754,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             dsWriter.Append("}");
             if (classDataSourcePartition is not null)
             {
-                dsWriter.Append($", {string.Join(", ", classDataSourcePartition.PartitionedIndices.Select(i => i.ToString(CultureInfo.InvariantCulture)))})");
+                if (classDataSourcePartition.PartitionedIndices.Length > 0)
+                {
+                    dsWriter.Append($", {string.Join(", ", classDataSourcePartition.PartitionedIndices.Select(i => i.ToString(CultureInfo.InvariantCulture)))}");
+                }
+                dsWriter.Append(")");
             }
             writer.AppendLine($"classDataSources: {dsWriter},");
         }
@@ -2816,12 +2820,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (entry.HasClassRows || entry.HasNoClassRow)
         {
+            // Own-class sources already matched by their declared rows or explicit class types must
+            // retain omitted constructor values, which cannot infer every class type again at runtime.
+            var matchesExplicitClassTypes = typeSymbol.GetAttributes().Any(attribute =>
+                attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true
+                && ExtractTypeArgsFromGenerateGenericTestAttribute(attribute) is { Length: > 0 } types
+                && InferredTypesMatch(types, entry.ClassTypeArgs));
+            var ownClassSources = matchesExplicitClassTypes
+                ? GetOwnClassMethodDataSourcesForInstantiation(testMethod, entry.ClassTypeArgs, includeUninferred: false).ToArray()
+                : [];
             // The class rows scoped to this instantiation, with every untyped source, in declaration order
             for (var i = 0; i < allClassDataSources.Length; i++)
             {
                 if (isUntyped[i])
                 {
-                    partitionedIndices.Add(dataSources.Count);
+                    if (!ownClassSources.Contains(allClassDataSources[i]))
+                    {
+                        partitionedIndices.Add(dataSources.Count);
+                    }
                     dataSources.Add(allClassDataSources[i]);
                 }
                 else if (entry.IsSpecificClassDataSource(allClassDataSources[i]))
@@ -8102,6 +8118,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static IEnumerable<AttributeData> GetOwnClassMethodDataSourcesForInstantiation(TestMethodMetadata testMethod, ITypeSymbol[] classTypeArgs, bool includeUninferred = true)
     {
         var compilation = testMethod.CompilationContext.Compilation;
+        var explicitClassTypes = testMethod.TypeSymbol.GetAttributes()
+            .Where(attribute => attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)
+            .Select(ExtractTypeArgsFromGenerateGenericTestAttribute)
+            .ToArray();
+        var matchesExplicitClassTypes = explicitClassTypes.Any(types =>
+            types is { Length: > 0 } && InferredTypesMatch(types, classTypeArgs));
         foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
         {
             if (attribute.AttributeClass is not { Name: "MethodDataSourceAttribute", IsGenericType: false }
@@ -8123,8 +8145,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var rowType = GetMethodDataSourceRowType(member, testMethod.CompilationContext.MethodDataSourceRowTypes, compilation, out var spreadsReferenceArray);
             var inferred = rowType == null
                 ? null
-                : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType, spreadsReferenceArray, hasExplicitTypes: includeUninferred);
-            if (GenericClassInferencePolicy.IncludesRow(inferred is null ? null : inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default), includeUninferred))
+                : InferClassTypesFromOwnMemberRowType(testMethod.TypeSymbol, rowType, spreadsReferenceArray, hasExplicitTypes: explicitClassTypes.Length > 0);
+            if (GenericClassInferencePolicy.IncludesRow(inferred is null ? null : inferred.SequenceEqual(classTypeArgs, SymbolEqualityComparer.Default), includeUninferred || matchesExplicitClassTypes))
             {
                 yield return attribute;
             }
@@ -8299,9 +8321,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // A tuple row is spread across the test method's parameters
             var tupleElements = tupleType.TupleElements;
-            for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
+            var inferringClassTypes = genericParams.Any(parameter => parameter.TypeParameterKind == TypeParameterKind.Type);
+            var trailingElementType = inferringClassTypes && testMethodParams.Length > 0 && testMethodParams[^1].CollectsTrailingArguments()
+                ? TupleArgumentHelper.GetTrailingElementType(testMethodParams[^1].Type)
+                : null;
+            if (inferringClassTypes && tupleElements.Length > testMethodParams.Length && trailingElementType is null)
             {
-                if (!ProcessTypeForGenerics(testMethodParams[i].Type, tupleElements[i].Type, genericParams, genericParamMap))
+                return null;
+            }
+
+            for (var i = 0; i < tupleElements.Length && (inferringClassTypes || i < testMethodParams.Length); i++)
+            {
+                // Excess columns are individual values collected by the final parameter.
+                var parameterType = inferringClassTypes && tupleElements.Length > testMethodParams.Length && i >= testMethodParams.Length - 1
+                    ? trailingElementType!
+                    : testMethodParams[i].Type;
+                if (!ProcessTypeForGenerics(parameterType, tupleElements[i].Type, genericParams, genericParamMap))
                 {
                     return null;
                 }
