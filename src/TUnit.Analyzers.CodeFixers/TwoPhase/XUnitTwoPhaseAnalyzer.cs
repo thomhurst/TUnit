@@ -356,7 +356,7 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
             // xUnit has two overloads with a second parameter:
             //   Assert.Single<T>(IEnumerable<T>, Predicate<T>) - predicate overload
             //   Assert.Single(IEnumerable, object?) - expected value overload
-            // Only convert the predicate overload to HasSingleItem(predicate).
+            // The predicate overload can use HasSingleItem(predicate) directly.
             var symbol = SemanticModel.GetSymbolInfo(memberAccess).Symbol;
             if (symbol is IMethodSymbol { Parameters.Length: 2 } methodSymbol &&
                 methodSymbol.Parameters[1].Type is INamedTypeSymbol { DelegateInvokeMethod: not null })
@@ -365,9 +365,19 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
                 return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem({predicate})", true, null);
             }
 
-            // For the expected value overload, fall back to HasSingleItem() without predicate
-            return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem()", true,
-                "// TODO: xUnit Assert.Single(collection, expected) matched by value - verify conversion");
+            // Capture both arguments before enumeration, in their original evaluation order.
+            // xUnit uses object.Equals(item, expected), including for non-generic collections.
+            // Avoid introducing lambda parameters that shadow names in the migrated source.
+            var identifiers = new HashSet<string>(memberAccess.SyntaxTree.GetRoot().DescendantTokens()
+                .Where(token => token.IsKind(SyntaxKind.IdentifierToken)).Select(token => token.ValueText));
+            var pair = "singleArguments";
+            while (identifiers.Contains(pair)) pair += "_";
+            var item = "singleItem";
+            while (identifiers.Contains(item)) item += "_";
+            var expected = args[1].Expression.ToString();
+            return (AssertionConversionKind.Single,
+                $"await Assert.That(((global::System.Collections.IEnumerable)({collection}), ({expected}) as object)).Satisfies({pair} => global::System.Linq.Enumerable.Count(global::System.Linq.Enumerable.Cast<object>({pair}.Item1), {item} => global::System.Object.Equals({item}, {pair}.Item2)) == 1)",
+                true, null);
         }
 
         return (AssertionConversionKind.Single, $"await Assert.That({collection}).HasSingleItem()", true, null);
