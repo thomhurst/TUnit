@@ -537,6 +537,14 @@ public static class DataSourceHelpers
                 if (TupleHelper.IsTupleType(expectedTypes[0])
                     && (expectedTypes.Length == 1 || expectedTypes[0].IsInstanceOfType(item)))
                 {
+                    // A bare singleton value-tuple row exposes its TestDataRow before wrapper removal.
+                    // Preserve the reference-tuple payload, rather than its outer row container.
+                    if (!expectedTypes[0].IsValueType && item.GetType().IsValueType
+                        && UnwrapTupleAot(item) is [ITestDataRow wrapped])
+                    {
+                        return [wrapped];
+                    }
+
                     if (RequiresFlattenedTupleBinding(item))
                     {
                         var elements = RetainTupleElements(item);
@@ -571,8 +579,9 @@ public static class DataSourceHelpers
         // Try to use ITuple interface first for any ValueTuple type
         if (value is ITuple tuple)
         {
-            // Elements are copied 1:1, capped at the expected parameter count
-            return CopyTupleElements(tuple, Math.Min(tuple.Length, expectedTypes.Length));
+            // Keep every column: trailing collecting parameters consume excess values,
+            // and the binder must see invalid excess arguments rather than silently drop them.
+            return CopyTupleElements(tuple, tuple.Length);
         }
 #endif
 

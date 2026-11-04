@@ -39,6 +39,34 @@ public class DataSourceHelpersTests
     }
 
     [Test]
+    public async Task Typed_Tuple_Rows_Keep_Excess_Columns_For_Binding()
+    {
+        var row = ((object)(1, "two", 3)).ToObjectArrayWithTypes([typeof(int), typeof(string)]);
+        await Assert.That(row).IsEquivalentTo(new object?[] { 1, "two", 3 });
+    }
+
+    [Test]
+    public async Task Reference_Tuple_Rows_Preserve_Whole_And_Spread_Binding()
+    {
+        var tuple = Tuple.Create(1, "two");
+        var whole = tuple.ToObjectArrayWithTypes([typeof(Tuple<int, string>)]);
+        await Assert.That(ReferenceEquals(whole[0], tuple)).IsTrue();
+        var spread = tuple.ToObjectArrayWithTypes([typeof(int), typeof(string)]);
+        await Assert.That(spread).IsEquivalentTo(new object?[] { 1, "two" });
+
+        var nested = Tuple.Create(new TestDataRow<int>(7));
+        var nestedWhole = nested.ToObjectArrayWithTypes([typeof(Tuple<TestDataRow<int>>)]);
+        await Assert.That(ReferenceEquals(nestedWhole[0], nested)).IsTrue();
+        var nestedSpread = nested.ToObjectArrayWithTypes([typeof(TestDataRow<int>)]);
+        await Assert.That(ReferenceEquals(nestedSpread[0], nested.Item1)).IsTrue();
+
+        var wrapper = new TestDataRow<Tuple<TestDataRow<int>>>(nested);
+        var container = ValueTuple.Create(wrapper).ToObjectArrayWithTypes([typeof(Tuple<TestDataRow<int>>)]);
+        var (unwrapped, _) = TestDataRowUnwrapper.UnwrapArray(container, typeof(Tuple<TestDataRow<int>>));
+        await Assert.That(ReferenceEquals(unwrapped[0], nested)).IsTrue();
+    }
+
+    [Test]
     public async Task UnwrapTuple_LongValueTuple_FlattensMultipleRestLevels()
     {
         object value = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, (15, 16));

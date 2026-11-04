@@ -445,9 +445,27 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// (#7208). Keep it in step with <see cref="GetRowsFromRuntimeValueAsync"/>; MethodDataSourceDeclaredRowTypeTests
     /// checks the two against each other.
     /// </summary>
+    // Callers that do not consume spread metadata retain the original array type.
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     internal static Type? GetDeclaredRowType(Type memberType)
+        => GetDeclaredRowTypeCore(memberType, out _, out _, normalizeReferenceArray: false);
+
+    // Keep the spread shape alongside the element type: unlike a scalar row, a wrapped reference array
+    // can supply more than one required method parameter.
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    internal static Type? GetDeclaredRowType(Type memberType, out bool spreadsReferenceArray)
+        => GetDeclaredRowType(memberType, out spreadsReferenceArray, out _);
+
+    // Tuple inference must not consume a nested wrapper after the reader already removed one.
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    internal static Type? GetDeclaredRowType(Type memberType, out bool spreadsReferenceArray, out bool rowWrapperRemoved)
+        => GetDeclaredRowTypeCore(memberType, out spreadsReferenceArray, out rowWrapperRemoved, normalizeReferenceArray: true);
+
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
+    private static Type? GetDeclaredRowTypeCore(Type memberType, out bool spreadsReferenceArray, out bool rowWrapperRemoved, bool normalizeReferenceArray)
     {
+        rowWrapperRemoved = false;
+        spreadsReferenceArray = false;
         if (memberType == typeof(Task) || memberType == typeof(ValueTask))
         {
             return null;
@@ -493,10 +511,17 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
         rowType = UnwrapFunc(rowType);
         if (rowType != null && TestDataRowUnwrapper.GetInnerDataType(rowType) is { } rowData)
         {
+            rowWrapperRemoved = true;
             rowType = UnwrapFunc(rowData);
+            // UnwrapArray spreads reference arrays through object[] covariance.
+            if (normalizeReferenceArray && rowType is { IsArray: true } && rowType.Name.EndsWith("[]", StringComparison.Ordinal) && rowType.GetElementType() is { IsValueType: false, IsPointer: false } elementType)
+            {
+                rowType = elementType;
+                spreadsReferenceArray = true;
+            }
         }
 
-        return rowType == null || rowType == typeof(object[]) ? null : rowType;
+        return rowType == null || !spreadsReferenceArray && rowType == typeof(object[]) || spreadsReferenceArray && rowType == typeof(object) ? null : rowType;
     }
 
     private static Type? UnwrapFunc(Type? type) =>
@@ -530,18 +555,26 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// <summary>
     /// The declared type of the member this source reads on <paramref name="targetType"/>: the return type of the
     /// method overload <see cref="GetDataRowsAsync"/> invokes, else the property or field type. Null when no such
-    /// member exists. Reflection discovery uses it to infer a generic class's type arguments before reading the
+    /// member exists or lookup is ambiguous. Reflection discovery uses it to infer a generic class's type arguments before reading the
     /// member, so it resolves the member exactly as invocation does.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
     internal Type? GetDeclaredMemberType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type targetType)
     {
-        var methodInfo = ResolveDataSourceMethod(targetType)
-            ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
+        try
+        {
+            var methodInfo = ResolveDataSourceMethod(targetType)
+                ?? targetType.GetMethod(MethodNameProvidingDataSource, BindingFlags);
 
-        return methodInfo?.ReturnType
-            ?? targetType.GetProperty(MethodNameProvidingDataSource, BindingFlags)?.PropertyType
-            ?? targetType.GetField(MethodNameProvidingDataSource, BindingFlags)?.FieldType;
+            return methodInfo?.ReturnType
+                ?? targetType.GetProperty(MethodNameProvidingDataSource, BindingFlags)?.PropertyType
+                ?? targetType.GetField(MethodNameProvidingDataSource, BindingFlags)?.FieldType;
+        }
+        catch (AmbiguousMatchException)
+        {
+            // An ambiguous source declares no usable row type. Its eventual read reports the failure.
+            return null;
+        }
     }
 
     // Resolves the data-source method overload that best matches the supplied Arguments.

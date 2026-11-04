@@ -4,6 +4,128 @@ namespace TUnit.UnitTests;
 
 public class GenericClassSourceRuntimeTests
 {
+    // Mirrors generated metadata for C<T,U>(T[] first, U second = default!), including
+    // the erased TypeInfo and the shared lazy constructor resolver.
+    public sealed class ArrayConstructor<T, U>(T[] first, U second = default!);
+    public sealed class MatrixConstructor<T, U>(T[,] first, U second = default!);
+    public sealed class NestedArrayConstructor<T, U>(T[][] first, U second = default!);
+    public sealed class NestedGenericConstructor<T, U>(IEnumerable<T[]> first, U second = default!);
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Partition_Preserves_Supplied_And_Omitted_Optional_Values(bool supplied)
+    {
+        object?[] original = supplied ? [7, "supplied"] : [7];
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => OneRow(() => Task.FromResult<object?[]?>(original)) };
+        var partition = GenericClassRowPartition.Create([typeof(int)], GenericClassRowFallback.None, [source], 0);
+        var factories = await ReadFactories(partition[0]);
+        await Assert.That(factories.Count).IsEqualTo(1);
+        var row = await factories.Single()();
+        await Assert.That(ReferenceEquals(row, original)).IsTrue();
+        await Assert.That(row!.Length).IsEqualTo(supplied ? 2 : 1);
+        if (supplied)
+        {
+            await Assert.That(row[1]).IsEqualTo("supplied");
+        }
+    }
+
+    [Test]
+    public async Task Nested_Generic_Constructor_Arguments_Preserve_Covariance()
+    {
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(typeof(object))
+            {
+                Name = "first", CachedIsOptional = false,
+                TypeInfo = new ConstructedGeneric(typeof(IEnumerable<>),
+                    [new ConstructedGeneric(typeof(IEnumerable<>), [new ConcreteType(typeof(object))])])
+            },
+            new ParameterMetadata(typeof(int)) { Name = "second", TypeInfo = new ConcreteType(typeof(int)), CachedIsOptional = true }
+        ];
+        await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([new List<List<string>>()], parameters, [])).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([new List<List<int>>()], parameters, [])).IsFalse();
+    }
+
+    [Test]
+    [Arguments(typeof(ArrayConstructor<,>), typeof(ArrayConstructor<int, int>), 0)]
+    [Arguments(typeof(MatrixConstructor<,>), typeof(MatrixConstructor<int, int>), 1)]
+    [Arguments(typeof(NestedArrayConstructor<,>), typeof(NestedArrayConstructor<int, int>), 2)]
+    [Arguments(typeof(NestedGenericConstructor<,>), typeof(NestedGenericConstructor<int, int>), 3)]
+    public async Task Constructor_Array_Filter_Preserves_Element_Type_And_Rank(Type open, Type closed, int shape)
+    {
+        var generated = ParameterMetadataFactory.ForConstructor(open, true,
+            new ParameterMetadata(typeof(object)) { Name = "first", TypeInfo = shape == 3 ? new ConstructedGeneric(typeof(IEnumerable<>), [new ConcreteType(typeof(object))]) : new ConcreteType(typeof(object)), CachedIsOptional = false },
+            new ParameterMetadata(typeof(object)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true });
+        var reflected = closed.GetConstructors()[0].GetParameters().Select(p => (IMemberMetadata)new ParameterMetadata(p.ParameterType)
+        {
+            Name = p.Name!, TypeInfo = new ConcreteType(p.ParameterType), ReflectionInfo = p
+        }).ToArray();
+        object valid = shape switch { 1 => new int[1, 1], 2 => new[] { new[] { 1 } }, 3 => new List<int[]> { new[] { 1 } }, _ => new[] { 1 } };
+        object invalid = shape switch { 1 => new string[1, 1], 2 => new[] { new[] { "bad" } }, 3 => new List<string[]> { new[] { "bad" } }, _ => new[] { "bad" } };
+        foreach (var parameters in new IMemberMetadata[][] { generated, reflected })
+        {
+            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([valid], parameters, [typeof(int), typeof(int)])).IsTrue();
+            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([invalid], parameters, [typeof(int), typeof(int)])).IsFalse();
+            await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([new int[1, 1, 1]], parameters, [typeof(int), typeof(int)])).IsFalse();
+            var source = new MethodDataSourceAttribute("Rows")
+            {
+                Factory = _ => OneRow(() => Task.FromResult<object?[]?>([invalid]))
+            };
+            var coordinator = new GenericClassRowPartition.Coordinator([typeof(int), typeof(int)], GenericClassRowFallback.None, [source], [0]);
+            var evaluation = await coordinator.EvaluateAsync(new DataGeneratorMetadata
+            {
+                TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+                Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+                TestClassInstance = null, ClassInstanceArguments = null
+            });
+            await Assert.That(evaluation.AnyRowInfers).IsFalse();
+            await Assert.That(evaluation.RowsByIndex[0]!.Single().InfersTypeArguments).IsFalse();
+        }
+
+        // An own-class TestDataRow<string[][]> spreads to a string[] constructor value.
+        var (values, _) = TUnit.Core.Helpers.TestDataRowUnwrapper.UnwrapArray([new TestDataRow<string[][]>([["bad"]])]);
+        await Assert.That(GenericClassRowPartition.MatchesOmittedOptionalConstructorRow(values, generated, [typeof(int), typeof(int)])).IsFalse();
+    }
+
+    [Test]
+    [Arguments(true, false, false)]
+    [Arguments(false, false, true)]
+    [Arguments(false, true, false)]
+    public async Task Omitted_Optional_Rows_Use_Reference_Type_Variance_Only(bool valueTypeElement, bool invariant, bool expectedMatch)
+    {
+        object first = valueTypeElement ? new List<int>() : new List<string>();
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(typeof(object))
+            {
+                Name = "first",
+                TypeInfo = new ConstructedGeneric(invariant ? typeof(List<>) : typeof(IEnumerable<>), [new ConcreteType(typeof(object))]),
+                CachedIsOptional = false
+            },
+            new ParameterMetadata(typeof(int))
+            {
+                Name = "second",
+                TypeInfo = new ConcreteType(typeof(int)),
+                CachedIsOptional = true
+            }
+        ];
+
+        var matches = GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([first], parameters, []);
+        await Assert.That(matches).IsEqualTo(expectedMatch);
+
+        // Reflection metadata contains the closed type, while generated metadata describes its structure.
+        var closedType = invariant ? typeof(List<object>) : typeof(IEnumerable<object>);
+        parameters[0] = new ParameterMetadata(closedType)
+        {
+            Name = "first",
+            TypeInfo = new ConcreteType(closedType),
+            CachedIsOptional = false
+        };
+        var reflectionMatches = GenericClassRowPartition.MatchesOmittedOptionalConstructorRow([first], parameters, []);
+        await Assert.That(reflectionMatches).IsEqualTo(expectedMatch);
+    }
+
     [Test]
     public async Task Null_Evaluated_Row_Uses_Original_Factory()
     {

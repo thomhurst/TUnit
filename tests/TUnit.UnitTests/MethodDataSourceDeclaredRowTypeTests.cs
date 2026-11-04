@@ -29,6 +29,19 @@ public class MethodDataSourceDeclaredRowTypeTests
         yield return () => (new Func<TestDataRow<int>>[] { () => new(5) }, typeof(Func<TestDataRow<int>>[]), typeof(int));
     }
 
+    private static class AmbiguousSource
+    {
+        public static int Rows(int required) => required;
+        public static string Rows(string required) => required;
+    }
+
+    [Test]
+    public async Task Ambiguous_Source_Has_No_Usable_Declared_Type()
+    {
+        var source = new MethodDataSourceAttribute(nameof(AmbiguousSource.Rows));
+        await Assert.That(source.GetDeclaredMemberType(typeof(AmbiguousSource))).IsNull();
+    }
+
     [Test]
     [MethodDataSource(nameof(Shapes))]
     public async Task Runtime_Rows_Have_The_Declared_Row_Type(object value, Type memberType, Type rowType)
@@ -58,6 +71,38 @@ public class MethodDataSourceDeclaredRowTypeTests
         }
 
         await Assert.That(rowCount).IsGreaterThan(0);
+    }
+
+    [Test]
+    public async Task Nested_Row_Preserves_Whether_A_Wrapper_Was_Removed()
+    {
+        var wrapped = MethodDataSourceAttribute.GetDeclaredRowType(
+            typeof(IEnumerable<TestDataRow<ValueTuple<TestDataRow<int>>>>), out var spreadsArray, out var wrapperRemoved);
+        await Assert.That(wrapped).IsEqualTo(typeof(ValueTuple<TestDataRow<int>>));
+        await Assert.That(wrapperRemoved).IsTrue();
+        await Assert.That(spreadsArray).IsFalse();
+
+        var bare = MethodDataSourceAttribute.GetDeclaredRowType(
+            typeof(IEnumerable<ValueTuple<TestDataRow<int>>>), out _, out var bareWrapperRemoved);
+        await Assert.That(bare).IsEqualTo(wrapped);
+        await Assert.That(bareWrapperRemoved).IsFalse();
+    }
+
+    [Test]
+    public async Task Wrapped_Reference_Array_Preserves_Its_Spread_Shape()
+    {
+        await Assert.That(MethodDataSourceAttribute.GetDeclaredRowType(typeof(IEnumerable<TestDataRow<string[]>>))).IsEqualTo(typeof(string[]));
+
+        var rowType = MethodDataSourceAttribute.GetDeclaredRowType(typeof(IEnumerable<TestDataRow<string[]>>), out var spreadsReferenceArray);
+        await Assert.That(rowType).IsEqualTo(typeof(string));
+        await Assert.That(spreadsReferenceArray).IsTrue();
+
+        var jaggedElement = MethodDataSourceAttribute.GetDeclaredRowType(typeof(IEnumerable<TestDataRow<object[][]>>), out var spreadsJaggedArray);
+        await Assert.That(jaggedElement).IsEqualTo(typeof(object[]));
+        await Assert.That(spreadsJaggedArray).IsTrue();
+
+        MethodDataSourceAttribute.GetDeclaredRowType(typeof(IEnumerable<string[]>), out var spreadsBareArray);
+        await Assert.That(spreadsBareArray).IsFalse();
     }
 
     [Test]
