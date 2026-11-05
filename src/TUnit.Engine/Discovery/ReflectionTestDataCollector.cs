@@ -2363,9 +2363,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     case GenericMethodInferencePolicy.Source.TypedDataSource when dataSource is not ArgumentsAttribute:
                         AddInstantiation(InferTypesFromTypedDataSource(dataSource, method, genericParameterCount, classGenericParameterCount), dataSource, source: rule.Source);
                         break;
-                    // Instance sources use the explicit method types, even when a static source
-                    // already inferred that instantiation. Join them below in declaration order.
-                    case GenericMethodInferencePolicy.Source.MethodDataSource when dataSource is InstanceMethodDataSourceAttribute:
+                    // Instance and derived static sources use the explicit method types, even when
+                    // another source already inferred that instantiation. Join them below in declaration order.
+                    case GenericMethodInferencePolicy.Source.MethodDataSource when dataSource is MethodDataSourceAttribute skippedMethodSource
+                        && skippedMethodSource.GetType() != typeof(MethodDataSourceAttribute)
+                        && !(skippedMethodSource.GetType().IsGenericType
+                            && skippedMethodSource.GetType().GetGenericTypeDefinition() == typeof(MethodDataSourceAttribute<>)):
                         (skippedSources ??= []).Add(dataSource);
                         break;
                     case GenericMethodInferencePolicy.Source.MethodDataSource when dataSource is MethodDataSourceAttribute methodDataSource:

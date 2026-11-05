@@ -22,6 +22,11 @@ internal class LookalikeDataSourceTests : TestsBase
         Path.Combine(Git.TestsDirectory.FullName, "TUnit.TestProject", "ReimplementedMethodSourceTests.cs"),
         _ => Task.CompletedTask);
 
+    [Test]
+    public Task Deferred_derived_static_rows() => TestMetadataGenerator.RunTest(
+        Path.Combine(Git.TestsDirectory.FullName, "TUnit.TestProject", "DerivedSourceDeferredRowsTests.cs"),
+        _ => Task.CompletedTask);
+
     private static string Fixture => Path.Combine(Git.TestsDirectory.FullName,
         "TUnit.TestProject", "LookalikeDataSourceTests.cs");
 }

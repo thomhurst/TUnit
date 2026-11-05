@@ -1222,12 +1222,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
             }
 
-            // Instance sources deliberately skip inference when explicit method types are present.
-            // They still run on those types, including when a closed-class static source created
-            // the same instantiation first. This helper is called only for explicit method types.
+            // Instance and derived static sources deliberately skip inference when explicit method
+            // types are present. Their rows still join an entry that another source inferred first.
+            // This helper is called only for explicit method types.
             foreach (var source in testMethod.MethodAttributes)
             {
-                if (DataSourceAttributeHelper.IsOrInheritsBuiltIn(source.AttributeClass, "InstanceMethodDataSourceAttribute"))
+                if (DataSourceAttributeHelper.IsMethodSource(source.AttributeClass)
+                    && !DataSourceAttributeHelper.IsBuiltIn(source.AttributeClass, "MethodDataSourceAttribute"))
                 {
                     existing.AddRow(source, isClassRow: false);
                 }
