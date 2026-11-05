@@ -78,7 +78,7 @@ public class AttributeInitializerCacheTests
         if (withoutSyntax)
         {
             var writer = new CodeWriter("", includeHeader: false);
-            AttributeWriter.WriteAttributeWithoutSyntax(writer, attribute);
+            new AttributeWriter(compilation).WriteAttributeWithoutSyntax(writer, attribute);
             initializer = writer.ToString();
         }
         else

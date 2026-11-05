@@ -33,7 +33,9 @@ public class InaccessibleAttributeTypeTests
         await Assert.That(errors).IsEmpty().Because(string.Join("\n", errors.Select(e => e.ToString())));
         var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
         await Assert.That(generated).Contains("Container.Tests<int>");
-        await Verify(generated);
+        await Verify(generated).ScrubLinesWithReplace(line =>
+            System.Text.RegularExpressions.Regex.Replace(line,
+                @"(GeneratedCode\(""TUnit"", "")[^""]+(""\))", "$1VERSION_SCRUBBED$2"));
     }
 
     [Test]
@@ -67,7 +69,7 @@ public class InaccessibleAttributeTypeTests
             }
             """;
         var options = new CSharpParseOptions(LanguageVersion.Preview);
-        var compilation = CSharpCompilation.Create("PrivateAttributeTypes",
+        var compilation = CSharpCompilation.Create("PrivateAttributeTypes_" + Guid.NewGuid().ToString("N"),
             [CSharpSyntaxTree.ParseText(source, options)], ReferencesHelper.References,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
         var attribute = compilation.GetTypeByMetadataName(namespaceName.Replace("@", "") + ".Container")!.GetMembers("Run").Single().GetAttributes().Single();
@@ -87,15 +89,28 @@ public class InaccessibleAttributeTypeTests
         var result = compilation.Emit(stream);
         await Assert.That(result.Success).IsTrue().Because(string.Join("\n", result.Diagnostics) + "\n" + generated);
         var assembly = System.Reflection.Assembly.Load(stream.ToArray());
-        foreach (var method in new[] { "Create", "FromMetadata" })
+        // .NET Framework cannot bind an assembly-qualified name back to an assembly
+        // loaded from bytes without an AssemblyResolve handler. Each case has a unique
+        // identity so parallel cases cannot resolve one another's generated types.
+        System.Reflection.Assembly? ResolveGeneratedAssembly(object? sender, ResolveEventArgs args) =>
+            args.Name == assembly.FullName ? assembly : null;
+        AppDomain.CurrentDomain.AssemblyResolve += ResolveGeneratedAssembly;
+        try
         {
-            var actual = assembly.GetType("Factory")!.GetMethod(method)!.Invoke(null, null)!;
-            var types = (Type[])actual.GetType().GetProperty("Types")!.GetValue(actual)!;
-            var named = (Type)actual.GetType().GetProperty("Named")!.GetValue(actual)!;
-            var original = assembly.GetType(namespaceName.Replace("@", "") + ".Container")!.GetMethod("Run")!.GetCustomAttributes(false).Single();
-            var expected = (Type[])original.GetType().GetProperty("Types")!.GetValue(original)!;
-            await Assert.That(types.Single()).IsEqualTo(expected.Single());
-            await Assert.That(named).IsEqualTo(expected.Single());
+            foreach (var method in new[] { "Create", "FromMetadata" })
+            {
+                var actual = assembly.GetType("Factory")!.GetMethod(method)!.Invoke(null, null)!;
+                var types = (Type[])actual.GetType().GetProperty("Types")!.GetValue(actual)!;
+                var named = (Type)actual.GetType().GetProperty("Named")!.GetValue(actual)!;
+                var original = assembly.GetType(namespaceName.Replace("@", "") + ".Container")!.GetMethod("Run")!.GetCustomAttributes(false).Single();
+                var expected = (Type[])original.GetType().GetProperty("Types")!.GetValue(original)!;
+                await Assert.That(types.Single()).IsEqualTo(expected.Single());
+                await Assert.That(named).IsEqualTo(expected.Single());
+            }
+        }
+        finally
+        {
+            AppDomain.CurrentDomain.AssemblyResolve -= ResolveGeneratedAssembly;
         }
     }
 }

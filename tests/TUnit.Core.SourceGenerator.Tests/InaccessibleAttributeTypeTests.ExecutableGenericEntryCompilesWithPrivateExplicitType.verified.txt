@@ -4,7 +4,7 @@
 #nullable enable
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
-[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "99.99.99.0")]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class Container_Tests_T_Run__T_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("PrivateGenericEntry:global::Container.Tests<>", new global::TUnit.Core.ClassMetadata
@@ -88,6 +88,11 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             FilePath = "",
             LineNumber = 8,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute(),
+                global::System.Linq.Enumerable.ElementAtOrDefault(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => (attribute.GetType().IsGenericType ? attribute.GetType().GetGenericTypeDefinition() : attribute.GetType()).FullName == "TUnit.Core.GenerateGenericTestAttribute"), 0)!
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'Hidden' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
