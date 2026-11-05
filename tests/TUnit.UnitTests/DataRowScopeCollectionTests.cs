@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.Discovery;
 
 namespace TUnit.UnitTests;
 
@@ -235,9 +236,52 @@ public class DataRowScopeCollectionTests
         await Assert.That(root.DisposeCount).IsEqualTo(1);
     }
 
-    private sealed class ThrowingInitializerRoot : IDisposable
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task FailedRowRetainsLaterInitializersAfterAGetterThrows(bool generatedMetadata)
+    {
+        var root = CreateThrowingRoot(generatedMetadata);
+        var context = new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
+        await Assert.That(() => new FailingSource(false, root).Resolve(context))
+            .Throws<InvalidOperationException>().WithMessage("Resolution failed");
+        await context.Events.DataRowScopes!.CompleteAsync();
+        await Assert.That(root.DisposeCount).IsEqualTo(1);
+        await Assert.That(root.Later.DisposeCount).IsEqualTo(1);
+        await Assert.That(root.Later.InitializeCount).IsEqualTo(0);
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task NormalDiscoveryStillReportsGetterFailures(bool generatedMetadata)
+    {
+        var root = CreateThrowingRoot(generatedMetadata);
+        await Assert.That(() => new ObjectGraphDiscoverer().DiscoverTrackableObjectGraph(root, CancellationToken.None))
+            .Throws<DataSourceException>();
+    }
+
+    private static ThrowingInitializerRoot CreateThrowingRoot(bool generatedMetadata)
+    {
+        if (!generatedMetadata)
+            return new ThrowingInitializerRoot();
+
+        // Exercise the same ordered getter delegates emitted by the source generator,
+        // independently of the reflection fallback used by the base type.
+        InitializerPropertyRegistry.Register(typeof(RegisteredThrowingRoot),
+        [
+            new() { PropertyName = "Nested", PropertyType = typeof(NestedInitializer), GetValue = obj => ((RegisteredThrowingRoot)obj).Nested },
+            new() { PropertyName = "Later", PropertyType = typeof(NestedInitializer), GetValue = obj => ((RegisteredThrowingRoot)obj).Later }
+        ]);
+        return new RegisteredThrowingRoot();
+    }
+
+    private sealed class RegisteredThrowingRoot : ThrowingInitializerRoot;
+
+    private class ThrowingInitializerRoot : IDisposable
     {
         public NestedInitializer Nested => throw new InvalidOperationException("Getter failed");
+        public NestedInitializer Later { get; } = new();
         public int DisposeCount;
         public void Dispose() => DisposeCount++;
     }
