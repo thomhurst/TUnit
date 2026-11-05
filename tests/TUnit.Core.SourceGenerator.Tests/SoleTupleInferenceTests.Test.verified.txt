@@ -6973,6 +6973,619 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_ValueToReference__Tuple_T__string__TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests)),
+        Name = "ExplicitSoleTupleInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7639",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("ValueToReference", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests), "ValueToReference", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(string))]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        switch (methodIndex)
+        {
+            case 0:
+            {
+                try
+                {
+                    // Special handling for single reference tuple parameter
+                    if (args.Length == 2)
+                    {
+                        instance.ValueToReference<int>(new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])));
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                    else
+                    {
+                        switch (args.Length)
+                        {
+                            case 1:
+                                {
+                                    instance.ValueToReference<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) }));
+                                    return default(global::System.Threading.Tasks.ValueTask);
+                                }
+                            default:
+                                throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        }
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            case 1:
+            {
+                try
+                {
+                    // Special handling for single reference tuple parameter
+                    if (args.Length == 2)
+                    {
+                        instance.ValueToReference<long>(new global::System.Tuple<long, string>(global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])));
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                    else
+                    {
+                        switch (args.Length)
+                        {
+                            case 1:
+                                {
+                                    instance.ValueToReference<long>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<long, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<long, string>)new global::System.Tuple<long, string>(global::TUnit.Core.Helpers.CastHelper.Cast<long>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<long, string>>(__tupleFallback0) }));
+                                    return default(global::System.Threading.Tasks.ValueTask);
+                                }
+                            default:
+                                throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                        }
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        switch (groupIndex)
+        {
+            case 0:
+            {
+                return new global::System.Attribute[]
+                {
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(long)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("ValueRows")
+                };
+            }
+            case 1:
+            {
+                return new global::System.Attribute[]
+                {
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(long)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("ValueRows")
+                };
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
+        }
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(
+            methodName: "ValueToReference<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.ValueToReference<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 825,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ValueRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.ValueRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<int, string>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<int, string>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(
+            methodName: "ValueToReference<long>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.ValueToReference<long>",
+            methodTypeArgumentsIdentity: "<long>",
+            filePath: "",
+            lineNumber: 825,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ValueRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.ValueRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<long, string>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<long, string>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_ValueToReference__Tuple_T__string__TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(static () => TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_ValueToReference__Tuple_T__string__TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_ReferenceToValue___T__str_039F53E6_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests)),
+        Name = "ExplicitSoleTupleInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7639",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("ReferenceToValue", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests), "ReferenceToValue", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(string))]), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "cancellationToken", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        switch (methodIndex)
+        {
+            case 0:
+            {
+                try
+                {
+                    var context = global::TUnit.Core.TestContext.Current;
+                    // Special handling for single tuple parameter
+                    if (args.Length == 2)
+                    {
+                        // Arguments are unwrapped tuple elements, reconstruct the tuple
+                        instance.ReferenceToValue<int>((global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])), cancellationToken);
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                    else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+                    {
+                        // Rare case: tuple is wrapped as a single argument
+                        instance.ReferenceToValue<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, string>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, string>>(__tupleFallback0) }), cancellationToken);
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                    else
+                    {
+                        throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            case 1:
+            {
+                try
+                {
+                    var context = global::TUnit.Core.TestContext.Current;
+                    // Special handling for single tuple parameter
+                    if (args.Length == 2)
+                    {
+                        // Arguments are unwrapped tuple elements, reconstruct the tuple
+                        instance.ReferenceToValue<long>((global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])), cancellationToken);
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                    else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+                    {
+                        // Rare case: tuple is wrapped as a single argument
+                        instance.ReferenceToValue<long>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<long, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<long, string>)(global::TUnit.Core.Helpers.CastHelper.Cast<long>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<long, string>>(__tupleFallback0) }), cancellationToken);
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                    else
+                    {
+                        throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        switch (groupIndex)
+        {
+            case 0:
+            {
+                return new global::System.Attribute[]
+                {
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(long)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("ReferenceRows")
+                };
+            }
+            case 1:
+            {
+                return new global::System.Attribute[]
+                {
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(long)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("ReferenceRows")
+                };
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
+        }
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(
+            methodName: "ReferenceToValue<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.ReferenceToValue<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 832,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ReferenceRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.ReferenceRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<int, string>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<int, string>)) }, __mm_0.Parameters[1] } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(
+            methodName: "ReferenceToValue<long>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.ReferenceToValue<long>",
+            methodTypeArgumentsIdentity: "<long>",
+            filePath: "",
+            lineNumber: 832,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ReferenceRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.ReferenceRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<long, string>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<long, string>)) }, __mm_0.Parameters[1] } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_ReferenceToValue___T__str_039F53E6_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(static () => TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_ReferenceToValue___T__str_039F53E6_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_Repeated___T__T__TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests)),
+        Name = "ExplicitSoleTupleInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7639",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Repeated", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests), "Repeated", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.GenericParameter(0, true, "T")]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        switch (methodIndex)
+        {
+            case 0:
+            {
+                try
+                {
+                    // Special handling for single tuple parameter
+                    if (args.Length == 2)
+                    {
+                        // Arguments are unwrapped tuple elements, reconstruct the tuple
+                        instance.Repeated<long>((global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(args[1])));
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                    else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+                    {
+                        // Rare case: tuple is wrapped as a single argument
+                        instance.Repeated<long>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<long, long> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<long, long>)(global::TUnit.Core.Helpers.CastHelper.Cast<long>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<long>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<long, long>>(__tupleFallback0) }));
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                    else
+                    {
+                        throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            case 1:
+            {
+                try
+                {
+                    // Special handling for single tuple parameter
+                    if (args.Length == 2)
+                    {
+                        // Arguments are unwrapped tuple elements, reconstruct the tuple
+                        instance.Repeated<short>((global::TUnit.Core.Helpers.CastHelper.Cast<short>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<short>(args[1])));
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                    else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+                    {
+                        // Rare case: tuple is wrapped as a single argument
+                        instance.Repeated<short>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<short, short> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<short, short>)(global::TUnit.Core.Helpers.CastHelper.Cast<short>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<short>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<short, short>>(__tupleFallback0) }));
+                        return default(global::System.Threading.Tasks.ValueTask);
+                    }
+                    else
+                    {
+                        throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+                    }
+                }
+                catch (global::System.Exception ex)
+                {
+                    return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+                }
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        switch (groupIndex)
+        {
+            case 0:
+            {
+                return new global::System.Attribute[]
+                {
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(short)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("RepeatedRows")
+                };
+            }
+            case 1:
+            {
+                return new global::System.Attribute[]
+                {
+                    new global::TUnit.Core.TestAttribute(),
+                    new global::TUnit.Core.GenerateGenericTestAttribute(typeof(short)),
+                    new global::TUnit.Core.MethodDataSourceAttribute("RepeatedRows")
+                };
+            }
+            default:
+                throw new global::System.ArgumentOutOfRangeException(nameof(groupIndex));
+        }
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(
+            methodName: "Repeated<long>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.Repeated<long>",
+            methodTypeArgumentsIdentity: "<long>",
+            filePath: "",
+            lineNumber: 839,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("RepeatedRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.RepeatedRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<long, long>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<long, long>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(
+            methodName: "Repeated<short>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.Repeated<short>",
+            methodTypeArgumentsIdentity: "<short>",
+            filePath: "",
+            lineNumber: 839,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("RepeatedRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.RepeatedRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<short, short>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<short, short>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 1,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 1),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_Repeated___T__T__TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(static () => TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_Repeated___T__T__TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_Duplicate__Tuple_T__string__TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests)),
+        Name = "ExplicitSoleTupleInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7639",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Duplicate", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests), "Duplicate", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(string))]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single reference tuple parameter
+            if (args.Length == 2)
+            {
+                instance.Duplicate<int>(new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                switch (args.Length)
+                {
+                    case 1:
+                        {
+                            instance.Duplicate<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) }));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        }
+                    default:
+                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                }
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
+            new global::TUnit.Core.MethodDataSourceAttribute("ValueRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(
+            methodName: "Duplicate<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.Duplicate<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 846,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ValueRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests.ValueRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<int, string>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<int, string>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_Duplicate__Tuple_T__string__TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7639.ExplicitSoleTupleInferenceTests>(static () => TUnit_TestProject_Bugs__7639_ExplicitSoleTupleInferenceTests_Duplicate__Tuple_T__string__TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7639_NestedSingletonBoundaryTests__TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.NestedSingletonBoundaryTests", new global::TUnit.Core.ClassMetadata

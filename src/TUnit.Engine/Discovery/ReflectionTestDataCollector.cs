@@ -2970,7 +2970,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         || (parameter == parameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
                     && (parameters.Length == 1 || TupleHelper.MatchesOpenTuple(parameters[0].ParameterType, rowType)))
                 || (parameters.Length == 1 && parameters[0].ParameterType.IsGenericParameter && !rowType.IsValueType));
-        if (receivesWholeTuple)
+        if (parameters.Length == 1 && GetTupleElementTypes(parameters[0].ParameterType) is not null)
+        {
+            // Explicit method types supplement, rather than replace, declared-row inference.
+            // Reconstruct sole tuples using the same policy as generated discovery and runtime
+            // inference; optional/params tails retain strict whole-tuple mapping below.
+            var bindings = new Dictionary<Type, Type>();
+            if (!SoleTupleInference.TryInfer(parameters[0].ParameterType, rowType, bindings)) return null;
+            foreach (var binding in bindings)
+                if (binding.Key.IsGenericParameter && binding.Key.DeclaringMethod is not null)
+                    typeArguments[binding.Key.GenericParameterPosition] = binding.Value;
+        }
+        else if (receivesWholeTuple)
         {
             MapGenericParameters(parameters[0].ParameterType, rowType, typeArguments);
         }

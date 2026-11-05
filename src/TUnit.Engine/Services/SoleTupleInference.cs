@@ -19,6 +19,8 @@ internal static class SoleTupleInference
 #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
 #endif
+    // On false, callers must discard bindings: runtime callers abort the row with a
+    // resolution exception, and declared-row discovery discards its local dictionary.
     internal static bool TryInfer(Type parameterType, Type argumentType, Dictionary<Type, Type> bindings)
         => TryInfer(parameterType, argumentType, bindings, InferenceMode.Structural);
 
@@ -140,6 +142,8 @@ internal static class SoleTupleInference
                     {
                         // Inferred arguments can violate this candidate's generic constraints.
                         // Reject it without preventing the caller from trying other candidates.
+                        // Tuple/data-source generic arguments cannot contain pointer, byref, or
+                        // byref-like types; candidates come from loaded runtime types, not TypeBuilder.
                         return false;
                     }
                 }

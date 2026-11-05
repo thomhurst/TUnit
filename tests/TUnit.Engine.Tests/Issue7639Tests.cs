@@ -6,6 +6,7 @@ namespace TUnit.Engine.Tests;
 public class Issue7639Tests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
+    [Arguments("ExplicitSoleTupleInferenceTests", 7)]
     [Arguments("RepeatedConvertibleTupleTests", 2)]
     [Arguments("RepeatedNullableTupleTests", 6)]
     [Arguments("RepeatedNestedGenericTupleTests", 3)]

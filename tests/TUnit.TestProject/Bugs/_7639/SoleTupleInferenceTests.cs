@@ -813,3 +813,42 @@ public class ContainingGenericTypeInferenceTests
             throw new InvalidOperationException("Expected inference from containing generic type");
     }
 }
+
+
+#pragma warning disable TUnit0001 // #7622: explicit types do not model tuple reconstruction.
+public class ExplicitSoleTupleInferenceTests
+{
+    public static IEnumerable<(int, string)> ValueRows() => [(1, "row")];
+    public static IEnumerable<Tuple<int, string>> ReferenceRows() => [Tuple.Create(1, "row")];
+    public static IEnumerable<(int, long)> RepeatedRows() => [(1, 2L)];
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(ValueRows))]
+    public void ValueToReference<T>(Tuple<T, string> row)
+    {
+        if ((typeof(T) != typeof(int) && typeof(T) != typeof(long)) || row.Item2 != "row")
+            throw new InvalidOperationException("Expected inferred int and explicit long instantiations");
+    }
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(ReferenceRows))]
+    public void ReferenceToValue<T>((T, string) row, CancellationToken cancellationToken)
+    {
+        if ((typeof(T) != typeof(int) && typeof(T) != typeof(long)) || row.Item2 != "row")
+            throw new InvalidOperationException("Expected inferred int and explicit long instantiations");
+    }
+
+    [Test, GenerateGenericTest(typeof(short)), MethodDataSource(nameof(RepeatedRows))]
+    public void Repeated<T>((T, T) row)
+    {
+        if (typeof(T) != typeof(long) && typeof(T) != typeof(short))
+            throw new InvalidOperationException("Expected last-occurrence long and explicit short instantiations");
+    }
+
+    [Test, GenerateGenericTest(typeof(int)), MethodDataSource(nameof(ValueRows))]
+    public void Duplicate<T>(Tuple<T, string> row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "row")
+            throw new InvalidOperationException("Expected one deduplicated int instantiation");
+    }
+}
+
+#pragma warning restore TUnit0001
