@@ -64,7 +64,9 @@ internal static class FileNameHelper
         sb.Append('_');
 
         // Add method name
-        sb.Append(SanitizeForFileName(methodSymbol.Name));
+        // Reserve "_Generic<N>" for arity suffixes. Escape its prefix in literal
+        // method names so Foo_Generic1 cannot collide with Foo<U>.
+        sb.Append(SanitizeForFileName(methodSymbol.Name).Replace("_Generic", "_Generic_"));
 
         // Include arity when overloads share a name and parameter count. Preserve
         // existing names for methods without those overloads.

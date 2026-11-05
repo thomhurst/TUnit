@@ -573,8 +573,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
+            // Bind inherited calls through their constructed declaring type. Calling through
+            // the derived type can select a different overload after generic substitution.
+            var invocationType = constructedType;
+            for (var current = constructedType; current != null; current = current.BaseType)
+            {
+                if (SymbolEqualityComparer.Default.Equals(current.OriginalDefinition,
+                        testMethod.MethodSymbol.ContainingType.OriginalDefinition))
+                {
+                    invocationType = current;
+                    break;
+                }
+            }
+
             // Invoke switch for this concrete type
-            writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __Invoke_{groupIndex.ToString(CultureInfo.InvariantCulture)}({concreteClassName} instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
+            writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __Invoke_{groupIndex.ToString(CultureInfo.InvariantCulture)}({invocationType.GloballyQualified()} instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
             writer.AppendLine("{");
             writer.Indent();
             if (entries.Count == 1)

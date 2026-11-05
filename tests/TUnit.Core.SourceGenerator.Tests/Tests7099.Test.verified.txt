@@ -3606,7 +3606,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "values", new 
     {
         return new global::TUnit.TestProject.Bugs._7099.GenericParamsArrayDerived();
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayDerived instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayBase<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {

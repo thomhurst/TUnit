@@ -100,8 +100,11 @@ public class RetainsInheritedOverloads<T> : OverloadTestBase<T>
 public abstract class CoincidingOverloadBase<T>
 {
     [Test]
-    [Arguments("value")]
-    public void Example(T value) { }
+    [Arguments("base")]
+    public async Task Example(T value)
+    {
+        await Assert.That(value).IsEqualTo((T)(object)"base");
+    }
 }
 
 [InheritsTests]
@@ -109,8 +112,24 @@ public abstract class CoincidingOverloadBase<T>
 public class RetainsCoincidingOverloads<T> : CoincidingOverloadBase<T>
 {
     [Test]
-    [Arguments("value")]
-    public void Example(string value) { }
+    [Arguments("derived")]
+    public async Task Example(string value)
+    {
+        await Assert.That(value).IsEqualTo("derived");
+    }
+}
+
+[GenerateGenericTest(typeof(int))]
+public class RetainsLiteralArityNames<T>
+{
+    public void Foo() { }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    public void Foo<U>() { }
+
+    [Test]
+    public void Foo_Generic1() { }
 }
 
 [InheritsTests]

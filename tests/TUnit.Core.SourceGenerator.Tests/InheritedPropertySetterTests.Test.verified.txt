@@ -234,7 +234,7 @@ internal static class TUnit_TestProject_InheritedPropertySetterTests_Test_TestSo
             Property7 = default!,
         };
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.InheritedPropertySetterTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.PropertySetterTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {

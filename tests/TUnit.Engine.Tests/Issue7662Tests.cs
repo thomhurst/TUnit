@@ -13,6 +13,7 @@ public class Issue7662Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("OverridesInheritedTest", 1)]
     [Arguments("RetainsInheritedOverloads", 4)]
     [Arguments("RetainsCoincidingOverloads", 2)]
+    [Arguments("RetainsLiteralArityNames", 2)]
     [Arguments("NonGenericHidesInheritedTest", 3)]
     public async Task Generic_Classes_Honor_InheritsTests(string className, int expectedCount)
     {

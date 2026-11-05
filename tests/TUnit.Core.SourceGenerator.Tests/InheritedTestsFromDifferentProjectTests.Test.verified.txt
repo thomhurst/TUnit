@@ -201,7 +201,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
     {
         return new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests();
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Library.BaseTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {
@@ -274,7 +274,7 @@ internal static class TUnit_TestProject_InheritedTestsFromDifferentProjectTests_
     {
         return new global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests();
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.InheritedTestsFromDifferentProjectTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Library.BaseTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {
