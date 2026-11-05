@@ -173,11 +173,10 @@ internal static class CodeGenerationHelpers
             // Fall through to regular typeof() handling
         }
 
-        if (typeSymbol is IArrayTypeSymbol && ContainsTypeParameter(typeSymbol))
+        if (typeSymbol is IArrayTypeSymbol array && ContainsTypeParameter(typeSymbol))
         {
-            // An array of a type parameter (e.g. `params T[]`) has no TypeInfo variant, and typeof(T[])
-            // does not compile outside T's scope. Erase it to object, as the parameter's Type already is.
-            return "new global::TUnit.Core.ConcreteType(typeof(object))";
+            // Preserve the recursive signature without constructing an open runtime array type.
+            return $"new global::TUnit.Core.ArrayType({GenerateTypeInfo(array.ElementType)}, {array.Rank.ToString(CultureInfo.InvariantCulture)})";
         }
 
         // Regular concrete type (including fully closed generic types like List<int>)

@@ -72,3 +72,10 @@ public sealed record ConstructedGeneric(
         return $"{name}<{string.Join(", ", TypeArguments.Select(t => t.ToString()))}>";
     }
 }
+
+/// <summary>
+/// Represents an array whose element type can contain generic parameters.
+/// </summary>
+/// <param name="ElementType">The recursive element type shape.</param>
+/// <param name="Rank">The array rank; one denotes a vector.</param>
+public sealed record ArrayType(TypeInfo ElementType, int Rank = 1) : TypeInfo;

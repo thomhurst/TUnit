@@ -68,6 +68,20 @@ public class PrivateAttributeContainer
         public void Run(string value) { }
         public void Run(object value) { }
     }
+
+    [PrivateCategory<int>]
+    [GenerateGenericTest(typeof(Hidden))]
+    public class InvalidPrivateArrayClass<T> where T : struct
+    {
+        // Put the concrete overload first so a name/count fallback cannot pass accidentally.
+        public void Run(string[] value) { }
+
+        [Test]
+        [PrivateCategory<double>]
+        [Arguments(null)]
+        public void Run(T[] value) { }
+    }
+
 }
 
 [ClassConstructor<ThrowingClassConstructor>]

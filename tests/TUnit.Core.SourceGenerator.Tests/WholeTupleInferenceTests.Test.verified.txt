@@ -3571,7 +3571,7 @@ internal static class TUnit_TestProject_Bugs__7638_ExplicitSpreadColumnInference
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Array", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7638.ExplicitSpreadColumnInferenceTests), "Array", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "first", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "extra", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "extra", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7638.ExplicitSpreadColumnInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {

@@ -88,6 +88,9 @@ public static class MetadataExtensions
             case GenericParameter generic:
                 return type.IsGenericParameter && type.GenericParameterPosition == generic.Position
                     && (type.DeclaringMethod is not null) == generic.IsMethodParameter;
+            case ArrayType array:
+                return type.IsArray && type.GetArrayRank() == array.Rank
+                    && MatchesTypeInfo(type.GetElementType()!, array.ElementType);
             case ConstructedGeneric constructed:
                 if (!type.IsGenericType || type.GetGenericTypeDefinition() != constructed.GenericDefinition)
                 {

@@ -38,7 +38,7 @@ internal sealed class TestMetadataEqualityComparer : IEqualityComparer<TestMetad
                SameTypes(x.GenericMethodTypeArguments, y.GenericMethodTypeArguments) &&
                // Overloads share the class, method name and test name (#7207); their parameters tell them apart.
                SameParameters(x.MethodMetadata.Parameters, y.MethodMetadata.Parameters) &&
-               // Source generation erases some parameter shapes (M(T[]) and M(object) both emit object), so
+               // Older source generation erases some parameter shapes, so
                // the declaration site is what separates overloads whose parameter metadata still matches. The
                // column separates such overloads declared on one line.
                // A dynamic test's location is its creator's, not the method's, and differs between the
@@ -67,6 +67,11 @@ internal sealed class TestMetadataEqualityComparer : IEqualityComparer<TestMetad
 
     private static bool SameTypeInfo(TypeInfo? x, TypeInfo? y)
     {
+        if (x is ArrayType ax && y is ArrayType ay)
+        {
+            return ax.Rank == ay.Rank && SameTypeInfo(ax.ElementType, ay.ElementType);
+        }
+
         if (x is ConstructedGeneric cx && y is ConstructedGeneric cy)
         {
             // Record equality compares the TypeArguments array by reference.

@@ -103,6 +103,12 @@ namespace
         public override .<<.<T>>> GetTypedDataRowsAsync(.DataGeneratorMetadata dataGeneratorMetadata) { }
         public . OnTestRegistered(.TestRegisteredContext context) { }
     }
+    public sealed class ArrayType : .TypeInfo, <.ArrayType>
+    {
+        public ArrayType(.TypeInfo ElementType, int Rank = 1) { }
+        public .TypeInfo ElementType { get; init; }
+        public int Rank { get; init; }
+    }
     public class Artifact
     {
         public Artifact() { }

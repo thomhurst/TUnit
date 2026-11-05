@@ -669,7 +669,7 @@ internal static class TUnit_TestProject_Bugs__7573_ArrayClassMethodRows_T_Direct
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7573.ArrayClassMethodRows<>);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("DirectArray", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7573.ArrayClassMethodRows<>), "DirectArray", false, 0, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, false, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7573.ArrayClassMethodRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -781,7 +781,7 @@ internal static class TUnit_TestProject_Bugs__7573_ArrayClassMethodRows_T_Factor
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7573.ArrayClassMethodRows<>);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("FactoryArray", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7573.ArrayClassMethodRows<>), "FactoryArray", false, 0, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, false, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7573.ArrayClassMethodRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -974,7 +974,7 @@ internal static class TUnit_TestProject_Bugs__7573_OpenClassMethodRows_T_OpenArr
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7573.OpenClassMethodRows<>);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("OpenArray", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7573.OpenClassMethodRows<>), "OpenArray", false, 0, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, false, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7573.OpenClassMethodRows<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1178,7 +1178,7 @@ internal static class TUnit_TestProject_Bugs__7573_ConstructorNestedNullableClas
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<>);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("NestedConstructorType", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<>), "NestedConstructorType", false, 0, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Nullable<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -2016,7 +2016,7 @@ internal static class TUnit_TestProject_Bugs__7573_PartialConstructorNullableCla
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7573.PartialConstructorNullableClassRows<,>);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("PartialConstructorTypes", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7573.PartialConstructorNullableClassRows<,>), "PartialConstructorTypes", false, 0, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Nullable<>), [new global::TUnit.Core.GenericParameter(0, false, "T")]), 1), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "label", new global::TUnit.Core.GenericParameter(1, false, "U"), false)
 }));
     private static global::TUnit.TestProject.Bugs._7573.PartialConstructorNullableClassRows<int, string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
@@ -2261,7 +2261,7 @@ internal static class TUnit_TestProject_Bugs__7573_NullableConstructedStructArra
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7573.NullableConstructedStructArrayRows<>);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("InfersThroughNullableConstructedStruct", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7573.NullableConstructedStructArrayRows<>), "InfersThroughNullableConstructedStruct", false, 0, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), true)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Nullable<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.KeyValuePair<,>), [new global::TUnit.Core.GenericParameter(0, false, "T"), new global::TUnit.Core.ConcreteType(typeof(int))])]), 1), true)
 }));
     private static global::TUnit.TestProject.Bugs._7573.NullableConstructedStructArrayRows<string> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -2368,7 +2368,7 @@ internal static class TUnit_TestProject_Bugs__7573_PartialConstructorInvalidFall
         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
         Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7573.PartialConstructorInvalidFallback<,>), true, new global::TUnit.Core.ParameterMetadata[]
         {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "seed", new global::TUnit.Core.ConcreteType(typeof(object)), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "seed", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, false, "T"), 1), false),
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "count", new global::TUnit.Core.ConcreteType(typeof(int)), false)
         }),
         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
@@ -2466,7 +2466,7 @@ internal static class TUnit_TestProject_Bugs__7573_ConstructorConstructedNullabl
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7573.ConstructorConstructedNullableClassRows<>);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("ConstructedConstructorType", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7573.ConstructorConstructedNullableClassRows<>), "ConstructedConstructorType", false, 0, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Nullable<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.KeyValuePair<,>), [new global::TUnit.Core.GenericParameter(0, false, "T"), new global::TUnit.Core.ConcreteType(typeof(int))])]), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7573.ConstructorConstructedNullableClassRows<double> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {

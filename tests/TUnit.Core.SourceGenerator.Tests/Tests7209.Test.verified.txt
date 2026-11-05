@@ -1404,7 +1404,7 @@ internal static class TUnit_TestProject_Bugs__7209_TypeBearingClassRowWithParams
         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
         Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7209.TypeBearingClassRowWithParams<>), true, new global::TUnit.Core.ParameterMetadata[]
         {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, false, "T"), 1), false)
         }),
         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
         Parent = null
@@ -1850,7 +1850,7 @@ internal static class TUnit_TestProject_Bugs__7209_NullTrailingClassArray_T_Run_
         Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7209.NullTrailingClassArray<>), true, new global::TUnit.Core.ParameterMetadata[]
         {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "number", new global::TUnit.Core.ConcreteType(typeof(int)), false),
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), true)
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, false, "T"), 1), true)
         }),
         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
         Parent = null
@@ -1928,7 +1928,7 @@ internal static class TUnit_TestProject_Bugs__7209_MixedTrailingClassValues_T_Ru
         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
         Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7209.MixedTrailingClassValues<>), true, new global::TUnit.Core.ParameterMetadata[]
         {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, false, "T"), 1), false)
         }),
         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
         Parent = null
@@ -2006,7 +2006,7 @@ internal static class TUnit_TestProject_Bugs__7209_PrefixedMixedTrailingClassVal
         Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7209.PrefixedMixedTrailingClassValues<>), true, new global::TUnit.Core.ParameterMetadata[]
         {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "prefix", new global::TUnit.Core.ConcreteType(typeof(string)), false),
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, false, "T"), 1), false)
         }),
         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
         Parent = null

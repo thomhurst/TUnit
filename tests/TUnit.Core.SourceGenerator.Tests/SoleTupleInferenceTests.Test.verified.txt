@@ -2889,7 +2889,7 @@ internal static class TUnit_TestProject_Bugs__7639_RepeatedNestedGenericTupleTes
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.RepeatedNestedGenericTupleTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Array", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.RepeatedNestedGenericTupleTests), "Array", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(object))]), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1)]), false)
 }));
     private static global::TUnit.TestProject.Bugs._7639.RepeatedNestedGenericTupleTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -5733,7 +5733,7 @@ internal static class TUnit_TestProject_Bugs__7639_OpenTupleArrayRuntimeCastTest
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Value", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests), "Value", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(object))]), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1)]), false)
 }));
     private static global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -5829,7 +5829,7 @@ internal static class TUnit_TestProject_Bugs__7639_OpenTupleArrayRuntimeCastTest
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Reference", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests), "Reference", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(object))]), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1)]), false)
 }));
     private static global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -5927,7 +5927,7 @@ internal static class TUnit_TestProject_Bugs__7639_OpenTupleArrayRuntimeCastTest
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Interface", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests), "Interface", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(object))]), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1)]), false)
 }));
     private static global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -6023,7 +6023,7 @@ internal static class TUnit_TestProject_Bugs__7639_OpenTupleArrayRuntimeCastTest
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Reversed", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests), "Reversed", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.ConcreteType(typeof(object)), new global::TUnit.Core.GenericParameter(0, true, "T")]), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), new global::TUnit.Core.GenericParameter(0, true, "T")]), false)
 }));
     private static global::TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -7602,7 +7602,7 @@ internal static class TUnit_TestProject_Bugs__7639_ExplicitArrayRankTupleInferen
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.ExplicitArrayRankTupleInferenceTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Value", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.ExplicitArrayRankTupleInferenceTests), "Value", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(object))]), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1)]), false)
 }));
     private static global::TUnit.TestProject.Bugs._7639.ExplicitArrayRankTupleInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -7699,7 +7699,7 @@ internal static class TUnit_TestProject_Bugs__7639_ExplicitArrayRankTupleInferen
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.ExplicitArrayRankTupleInferenceTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Reference", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.ExplicitArrayRankTupleInferenceTests), "Reference", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(object))]), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1)]), false)
 }));
     private static global::TUnit.TestProject.Bugs._7639.ExplicitArrayRankTupleInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
