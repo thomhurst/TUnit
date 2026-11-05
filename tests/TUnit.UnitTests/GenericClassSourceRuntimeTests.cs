@@ -32,6 +32,84 @@ public class GenericClassSourceRuntimeTests
             => throw new InvalidOperationException("Partitioning must not enumerate user data");
     }
 
+    private sealed class DeferredConvertible(bool throws) : IConvertible
+    {
+        public TypeCode GetTypeCode() => TypeCode.Object;
+        public int ToInt32(IFormatProvider? provider) => throws ? throw new InvalidOperationException("Partitioning must not convert user values") : 2;
+        public object ToType(Type conversionType, IFormatProvider? provider) => ToInt32(provider);
+        public bool ToBoolean(IFormatProvider? provider) => throw new NotSupportedException();
+        public byte ToByte(IFormatProvider? provider) => throw new NotSupportedException();
+        public char ToChar(IFormatProvider? provider) => throw new NotSupportedException();
+        public DateTime ToDateTime(IFormatProvider? provider) => throw new NotSupportedException();
+        public decimal ToDecimal(IFormatProvider? provider) => throw new NotSupportedException();
+        public double ToDouble(IFormatProvider? provider) => throw new NotSupportedException();
+        public short ToInt16(IFormatProvider? provider) => throw new NotSupportedException();
+        public long ToInt64(IFormatProvider? provider) => throw new NotSupportedException();
+        public sbyte ToSByte(IFormatProvider? provider) => throw new NotSupportedException();
+        public float ToSingle(IFormatProvider? provider) => throw new NotSupportedException();
+        public string ToString(IFormatProvider? provider) => throw new NotSupportedException();
+        public ushort ToUInt16(IFormatProvider? provider) => throw new NotSupportedException();
+        public uint ToUInt32(IFormatProvider? provider) => throw new NotSupportedException();
+        public ulong ToUInt64(IFormatProvider? provider) => throw new NotSupportedException();
+    }
+
+    [Test]
+    public async Task Constructor_Conversion_Does_Not_Override_Declared_Source_Mapping()
+    {
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => OneRow(() => Task.FromResult<object?[]?>([2])) };
+        GenericClassRowPartition.ConfigureInferredSource(source, false, typeof(int));
+        var coordinator = new GenericClassRowPartition.Coordinator([typeof(string)], GenericClassRowFallback.None, [source], [0]);
+        var evaluation = await coordinator.EvaluateAsync(new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = [new ParameterMetadata(typeof(string)) { Name = "value", TypeInfo = new GenericParameter(0, false) }],
+            TestInformation = null, Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        });
+        await Assert.That(evaluation.AnyRowInfers).IsFalse();
+    }
+
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(false, true)]
+    [Arguments(true, false)]
+    [Arguments(true, true)]
+    public async Task Partition_Retains_Array_And_Custom_Convertible_Rows(bool generated, bool array)
+    {
+        var constructor = (generated ? typeof(ArrayConstructor<,>) : typeof(ArrayConstructor<int, string>)).GetConstructors()[0];
+        IMemberMetadata[] parameters =
+        [
+            array
+                ? new ParameterMetadata(typeof(object)) { Name = "first", TypeInfo = generated ? new ConcreteType(typeof(object)) : new ConcreteType(typeof(int[])), ReflectionInfo = constructor.GetParameters()[0], CachedIsOptional = false }
+                : new ParameterMetadata(typeof(int)) { Name = "first", TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(typeof(int)), CachedIsOptional = false },
+            new ParameterMetadata(typeof(string)) { Name = "second", TypeInfo = generated ? new GenericParameter(1, false) : new ConcreteType(typeof(string)), CachedIsOptional = true }
+        ];
+        if (generated && array)
+        {
+            parameters = ParameterMetadataFactory.ForConstructor(typeof(ArrayConstructor<,>), true, parameters.Cast<ParameterMetadata>().ToArray());
+        }
+        object?[][] original = array ? [[new int[] { 1 }], [new long[] { 2 }], [new object[] { new DeferredConvertible(true) }]] : [[1], [new DeferredConvertible(false)], [new DeferredConvertible(true)]];
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create([typeof(int), typeof(string)], GenericClassRowFallback.AllRows, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata)) rows.Add(await factory());
+        await Assert.That(rows.Count).IsEqualTo(original.Length);
+        for (var i = 0; i < rows.Count; i++) await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+        if (array) await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<int[]>(original[1][0])![0]).IsEqualTo(2);
+        else await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<int>(original[1][0])).IsEqualTo(2);
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
+    }
+
     [Test]
     [Arguments(false)]
     [Arguments(true)]

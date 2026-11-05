@@ -295,7 +295,7 @@ public static class GenericClassRowPartition
                         var row = await rowFactory().ConfigureAwait(false) is { } fetched ? EvaluateWrappedFactory(fetched) : null;
                         // Retain declared constructor-position and own-class null inference.
                         var infers = RowInfers(dataSources[index], row, ClassTypeArguments)
-                            || (dataSources[index] is MethodDataSourceAttribute { ClassProvidingDataSource: null }
+                            || (dataSources[index] is MethodDataSourceAttribute { ClassProvidingDataSource: null, InferredClassTypeArguments: null }
                                 && MatchesConstructorRow(row, dataGeneratorMetadata.MembersToGenerate, ClassTypeArguments));
                         anyRowInfers |= infers;
                         rows.Add(new EvaluatedRow(new EvaluatedDataRow(row, rowFactory), infers));
@@ -424,6 +424,28 @@ public static class GenericClassRowPartition
     // retain candidates for registered conversions and built-in scalar CastHelper paths.
     private static bool MayConvertConstructorValue(TypeInfo description, object value, Type[] classTypeArguments)
     {
+        // CastHelper's non-AOT array fallback converts vector elements (or a single
+        // IConvertible value). Inspect candidates without invoking user conversions.
+        var arrayElement = description switch
+        {
+            ConstructorArray { Rank: 1, IsVector: true } array => array.Element,
+            ConcreteType { Type: { IsArray: true } array } when array.GetArrayRank() == 1
+                && array.Name.EndsWith("[]", StringComparison.Ordinal) => new ConcreteType(array.GetElementType()!),
+            _ => null
+        };
+        if (arrayElement is not null)
+        {
+            if (value is Array { Rank: 1 } array && array.GetLowerBound(0) == 0
+                && MatchesTrailingArrayElements(array, arrayElement, classTypeArguments))
+            {
+                return true;
+            }
+            if (value is IConvertible && MatchesConstructorValue(arrayElement, value, classTypeArguments))
+            {
+                return true;
+            }
+        }
+
         var target = description switch
         {
             GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
@@ -510,7 +532,9 @@ public static class GenericClassRowPartition
             }
         }
 
-        return false;
+        // Custom IConvertible implementations are user code: only the binder may
+        // call them. Built-in conversions above still reject known invalid values.
+        return value is IConvertible && (target.IsPrimitive || target == typeof(decimal));
     }
 
     // Array descriptions emitted outside a generic class erase T[] to object. The existing lazy
