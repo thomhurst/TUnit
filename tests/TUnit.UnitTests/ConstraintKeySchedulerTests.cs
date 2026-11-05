@@ -119,11 +119,9 @@ public class ConstraintKeySchedulerTests
 
         var runner = new TestRunner(
             coordinator,
-            new TestRunnerTests.FakeMessageBus(),
             isFailFastEnabled: false,
             new CancellationTokenSource(),
             logger,
-            new TestStateManager(),
             new ParallelLimitLockProvider(),
             new NotInParallelLock());
 

@@ -318,7 +318,7 @@ public class SkippedIfEmptyScopeTests(ProbeService service)
     public void Run(int value) => throw new InvalidOperationException($"Should have been skipped, but ran with {service} and {value}");
 }
 
-// A test skipped because its dependency failed never reaches TestCoordinator. The scope created for
+// A test skipped because its dependency failed takes the coordinator early-skip path. The scope created for
 // it must still be disposed.
 [EngineTest(ExpectedResult.Failure)]
 public class DependencySkippedScopeTests
