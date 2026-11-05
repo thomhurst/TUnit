@@ -853,6 +853,33 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("int extra = 5", "int, int")]
+    [Arguments("params int[] rest", "int, int[]")]
+    public async Task Convertible_ITuple_Row_Rejects_Omitted_Tail(string tail, string expectedTypes)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using System.Runtime.CompilerServices;
+            using TUnit.Core;
+            public class Tests
+            {
+                public sealed class Row : ITuple
+                {
+                    public int Length => 1;
+                    public object this[int index] => "expanded";
+                    public static implicit operator int(Row value) => 42;
+                }
+                public static IEnumerable<Row> Rows() => [new Row()];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(int value, {{tail}}) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("Tests.Row", expectedTypes));
+    }
+
+    [Test]
     public async Task Convertible_Row_Rejects_Required_Test_Parameters()
     {
         await Verifier.VerifyAnalyzerAsync(
