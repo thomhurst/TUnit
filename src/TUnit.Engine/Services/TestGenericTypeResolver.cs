@@ -688,11 +688,11 @@ internal sealed class TestGenericTypeResolver
                     {
                         // Tuple invocation converts closed elements (including nullable/numeric
                         // values). Only open elements contribute to generic inference.
-                        if (TupleHelper.IsTupleType(parameterType) && !paramGenericArgs[i].ContainsGenericParameters)
+                        if (tupleElement && TupleHelper.IsTupleType(parameterType) && !paramGenericArgs[i].ContainsGenericParameters)
                             continue;
                         // A sole tuple is reconstructed with conversions. Match the generator's
                         // last-element inference through structurally matching tuple elements.
-                        if (TupleHelper.IsTupleType(parameterType))
+                        if (tupleElement && TupleHelper.IsTupleType(parameterType))
                         {
                             var parameterElement = paramGenericArgs[i];
                             var argumentElement = argGenericArgs[i];
@@ -709,8 +709,7 @@ internal sealed class TestGenericTypeResolver
                             }
                         }
                         if (!TryInferTypeMapping(paramGenericArgs[i], argGenericArgs[i], typeMapping,
-                            tupleElement || TupleHelper.IsTupleType(parameterType),
-                            overwriteBindings || TupleHelper.IsTupleType(parameterType)))
+                            tupleElement, overwriteBindings))
                         {
                             return false;
                         }

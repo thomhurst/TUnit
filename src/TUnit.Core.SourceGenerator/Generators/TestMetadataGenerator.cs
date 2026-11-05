@@ -7323,10 +7323,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // A sole tuple parameter is reconstructed element by element at invocation.
         // Closed elements do not contribute to inference: their values may support runtime
         // conversions that their declared types cannot prove (for example object boxing int).
-        // Whole rows with omitted trailing parameters must retain exact tuple invariance.
+        // Whole rows and interface/base candidates retain exact closed-argument matching.
+        // overwriteBindings marks structural element inference, not candidate validation.
         if (!CodeGenerationHelpers.ContainsTypeParameter(parameter))
         {
-            return reconstructTupleElements || SymbolEqualityComparer.Default.Equals(parameter, row);
+            return (reconstructTupleElements && overwriteBindings) || SymbolEqualityComparer.Default.Equals(parameter, row);
         }
 
         // Tuple reconstruction can lift a non-nullable value into an open nullable element,

@@ -20,6 +20,7 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TupleInterfaceCandidateIsolationTests", 2)]
     [Arguments("TupleNestedInterfaceBaseTests", 2)]
     [Arguments("TupleMultiParameterCandidateTests", 2)]
+    [Arguments("TupleClosedCandidateArgumentTests", 2)]
     [Arguments("WholeTupleWithTrailingParametersTests", 6)]
     public async Task Tuple_Inference_And_Conversion_Agree_In_Both_Modes(string className, int expectedCount)
     {
@@ -35,6 +36,7 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     [Arguments("OrdinaryGenericBaseInferenceTests")]
     [Arguments("SpreadCrossFamilyTupleInferenceTests")]
+    [Arguments("SpreadMatchingFamilyTupleInferenceTests")]
     public async Task Unsupported_Inference_Remains_Consistent_In_Both_Modes(string className)
     {
         await RunTestsWithFilter(

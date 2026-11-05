@@ -596,3 +596,40 @@ public class SpreadCrossFamilyTupleInferenceTests
 #pragma warning restore TUnit0001
     public void Value<T>((T, string) row, int extra) { }
 }
+
+public class TupleClosedCandidateArgumentTests
+{
+    public interface IPair<T, U> { }
+    public sealed class Dual : IPair<int, string>, IPair<long, int> { }
+    public static IEnumerable<(string, Dual)> Rows() => [("value", new())];
+    public static IEnumerable<Tuple<string, Dual>> ReferenceRows() => [Tuple.Create("value", new Dual())];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void Value<T, U>((T, IPair<U, int>) row)
+    {
+        if (typeof(T) != typeof(string) || typeof(U) != typeof(long) || row.Item2 is not Dual)
+            throw new InvalidOperationException("Expected incompatible closed candidate arguments to be rejected");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T, U>(Tuple<T, IPair<U, int>> row)
+    {
+        if (typeof(T) != typeof(string) || typeof(U) != typeof(long) || row.Item2 is not Dual)
+            throw new InvalidOperationException("Expected reference tuple closed candidate validation");
+    }
+}
+
+public class SpreadMatchingFamilyTupleInferenceTests
+{
+    public class Base<T> { }
+    public sealed class Derived : Base<int> { }
+    public static IEnumerable<((Derived, int), int)> Rows() => [((new(), 1), 7)];
+
+    [Test]
+#pragma warning disable TUnit0001 // Intentionally uninferable spread column.
+    [MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public void Value<T>((Base<T>, int) row, int extra) { }
+}
