@@ -15,7 +15,7 @@ public static class MetadataExtensions
 
     public static MethodInfo GetReflectionInfo(this MethodMetadata method)
     {
-        return GetMethodFromType(method.Type, method.Name, method.Parameters, method.GenericTypeCount);
+        return method.ReflectionInfo ?? GetMethodFromType(method.Type, method.Name, method.Parameters, method.GenericTypeCount);
     }
 
     public static IEnumerable<Attribute> GetCustomAttributes(this MethodMetadata method)

@@ -92,7 +92,7 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     {
         if (testMode != TestMode.Reflection)
         {
-            await RunTestsWithFilter($"/*/TUnit.TestProject.Bugs._7208/{className}*/*",
+            await RunTestsWithFilter($"/*/TUnit.TestProject.Bugs._7208/{className}/*",
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),

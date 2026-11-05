@@ -39,6 +39,17 @@ public class MetadataMethodLookupTests
         await Assert.That(method.GetParameters()[0].ParameterType.IsArray).IsTrue();
     }
 
+    [Test]
+    public async Task Reflection_metadata_preserves_closed_generic_method()
+    {
+        var reflected = typeof(Overloads<string>).GetMethod("Empty", 1, System.Type.EmptyTypes)!
+            .MakeGenericMethod(typeof(int));
+        var metadata = TUnit.Engine.Building.ReflectionMetadataBuilder.CreateMethodMetadata(
+            typeof(Overloads<string>), reflected);
+        await Assert.That(metadata.GetReflectionInfo()).IsSameReferenceAs(reflected);
+        await Assert.That(metadata.GetReflectionInfo().GetGenericArguments()[0]).IsEqualTo(typeof(int));
+    }
+
     private static MethodMetadata Create(string name, int arity, TUnit.Core.TypeInfo? shape = null) =>
         MethodMetadataFactory.Create(name, typeof(Overloads<>), typeof(void),
             TestContext.Current!.TestDetails.MethodMetadata.Class, arity,
