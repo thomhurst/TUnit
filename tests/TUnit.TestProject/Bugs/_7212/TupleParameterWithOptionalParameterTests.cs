@@ -48,6 +48,47 @@ public class TupleParameterWithOptionalParameterTests
         yield return ((25, 26), 7);
     }
 
+    public static IEnumerable<Tuple<int, string>> ReferenceRows() => [Tuple.Create(25, "tuple")];
+
+    [Test, MethodDataSource(nameof(ReferenceRows))]
+    public async Task Reference_Tuple_And_Array(Tuple<int, string> pair, int[] rest)
+    {
+        await Assert.That(pair.Item1).IsEqualTo(25);
+        await Assert.That(pair.Item2).IsEqualTo("tuple");
+        await Assert.That(rest).IsEmpty();
+    }
+
+    public static IEnumerable<TestDataRow<Tuple<int, string>>> WrappedReferenceRows() =>
+        [new(Tuple.Create(25, "tuple"))];
+
+    [Test, MethodDataSource(nameof(WrappedReferenceRows))]
+    public async Task Wrapped_Reference_Tuple_And_Array(Tuple<int, string> pair, int[] rest)
+    {
+        await Assert.That(pair.Item1).IsEqualTo(25);
+        await Assert.That(pair.Item2).IsEqualTo("tuple");
+        await Assert.That(rest).IsEmpty();
+    }
+
+    // Generic whole-row analyzer matching is tracked by #7622.
+#pragma warning disable TUnit0001
+    [Test, GenerateGenericTest(typeof(int)), MethodDataSource(nameof(ReferenceRows))]
+    public async Task Generic_Reference_Tuple_And_Array<T>(Tuple<T, string> pair, int[] rest)
+    {
+        await Assert.That(pair.Item1).IsEqualTo((T)(object)25);
+        await Assert.That(pair.Item2).IsEqualTo("tuple");
+        await Assert.That(rest).IsEmpty();
+    }
+
+#pragma warning restore TUnit0001
+
+    [Test, MethodDataSource(nameof(TypedTupleRows)), MethodDataSource(nameof(WrappedTupleRows))]
+    public async Task Tuple_And_Array((int, int) pair, int[] rest, CancellationToken token)
+    {
+        await Assert.That(pair).IsEqualTo((25, 26));
+        await Assert.That(rest).IsEmpty();
+        await Assert.That(token.CanBeCanceled).IsTrue();
+    }
+
     [Test]
     [MethodDataSource(nameof(TupleRows))]
     [MethodDataSource(nameof(TypedTupleRows))]
@@ -193,6 +234,13 @@ public class MutableTupleWithOptionalParameterTests
 
     [Test, MethodDataSource(nameof(ReferenceRow))]
     public async Task Mutable_Reference_Tuple_And_Params(Tuple<Fixture, int> pair, params int[] rest)
+    {
+        await Check(pair.Item1, pair.Item2);
+        await Assert.That(rest).IsEmpty();
+    }
+
+    [Test, MethodDataSource(nameof(ReferenceRow))]
+    public async Task Mutable_Reference_Tuple_And_Array(Tuple<Fixture, int> pair, int[] rest)
     {
         await Check(pair.Item1, pair.Item2);
         await Assert.That(rest).IsEmpty();

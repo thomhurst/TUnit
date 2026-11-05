@@ -4339,7 +4339,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Mutable elements retain their boxes inside one tuple argument until initialization finishes.
         // Reconstruct only at invocation, before the ordinary optional/params binder consumes the row.
         if (parametersFromArgs.Length > 1
-            && parametersFromArgs.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams)
+            && parametersFromArgs.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams
+                || SymbolEqualityComparer.Default.Equals(parameter, parametersFromArgs[^1]) && parameter.CollectsTrailingArguments())
             && parametersFromArgs[0].Type is INamedTypeSymbol firstTuple
             && (firstTuple.IsTupleType || IsReferenceTuple(firstTuple)))
         {

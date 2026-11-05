@@ -66,35 +66,26 @@ internal class DataUnwrapper
 
     private static Type? GetTupleDataParameterType(ParameterMetadata[]? parameters)
     {
-        Type? dataType = null;
         if (parameters is null)
         {
             return null;
         }
 
-        foreach (var parameter in parameters)
+        for (var i = 0; i < parameters.Length; i++)
         {
-            if (parameter.Type == typeof(CancellationToken))
+            var dataType = parameters[i].Type;
+            if (dataType == typeof(CancellationToken))
             {
                 continue;
             }
 
-            // Keep scanning after the tuple: only a required later data parameter prevents
-            // the wrapped row from binding whole (injected tokens do not consume row values).
-            if (dataType is not null)
-            {
-                if (!parameter.IsOptional && !parameter.IsParams)
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                dataType = parameter.Type;
-            }
+            // Wrapped and unwrapped rows must use the same whole-tuple binding rule.
+            return TupleHelper.IsTupleType(dataType) && RemainingDataParametersAreOmittable(parameters, i)
+                ? dataType
+                : null;
         }
 
-        return TupleHelper.IsTupleType(dataType) ? dataType : null;
+        return null;
     }
 
     private static object?[] UnwrapWithTypesInternal(object?[] values, ParameterMetadata[]? expectedParameters)
@@ -176,7 +167,7 @@ internal class DataUnwrapper
         }
 
         // A tuple that is already an instance of the first data parameter's tuple type binds to it
-        // whole when every later data parameter can be omitted (optional or params).
+        // whole when every later data parameter can be omitted (optional, params, or a trailing collecting array).
         var firstDataParameterType = expectedParameters[firstDataParameterIndex].Type;
         if (dataParameterCount > 1
             && TupleHelper.IsTupleType(firstDataParameterType)
@@ -205,15 +196,33 @@ internal class DataUnwrapper
 
     private static bool RemainingDataParametersAreOmittable(ParameterMetadata[] parameters, int firstDataParameterIndex)
     {
+        var lastDataParameterIndex = parameters.Length - 1;
+        while (lastDataParameterIndex > firstDataParameterIndex
+               && parameters[lastDataParameterIndex].Type == typeof(CancellationToken))
+        {
+            lastDataParameterIndex--;
+        }
+
         for (var i = firstDataParameterIndex + 1; i < parameters.Length; i++)
         {
             var parameter = parameters[i];
-            if (parameter.Type != typeof(CancellationToken) && !parameter.IsOptional && !parameter.IsParams)
+            if (parameter.Type != typeof(CancellationToken) && !parameter.IsOptional && !parameter.IsParams
+                && !(i == lastDataParameterIndex
+                    && IsSingleDimensionalZeroBasedArray(parameter.Type)))
             {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private static bool IsSingleDimensionalZeroBasedArray(Type type)
+    {
+#if NET
+        return type.IsSZArray;
+#else
+        return type.IsArray && type.Name.EndsWith("[]", StringComparison.Ordinal);
+#endif
     }
 }

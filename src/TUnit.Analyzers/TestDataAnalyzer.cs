@@ -995,8 +995,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         // testParameterTypes and this parameter list both exclude engine-injected tokens.
         var cancellationToken = context.Compilation.GetTypeByMetadataName("System.Threading.CancellationToken");
-        return method.Parameters.Where(parameter => !SymbolEqualityComparer.Default.Equals(parameter.Type, cancellationToken))
-            .Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams);
+        var dataParameters = method.Parameters
+            .Where(parameter => !SymbolEqualityComparer.Default.Equals(parameter.Type, cancellationToken)).ToArray();
+        return dataParameters.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams
+            || SymbolEqualityComparer.Default.Equals(parameter, dataParameters[^1])
+            && parameter.Type is IArrayTypeSymbol { IsSZArray: true });
     }
 
     private ImmutableArray<ITypeSymbol> UnwrapTypes(SymbolAnalysisContext context,
