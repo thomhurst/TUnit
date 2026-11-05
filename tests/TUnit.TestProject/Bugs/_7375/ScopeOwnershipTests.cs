@@ -9,7 +9,10 @@ public sealed class UntrackingScope : IDisposable
     public int DisposeCount { get; private set; }
     public UntrackedService Service { get; } = new();
 
-    public UntrackingScope() => Created.Add(this);
+    public UntrackingScope(bool record = true)
+    {
+        if (record) Created.Add(this);
+    }
 
     public void Dispose() => DisposeCount++;
 }
@@ -44,6 +47,44 @@ public class ScopeOwnershipObserverTests
     {
         await Assert.That(UntrackingScope.Created.Count).IsEqualTo(1);
         var scope = UntrackingScope.Created.Single();
+        await Assert.That(scope.DisposeCount).IsEqualTo(1);
+        await Assert.That(scope.Service.DisposeCount).IsEqualTo(1);
+    }
+}
+
+public sealed class PartiallyFailingScopeAttribute : DependencyInjectionDataSourceAttribute<UntrackingScope>
+{
+    public static ConcurrentBag<UntrackingScope> Created { get; } = [];
+
+    public override UntrackingScope CreateScope(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        var scope = new UntrackingScope(record: false);
+        Created.Add(scope);
+        return scope;
+    }
+
+    protected override bool ScopeOwnsCreatedObjects(UntrackingScope scope) => false;
+    public override object Create(UntrackingScope scope, Type type)
+        => type == typeof(UntrackedService) ? scope.Service : throw new InvalidOperationException("Missing registration");
+}
+
+[EngineTest(ExpectedResult.Failure)]
+public class PartiallyFailedResolutionTests
+{
+    [Test]
+    [PartiallyFailingScope]
+    public void Run(UntrackedService service, string missing) => throw new Exception("Should never run");
+}
+
+// Run with the failing test: it deliberately cannot join the EngineTest=Pass sweep.
+public class PartiallyFailedResolutionObserverTests
+{
+    [Test]
+    [DependsOn(typeof(PartiallyFailedResolutionTests), ProceedOnFailure = true)]
+    public async Task Earlier_Service_And_Scope_Are_Disposed_Once()
+    {
+        await Assert.That(PartiallyFailingScopeAttribute.Created.Count).IsEqualTo(1);
+        var scope = PartiallyFailingScopeAttribute.Created.Single();
         await Assert.That(scope.DisposeCount).IsEqualTo(1);
         await Assert.That(scope.Service.DisposeCount).IsEqualTo(1);
     }

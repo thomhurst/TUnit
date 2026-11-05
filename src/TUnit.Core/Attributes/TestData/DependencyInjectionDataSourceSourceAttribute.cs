@@ -19,30 +19,52 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
             // Custom scopes can leave disposal of their resolved objects to the tracker.
             var scopeOwnsCreatedObjects = ScopeOwnsCreatedObjects(scope);
 
-            return dataGeneratorMetadata.MembersToGenerate
-                .Select(m => m switch
+            var values = new object?[dataGeneratorMetadata.MembersToGenerate.Length];
+            var resolvedCount = 0;
+            try
+            {
+                foreach (var member in dataGeneratorMetadata.MembersToGenerate)
                 {
-                    PropertyMetadata prop => prop.Type,
-                    ParameterMetadata param => param.Type,
-                    ClassMetadata cls => cls.Type,
-                    MethodMetadata method => method.Type,
-                    _ => throw new InvalidOperationException($"Unknown member type: {m.GetType()}")
-                })
-                .Select(x =>
-                {
-                    var created = Create(scope, x);
+                    var type = member switch
+                    {
+                        PropertyMetadata prop => prop.Type,
+                        ParameterMetadata param => param.Type,
+                        ClassMetadata cls => cls.Type,
+                        MethodMetadata method => method.Type,
+                        _ => throw new InvalidOperationException($"Unknown member type: {member.GetType()}")
+                    };
+                    var created = Create(scope, type);
+                    values[resolvedCount++] = created;
                     cleanup.RegisterObject(owner, created);
 
                     if (scopeOwnsCreatedObjects)
                     {
-                        // The scope owns what it resolves and disposes it with itself above, so the
-                        // object tracker must not dispose it a second time when the test ends.
+                        // The scope owns what it resolves; the tracker must not dispose it again.
                         ObjectTracker.MarkExternallyOwned(created);
                     }
+                }
 
-                    return created;
-                })
-                .ToArray();
+                return values;
+            }
+            catch
+            {
+                if (!scopeOwnsCreatedObjects)
+                {
+                    // No row reaches the tracker after a factory failure. Retain its resolved
+                    // services for asynchronous cleanup, without replacing the resolution error.
+                    var retained = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+                    for (var i = 0; i < resolvedCount; i++)
+                    {
+                        if (values[i] is { } value && !ReferenceEquals(value, scope)
+                            && !ObjectTracker.IsExternallyOwned(value) && retained.Add(value))
+                        {
+                            cleanup.Register(value);
+                        }
+                    }
+                }
+
+                throw;
+            }
         };
     }
 
@@ -53,6 +75,7 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
     /// Defaults to true for <see cref="IDisposable"/> or <see cref="IAsyncDisposable"/> scopes.
     /// Override to return false when the scope does not dispose the objects it resolves; TUnit will
     /// track and dispose those objects instead. The scope itself is still disposed when disposable.
+    /// This hook is evaluated once per scope; overrides should be cheap and side-effect free.
     /// </remarks>
     protected virtual bool ScopeOwnsCreatedObjects(TScope scope) => scope is IDisposable or IAsyncDisposable;
 

@@ -146,6 +146,70 @@ public class DataRowScopeCollectionTests
         await Assert.That(calls).IsEqualTo(67);
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task FailedDiResolutionRetainsEarlierServicesForCleanup(bool ownsServices)
+    {
+        var context = new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
+        var source = new FailingSource(ownsServices);
+        try
+        {
+            source.Resolve(context);
+            throw new Exception("Expected resolution to fail");
+        }
+        catch (InvalidOperationException exception)
+        {
+            await Assert.That(exception.Message).IsEqualTo("Resolution failed");
+        }
+
+        var scopes = context.Events.DataRowScopes!;
+        var clone = scopes.Clone();
+        await Assert.That(source.Service.DisposeCount).IsEqualTo(0);
+        await scopes.CompleteAsync();
+        await clone.CompleteAsync();
+        await Assert.That(source.Scope.DisposeCount).IsEqualTo(1);
+        // Owning scopes retain responsibility; non-owning scopes hand cleanup to TUnit.
+        await Assert.That(source.Service.DisposeCount).IsEqualTo(ownsServices ? 0 : 1);
+    }
+
+    private sealed class AsyncService : IAsyncDisposable
+    {
+        internal int DisposeCount;
+        public async ValueTask DisposeAsync()
+        {
+            await Task.Yield();
+            DisposeCount++;
+        }
+    }
+
+    private sealed class FailingSource(bool ownsServices) : DependencyInjectionDataSourceAttribute<Scope>
+    {
+        internal Scope Scope { get; } = new();
+        internal AsyncService Service { get; } = new();
+        private int _calls;
+
+        internal void Resolve(TestBuilderContext context)
+        {
+            var metadata = new DataGeneratorMetadata
+            {
+                TestBuilderContext = new TestBuilderContextAccessor(context),
+                MembersToGenerate = [context.TestMetadata.Class, context.TestMetadata.Class, context.TestMetadata.Class],
+                TestInformation = null,
+                Type = TUnit.Core.Enums.DataGeneratorType.Property,
+                TestSessionId = "failed-scope-registration",
+                TestClassInstance = null,
+                ClassInstanceArguments = []
+            };
+            GenerateDataSources(metadata).Single()();
+        }
+
+        public override Scope CreateScope(DataGeneratorMetadata metadata) => Scope;
+        protected override bool ScopeOwnsCreatedObjects(Scope scope) => ownsServices;
+        public override object Create(Scope scope, Type type)
+            => ++_calls < 3 ? Service : throw new InvalidOperationException("Resolution failed");
+    }
+
     private sealed class ConcurrentSource : DependencyInjectionDataSourceAttribute<Scope>
     {
         internal Scope Scope { get; } = new();
