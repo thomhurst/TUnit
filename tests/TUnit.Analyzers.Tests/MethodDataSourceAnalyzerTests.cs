@@ -827,6 +827,151 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("(int, int)", "int extra = 5, string text = \"tail\"")]
+    [Arguments("int", "int extra = 5, string text = \"tail\"")]
+    [Arguments("(int, int)", "params int[] rest")]
+    [Arguments("int", "params int[] rest")]
+    [Arguments("(int, int)", "int extra = 5, params int[] rest")]
+    [Arguments("int", "int extra = 5, params int[] rest")]
+    public async Task Convertible_Row_Allows_Optional_Test_Parameters(string targetType, string tail)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public sealed class Row
+                {
+                    public static implicit operator {{targetType}}(Row value) => default;
+                }
+                public static IEnumerable<Row> Rows() => [new Row()];
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run({{targetType}} value, {{tail}}) { }
+            }
+            """);
+    }
+
+    [Test]
+    [Arguments("int extra = 5", "int, int")]
+    [Arguments("params int[] rest", "int, int[]")]
+    public async Task Convertible_ITuple_Row_Rejects_Omitted_Tail(string tail, string expectedTypes)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using System.Runtime.CompilerServices;
+            using TUnit.Core;
+            public class Tests
+            {
+                public sealed class Row : ITuple
+                {
+                    public int Length => 1;
+                    public object this[int index] => "expanded";
+                    public static implicit operator int(Row value) => 42;
+                }
+                public static IEnumerable<Row> Rows() => [new Row()];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(int value, {{tail}}) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("Tests.Row", expectedTypes));
+    }
+
+    [Test]
+    [Arguments("int extra = 5", "object, int")]
+    [Arguments("params int[] rest", "object, int[]")]
+    public async Task ITuple_Interface_Row_Rejects_Omitted_Tail(string tail, string expectedTypes)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using System.Runtime.CompilerServices;
+            using TUnit.Core;
+            public class Tests
+            {
+                #pragma warning disable TUnit0046
+                public static IEnumerable<ITuple> Rows() => [(1, "bad")];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(object value, {{tail}}) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("ITuple", expectedTypes));
+    }
+
+    [Test]
+    [Arguments("int extra = 5", "object, int")]
+    [Arguments("params int[] rest", "object, int[]")]
+    public async Task Nullable_Tuple_Row_Rejects_Omitted_Tail(string tail, string expectedTypes)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<(int, string)?> Rows() => [(1, "bad")];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(object value, {{tail}}) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("(int, string)?", expectedTypes));
+    }
+
+    [Test]
+    [Arguments("ITuple", "ITuple", "int extra = 5")]
+    [Arguments("ITuple", "ITuple", "params int[] rest")]
+    [Arguments("Row", "Row", "int extra = 5")]
+    [Arguments("Row", "ITuple", "int extra = 5")]
+    [Arguments("Row", "Row", "params int[] rest")]
+    public async Task Runtime_Tuple_Row_Allows_Whole_Binding(string rowType, string parameterType, string tail)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using System.Runtime.CompilerServices;
+            using TUnit.Core;
+            public class Tests
+            {
+                public sealed class Row : ITuple
+                {
+                    public int Length => 2;
+                    public object this[int index] => index;
+                }
+                #pragma warning disable TUnit0046
+                public static IEnumerable<{{rowType}}> Rows() => [new Row()];
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run({{parameterType}} value, {{tail}}) { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Convertible_Row_Rejects_Required_Test_Parameters()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public sealed class Row
+                {
+                    public static implicit operator (int, int)(Row value) => default;
+                }
+                public static IEnumerable<Row> Rows() => [new Row()];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run((int, int) value, int extra) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("Tests.Row", "(int, int), int"));
+    }
+
+    [Test]
     [Arguments("int extra = 5")]
     [Arguments("params int[] rest")]
     [Arguments("int extra = 5, params int[] rest")]
