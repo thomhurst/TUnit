@@ -54,3 +54,71 @@ public class HidesInheritedTest<T> : HiddenTestBase<T>
     [Test]
     public void Overload() { }
 }
+
+public abstract class VirtualTestBase<T>
+{
+    [Test]
+    public virtual Task Example() => throw new InvalidOperationException("The override must execute instead.");
+}
+
+[InheritsTests]
+[GenerateGenericTest(typeof(int))]
+public class OverridesInheritedTest<T> : VirtualTestBase<T>
+{
+    private int _executions;
+
+    [Test]
+    public override async Task Example()
+    {
+        await Assert.That(++_executions).IsEqualTo(1);
+    }
+}
+
+public abstract class OverloadTestBase<T>
+{
+    [Test]
+    [Arguments(1)]
+    public void Example(T value) { }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    public void DifferentArity<U>() { }
+}
+
+[InheritsTests]
+[GenerateGenericTest(typeof(int))]
+public class RetainsInheritedOverloads<T> : OverloadTestBase<T>
+{
+    [Test]
+    [Arguments("value")]
+    public void Example(string value) { }
+
+    [Test]
+    public void DifferentArity() { }
+}
+
+public abstract class CoincidingOverloadBase<T>
+{
+    [Test]
+    [Arguments("value")]
+    public void Example(T value) { }
+}
+
+[InheritsTests]
+[GenerateGenericTest(typeof(string))]
+public class RetainsCoincidingOverloads<T> : CoincidingOverloadBase<T>
+{
+    [Test]
+    [Arguments("value")]
+    public void Example(string value) { }
+}
+
+[InheritsTests]
+public class NonGenericHidesInheritedTest : HiddenTestBase<int>
+{
+    [Test]
+    public new void Example() { }
+
+    [Test]
+    public void Overload() { }
+}

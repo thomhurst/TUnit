@@ -6078,7 +6078,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool IsMethodHiding(IMethodSymbol derivedMethod, IMethodSymbol baseMethod)
     {
         // Must have same name
-        if (derivedMethod.Name != baseMethod.Name)
+        if (derivedMethod.Name != baseMethod.Name || derivedMethod.Arity != baseMethod.Arity)
         {
             return false;
         }
@@ -6090,9 +6090,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Must have matching parameters
-        if (!ParametersMatch(derivedMethod.Parameters, baseMethod.Parameters))
+        if (derivedMethod.Parameters.Length != baseMethod.Parameters.Length)
         {
             return false;
+        }
+
+        for (var i = 0; i < derivedMethod.Parameters.Length; i++)
+        {
+            if ((derivedMethod.Parameters[i].RefKind == RefKind.None) != (baseMethod.Parameters[i].RefKind == RefKind.None)
+                || !HaveSameSignatureType(derivedMethod.Parameters[i].Type, baseMethod.Parameters[i].Type))
+            {
+                return false;
+            }
         }
 
         // Derived method's containing type must be derived from base method's containing type
@@ -6117,6 +6126,54 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         return false;
+    }
+
+    private static bool HaveSameSignatureType(ITypeSymbol derivedType, ITypeSymbol baseType)
+    {
+        if (SymbolEqualityComparer.Default.Equals(derivedType, baseType))
+        {
+            return true;
+        }
+
+        if (derivedType is ITypeParameterSymbol derivedParameter && baseType is ITypeParameterSymbol baseParameter)
+        {
+            return derivedParameter.TypeParameterKind == TypeParameterKind.Method
+                && baseParameter.TypeParameterKind == TypeParameterKind.Method
+                && derivedParameter.Ordinal == baseParameter.Ordinal;
+        }
+
+        if (derivedType is IArrayTypeSymbol derivedArray && baseType is IArrayTypeSymbol baseArray)
+        {
+            return derivedArray.Rank == baseArray.Rank
+                && HaveSameSignatureType(derivedArray.ElementType, baseArray.ElementType);
+        }
+
+        if (derivedType is IPointerTypeSymbol derivedPointer && baseType is IPointerTypeSymbol basePointer)
+        {
+            return HaveSameSignatureType(derivedPointer.PointedAtType, basePointer.PointedAtType);
+        }
+
+        if (derivedType is not INamedTypeSymbol derivedNamed || baseType is not INamedTypeSymbol baseNamed
+            || !SymbolEqualityComparer.Default.Equals(derivedNamed.OriginalDefinition, baseNamed.OriginalDefinition))
+        {
+            return false;
+        }
+
+        if (derivedNamed.ContainingType != null && baseNamed.ContainingType != null
+            && !HaveSameSignatureType(derivedNamed.ContainingType, baseNamed.ContainingType))
+        {
+            return false;
+        }
+
+        for (var i = 0; i < derivedNamed.TypeArguments.Length; i++)
+        {
+            if (!HaveSameSignatureType(derivedNamed.TypeArguments[i], baseNamed.TypeArguments[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static List<IMethodSymbol> CollectInheritedTestMethods(INamedTypeSymbol derivedClass)

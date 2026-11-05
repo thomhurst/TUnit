@@ -10,6 +10,10 @@ public class Issue7662Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("InheritedAndDeclared", 2)]
     [Arguments("WithoutInheritance", 1)]
     [Arguments("HidesInheritedTest", 3)]
+    [Arguments("OverridesInheritedTest", 1)]
+    [Arguments("RetainsInheritedOverloads", 4)]
+    [Arguments("RetainsCoincidingOverloads", 2)]
+    [Arguments("NonGenericHidesInheritedTest", 3)]
     public async Task Generic_Classes_Honor_InheritsTests(string className, int expectedCount)
     {
         await RunTestsWithFilter(

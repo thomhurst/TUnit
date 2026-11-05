@@ -66,6 +66,14 @@ internal static class FileNameHelper
         // Add method name
         sb.Append(SanitizeForFileName(methodSymbol.Name));
 
+        // Include arity when overloads share a name and parameter count. Preserve
+        // existing names for methods without those overloads.
+        if (methodSymbol.Arity > 0 && HasDifferentArityOverload(typeSymbol, methodSymbol))
+        {
+            sb.Append("_Generic");
+            sb.Append(methodSymbol.Arity.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+
         // Add parameters with double underscore separator
         if (methodSymbol.Parameters.Length > 0)
         {
@@ -89,6 +97,23 @@ internal static class FileNameHelper
         }
 
         return baseName + ".g.cs";
+    }
+
+    private static bool HasDifferentArityOverload(INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
+    {
+        for (var current = typeSymbol; current != null; current = current.BaseType)
+        {
+            foreach (var member in current.GetMembers(methodSymbol.Name))
+            {
+                if (member is IMethodSymbol candidate && candidate.Arity != methodSymbol.Arity
+                    && candidate.Parameters.Length == methodSymbol.Parameters.Length)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

@@ -5,6 +5,11 @@ namespace TUnit.Core.SourceGenerator.Tests;
 internal class InheritsTestsTests : TestsBase
 {
     [Test]
+    public Task Generic_Inheritance_Signatures() => TestMetadataGenerator.RunTest(
+        Path.Combine(Git.TestsDirectory.FullName, "TUnit.TestProject", "Bugs", "7662", "InheritedGenericTests.cs"),
+        _ => Task.CompletedTask);
+
+    [Test]
     public Task Test() => TestMetadataGenerator.RunTest(Path.Combine(Git.TestsDirectory.FullName,
             "TUnit.TestProject",
             "Bugs",
