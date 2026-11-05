@@ -219,3 +219,17 @@ public class NestedTupleWithTrailingParametersTests
             throw new InvalidOperationException("Expected nested tuple and supplied params column");
     }
 }
+
+
+public class ClosedNestedTupleConversionTests
+{
+    public static IEnumerable<((int, (object, int)), (int, int))> Rows() => [((1, (new object(), 2)), (3, 4))];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void ClosedNested<T>((T, (object, int)) pair, (int, int)? extra = null)
+    {
+        if (typeof(T) != typeof(int) || pair.Item2.Item2 != 2 || extra != (3, 4))
+            throw new InvalidOperationException("Expected separate columns with a closed nested tuple");
+    }
+}

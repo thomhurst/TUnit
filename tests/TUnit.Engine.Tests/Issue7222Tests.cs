@@ -220,6 +220,17 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Closed_Nested_Tuple_Does_Not_Convert_Elements_When_Matching_Whole_Row()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/ClosedNestedTupleConversionTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1)
+            ]);
+    }
+
+    [Test]
     public async Task Generic_Class_Instance_Source_Infers_Method_Types()
     {
         await RunTestsWithFilter(

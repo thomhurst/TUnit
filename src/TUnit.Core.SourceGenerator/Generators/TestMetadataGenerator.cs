@@ -7237,6 +7237,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool MatchesOpenRowType(ITypeSymbol parameter, ITypeSymbol row, Compilation compilation)
     {
         if (parameter is ITypeParameterSymbol) return true;
+        // Closed constructed types must be assignable as a whole, just like the runtime matcher.
+        // Recursing first would allow boxing inside invariant tuples or arrays.
+        if (!CodeGenerationHelpers.ContainsTypeParameter(parameter))
+        {
+            var conversion = compilation.ClassifyCommonConversion(row, parameter);
+            return conversion.Exists && conversion.IsImplicit
+                && (conversion.IsIdentity || conversion.IsReference
+                    || row.IsValueType && !parameter.IsValueType && !conversion.IsUserDefined);
+        }
+
         if (parameter is IArrayTypeSymbol array)
         {
             return row is IArrayTypeSymbol rowArray && array.Rank == rowArray.Rank
@@ -7254,10 +7264,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return true;
         }
 
-        var conversion = compilation.ClassifyCommonConversion(row, parameter);
-        return conversion.Exists && conversion.IsImplicit
-            && (conversion.IsIdentity || conversion.IsReference
-                || row.IsValueType && !parameter.IsValueType && !conversion.IsUserDefined);
+        return false;
     }
 
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
