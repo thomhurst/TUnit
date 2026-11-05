@@ -667,7 +667,10 @@ internal sealed class TestGenericTypeResolver
                 ? argumentType 
                 : argumentType.GetGenericTypeDefinition();
 
-            if (paramGenericDef == argGenericDef)
+            // The tuple binder reconstructs a sole tuple argument across reference/value families.
+            // Infer the corresponding elements first, as the source generator does.
+            if (paramGenericDef == argGenericDef
+                || TupleHelper.IsTupleType(parameterType) && TupleHelper.IsTupleType(argumentType))
             {
                 var paramGenericArgs = parameterType.GetGenericArguments();
                 var argGenericArgs = argumentType.GetGenericArguments();
@@ -676,6 +679,10 @@ internal sealed class TestGenericTypeResolver
                 {
                     for (var i = 0; i < paramGenericArgs.Length; i++)
                     {
+                        // Tuple invocation converts closed elements (including nullable/numeric
+                        // values). Only open elements contribute to generic inference.
+                        if (TupleHelper.IsTupleType(parameterType) && !paramGenericArgs[i].ContainsGenericParameters)
+                            continue;
                         if (!TryInferTypeMapping(paramGenericArgs[i], argGenericArgs[i], typeMapping))
                         {
                             return false;
@@ -683,6 +690,20 @@ internal sealed class TestGenericTypeResolver
                     }
                     return true;
                 }
+            }
+        }
+
+        // A reconstructed tuple element may be a derived instance of an open generic base.
+        if (parameterType is { IsGenericType: true, IsClass: true })
+        {
+            var parameterDefinition = parameterType.GetGenericTypeDefinition();
+            for (var baseType = argumentType.BaseType; baseType is not null; baseType = baseType.BaseType)
+            {
+                if (!baseType.IsGenericType || baseType.GetGenericTypeDefinition() != parameterDefinition) continue;
+                var candidateMapping = new Dictionary<Type, Type>(typeMapping);
+                if (!TryInferTypeMapping(parameterType, baseType, candidateMapping)) continue;
+                foreach (var mapping in candidateMapping) typeMapping[mapping.Key] = mapping.Value;
+                return true;
             }
         }
 
@@ -705,10 +726,11 @@ internal sealed class TestGenericTypeResolver
 
                         if (paramGenericArgs.Length == implGenericArgs.Length)
                         {
+                            var candidateMapping = new Dictionary<Type, Type>(typeMapping);
                             var allMapped = true;
                             for (var i = 0; i < paramGenericArgs.Length; i++)
                             {
-                                if (!TryInferTypeMapping(paramGenericArgs[i], implGenericArgs[i], typeMapping))
+                                if (!TryInferTypeMapping(paramGenericArgs[i], implGenericArgs[i], candidateMapping))
                                 {
                                     allMapped = false;
                                     break;
@@ -716,6 +738,7 @@ internal sealed class TestGenericTypeResolver
                             }
                             if (allMapped)
                             {
+                                foreach (var mapping in candidateMapping) typeMapping[mapping.Key] = mapping.Value;
                                 return true;
                             }
                         }

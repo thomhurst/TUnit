@@ -171,7 +171,9 @@ internal class DataUnwrapper
         var firstDataParameterType = expectedParameters[firstDataParameterIndex].Type;
         if (dataParameterCount > 1
             && TupleHelper.IsTupleType(firstDataParameterType)
-            && (firstDataParameterType.IsInstanceOfType(values[0])
+            && (firstDataParameterType.ContainsGenericParameters
+                && TupleHelper.MatchesOpenTuple(firstDataParameterType, values[0]!.GetType())
+                || firstDataParameterType.IsInstanceOfType(values[0])
                 || values[0] is TupleArgument argument && argument.TupleType == firstDataParameterType)
             && RemainingDataParametersAreOmittable(expectedParameters, firstDataParameterIndex))
         {

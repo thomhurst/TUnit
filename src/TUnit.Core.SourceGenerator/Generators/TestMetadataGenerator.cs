@@ -7303,6 +7303,96 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             : null;
     }
 
+    private static bool MatchesOpenRowType(ITypeSymbol parameter, ITypeSymbol row, Compilation compilation,
+        Dictionary<ITypeSymbol, ITypeSymbol> bindings, bool reconstructTupleElements)
+    {
+        if (parameter is ITypeParameterSymbol)
+        {
+            if (bindings.TryGetValue(parameter, out var bound))
+                return SymbolEqualityComparer.Default.Equals(bound, row);
+            bindings.Add(parameter, row);
+            return true;
+        }
+        // A sole tuple parameter is reconstructed element by element at invocation.
+        // Closed elements do not contribute to inference: their values may support runtime
+        // conversions that their declared types cannot prove (for example object boxing int).
+        // Whole rows with omitted trailing parameters must retain exact tuple invariance.
+        if (!CodeGenerationHelpers.ContainsTypeParameter(parameter))
+        {
+            return reconstructTupleElements || SymbolEqualityComparer.Default.Equals(parameter, row);
+        }
+
+        // Tuple reconstruction can lift a non-nullable value into an open nullable element,
+        // just as ProcessTypeForGenerics and reflection TryInferTypeMapping do during inference.
+        if (reconstructTupleElements
+            && parameter is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableParameter
+            && row.IsValueType
+            && row is not INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T })
+        {
+            return MatchesOpenRowType(nullableParameter.TypeArguments[0], row, compilation, bindings, true);
+        }
+
+        // A single tuple argument is reconstructed by the generated binder, including across
+        // Tuple and ValueTuple families. Multi-parameter rows require an exact constructed shape,
+        // matching TupleHelper.MatchesOpenTuple, since their binder uses whole-type assignability.
+        if (reconstructTupleElements && GetTupleElementTypes(parameter) is { } parameterElements
+            && GetTupleElementTypes(row) is { } rowElements && parameterElements.Length == rowElements.Length)
+        {
+            for (var i = 0; i < parameterElements.Length; i++)
+            {
+                if (!MatchesOpenRowType(parameterElements[i], rowElements[i], compilation, bindings, true)) return false;
+            }
+            return true;
+        }
+
+        if (parameter is IArrayTypeSymbol array)
+        {
+            return row is IArrayTypeSymbol rowArray && array.Rank == rowArray.Rank
+                && MatchesOpenRowType(array.ElementType, rowArray.ElementType, compilation, bindings, reconstructTupleElements);
+        }
+
+        if (parameter is INamedTypeSymbol { IsGenericType: true } named
+            && row is INamedTypeSymbol { IsGenericType: true } rowNamed
+            && SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, rowNamed.OriginalDefinition))
+        {
+            for (var i = 0; i < named.TypeArguments.Length; i++)
+            {
+                if (!MatchesOpenRowType(named.TypeArguments[i], rowNamed.TypeArguments[i], compilation, bindings, reconstructTupleElements)) return false;
+            }
+            return true;
+        }
+
+        // The binder also supports converting a derived element to a generic base class.
+        // Only reconstruction permits this conversion; whole multi-parameter rows stay invariant.
+        if (reconstructTupleElements && parameter is INamedTypeSymbol { IsGenericType: true, TypeKind: TypeKind.Class } classParameter)
+        {
+            for (var baseType = row.BaseType; baseType is not null; baseType = baseType.BaseType)
+            {
+                if (!SymbolEqualityComparer.Default.Equals(classParameter.OriginalDefinition, baseType.OriginalDefinition)) continue;
+                var candidateBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(bindings, SymbolEqualityComparer.Default);
+                if (!MatchesOpenRowType(parameter, baseType, compilation, candidateBindings, true)) continue;
+                foreach (var binding in candidateBindings) bindings[binding.Key] = binding.Value;
+                return true;
+            }
+        }
+
+        // Reconstructed tuple elements may bind a concrete collection to an open interface.
+        // Keep candidate bindings isolated so a rejected interface cannot affect another match.
+        if (reconstructTupleElements && parameter is INamedTypeSymbol { IsGenericType: true, TypeKind: TypeKind.Interface } interfaceParameter)
+        {
+            foreach (var implementedInterface in row.AllInterfaces)
+            {
+                if (!SymbolEqualityComparer.Default.Equals(interfaceParameter.OriginalDefinition, implementedInterface.OriginalDefinition)) continue;
+                var candidateBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(bindings, SymbolEqualityComparer.Default);
+                if (!MatchesOpenRowType(parameter, implementedInterface, compilation, candidateBindings, true)) continue;
+                foreach (var binding in candidateBindings) bindings[binding.Key] = binding.Value;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr, ITypeSymbol[]? classTypes = null)
     {
         if (mdsAttr.ConstructorArguments.Length == 0)
@@ -7346,14 +7436,37 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var genericParams = testMethod.MethodSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
-        if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType
-            && !(testMethodParams.Length == 1 && testMethodParams[0].Type.IsTupleType))
+        // A typed tuple parameter receives the whole row when the remaining parameters can be
+        // omitted (optional or a trailing collection). A bare type parameter normally
+        // receives the first element, as reflection mode unwraps tuple rows before inference.
+        // With explicit method types, preserve whole reference-tuple inference so it deduplicates
+        // against GenerateGenericTest<Tuple<...>> instead of adding a first-element instantiation.
+        Dictionary<ITypeSymbol, ITypeSymbol>? wholeTupleBindings = null;
+        var receivesWholeTuple = testMethodParams.Length > 0
+            && ((GetTupleElementTypes(CloseClassType(testMethodParams[0].Type)) is not null
+                    && testMethodParams.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams
+                        || SymbolEqualityComparer.Default.Equals(parameter, testMethodParams[^1]) && parameter.CollectsTrailingArguments())
+                    && MatchesOpenRowType(CloseClassType(testMethodParams[0].Type), rowType, compilation,
+                        wholeTupleBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(SymbolEqualityComparer.Default), testMethodParams.Length == 1))
+                || (testMethodParams.Length == 1
+                    && testMethodParams[0].Type is ITypeParameterSymbol
+                    && rowType is INamedTypeSymbol { IsTupleType: false }
+                    && testMethod.MethodAttributes.Any(static attribute => attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)));
+
+        if (GetTupleElementTypes(rowType) is { } tupleElements && !receivesWholeTuple)
         {
             // A tuple row is spread across the test method's parameters
-            var tupleElements = tupleType.TupleElements;
             for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
             {
-                ProcessTypeForGenerics(CloseClassType(testMethodParams[i].Type), tupleElements[i].Type, genericParams, genericParamMap);
+                ProcessTypeForGenerics(CloseClassType(testMethodParams[i].Type), tupleElements[i], genericParams, genericParamMap);
+            }
+        }
+        else if (receivesWholeTuple && wholeTupleBindings is { Count: > 0 })
+        {
+            foreach (var binding in wholeTupleBindings)
+            {
+                if (binding.Key is ITypeParameterSymbol parameter && genericParams.Contains(parameter))
+                    genericParamMap[parameter.Name] = binding.Value;
             }
         }
         else if (testMethodParams.Length > 0)
