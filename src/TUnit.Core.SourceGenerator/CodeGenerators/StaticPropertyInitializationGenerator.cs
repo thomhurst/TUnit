@@ -323,7 +323,11 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         {
             sourceAttribute = ParseMethodDataSourceWithAssignment(attr, staticProperty.Property.ContainingType);
         }
-        else if (DataSourceAttributeHelper.IsDataSourceAttribute(attr.AttributeClass))
+        // Preserve the supported source families; direct IDataSourceAttribute implementations
+        // retain their existing fallback behavior (including reflection-only fixture sources).
+        else if (DataSourceAttributeHelper.IsMethodSource(attr.AttributeClass)
+                 || DataSourceAttributeHelper.IsOrInheritsBuiltIn(attr.AttributeClass, "AsyncDataSourceGeneratorAttribute")
+                 || DataSourceAttributeHelper.IsOrInheritsBuiltIn(attr.AttributeClass, "AsyncUntypedDataSourceGeneratorAttribute"))
         {
             sourceAttribute = new DataSourceAttribute.AsyncDataSource(CodeGenerationHelpers.GenerateAttributeInstantiation(attr));
         }

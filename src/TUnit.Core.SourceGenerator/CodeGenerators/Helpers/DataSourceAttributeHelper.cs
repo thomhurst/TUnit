@@ -59,8 +59,9 @@ internal static class DataSourceAttributeHelper
             {
                 ClassDeclarationSyntax declaration => declaration.BaseList?.Types
                     .OfType<PrimaryConstructorBaseTypeSyntax>().SingleOrDefault()?.ArgumentList.Arguments,
-                ConstructorDeclarationSyntax { Body.Statements.Count: 0, ExpressionBody: null } declaration
+                ConstructorDeclarationSyntax { Body: { } body, ExpressionBody: null } declaration
                     when declaration.Initializer?.ThisOrBaseKeyword.ValueText == "base"
+                        && body.Statements.All(statement => IsIndependentConfiguration(statement, constructor))
                     => declaration.Initializer.ArgumentList.Arguments,
                 _ => null
             };
@@ -84,6 +85,41 @@ internal static class DataSourceAttributeHelper
         }
 
         return false;
+    }
+
+    // Only literal writes to the built-in boolean options are independent of row selection.
+    // Reject calls, source/row writes, and hidden members whose setters could change the source.
+    private static bool IsIndependentConfiguration(StatementSyntax statement, IMethodSymbol constructor)
+    {
+        if (statement is not ExpressionStatementSyntax
+            {
+                Expression: AssignmentExpressionSyntax
+                {
+                    RawKind: (int)Microsoft.CodeAnalysis.CSharp.SyntaxKind.SimpleAssignmentExpression,
+                    Right: LiteralExpressionSyntax { Token.Value: bool }
+                } assignment
+            })
+        {
+            return false;
+        }
+
+        var name = assignment.Left switch
+        {
+            IdentifierNameSyntax identifier => identifier.Identifier.ValueText,
+            MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax or BaseExpressionSyntax, Name: IdentifierNameSyntax identifier }
+                => identifier.Identifier.ValueText,
+            _ => null
+        };
+
+        if (name is not ("SkipIfEmpty" or "DeferEnumeration"))
+        {
+            return false;
+        }
+
+        return assignment.Left is MemberAccessExpressionSyntax { Expression: BaseExpressionSyntax }
+            || (constructor.ContainingType.GetMembers(name).Length == 0
+                && (assignment.Left is not IdentifierNameSyntax
+                    || !constructor.Parameters.Any(parameter => parameter.Name == name)));
     }
 
     public static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)

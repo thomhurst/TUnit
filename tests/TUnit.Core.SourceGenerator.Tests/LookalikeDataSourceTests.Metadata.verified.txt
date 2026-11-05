@@ -54,7 +54,7 @@ internal static class TUnit_TestProject_LookalikeClassArgumentsTests_T_Only_real
             methodName: "Only_real_class_row_is_used",
             fullyQualifiedName: "TUnit.TestProject.LookalikeClassArgumentsTests<int>.Only_real_class_row_is_used",
             filePath: "",
-            lineNumber: 45,
+            lineNumber: 53,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -131,7 +131,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Remapped_source_preserves_class_types",
             fullyQualifiedName: "TUnit.TestProject.RemappedClassSourceTests<string>.Remapped_source_preserves_class_types",
             filePath: "",
-            lineNumber: 59,
+            lineNumber: 67,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -245,7 +245,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.LookalikeDataSourceTests.Derived_instance_source_preserves_explicit_types<object>",
             methodTypeArgumentsIdentity: "<object>",
             filePath: "",
-            lineNumber: 86,
+            lineNumber: 94,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -362,7 +362,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.LookalikeDataSourceTests.Remapped_source_uses_real_rows<string>",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 96,
+            lineNumber: 104,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -474,7 +474,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.LookalikeDataSourceTests.Derived_method_source_is_inferred<string>",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 105,
+            lineNumber: 113,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -587,7 +587,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             fullyQualifiedName: "TUnit.TestProject.LookalikeDataSourceTests.Only_real_method_row_is_used<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 121,
+            lineNumber: 129,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -712,7 +712,7 @@ internal static class TUnit_TestProject_LookalikeDataSourceTests__TestSource
             methodName: "Custom_property_source_is_used",
             fullyQualifiedName: "TUnit.TestProject.LookalikeDataSourceTests.Custom_property_source_is_used",
             filePath: "",
-            lineNumber: 113,
+            lineNumber: 121,
             returnType: typeof(global::System.Threading.Tasks.Task),
             classMetadata: __classMetadata,
             createInstance: __createInstance,

@@ -19,7 +19,15 @@ namespace TUnit.TestProject.Lookalikes
 
 namespace TUnit.TestProject.DerivedSources
 {
-    public sealed class MethodDataSourceAttribute(string memberName) : TUnit.Core.MethodDataSourceAttribute(memberName);
+    public sealed class MethodDataSourceAttribute : TUnit.Core.MethodDataSourceAttribute
+    {
+        public MethodDataSourceAttribute(string memberName) : base(memberName)
+        {
+            SkipIfEmpty = true;
+            this.DeferEnumeration = false;
+            base.SkipIfEmpty = true;
+        }
+    }
     public sealed class InstanceSourceAttribute(string memberName) : TUnit.Core.InstanceMethodDataSourceAttribute(memberName);
     public sealed class ClassAliasAttribute(string label) : TUnit.Core.MethodDataSourceAttribute(typeof(LookalikeDataSourceTests), nameof(LookalikeDataSourceTests.RealRows));
     public sealed class AliasAttribute(string label) : TUnit.Core.MethodDataSourceAttribute(nameof(LookalikeDataSourceTests.RealRows));

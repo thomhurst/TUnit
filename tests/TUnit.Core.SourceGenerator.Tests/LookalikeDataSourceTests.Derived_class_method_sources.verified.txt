@@ -53,7 +53,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Sources_stay_on_their_inferred_class",
             fullyQualifiedName: "TUnit.TestProject.DerivedClassMethodSourceTests<int>.Sources_stay_on_their_inferred_class",
             filePath: "",
-            lineNumber: 13,
+            lineNumber: 19,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -96,7 +96,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Sources_stay_on_their_inferred_class",
             fullyQualifiedName: "TUnit.TestProject.DerivedClassMethodSourceTests<string>.Sources_stay_on_their_inferred_class",
             filePath: "",
-            lineNumber: 13,
+            lineNumber: 19,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
