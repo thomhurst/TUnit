@@ -2,6 +2,7 @@ namespace TUnit.Mocks.Tests;
 
 public interface INullLiteralService
 {
+    string Five(string? text, int number, int? nullable, string? other, int last);
     string Take(string? value);
     string Pair(string? first, string? second);
     void Notify(string? value);
@@ -12,6 +13,33 @@ public interface INullLiteralService
 
 public class NullLiteralMatcherTests
 {
+    [Test]
+    public async Task Default_Literals_Without_Predicate_Overloads_Match_Only_Default_Values()
+    {
+        var mock = Mock.Of<INullLiteralService>();
+        mock.Five(default, default, default, "exact", 4).Returns("matched");
+
+        await Assert.That(mock.Object.Five(null, 0, null, "exact", 4)).IsEqualTo("matched");
+        await Assert.That(mock.Object.Five("value", 0, null, "exact", 4)).IsEqualTo("");
+        await Assert.That(mock.Object.Five(null, 1, null, "exact", 4)).IsEqualTo("");
+        await Assert.That(mock.Object.Five(null, 0, 1, "exact", 4)).IsEqualTo("");
+        await Assert.That(mock.Object.Five(null, 0, null, "other", 4)).IsEqualTo("");
+
+        mock.Five(default, default, default, "exact", 4).WasCalled(Times.Once);
+        mock.Five(default, default, default, "missing", 4).WasNeverCalled();
+    }
+
+    [Test]
+    public async Task Default_Argument_Has_Empty_Capture_State()
+    {
+        Arguments.Arg<int> argument = default;
+
+        await Assert.That(argument.Values.Count).IsEqualTo(0);
+        await Assert.That(argument.Latest).IsEqualTo(0);
+        await Assert.That(argument.Matcher.Matches(0)).IsTrue();
+        await Assert.That(argument.Matcher.Matches(1)).IsFalse();
+    }
+
     [Test]
     public async Task Default_Literal_For_NonNullable_Number_Matches_Zero()
     {

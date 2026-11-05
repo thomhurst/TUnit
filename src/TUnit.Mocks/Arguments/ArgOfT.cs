@@ -6,16 +6,23 @@ namespace TUnit.Mocks.Arguments;
 /// Represents a typed argument matcher used in mock setup and verification expressions.
 /// Implicitly converts from raw values for convenient inline usage.
 /// Every Arg supports value capture — store it in a variable and read <see cref="Values"/>
-/// after the mock is exercised.
+/// after the mock is exercised. A default-initialized Arg matches default(T)
+/// without capturing values.
 /// </summary>
 /// <typeparam name="T">The type of the argument being matched.</typeparam>
 public readonly struct Arg<T>
 {
-    private readonly CapturingMatcher<T> _capturingMatcher;
+    private readonly CapturingMatcher<T>? _capturingMatcher;
+
+    // A shared fallback must be stateless: default structs have no per-argument capture storage.
+    private static class DefaultMatcher
+    {
+        internal static readonly IArgumentMatcher Instance = new ExactMatcher<T>(default);
+    }
 
     /// <summary>Gets the argument matcher. Public for generated code access. Not intended for direct use.</summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-    public IArgumentMatcher Matcher => _capturingMatcher;
+    public IArgumentMatcher Matcher => _capturingMatcher ?? DefaultMatcher.Instance;
 
     /// <summary>Creates an Arg with a matcher. Public for generated code access. Not intended for direct use.</summary>
     [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
@@ -25,10 +32,10 @@ public readonly struct Arg<T>
     }
 
     /// <summary>Gets all captured values in order of capture.</summary>
-    public IReadOnlyList<T?> Values => _capturingMatcher.CapturedValues;
+    public IReadOnlyList<T?> Values => _capturingMatcher?.CapturedValues ?? Array.Empty<T?>();
 
     /// <summary>Gets the most recently captured value, or default if none captured.</summary>
-    public T? Latest => _capturingMatcher.Latest;
+    public T? Latest => _capturingMatcher is { } matcher ? matcher.Latest : default;
 
     /// <summary>Implicitly converts a raw value to an <see cref="Arg{T}"/> using exact equality matching.</summary>
     /// <param name="value">The value to match against.</param>
