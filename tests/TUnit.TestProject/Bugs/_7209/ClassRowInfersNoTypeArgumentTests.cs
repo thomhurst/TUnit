@@ -200,3 +200,115 @@ public static class TypeFreeClassRowSources
 {
     public static IEnumerable<object> Values() => [2, 3];
 }
+
+// Only the supplied prefix participates in inference. The omitted optional T must retain its default.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+public class TypeFreeClassRowWithOptionalTypeParameter<T>(int number, T value = default!)
+{
+    [Test]
+    [Arguments(1)]
+    [Arguments("s")]
+    public async Task Run(T methodValue)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(value).IsEqualTo(default(T));
+        await Assert.That(typeof(T)).IsEqualTo(methodValue!.GetType());
+    }
+}
+
+// Expanded values bind to an int[] parameter, so they cannot infer the class type parameter.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1, 2)]
+public class TypeFreeClassRowWithParams<T>(params int[] numbers)
+{
+    [Test]
+    [Arguments(3)]
+    [Arguments("s")]
+    public async Task Run(T value)
+    {
+        await Assert.That(numbers).IsEquivalentTo(new[] { 1, 2 });
+        await Assert.That(typeof(T)).IsEqualTo(value!.GetType());
+    }
+}
+
+// Expanded values bind to T[] and must infer the element type, rather than an array class argument.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1, 2)]
+public class TypeBearingClassRowWithParams<T>(params T[] values)
+{
+    [Test]
+    [Arguments(3)]
+    public async Task Run(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values.Length).IsEqualTo(2);
+        await Assert.That((object?)values[0]).IsEqualTo(1);
+        await Assert.That((object?)values[1]).IsEqualTo(2);
+        await Assert.That((object?)value).IsEqualTo(3);
+    }
+}
+
+// The generic attribute supplies one constructor value, not a class type argument of its own.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments<int>(42)]
+public class TypeFreeGenericClassRow<T>(int number)
+{
+    [Test]
+    [Arguments(1)]
+    [Arguments("s")]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(value!.GetType());
+    }
+}
+
+// Both rows construct C<int>, with distinct supplied and omitted values for the optional T.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42, 1)]
+[Arguments(42)]
+public class MixedTypeFreeAndTypeBearingClassRows<T>(int number, T value = default!)
+{
+    [Test]
+    [Arguments(3)]
+    public async Task Run(T methodValue)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value is 0 or 1).IsTrue();
+        await Assert.That((object?)methodValue).IsEqualTo(3);
+    }
+}
+
+// Neither foreign attribute is a data source, despite sharing TUnit's attribute simple name.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42)]
+[UnrelatedAttributes.Arguments("ignored")]
+[UnrelatedAttributes.Arguments<double>(1.5)]
+public class TypeFreeClassRowWithUnrelatedArgumentsAttributes<T>(int number)
+{
+    [Test]
+    [Arguments(1)]
+    [Arguments("s")]
+    public async Task Run(T value)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(typeof(T)).IsEqualTo(value!.GetType());
+    }
+}
+
+public static class UnrelatedAttributes
+{
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class ArgumentsAttribute(string value) : Attribute
+    {
+        public string Value { get; } = value;
+    }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class ArgumentsAttribute<T>(T value) : Attribute
+    {
+        public T Value { get; } = value;
+    }
+}

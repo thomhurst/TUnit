@@ -315,7 +315,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         DataSourceAttribute sourceAttribute;
 
         // Generate data source logic based on attribute type
-        if (attributeClassName == "ArgumentsAttribute")
+        if (attr.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") == true)
         {
             sourceAttribute = ParseArgumentsDataSourceWithAssignment(attr);;
         }

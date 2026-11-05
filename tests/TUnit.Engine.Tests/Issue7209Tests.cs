@@ -21,6 +21,12 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypeFreeClassRowWithUninferredMethodSource", 3)]
     [Arguments("EmptyClassRow", 2)]
     [Arguments("TypeFreeClassRowConstrainedWithLeadingToken", 1)]
+    [Arguments("TypeFreeClassRowWithOptionalTypeParameter", 2)]
+    [Arguments("TypeFreeClassRowWithParams", 2)]
+    [Arguments("TypeBearingClassRowWithParams", 1)]
+    [Arguments("TypeFreeGenericClassRow", 2)]
+    [Arguments("MixedTypeFreeAndTypeBearingClassRows", 2)]
+    [Arguments("TypeFreeClassRowWithUnrelatedArgumentsAttributes", 2)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests)
     {
         await RunTestsWithFilter(
