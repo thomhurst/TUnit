@@ -2953,7 +2953,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>)
             || returnType.GetGenericArguments()[0] is not { IsGenericType: true } funcType
             || funcType.GetGenericTypeDefinition() != typeof(Func<>)
-            || GetValueTupleElementTypes(funcType.GetGenericArguments()[0]) is not { } tupleElements)
+            || GetTupleElementTypes(funcType.GetGenericArguments()[0]) is not { } tupleElements)
         {
             return null;
         }
