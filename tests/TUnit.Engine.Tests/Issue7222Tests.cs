@@ -209,6 +209,17 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Nested_Tuple_With_Trailing_Parameters_Spreads_Columns()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/NestedTupleWithTrailingParametersTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4)
+            ]);
+    }
+
+    [Test]
     public async Task Generic_Class_Instance_Source_Infers_Method_Types()
     {
         await RunTestsWithFilter(

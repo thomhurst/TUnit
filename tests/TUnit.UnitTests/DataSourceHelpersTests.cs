@@ -8,6 +8,27 @@ namespace TUnit.UnitTests;
 /// </summary>
 public class DataSourceHelpersTests
 {
+    private static void OpenTuple<T>(Tuple<T, string> row) { }
+
+    [Test]
+    public async Task OpenTupleBinding_DistinguishesWholeAndNestedRows()
+    {
+        var parameter = typeof(DataSourceHelpersTests).GetMethod(nameof(OpenTuple),
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)!.GetParameters()[0].ParameterType;
+        var whole = Tuple.Create(1, "tuple");
+        var nested = Tuple.Create(whole, 7);
+        var mismatched = Tuple.Create(1, 2);
+
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, whole.GetType())).IsTrue();
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, nested.GetType())).IsFalse();
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, mismatched.GetType())).IsFalse();
+        await Assert.That(whole.ToObjectArrayWithTypes([parameter, typeof(int)]).Length).IsEqualTo(1);
+        var columns = nested.ToObjectArrayWithTypes([parameter, typeof(int)]);
+        await Assert.That(columns.Length).IsEqualTo(2);
+        await Assert.That(columns[0]).IsEqualTo((object)whole);
+        await Assert.That(columns[1]).IsEqualTo((object)7);
+    }
+
     [Test]
     [Arguments(null, false)]
     [Arguments("text", true)]

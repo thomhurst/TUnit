@@ -11,6 +11,47 @@ namespace TUnit.Core.Helpers;
 public static class TupleHelper
 {
 
+    private static readonly ConcurrentDictionary<(Type Parameter, Type Row), bool> OpenTupleMatches = new();
+
+    // Open tuple types cannot use IsInstanceOfType. Match their complete shape so a nested
+    // row with separate columns is not mistaken for the first tuple argument.
+    internal static bool MatchesOpenTuple(Type parameter, Type row) =>
+        OpenTupleMatches.GetOrAdd((parameter, row), static pair => MatchesType(pair.Parameter, pair.Row));
+
+    private static bool MatchesType(Type parameter, Type row)
+    {
+        if (parameter.IsGenericParameter)
+        {
+            return true;
+        }
+
+        if (!parameter.ContainsGenericParameters)
+        {
+            return parameter.IsAssignableFrom(row);
+        }
+
+        if (parameter.IsArray)
+        {
+            return row.IsArray && parameter.GetArrayRank() == row.GetArrayRank()
+                && MatchesType(parameter.GetElementType()!, row.GetElementType()!);
+        }
+
+        if (!parameter.IsGenericType || !row.IsGenericType
+            || parameter.GetGenericTypeDefinition() != row.GetGenericTypeDefinition())
+        {
+            return false;
+        }
+
+        var parameters = parameter.GetGenericArguments();
+        var arguments = row.GetGenericArguments();
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            if (!MatchesType(parameters[i], arguments[i])) return false;
+        }
+
+        return true;
+    }
+
 #if NET
     /// <summary>
     /// Checks if a type is a tuple type (ValueTuple or Tuple)

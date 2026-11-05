@@ -7234,6 +7234,32 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             : null;
     }
 
+    private static bool MatchesOpenRowType(ITypeSymbol parameter, ITypeSymbol row, Compilation compilation)
+    {
+        if (parameter is ITypeParameterSymbol) return true;
+        if (parameter is IArrayTypeSymbol array)
+        {
+            return row is IArrayTypeSymbol rowArray && array.Rank == rowArray.Rank
+                && MatchesOpenRowType(array.ElementType, rowArray.ElementType, compilation);
+        }
+
+        if (parameter is INamedTypeSymbol { IsGenericType: true } named
+            && row is INamedTypeSymbol { IsGenericType: true } rowNamed
+            && SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, rowNamed.OriginalDefinition))
+        {
+            for (var i = 0; i < named.TypeArguments.Length; i++)
+            {
+                if (!MatchesOpenRowType(named.TypeArguments[i], rowNamed.TypeArguments[i], compilation)) return false;
+            }
+            return true;
+        }
+
+        var conversion = compilation.ClassifyCommonConversion(row, parameter);
+        return conversion.Exists && conversion.IsImplicit
+            && (conversion.IsIdentity || conversion.IsReference
+                || row.IsValueType && !parameter.IsValueType && !conversion.IsUserDefined);
+    }
+
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
         if (mdsAttr.ConstructorArguments.Length == 0)
@@ -7281,7 +7307,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // against GenerateGenericTest<Tuple<...>> instead of adding a first-element instantiation.
         var receivesWholeTuple = testMethodParams.Length > 0
             && ((GetTupleElementTypes(testMethodParams[0].Type) is not null
-                    && testMethodParams.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams))
+                    && testMethodParams.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams)
+                    && (testMethodParams.Length == 1
+                        || MatchesOpenRowType(testMethodParams[0].Type, rowType, compilation)))
                 || (testMethodParams.Length == 1
                     && testMethodParams[0].Type is ITypeParameterSymbol
                     && rowType is INamedTypeSymbol { IsTupleType: false }

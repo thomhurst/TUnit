@@ -23,6 +23,10 @@ internal class InstanceMethodTypeInferenceTests : TestsBase
             await Assert.That(source).Contains("WholeRow<global::System.Tuple<int, string>>");
             await Assert.That(source).Contains("BothSources<string>");
             await Assert.That(source).Contains("Optional<int>");
+            await Assert.That(source).Contains("ValueOptional<int>");
+            await Assert.That(source).Contains("ValueParams<int>");
+            await Assert.That(source).Contains("ReferenceOptional<int>");
+            await Assert.That(source).Contains("ReferenceParams<int>");
             await Assert.That(source).Contains("Params<int>");
             await Assert.That(source).Contains("InstanceElement<int>");
             await Assert.That(source).Contains("StaticElement<int>");

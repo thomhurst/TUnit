@@ -177,3 +177,45 @@ public class WholeTupleWithTrailingParametersTests
 }
 
 #pragma warning restore TUnit0001
+
+public class NestedTupleWithTrailingParametersTests
+{
+    public static IEnumerable<((int, string), int)> ValueRows() => [((1, "tuple"), 7)];
+    public IEnumerable<Tuple<Tuple<int, string>, int>> ReferenceRows() => [Tuple.Create(Tuple.Create(1, "tuple"), 7)];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void ValueOptional<T>((T, string) row, int extra = 5) where T : struct
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra != 7)
+            throw new InvalidOperationException("Expected nested tuple and supplied column");
+    }
+
+    public static IEnumerable<((int, string), int[])> ValueParamsRows() => [((1, "tuple"), [7])];
+
+    [Test]
+    [MethodDataSource(nameof(ValueParamsRows))]
+    public void ValueParams<T>((T, string) row, params int[] extra) where T : struct
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra is not [7])
+            throw new InvalidOperationException("Expected nested tuple and supplied params column");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(ReferenceRows))]
+    public void ReferenceOptional<T>(Tuple<T, string> row, int extra = 5) where T : struct
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra != 7)
+            throw new InvalidOperationException("Expected nested tuple and supplied column");
+    }
+
+    public IEnumerable<Tuple<Tuple<int, string>, int[]>> ReferenceParamsRows() => [Tuple.Create(Tuple.Create(1, "tuple"), new[] { 7 })];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(ReferenceParamsRows))]
+    public void ReferenceParams<T>(Tuple<T, string> row, params int[] extra) where T : struct
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra is not [7])
+            throw new InvalidOperationException("Expected nested tuple and supplied params column");
+    }
+}
