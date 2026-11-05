@@ -35,7 +35,6 @@ public class DataClass : IAsyncInitializer, IAsyncDisposable
 [NotInParallel]
 public class ClassDataSourceRetryTests
 {
-    private static bool _wasExecuted;
     private static int _attemptCount;
     // Finished tests release their class instance (#7260), so keep our own reference to inspect.
     private static DataClass? _dataClass;
@@ -53,7 +52,6 @@ public class ClassDataSourceRetryTests
     [Retry(2)]
     public async Task TestThatFailsAndRetries()
     {
-        _wasExecuted = true;
         _attemptCount++;
         _dataClass = DataClass;
 

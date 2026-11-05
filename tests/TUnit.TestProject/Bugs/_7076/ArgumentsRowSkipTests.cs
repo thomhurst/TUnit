@@ -61,6 +61,7 @@ public class ClassConstructorDataSourceTest(ClassConstructorFixture fixture)
     public async Task MethodDataSourceIsPassedToClassConstructor(int value)
     {
         await Assert.That(value).IsEqualTo(42);
+        await Assert.That(fixture).IsNotNull();
     }
 }
 

@@ -11,7 +11,6 @@ public class HookExceptionHandlingTests
     private static readonly ConcurrentBag<string> ExecutionLog = new();
     private static int _hookExceptionTestCount = 0;
     private static bool _afterClassExecuted = false;
-    private static bool _afterAssemblyExecuted = false;
 
     [Before(Class)]
     public static void BeforeClassThatMightFail(ClassHookContext context)

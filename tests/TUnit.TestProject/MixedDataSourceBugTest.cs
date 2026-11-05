@@ -9,7 +9,8 @@ public class MixedDataSourceBugTest(int classValue)
     [MethodDataSource(typeof(ExternalData), nameof(ExternalData.GetMoreData))]
     public async Task TestMethod(string value)
     {
-        await Task.CompletedTask;
+        await Assert.That(new[] { 100, 200 }).Contains(classValue);
+        await Assert.That(new[] { "A", "B", "X", "Y" }).Contains(value);
     }
 
     public static IEnumerable<string> GetData()

@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using TUnit.TestProject.Attributes;
 using TUnit.TestProject.Models;
 
@@ -26,15 +25,16 @@ public class NestedClassDataSourceDrivenTests2
         await Assert.That(value.InnerClass.InnerClass.IsDisposed).IsFalse();
     }
 
-    [method: SetsRequiredMembers]
     public class MyDataProvider() : DataSourceGeneratorAttribute<SomeClass1>
     {
         [ClassDataSource<SomeClass1>]
-        public required SomeClass1 InnerClass { get; init; }
+        public SomeClass1? InnerClass { get; init; }
 
         protected override IEnumerable<Func<SomeClass1>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
-            yield return () => InnerClass;
+            var innerClass = InnerClass ?? throw new InvalidOperationException("InnerClass was not injected.");
+
+            yield return () => innerClass;
         }
     }
 

@@ -10,7 +10,7 @@ public class SimpleGenericMethodTests
     [Arguments("hello")]
     public async Task GenericMethod_SimpleCase<T>(T value)
     {
-        await Assert.That(value).IsNotEqualTo(default(T));
+        await Assert.That<T?>(value).IsNotEqualTo(default(T));
     }
 }
 
@@ -23,7 +23,7 @@ public class SimpleGenericClassTests<T>
     public async Task TestWithValue(T value)
     {
         // Just verify the method runs with the correct type
-        await Assert.That(value).IsNotEqualTo(default(T));
+        await Assert.That<T?>(value).IsNotEqualTo(default(T));
     }
 }
 
@@ -39,7 +39,7 @@ public class SimpleGenericClassConstructorTests<T>(T value)
     public async Task TestWithValue()
     {
         // Just verify the method runs with the correct type
-        await Assert.That(value).IsNotEqualTo(default(T));
+        await Assert.That<T?>(value).IsNotEqualTo(default(T));
     }
 }
 
@@ -55,7 +55,7 @@ public class SimpleGenericClassConstructorAndMethodTests<T>(T value)
     [Arguments(10.5)]
     public async Task TestWithValue<T2>(T2 methodValue)
     {
-        await Assert.That(value).IsNotEqualTo(default(T));
-        await Assert.That(methodValue).IsNotEqualTo(default(T2));
+        await Assert.That<T?>(value).IsNotEqualTo(default(T));
+        await Assert.That<T2?>(methodValue).IsNotEqualTo(default(T2));
     }
 }

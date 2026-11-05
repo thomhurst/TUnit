@@ -18,7 +18,7 @@ public class InitializerExceptionPropagationTests(
     {
         // This test should never run - it should fail during initialization
         // because the IAsyncInitializer.InitializeAsync throws
-        throw new InvalidOperationException("This test should not have executed - initializer should have thrown");
+        throw new InvalidOperationException($"{factory.GetType().Name}: This test should not have executed - initializer should have thrown");
     }
 
     public class FailingInitializerFactory : IAsyncInitializer
