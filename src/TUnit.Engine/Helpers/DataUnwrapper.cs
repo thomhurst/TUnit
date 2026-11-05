@@ -208,12 +208,21 @@ internal class DataUnwrapper
             var parameter = parameters[i];
             if (parameter.Type != typeof(CancellationToken) && !parameter.IsOptional && !parameter.IsParams
                 && !(i == lastDataParameterIndex
-                    && parameter.Type.IsSZArray))
+                    && IsSingleDimensionalZeroBasedArray(parameter.Type)))
             {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private static bool IsSingleDimensionalZeroBasedArray(Type type)
+    {
+#if NET
+        return type.IsSZArray;
+#else
+        return type.IsArray && type.Name.EndsWith("[]", StringComparison.Ordinal);
+#endif
     }
 }
