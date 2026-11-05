@@ -130,7 +130,7 @@ internal static class ClosedGenericRegistrationBuilder
                 writer.AppendLine();
                 using (writer.Block($"internal static class {safeName}_ClosedMockMemberExtensions_{index.ToString(CultureInfo.InvariantCulture)}"))
                 {
-                    using (writer.Block($"extension(global::TUnit.Mocks.Mock<{MockImplBuilder.GetMockableTypeName(model)}> mock)"))
+                    using (writer.Block($"extension(global::TUnit.Mocks.Mock<{MockImplBuilder.GetMockableTypeName(model)}> {MockMembersBuilder.GetSetupIdentifier(model, "mock")})"))
                     {
                         var first = true;
                         foreach (var method in emission.Methods)
