@@ -6148,6 +6148,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return true;
         }
 
+        // dynamic is emitted as System.Object, including inside compound parameter types.
+        if ((derivedType.TypeKind == TypeKind.Dynamic && baseType.SpecialType == SpecialType.System_Object)
+            || (baseType.TypeKind == TypeKind.Dynamic && derivedType.SpecialType == SpecialType.System_Object))
+        {
+            return true;
+        }
+
         if (derivedType is ITypeParameterSymbol derivedParameter && baseType is ITypeParameterSymbol baseParameter)
         {
             return derivedParameter.TypeParameterKind == TypeParameterKind.Method

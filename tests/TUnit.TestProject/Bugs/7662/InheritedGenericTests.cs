@@ -230,3 +230,35 @@ public class NonGenericOverridesHiddenIntermediateTest : IntermediateHiddenVirtu
     [Test]
     public override void Example() { }
 }
+
+public abstract class ObjectParameterBase<T>
+{
+    [Test]
+    [Arguments("base")]
+    public void Example(object value) => throw new InvalidOperationException("The hidden object test must not execute.");
+}
+
+[InheritsTests]
+[GenerateGenericTest(typeof(int))]
+public class HidesObjectWithDynamic<T> : ObjectParameterBase<T>
+{
+    [Test]
+    [Arguments("derived")]
+    public new void Example(dynamic value) { }
+}
+
+public abstract class DynamicParameterBase<T>
+{
+    [Test]
+    [Arguments("base")]
+    public void Example(dynamic value) => throw new InvalidOperationException("The hidden dynamic test must not execute.");
+}
+
+[InheritsTests]
+[GenerateGenericTest(typeof(int))]
+public class HidesDynamicWithObject<T> : DynamicParameterBase<T>
+{
+    [Test]
+    [Arguments("derived")]
+    public new void Example(object value) { }
+}
