@@ -680,6 +680,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
+    private static IEnumerable<AttributeData> GetConstraintViolationAttributes(TestMethodMetadata testMethod) =>
+        GetTestAttributes(testMethod)
+            .Where(attribute => !DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass));
+
+    private static bool AttributeRequiresUnsafeContext(AttributeData attribute) =>
+        attribute.ConstructorArguments.Any(RequiresUnsafeContext)
+        || attribute.NamedArguments.Any(argument => RequiresUnsafeContext(argument.Value));
+
+    private static bool RequiresUnsafeContext(TypedConstant argument) =>
+        argument.Kind == TypedConstantKind.Array
+            ? !argument.IsNull && argument.Values.Any(RequiresUnsafeContext)
+            : argument.Value is ITypeSymbol type && RequiresUnsafeContext(type);
+
+    private static bool RequiresUnsafeContext(ITypeSymbol type) => type switch
+    {
+        IPointerTypeSymbol => true,
+        IFunctionPointerTypeSymbol => true,
+        IArrayTypeSymbol array => RequiresUnsafeContext(array.ElementType),
+        _ => false
+    };
+
     /// <summary>
     /// Emits the test method's class type arguments that break the class's generic constraints. A
     /// <c>TestEntry&lt;T&gt;</c> cannot be emitted for such a closed type, so the entry is registered
@@ -698,22 +719,37 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"FilePath = {SymbolDisplay.FormatLiteral(testMethod.FilePath ?? "", quote: true)},");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber.ToString(CultureInfo.InvariantCulture)},");
         writer.AppendLine("MethodMetadata = __mm_0,");
-        writer.AppendLine("AttributeFactory = static () => new global::System.Attribute[]");
-        writer.AppendLine("{");
-        writer.Indent();
-        // Keep the same precedence as regular tests, without reflecting over the open type in AOT.
-        var attributes = testMethod.MethodSymbol.GetAttributes()
-            .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
-            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
-            .Where(attribute => !DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass));
-        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
-        writer.Unindent();
-        writer.AppendLine("},");
+        var attributes = GetConstraintViolationAttributes(testMethod).ToArray();
+        var requiresUnsafe = attributes.Any(AttributeRequiresUnsafeContext);
+        if (requiresUnsafe)
+        {
+            writer.AppendLine("AttributeFactory = __CreateConstraintViolationAttributes,");
+        }
+        else
+        {
+            writer.AppendLine("AttributeFactory = static () => new global::System.Attribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
+            writer.Unindent();
+            writer.AppendLine("},");
+        }
         writer.AppendLine($"Messages = new string[] {{ {string.Join(", ", messages.Select(m => $"\"{EscapeString(m)}\""))} }},");
         writer.Unindent();
         writer.AppendLine("},");
         writer.Unindent();
         writer.AppendLine("};");
+
+        if (requiresUnsafe)
+        {
+            // Limit the unsafe context to attribute construction: mixed valid entries can contain awaits.
+            writer.AppendLine("private static unsafe global::System.Attribute[] __CreateConstraintViolationAttributes() => new global::System.Attribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
+            writer.Unindent();
+            writer.AppendLine("};");
+        }
     }
 
     /// <summary>
