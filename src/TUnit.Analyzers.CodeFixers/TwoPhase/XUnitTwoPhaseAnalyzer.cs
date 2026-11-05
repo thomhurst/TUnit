@@ -748,27 +748,42 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertProperSubset(SeparatedSyntaxList<ArgumentSyntax> args)
-    {
-        if (args.Count < 2) return (AssertionConversionKind.Contains, null, false, null);
-
-        // Keep xUnit argument evaluation order by asserting the inverse strict relation.
-        // xUnit: Assert.ProperSubset(expectedSuperset, actual)
-        var expectedSuperset = args[0].Expression.ToString();
-        var actual = args[1].Expression.ToString();
-
-        return (AssertionConversionKind.Contains, $"await Assert.That({expectedSuperset}).IsProperSupersetOf({actual})", true, null);
-    }
+        => ConvertProperSet(args, "IsProperSubsetOf");
 
     private (AssertionConversionKind, string?, bool, string?) ConvertProperSuperset(SeparatedSyntaxList<ArgumentSyntax> args)
+        => ConvertProperSet(args, "IsProperSupersetOf");
+
+    private (AssertionConversionKind, string?, bool, string?) ConvertProperSet(SeparatedSyntaxList<ArgumentSyntax> args, string relation)
     {
         if (args.Count < 2) return (AssertionConversionKind.Contains, null, false, null);
 
-        // Keep xUnit argument evaluation order by asserting the inverse strict relation.
-        // xUnit: Assert.ProperSuperset(expectedSubset, actual)
-        var expectedSubset = args[0].Expression.ToString();
-        var actual = args[1].Expression.ToString();
+        // Capture in source order, then use actual's comparer for the strict relation.
+        // The inverse relation is not equivalent when the sets have different comparers.
+        var identifiers = _sourceIdentifiers ??= new HashSet<string>(args[0].SyntaxTree.GetRoot().DescendantTokens()
+            .Where(token => token.IsKind(SyntaxKind.IdentifierToken)).Select(token => token.ValueText));
+        var pair = "setArguments";
+        while (identifiers.Contains(pair)) pair += "_";
+        var actualFirst = args[0].NameColon?.Name.Identifier.ValueText == "actual";
+        var actual = $"{pair}.{(actualFirst ? "Item1" : "Item2")}";
+        var expected = $"{pair}.{(actualFirst ? "Item2" : "Item1")}";
 
-        return (AssertionConversionKind.Contains, $"await Assert.That({expectedSubset}).IsProperSubsetOf({actual})", true, null);
+        // Tuple elements have no target type for null/default literals or target-typed new.
+        string Capture(ArgumentSyntax argument)
+        {
+            var expression = argument.Expression;
+            if ((expression.IsKind(SyntaxKind.NullLiteralExpression) ||
+                 expression.IsKind(SyntaxKind.DefaultLiteralExpression) ||
+                 expression is ImplicitObjectCreationExpressionSyntax) &&
+                SemanticModel.GetTypeInfo(expression).ConvertedType is { } type)
+            {
+                return $"({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})({expression})";
+            }
+            return expression.ToString();
+        }
+
+        return (AssertionConversionKind.Contains,
+            $"await Assert.That(({Capture(args[0])}, {Capture(args[1])})).Satisfies({pair} => {actual} != null && {actual}.{relation}({expected}))",
+            true, null);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertDistinct(SeparatedSyntaxList<ArgumentSyntax> args)
