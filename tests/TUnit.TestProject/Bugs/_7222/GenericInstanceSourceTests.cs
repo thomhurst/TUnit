@@ -310,6 +310,25 @@ public class SingleTupleElementConversionTests
             throw new InvalidOperationException("Expected nullable element conversion");
     }
 
+    public static IEnumerable<(int, string)> OpenNullableRows() => [(3, "nullable")];
+    public IEnumerable<Tuple<int, string>> OpenNullableReferenceRows() => [Tuple.Create(4, "nullable")];
+
+    [Test]
+    [MethodDataSource(nameof(OpenNullableRows))]
+    public void OpenNullableElement<T>((T?, string) row) where T : struct
+    {
+        if (typeof(T) != typeof(int) || row.Item1 is not int value || value != 3 || row.Item2 != "nullable")
+            throw new InvalidOperationException("Expected open nullable element inference");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(OpenNullableReferenceRows))]
+    public void OpenNullableReferenceElement<T>(Tuple<T?, string> row) where T : struct
+    {
+        if (typeof(T) != typeof(int) || row.Item1 is not int value || value != 4 || row.Item2 != "nullable")
+            throw new InvalidOperationException("Expected open nullable reference element inference");
+    }
+
     [Test]
     [MethodDataSource(nameof(Rows))]
     public void NumericElement<T>((T, long) row)

@@ -40,6 +40,8 @@ internal class InstanceMethodTypeInferenceTests : TestsBase
             await Assert.That(source).Contains("CrossFamily<int>");
             await Assert.That(source).Contains("NullableElement<int>");
             await Assert.That(source).Contains("NumericElement<int>");
+            await Assert.That(source).Contains("OpenNullableElement<int>");
+            await Assert.That(source).Contains("OpenNullableReferenceElement<int>");
             await Assert.That(source).Contains("ClosedClass<string>");
             await Assert.That(source).Contains("Valid<int>");
             await Assert.That(source).Contains("Valid<string>");

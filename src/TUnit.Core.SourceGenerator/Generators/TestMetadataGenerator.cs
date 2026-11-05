@@ -7269,6 +7269,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             if (!reconstructTupleElements || !reconstructibleTuple) return false;
         }
 
+        // Tuple reconstruction can lift a non-nullable value into an open nullable element,
+        // just as ProcessTypeForGenerics and reflection TryInferTypeMapping do during inference.
+        if (reconstructTupleElements
+            && parameter is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableParameter
+            && row.IsValueType
+            && row is not INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T })
+        {
+            return MatchesOpenRowType(nullableParameter.TypeArguments[0], row, compilation, bindings, true);
+        }
+
         // A single tuple argument is reconstructed by the generated binder, including across
         // Tuple and ValueTuple families. Multi-parameter rows require an exact constructed shape,
         // matching TupleHelper.MatchesOpenTuple, since their binder uses whole-type assignability.
