@@ -43,7 +43,10 @@ public class InaccessibleAttributeTypeTests
     [Arguments("typeof(System.Collections.Generic.List<Hidden>)")]
     [Arguments("typeof(Outer<int>.Inner<string>)")]
     [Arguments("typeof(Outer<>.Inner<>)")]
-    public async Task InitializersCompileAndPreservePrivateTypes(string expression)
+    [Arguments("typeof(Hidden)", "@event.@class")]
+    [Arguments("typeof(System.Collections.Generic.List<Hidden[]>)", "@event.@class")]
+    [Arguments("typeof(Outer<>.Inner<>)", "@event.@class")]
+    public async Task InitializersCompileAndPreservePrivateTypes(string expression, string namespaceName = "TestTypes")
     {
         var source = $$"""
             public class MarkerAttribute : System.Attribute
@@ -52,19 +55,22 @@ public class InaccessibleAttributeTypeTests
                 public System.Type[] Types { get; }
                 public System.Type Named { get; set; }
             }
-            public class Container
+            namespace {{namespaceName}}
             {
-                private sealed class Hidden { }
-                private class Outer<T> { public class Inner<U> { } }
-                [Marker({{expression}}, Named = {{expression}})]
-                public void Run() { }
+                public class Container
+                {
+                    private sealed class Hidden { }
+                    private class Outer<T> { public class Inner<U> { } }
+                    [Marker({{expression}}, Named = {{expression}})]
+                    public void Run() { }
+                }
             }
             """;
         var options = new CSharpParseOptions(LanguageVersion.Preview);
         var compilation = CSharpCompilation.Create("PrivateAttributeTypes",
             [CSharpSyntaxTree.ParseText(source, options)], ReferencesHelper.References,
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
-        var attribute = compilation.GetTypeByMetadataName("Container")!.GetMembers("Run").Single().GetAttributes().Single();
+        var attribute = compilation.GetTypeByMetadataName(namespaceName.Replace("@", "") + ".Container")!.GetMembers("Run").Single().GetAttributes().Single();
         var writer = new AttributeWriter(compilation);
         var initializer = writer.GetAttributeObjectInitializer(attribute);
         var metadataWriter = new global::TUnit.Core.SourceGenerator.CodeWriter("", includeHeader: false);
@@ -86,7 +92,7 @@ public class InaccessibleAttributeTypeTests
             var actual = assembly.GetType("Factory")!.GetMethod(method)!.Invoke(null, null)!;
             var types = (Type[])actual.GetType().GetProperty("Types")!.GetValue(actual)!;
             var named = (Type)actual.GetType().GetProperty("Named")!.GetValue(actual)!;
-            var original = assembly.GetType("Container")!.GetMethod("Run")!.GetCustomAttributes(false).Single();
+            var original = assembly.GetType(namespaceName.Replace("@", "") + ".Container")!.GetMethod("Run")!.GetCustomAttributes(false).Single();
             var expected = (Type[])original.GetType().GetProperty("Types")!.GetValue(original)!;
             await Assert.That(types.Single()).IsEqualTo(expected.Single());
             await Assert.That(named).IsEqualTo(expected.Single());

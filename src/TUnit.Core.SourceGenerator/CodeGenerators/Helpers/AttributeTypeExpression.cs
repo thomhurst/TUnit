@@ -39,9 +39,16 @@ internal static class AttributeTypeExpression
             chain.Push(current);
         }
 
-        var name = named.ContainingNamespace.IsGlobalNamespace
-            ? ""
-            : named.ContainingNamespace.ToDisplayString() + ".";
+        // Runtime names use raw namespace identifiers, without C# keyword escaping.
+        var namespaces = new Stack<string>();
+        for (var current = named.ContainingNamespace; !current.IsGlobalNamespace; current = current.ContainingNamespace)
+        {
+            namespaces.Push(current.Name);
+        }
+
+        var name = namespaces.Count == 0 ? "" : string.Join(".", namespaces) + ".";
+        // CLR-only identifiers containing reserved type-name punctuation (not valid C# identifiers)
+        // would additionally require reflection-name escaping.
         name += string.Join("+", chain.Select(t => t.MetadataName));
         if (!named.IsUnboundGenericType)
         {
