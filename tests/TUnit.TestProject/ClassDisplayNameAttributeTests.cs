@@ -27,7 +27,8 @@ public class ClassDisplayNameWithParametersTests(string value)
     {
         // This test should show the class display name with parameter substitution
         var displayName = TestContext.Current!. Metadata.DisplayName;
+        await Assert.That(value).IsEqualTo("TestValue");
         await Assert.That(displayName)
-            .Contains(value);
+            .Contains("TestValue");
     }
 }
