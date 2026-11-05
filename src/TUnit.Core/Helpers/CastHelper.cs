@@ -513,6 +513,10 @@ public static class CastHelper
         return false;
     }
 
+    // Share the binder's cached operator discovery without executing user code.
+    internal static bool HasReflectionConversion(Type sourceType, Type targetType)
+        => !IsAotMode() && GetConversionMethodCached(sourceType, targetType) is not null;
+
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
     private static MethodInfo? GetConversionMethodCached(Type sourceType, Type targetType)
     {

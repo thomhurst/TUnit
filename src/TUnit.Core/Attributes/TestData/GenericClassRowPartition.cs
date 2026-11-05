@@ -499,15 +499,23 @@ public static class GenericClassRowPartition
             return true;
         }
 
+        if (Helpers.CastHelper.HasReflectionConversion(value.GetType(), target))
+        {
+            return true;
+        }
+
         // Parsing belongs to the binder, especially for user-defined IParsable implementations.
         // Compare cached interface identities only; do not invoke Parse or close generic types here.
         if (value is string && (target == typeof(Guid) || target == typeof(DateTime)
             || target == typeof(DateTimeOffset) || target == typeof(TimeSpan)
 #if NET
             || (!target.IsPrimitive && target != typeof(decimal)
-                && GetConstructorRowInterfaces(target).Any(candidate => candidate.IsGenericType
-                && candidate.GetGenericTypeDefinition() == typeof(IParsable<>)
-                && candidate.GenericTypeArguments[0] == target))
+                // Closed custom types can also lose parsing interfaces under Native AOT.
+                && ((!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported
+                        && Type.GetTypeCode(target) == TypeCode.Object)
+                    || GetConstructorRowInterfaces(target).Any(candidate => candidate.IsGenericType
+                        && candidate.GetGenericTypeDefinition() == typeof(IParsable<>)
+                        && candidate.GenericTypeArguments[0] == target)))
 #endif
             ))
         {
@@ -553,7 +561,27 @@ public static class GenericClassRowPartition
         // call them. Built-in conversions above still reject known invalid values.
         // The reflection fallback also calls ChangeType for non-primitive targets,
         // including DateTime and custom ToType implementations. Preserve uncertain rows.
-        return value is IConvertible;
+        if (value is not IConvertible)
+        {
+            return false;
+        }
+
+        // Framework scalar implementations cannot define custom ToType behavior.
+        // Probe only these known values; custom IConvertible stays deferred to the binder.
+        if (source.IsPrimitive || source.IsEnum || source == typeof(string)
+            || source == typeof(decimal) || source == typeof(DateTime))
+        {
+            try
+            {
+                _ = Convert.ChangeType(value, target);
+                return true;
+            }
+            catch (Exception exception) when (exception is InvalidCastException or FormatException or OverflowException)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     // Array descriptions emitted outside a generic class erase T[] to object. The existing lazy

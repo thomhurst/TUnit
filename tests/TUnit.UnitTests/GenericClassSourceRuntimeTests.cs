@@ -26,6 +26,49 @@ public class GenericClassSourceRuntimeTests
 
     private sealed class ConvertedRowValue;
 
+    private sealed class OperatorRow(bool throws)
+    {
+        public static implicit operator int(OperatorRow value)
+            => value.throws ? throw new InvalidOperationException("Partitioning must not invoke operators") : 2;
+        private readonly bool throws = throws;
+    }
+
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(true, false)]
+    [Arguments(false, true)]
+    [Arguments(true, true)]
+    public async Task Partition_Preserves_Operators_And_Rejects_Unsupported_BuiltIns(bool generated, bool operators)
+    {
+        var target = operators ? typeof(int) : typeof(Guid);
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(target) { Name = "first", TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(target), CachedIsOptional = false },
+            new ParameterMetadata(typeof(string)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true }
+        ];
+        object?[][] original = operators ? [[1], [new OperatorRow(false)], [new OperatorRow(true)]] : [[Guid.Empty], [1], [DateTime.MinValue]];
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create([target, typeof(string)], GenericClassRowFallback.AllRows, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata)) rows.Add(await factory());
+        await Assert.That(rows.Count).IsEqualTo(operators ? 3 : 1);
+        for (var i = 0; i < rows.Count; i++) await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+        if (operators) await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<int>(original[1][0])).IsEqualTo(2);
+        else await Assert.That(TUnit.Core.Helpers.CastHelper.Cast(typeof(Guid), 1) is Guid).IsFalse();
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
+    }
+
     private sealed class DeferredEnumerable : System.Collections.IEnumerable
     {
         public System.Collections.IEnumerator GetEnumerator()
