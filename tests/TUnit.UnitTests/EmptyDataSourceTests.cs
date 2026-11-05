@@ -56,11 +56,11 @@ public class EmptyDataSourceTests
     /// </summary>
     [Test]
     [MethodDataSource(nameof(EmptyStaticDataSource), SkipIfEmpty = true)]
-    public async Task EmptyStaticDataSource_WithSkipIfEmpty_ShouldBeSkipped(string value)
+    public void EmptyStaticDataSource_WithSkipIfEmpty_ShouldBeSkipped(string value)
     {
         // This test should be skipped because the data source is empty and SkipIfEmpty is true
         // If it runs, that's a bug
-        await Assert.That(false).IsTrue(); // This should never execute
+        Assert.Fail("An empty data source with SkipIfEmpty must not execute.");
     }
 
 }

@@ -57,7 +57,7 @@ public class GenericTestClass_String
     public async Task TestGenericValue()
     {
         await Assert.That(typeof(string)).IsNotNull();
-        await Assert.That(_value).IsEqualTo(default(string));
+        await Assert.That(_value).IsNull();
     }
 
     [Test]
@@ -83,7 +83,7 @@ public class GenericTestClass_Bool
     public async Task TestGenericValue()
     {
         await Assert.That(typeof(bool)).IsNotNull();
-        await Assert.That(_value).IsEqualTo(default(bool));
+        await Assert.That(_value).IsFalse();
     }
 
     [Test]

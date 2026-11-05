@@ -100,7 +100,7 @@ public class SharedObjectDisposeSpanTests
         {
         }
 
-        await Assert.That(scope.Activities).HasCount(2);
+        await Assert.That(scope.Activities).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -133,14 +133,14 @@ public class SharedObjectDisposeSpanTests
         {
         }
 
-        await Assert.That(scope.Activities).HasCount(1);
+        await Assert.That(scope.Activities).Count().IsEqualTo(1);
 
         // Separate disposal spans must remain separate, even with the same name and parent.
         using (source.StartActivity(name, ActivityKind.Internal, context.ClassContext.Activity!.Context))
         {
         }
 
-        await Assert.That(scope.Activities).HasCount(2);
+        await Assert.That(scope.Activities).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -167,8 +167,8 @@ public class SharedObjectDisposeSpanTests
         await disposal;
 
         var name = $"dispose {nameof(SharedObjectDisposeSpanTests)}.{nameof(SpanFixture)}";
-        await Assert.That(firstScope.Activities).HasCount(1);
-        await Assert.That(secondScope.Activities).HasCount(1);
+        await Assert.That(firstScope.Activities).Count().IsEqualTo(1);
+        await Assert.That(secondScope.Activities).Count().IsEqualTo(1);
         await Assert.That(firstScope.Single(name).ParentSpanId).IsEqualTo(firstContext.ClassContext.Activity!.SpanId);
         await Assert.That(secondScope.Single(name).ParentSpanId).IsEqualTo(secondContext.ClassContext.AssemblyContext.Activity!.SpanId);
     }
