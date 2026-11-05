@@ -231,6 +231,30 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Open_Tuple_Binding_Requires_Outer_Assignability_And_Supports_Cross_Family_Conversion()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/OpenTupleAssignabilityTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(3)
+            ]);
+    }
+
+    [Test]
+    [Arguments("SingleTupleElementConversionTests", 2)]
+    [Arguments("ClosedClassTupleInferenceTests*", 1)]
+    public async Task Tuple_Inference_Preserves_Element_Conversions_And_Concrete_Class_Types(string className, int count)
+    {
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7222/{className}/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(count),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(count)
+            ]);
+    }
+
+    [Test]
     public async Task Repeated_Tuple_Parameters_Require_Consistent_Bindings()
     {
         await RunTestsWithFilter(

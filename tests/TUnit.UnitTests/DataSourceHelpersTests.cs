@@ -10,6 +10,20 @@ public class DataSourceHelpersTests
 {
     private static void OpenTuple<T>(Tuple<T, string> row) { }
 
+    private static void ObjectTuple<T>(Tuple<T, object> row) { }
+
+    [Test]
+    public async Task OpenTupleBinding_RequiresOuterAssignability()
+    {
+        var parameter = typeof(DataSourceHelpersTests).GetMethod(nameof(ObjectTuple),
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)!.GetParameters()[0].ParameterType;
+        var whole = Tuple.Create(1, new object());
+        var nested = Tuple.Create(whole, "extra");
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, whole.GetType())).IsTrue();
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, nested.GetType())).IsFalse();
+        await Assert.That(nested.ToObjectArrayWithTypes([parameter, typeof(string)]).Length).IsEqualTo(2);
+    }
+
     private static void RepeatedTuple<T>(Tuple<T, T> row) { }
 
     [Test]

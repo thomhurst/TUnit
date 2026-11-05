@@ -3712,7 +3712,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var paramGenDef = paramType.GetGenericTypeDefinition();
 
             // Check if argument type directly matches or implements the parameter generic type
-            if (argType.GetGenericTypeDefinition() == paramGenDef)
+            if (argType.GetGenericTypeDefinition() == paramGenDef
+                || TupleHelper.IsTupleType(paramType) && TupleHelper.IsTupleType(argType)
+                    && paramType.GetGenericArguments().Length == argType.GetGenericArguments().Length)
             {
                 var paramGenArgs = paramType.GetGenericArguments();
                 var argGenArgs = argType.GetGenericArguments();

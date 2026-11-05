@@ -265,3 +265,70 @@ public class RepeatedTupleBindingTests
             throw new InvalidOperationException("Expected consistent whole-row int binding");
     }
 }
+
+public class OpenTupleAssignabilityTests
+{
+    public static IEnumerable<((int, object), string)> ValueRows() => [((1, new object()), "extra")];
+    public IEnumerable<Tuple<Tuple<int, object>, string>> ReferenceRows() =>
+        [Tuple.Create(Tuple.Create(1, new object()), "extra")];
+    public IEnumerable<Tuple<int, string>> CrossFamilyRows() => [Tuple.Create(1, "tuple")];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void ValueAssignable<T>((T, object) row, string extra = "")
+    {
+        if (typeof(T) != typeof(int) || extra != "extra")
+            throw new InvalidOperationException("Expected separate columns and int inference");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(ReferenceRows))]
+    public void ReferenceAssignable<T>(Tuple<T, object> row, string extra = "")
+    {
+        if (typeof(T) != typeof(int) || extra != "extra")
+            throw new InvalidOperationException("Expected separate columns and int inference");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(CrossFamilyRows))]
+    public void CrossFamily<T>((T, string) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple")
+            throw new InvalidOperationException("Expected logical tuple element inference");
+    }
+}
+
+public class SingleTupleElementConversionTests
+{
+    public static IEnumerable<(int, int)> Rows() => [(1, 2)];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void NullableElement<T>((T, int?) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != 2)
+            throw new InvalidOperationException("Expected nullable element conversion");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void NumericElement<T>((T, long) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != 2)
+            throw new InvalidOperationException("Expected numeric element conversion");
+    }
+}
+
+[GenerateGenericTest(typeof(int))]
+public class ClosedClassTupleInferenceTests<TClass>
+{
+    public static IEnumerable<((int, string), int)> Rows() => [((1, "text"), 7)];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void ClosedClass<T>((TClass, T) row, int extra = 5)
+    {
+        if (typeof(T) != typeof(string) || row.Item2 is not "text" || extra != 7)
+            throw new InvalidOperationException("Expected closed class types before tuple matching");
+    }
+}

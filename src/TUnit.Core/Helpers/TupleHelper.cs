@@ -29,7 +29,9 @@ public static class TupleHelper
 
         if (!parameter.ContainsGenericParameters)
         {
-            return parameter.IsAssignableFrom(row);
+            // Tuple type arguments are invariant. Element assignability alone does not make
+            // the constructed outer tuple assignable. Mirrors generator MatchesOpenRowType.
+            return parameter == row;
         }
 
         if (parameter.IsArray)

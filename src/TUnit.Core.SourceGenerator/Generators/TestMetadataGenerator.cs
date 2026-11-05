@@ -1592,7 +1592,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     foreach (var (methodTypes, source, policySource) in methodSources)
                     {
                         var reportsViolation = GenericMethodInferencePolicy.ReportsConstraintViolation(policySource, hasExplicitMethodTypes);
-                        TryAddInstantiation(CloseOverClass(classGenericTest.TypeArgs!, methodTypes), source,
+                        var concreteMethodTypes = policySource == GenericMethodInferencePolicy.Source.MethodDataSource && source is not null
+                            ? InferTypesFromMethodDataSource(testMethod, source, classGenericTest.TypeArgs!)
+                            : methodTypes;
+                        if (concreteMethodTypes is null) continue;
+                        TryAddInstantiation(CloseOverClass(classGenericTest.TypeArgs!, concreteMethodTypes), source,
                             reportMethodConstraintViolation: reportsViolation,
                             deferToGenerateGenericTest: !reportsViolation,
                             reportClassViolationAs: ClassViolationSource.GenerateGenericTest,
@@ -1611,14 +1615,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Method rows were already paired with this class row above; they join their entries.
                     foreach (var (methodTypes, source, policySource) in methodSources)
                     {
+                        var concreteMethodTypes = policySource == GenericMethodInferencePolicy.Source.MethodDataSource && source is not null
+                            ? InferTypesFromMethodDataSource(testMethod, source, classTypes)
+                            : methodTypes;
+                        if (concreteMethodTypes is null) continue;
                         if (source is not null)
                         {
-                            TryAddCombinedArgumentsInstantiation(classTypes, CloseOverClass(classTypes, methodTypes), classAttr, source,
+                            TryAddCombinedArgumentsInstantiation(classTypes, CloseOverClass(classTypes, concreteMethodTypes), classAttr, source,
                                 reportMethodConstraintViolation: GenericMethodInferencePolicy.ReportsConstraintViolation(policySource, hasExplicitMethodTypes));
                         }
                         else
                         {
-                            TryAddClassRowInstantiationWithEveryMethodSource(classTypes, CloseOverClass(classTypes, methodTypes), classAttr, methodSource: null, typedDataSourceBucket);
+                            TryAddClassRowInstantiationWithEveryMethodSource(classTypes, CloseOverClass(classTypes, concreteMethodTypes), classAttr, methodSource: null, typedDataSourceBucket);
                         }
                     }
 
@@ -7056,7 +7064,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// such as a private nested row class read through a private property: closing the method over it would not
     /// compile. <see cref="AddUninferredTypeArgumentFailures"/> then reports the rows as failed tests.
     /// </summary>
-    private static ITypeSymbol[]? InferTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr)
+    private static ITypeSymbol[]? InferTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr, ITypeSymbol[]? classTypes = null)
     {
         // Reflection mode runs instance sources on the explicit method types when supplied, without
         // adding declared-row instantiations. Preserve conversions enabled by those explicit types.
@@ -7066,7 +7074,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return null;
         }
 
-        var inferredTypes = InferTypesFromMethodDataSourceRowType(testMethod, mdsAttr);
+        var inferredTypes = InferTypesFromMethodDataSourceRowType(testMethod, mdsAttr, classTypes);
         return inferredTypes != null && FindInaccessibleType(inferredTypes, testMethod.CompilationContext.Compilation) == null
             ? inferredTypes
             : null;
@@ -7250,8 +7258,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             var conversion = compilation.ClassifyCommonConversion(row, parameter);
             if (conversion.Exists && conversion.IsImplicit
-                && (conversion.IsIdentity || conversion.IsReference
-                    || row.IsValueType && !parameter.IsValueType && !conversion.IsUserDefined))
+                && (conversion.IsIdentity || reconstructTupleElements && !conversion.IsUserDefined))
             {
                 return true;
             }
@@ -7260,6 +7267,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 || parameter is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable
                     && GetTupleElementTypes(nullable.TypeArguments[0]) is not null;
             if (!reconstructTupleElements || !reconstructibleTuple) return false;
+        }
+
+        // A single tuple argument is reconstructed by the generated binder, including across
+        // Tuple and ValueTuple families. Multi-parameter rows require an exact constructed shape,
+        // matching TupleHelper.MatchesOpenTuple, since their binder uses whole-type assignability.
+        if (reconstructTupleElements && GetTupleElementTypes(parameter) is { } parameterElements
+            && GetTupleElementTypes(row) is { } rowElements && parameterElements.Length == rowElements.Length)
+        {
+            for (var i = 0; i < parameterElements.Length; i++)
+            {
+                if (!MatchesOpenRowType(parameterElements[i], rowElements[i], compilation, bindings, true)) return false;
+            }
+            return true;
         }
 
         if (parameter is IArrayTypeSymbol array)
@@ -7282,7 +7302,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return false;
     }
 
-    private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr)
+    private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr, ITypeSymbol[]? classTypes = null)
     {
         if (mdsAttr.ConstructorArguments.Length == 0)
         {
@@ -7319,6 +7339,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Row values bind to the data parameters only; the engine supplies the CancellationToken.
         var testMethodParams = GetDataParameters(testMethod.MethodSymbol);
+        ITypeSymbol CloseClassType(ITypeSymbol type) => classTypes is null || classTypes.Length != testMethod.TypeSymbol.TypeParameters.Length ? type
+            : SubstituteTypeParameters(type, testMethod.TypeSymbol.TypeParameters, classTypes, compilation);
+        rowType = CloseClassType(rowType);
+        var parameterTypes = testMethodParams.Select(parameter => CloseClassType(parameter.Type)).ToArray();
         var genericParams = testMethod.MethodSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
@@ -7327,13 +7351,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // receives the first element, as reflection mode unwraps tuple rows before inference.
         // With explicit method types, preserve whole reference-tuple inference so it deduplicates
         // against GenerateGenericTest<Tuple<...>> instead of adding a first-element instantiation.
+        Dictionary<ITypeSymbol, ITypeSymbol>? wholeTupleBindings = null;
         var receivesWholeTuple = testMethodParams.Length > 0
-            && ((GetTupleElementTypes(testMethodParams[0].Type) is not null
+            && ((GetTupleElementTypes(parameterTypes[0]) is not null
                     && testMethodParams.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams)
-                    && MatchesOpenRowType(testMethodParams[0].Type, rowType, compilation,
-                        new Dictionary<ITypeSymbol, ITypeSymbol>(SymbolEqualityComparer.Default), testMethodParams.Length == 1))
+                    && MatchesOpenRowType(parameterTypes[0], rowType, compilation,
+                        wholeTupleBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(SymbolEqualityComparer.Default), testMethodParams.Length == 1))
                 || (testMethodParams.Length == 1
-                    && testMethodParams[0].Type is ITypeParameterSymbol
+                    && parameterTypes[0] is ITypeParameterSymbol
                     && rowType is INamedTypeSymbol { IsTupleType: false }
                     && HasExplicitGenericTestTypes(testMethod)));
 
@@ -7342,14 +7367,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // A tuple row is spread across the test method's parameters
             for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
             {
-                ProcessTypeForGenerics(testMethodParams[i].Type, tupleElements[i], genericParams, genericParamMap);
+                ProcessTypeForGenerics(parameterTypes[i], tupleElements[i], genericParams, genericParamMap);
+            }
+        }
+        else if (receivesWholeTuple && wholeTupleBindings is { Count: > 0 })
+        {
+            foreach (var binding in wholeTupleBindings)
+            {
+                if (binding.Key is ITypeParameterSymbol parameter && genericParams.Contains(parameter))
+                    genericParamMap[parameter.Name] = binding.Value;
             }
         }
         else if (testMethodParams.Length > 0)
         {
             // Any other row is a single value for the first parameter. This includes typed arrays
             // such as int[]: only object[] rows are spread (DataSourceHelpers.ToObjectArray).
-            ProcessTypeForGenerics(testMethodParams[0].Type, rowType, genericParams, genericParamMap);
+            ProcessTypeForGenerics(parameterTypes[0], rowType, genericParams, genericParamMap);
         }
 
         // Build the result array in the correct order

@@ -667,7 +667,10 @@ internal sealed class TestGenericTypeResolver
                 ? argumentType 
                 : argumentType.GetGenericTypeDefinition();
 
-            if (paramGenericDef == argGenericDef)
+            // The tuple binder reconstructs a sole tuple argument across reference/value families.
+            // Infer the corresponding elements first, as the source generator does.
+            if (paramGenericDef == argGenericDef
+                || TupleHelper.IsTupleType(parameterType) && TupleHelper.IsTupleType(argumentType))
             {
                 var paramGenericArgs = parameterType.GetGenericArguments();
                 var argGenericArgs = argumentType.GetGenericArguments();
@@ -676,6 +679,10 @@ internal sealed class TestGenericTypeResolver
                 {
                     for (var i = 0; i < paramGenericArgs.Length; i++)
                     {
+                        // Tuple invocation converts closed elements (including nullable/numeric
+                        // values). Only open elements contribute to generic inference.
+                        if (TupleHelper.IsTupleType(parameterType) && !paramGenericArgs[i].ContainsGenericParameters)
+                            continue;
                         if (!TryInferTypeMapping(paramGenericArgs[i], argGenericArgs[i], typeMapping))
                         {
                             return false;
