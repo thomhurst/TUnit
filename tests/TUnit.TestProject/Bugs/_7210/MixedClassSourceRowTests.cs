@@ -201,3 +201,83 @@ public class MethodRowTypeNoClassRowInfers<T>(T value)
         await Assert.That(arg).IsTypeOf<T>();
     }
 }
+
+// Custom untyped sources keep the nulls as constructor positions rather than treating an array as one value.
+public sealed class NullLeadingRowAttribute : UntypedDataSourceGeneratorAttribute
+{
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata metadata)
+    {
+        yield return () => [null, 5];
+    }
+}
+
+public sealed class AllNullRowAttribute : UntypedDataSourceGeneratorAttribute
+{
+    protected override IEnumerable<Func<object?[]?>> GenerateDataSources(DataGeneratorMetadata metadata)
+    {
+        yield return () => [null, null];
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+[NullLeadingRow]
+public class NullLeadingRowInfersFirstNonNull<T>(T? value, int number) where T : struct
+{
+    [Test]
+    [Arguments(1)]
+    public async Task Test(T arg)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsNull();
+        await Assert.That(number).IsEqualTo(5);
+        await Assert.That((int)(object)arg).IsEqualTo(1);
+    }
+}
+
+// Neither null supplies a type: the method supplies T and AllRows retains both constructor positions.
+[EngineTest(ExpectedResult.Pass)]
+[AllNullRow]
+public class AllNullRowsUseAllRowsFallback<T>(T? first, T? second) where T : class
+{
+    [Test]
+    [Arguments("method")]
+    public async Task Test(T arg)
+    {
+        await Assert.That(first).IsNull();
+        await Assert.That(second).IsNull();
+        await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+    }
+}
+
+// A later non-null value cannot infer both type parameters, so method inference uses AllRows.
+[EngineTest(ExpectedResult.Pass)]
+[NullLeadingRow]
+public class NullLeadingTwoParameterRowUsesFallback<TFirst, TSecond>(TFirst? first, TSecond second)
+    where TFirst : class
+{
+    [Test]
+    [Arguments("method", 1)]
+    public async Task Test(TFirst firstArg, TSecond secondArg)
+    {
+        await Assert.That(first).IsNull();
+        await Assert.That(typeof(TFirst)).IsEqualTo(typeof(string));
+        await Assert.That(typeof(TSecond)).IsEqualTo(typeof(int));
+        await Assert.That((int)(object)second!).IsEqualTo(5);
+    }
+}
+
+// With an Arguments row, null source values cannot supply the unmatched int instantiation (NoClassRow).
+[EngineTest(ExpectedResult.Failure)]
+[Arguments("class", "class")]
+[AllNullRow]
+public class AllNullRowsUseNoClassRowFallback<T>(T? first, T? second)
+{
+    [Test]
+    [Arguments("method")]
+    [Arguments(1)]
+    public async Task Test(T arg)
+    {
+        await Assert.That(first).IsEqualTo((T)(object)"class");
+        await Assert.That(second).IsEqualTo((T)(object)"class");
+    }
+}
