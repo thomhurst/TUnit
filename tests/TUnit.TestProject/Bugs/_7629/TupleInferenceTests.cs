@@ -926,3 +926,38 @@ public class WrappedWholeTupleInferenceTests
     }
 }
 #pragma warning restore TUnit0001
+
+
+// #7622: analyzer does not model deferred tuple-element runtime casts.
+#pragma warning disable TUnit0001
+public class OpenTupleArrayRuntimeCastTests
+{
+    public static IEnumerable<(int, object)> ValueRows() => [(1, new[] { 7 })];
+    public static IEnumerable<Tuple<int, object>> ReferenceRows() => [Tuple.Create(1, (object)new[] { 7 })];
+    public static IEnumerable<(int, IEnumerable<int>)> InterfaceRows() => [(1, new[] { 7 })];
+    public static IEnumerable<(object, int)> ReversedRows() => [(new[] { 7 }, 1)];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void Value<T>((T, T[]) row) => Verify(row.Item1, row.Item2);
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<T, T[]> row) => Verify(row.Item1, row.Item2);
+
+    [Test]
+    [MethodDataSource(nameof(InterfaceRows))]
+    public void Interface<T>((T, T[]) row) => Verify(row.Item1, row.Item2);
+
+    [Test]
+    [MethodDataSource(nameof(ReversedRows))]
+    public void Reversed<T>((T[], T) row) => Verify(row.Item2, row.Item1);
+
+    private static void Verify<T>(T first, T[] array)
+    {
+        if (typeof(T) != typeof(int) || !Equals(first, 1) || array.Length != 1 || !Equals(array[0], 7))
+            throw new InvalidOperationException("Expected array runtime cast after tuple inference");
+    }
+}
+
+#pragma warning restore TUnit0001

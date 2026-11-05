@@ -7372,10 +7372,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return true;
         }
 
-        if (parameter is IArrayTypeSymbol array)
+        if (parameter is IArrayTypeSymbol array
+            && row is IArrayTypeSymbol rowArray && array.Rank == rowArray.Rank)
         {
-            return row is IArrayTypeSymbol rowArray && array.Rank == rowArray.Rank
-                && MatchesOpenRowType(array.ElementType, rowArray.ElementType, compilation, bindings, reconstructTupleElements, overwriteBindings);
+            return MatchesOpenRowType(array.ElementType, rowArray.ElementType, compilation, bindings, reconstructTupleElements, overwriteBindings);
         }
 
         if (parameter is INamedTypeSymbol { IsGenericType: true } named
