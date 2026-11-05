@@ -17,18 +17,37 @@ internal static class ExternalObjectOwnership
         s_hasOwners = true;
         lock (owners)
         {
-            for (var i = owners.Values.Count - 1; i >= 0; i--)
+            // Amortize stale-entry cleanup: inspect one old handle per registration, rather
+            // than scanning every live row that shares a singleton.
+            if (owners.Values.First is { } oldest)
             {
-                if (!owners.Values[i].TryGetTarget(out var existing))
+                owners.Values.RemoveFirst();
+                if (oldest.Value.TryGetTarget(out _))
                 {
-                    owners.Values.RemoveAt(i);
-                }
-                else if (ReferenceEquals(existing, owner))
-                {
-                    return;
+                    owners.Values.AddLast(oldest);
                 }
             }
-            owners.Values.Add(new(owner));
+            if (!owners.Membership.TryGetValue(owner, out _))
+            {
+                var node = owners.Values.AddLast(new WeakReference<DataRowScopeCollection.ScopeOwner>(owner));
+                owners.Membership.Add(owner, node);
+            }
+        }
+    }
+
+    internal static void Unregister(object instance, DataRowScopeCollection.ScopeOwner owner)
+    {
+        if (!Owners.TryGetValue(instance, out var owners))
+        {
+            return;
+        }
+        lock (owners)
+        {
+            if (owners.Membership.TryGetValue(owner, out var node))
+            {
+                owners.Membership.Remove(owner);
+                owners.Values.Remove(node);
+            }
         }
     }
 
@@ -43,13 +62,13 @@ internal static class ExternalObjectOwnership
         }
         lock (owners)
         {
-            for (var i = owners.Values.Count - 1; i >= 0; i--)
+            while (owners.Values.Last is { } node)
             {
-                if (owners.Values[i].TryGetTarget(out var owner))
+                if (node.Value.TryGetTarget(out var owner))
                 {
                     return owner;
                 }
-                owners.Values.RemoveAt(i);
+                owners.Values.RemoveLast();
             }
         }
         return null;
@@ -57,6 +76,10 @@ internal static class ExternalObjectOwnership
 
     private sealed class OwnerSet
     {
-        internal readonly List<WeakReference<DataRowScopeCollection.ScopeOwner>> Values = [];
+        // Membership uses weak identity keys, so adding another owner never scans existing rows.
+        // The linked list permits lookup and constant-time revocation without retaining handles.
+        internal readonly ConditionalWeakTable<DataRowScopeCollection.ScopeOwner,
+            LinkedListNode<WeakReference<DataRowScopeCollection.ScopeOwner>>> Membership = new();
+        internal readonly LinkedList<WeakReference<DataRowScopeCollection.ScopeOwner>> Values = new();
     }
 }

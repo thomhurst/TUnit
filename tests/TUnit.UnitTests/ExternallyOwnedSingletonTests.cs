@@ -15,6 +15,51 @@ public class ExternallyOwnedSingletonTests
 {
     // Synthetic contexts never reach the engine's cleanup, so each test removes its own from the registry.
     [Test]
+    public async Task Tracker_Releases_Completed_Row_Handles_Before_Session_End()
+    {
+        var tracker = CreateTracker();
+        var singleton = new TrackedDisposable();
+        var owner = await TrackAndReleaseClonedRows(tracker, singleton);
+        Collect();
+        await Assert.That(OwnerIsAlive(owner)).IsFalse();
+        await Assert.That(singleton.DisposeCount).IsEqualTo(0);
+        GC.KeepAlive(tracker);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private async Task<WeakReference<DataRowScopeCollection.ScopeOwner>> TrackAndReleaseClonedRows(
+        ObjectTracker tracker, TrackedDisposable singleton)
+    {
+        var first = CreateContext(singleton);
+        var second = CreateContext(singleton);
+        var owner = AttachClonedScopes(first, second, singleton);
+        tracker.TrackObjects(first);
+        tracker.TrackObjects(second);
+        DetachScopes(first);
+        DetachScopes(second);
+        await tracker.UntrackObjects(first);
+        Collect();
+        await Assert.That(OwnerIsAlive(owner)).IsTrue();
+        await tracker.UntrackObjects(second);
+        return owner;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void DetachScopes(TestContext context) => context.InternalEvents.DetachDataRowScopes();
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference<DataRowScopeCollection.ScopeOwner> AttachClonedScopes(
+        TestContext first, TestContext second, object singleton)
+    {
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new EmptyScope());
+        scopes.RegisterObject(owner, singleton);
+        first.InternalEvents.AddDataRowScopes(scopes);
+        second.InternalEvents.AddDataRowScopes(scopes.Clone());
+        return new(owner);
+    }
+
+    [Test]
     public async Task Later_Consumers_Do_Not_Release_The_First_Consumers_Reference()
     {
         var tracker = CreateTracker();

@@ -19,9 +19,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static readonly ConcurrentDictionary<object, Counter> s_trackedObjects =
         new(Helpers.ReferenceEqualityComparer.Instance);
 
-    // Keep owner handles alive until every session reference has been released. Other sessions can
-    // still find those owners through the weak registry, without permanent marks on their objects.
-    private readonly HashSet<DataRowScopeCollection.ScopeOwner> _externalOwners = [];
+    // Each active context retains its own handles, including handles shared by cloned rows.
+    // Removing one context cannot release another context's ownership.
+    private readonly Dictionary<TestContext, DataRowScopeCollection.ScopeOwner[]> _externalOwners = [];
 
     private readonly Dictionary<object, int> _sessionReferences = new(Helpers.ReferenceEqualityComparer.Instance);
 
@@ -147,14 +147,14 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public void TrackObjects(TestContext testContext)
     {
-        var owners = RetainExternalOwners(testContext.InternalEventsIfCreated?.DataRowScopes);
+        var owners = RetainExternalOwners(testContext);
         var alreadyTrackedSnapshot = SnapshotTrackedObjects(testContext.TrackedObjectsIfCreated);
 
         SortedList<int, HashSet<object>> trackableDict;
         try
         {
             foreach (var owner in owners)
-                owner.CaptureOwnership(testContext.TestDetails.TestClassInjectedPropertyArguments.Values);
+                owner.CaptureOwnership(testContext.TestDetails?.TestClassInjectedPropertyArguments.Values ?? []);
             HashSet<object>? refreshed = null;
             void RefreshOwner(object? instance)
             {
@@ -163,14 +163,14 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
                     && !owners.Contains(owner)
                     && (refreshed ??= new(Helpers.ReferenceEqualityComparer.Instance)).Add(instance))
                 {
-                    owner.CaptureOwnershipFor(instance, testContext.TestDetails.TestClassInjectedPropertyArguments.Values);
+                    owner.CaptureOwnershipFor(instance, testContext.TestDetails?.TestClassInjectedPropertyArguments.Values ?? []);
                 }
             }
 
             // Include non-disposable roots: they may expose disposable initializer dependencies.
-            foreach (var root in testContext.TestDetails.TestClassArguments ?? []) RefreshOwner(root);
-            foreach (var root in testContext.TestDetails.TestMethodArguments ?? []) RefreshOwner(root);
-            foreach (var root in testContext.TestDetails.TestClassInjectedPropertyArguments.Values) RefreshOwner(root);
+            foreach (var root in testContext.TestDetails?.TestClassArguments ?? []) RefreshOwner(root);
+            foreach (var root in testContext.TestDetails?.TestMethodArguments ?? []) RefreshOwner(root);
+            foreach (var root in testContext.TestDetails?.TestClassInjectedPropertyArguments.Values ?? []) RefreshOwner(root);
 
             trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
             // Also cover shared services discovered through another root.
@@ -271,6 +271,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
         if (CountTrackedObjects(trackedObjects) == 0 && heldSharedInstances is not { Count: > 0 })
         {
+            ReleaseExternalOwners(testContext);
             return new ValueTask<List<Exception>?>((List<Exception>?)null);
         }
 
@@ -279,28 +280,35 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     private async ValueTask<List<Exception>?> UntrackObjectsAsync(TestContext testContext, SortedList<int, HashSet<object>>? trackedObjects, HashSet<object>? heldSharedInstances)
     {
-        // SortedList keeps keys in ascending order; iterate in ascending order (shallowest depth first).
-        // This ensures disposal happens in reverse order of initialization (which goes deepest first).
-        // Dependents (shallow) are disposed before their dependencies (deep).
-        List<Exception>? cleanupExceptions = null;
-
-        if (trackedObjects is not null)
+        try
         {
-            var values = trackedObjects.Values;
+            // SortedList keeps keys in ascending order; iterate in ascending order (shallowest depth first).
+            // This ensures disposal happens in reverse order of initialization (which goes deepest first).
+            // Dependents (shallow) are disposed before their dependencies (deep).
+            List<Exception>? cleanupExceptions = null;
 
-            for (var i = 0; i < values.Count; i++)
+            if (trackedObjects is not null)
             {
-                cleanupExceptions = await UntrackBucketAsync(testContext, values[i], cleanupExceptions).ConfigureAwait(false);
+                var values = trackedObjects.Values;
+
+                for (var i = 0; i < values.Count; i++)
+                {
+                    cleanupExceptions = await UntrackBucketAsync(testContext, values[i], cleanupExceptions).ConfigureAwait(false);
+                }
             }
-        }
 
-        // Released last: the test's own objects may depend on the shared instances it fetched.
-        if (heldSharedInstances is { Count: > 0 })
+            // Released last: the test's own objects may depend on the shared instances it fetched.
+            if (heldSharedInstances is { Count: > 0 })
+            {
+                cleanupExceptions = await UntrackBucketAsync(testContext, heldSharedInstances, cleanupExceptions, sessionReference: false).ConfigureAwait(false);
+            }
+
+            return cleanupExceptions;
+        }
+        finally
         {
-            cleanupExceptions = await UntrackBucketAsync(testContext, heldSharedInstances, cleanupExceptions, sessionReference: false).ConfigureAwait(false);
+            ReleaseExternalOwners(testContext);
         }
-
-        return cleanupExceptions;
     }
 
     private async ValueTask<List<Exception>?> UntrackBucketAsync(TestContext? testContext, HashSet<object> bucket, List<Exception>? cleanupExceptions, bool sessionReference = true)
@@ -418,16 +426,22 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         }
     }
 
-    private DataRowScopeCollection.ScopeOwner[] RetainExternalOwners(DataRowScopeCollection? scopes)
+    private DataRowScopeCollection.ScopeOwner[] RetainExternalOwners(TestContext context)
     {
+        var scopes = context.InternalEventsIfCreated?.DataRowScopes;
         if (scopes is null) return [];
         var owners = scopes.GetOwners();
         if (owners.Length > 0)
         {
             lock (s_sharedInstanceLock)
-                foreach (var owner in owners) _externalOwners.Add(owner);
+                _externalOwners[context] = owners;
         }
         return owners;
+    }
+
+    private void ReleaseExternalOwners(TestContext context)
+    {
+        lock (s_sharedInstanceLock) _externalOwners.Remove(context);
     }
 
     /// <summary>

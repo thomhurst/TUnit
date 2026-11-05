@@ -7,6 +7,47 @@ namespace TUnit.UnitTests;
 public class ExternalObjectOwnershipTests
 {
     [Test]
+    public async Task Later_Injected_Identity_Revokes_Previous_Dependency_Ownership()
+    {
+        var service = new Service();
+        var injected = service.Child;
+        var scopes = new DataRowScopeCollection();
+        scopes.RegisterObject(scopes.Register(new Scope()), service);
+        scopes.CaptureOwnership();
+        await Assert.That(ExternalObjectOwnership.IsOwned(injected)).IsTrue();
+
+        scopes.CaptureOwnership([injected, service]);
+        await Assert.That(ExternalObjectOwnership.IsOwned(injected)).IsFalse();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service)).IsTrue();
+        GC.KeepAlive(scopes);
+    }
+
+    [Test]
+    public async Task Changed_Graph_Does_Not_Retain_Unreachable_Previous_Dependencies()
+    {
+        var service = new Service();
+        var scopes = new DataRowScopeCollection();
+        scopes.RegisterObject(scopes.Register(new Scope()), service);
+        var previous = ReplaceDependency(scopes, service);
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        await Assert.That(previous.IsAlive).IsFalse();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
+        GC.KeepAlive(scopes);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference ReplaceDependency(DataRowScopeCollection scopes, Service service)
+    {
+        scopes.CaptureOwnership();
+        var previous = new WeakReference(service.Child);
+        service.Child = new Initializer();
+        scopes.CaptureOwnership();
+        return previous;
+    }
+
+    [Test]
     public async Task Ownership_Ends_When_The_Last_Owner_Handle_Is_Collected()
     {
         var service = new Service();

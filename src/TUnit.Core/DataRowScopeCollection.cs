@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using TUnit.Core.Discovery;
 
 namespace TUnit.Core;
@@ -115,11 +116,12 @@ internal sealed class DataRowScopeCollection
         private readonly object? _scope;
         internal bool OwnsCreatedObjects { get; set; }
         // Keep exclusions from wider graphs when a foreign row refreshes only an owned child.
-        private HashSet<object>? _injectedObjects;
+        private readonly ConditionalWeakTable<object, object> _injectedObjects = new();
         private readonly object _ownershipLock = new();
         private readonly HashSet<object> _roots = new(Helpers.ReferenceEqualityComparer.Instance);
         private readonly HashSet<object> _pinnedObjects = new(Helpers.ReferenceEqualityComparer.Instance);
-        private HashSet<object>? _ownedObjects;
+        private readonly ConditionalWeakTable<object, object> _ownedObjects = new();
+        private static readonly object Membership = new();
         private int _disposed;
 
         internal ScopeOwner(object? scope)
@@ -146,11 +148,11 @@ internal sealed class DataRowScopeCollection
         internal bool Owns(object instance)
         {
             lock (_ownershipLock)
-                return ReferenceEquals(instance, _scope) || _roots.Contains(instance) || _ownedObjects?.Contains(instance) == true;
+                return ReferenceEquals(instance, _scope) || _roots.Contains(instance) || _ownedObjects.TryGetValue(instance, out _);
         }
 
-        // Snapshots accumulate dependencies for the lifetime of this handle: a container still
-        // owns previously exposed dependencies after a shared root changes its graph.
+        // Remember previously exposed identities weakly: the container owns their lifetime.
+        // A changed graph must not make this handle retain otherwise unreachable dependencies.
         internal void CaptureOwnership(IEnumerable<object?> injectedRoots)
         {
             object[] roots;
@@ -165,29 +167,34 @@ internal sealed class DataRowScopeCollection
         private void CaptureOwnership(object[] roots, IEnumerable<object?> injectedRoots)
         {
             if (!OwnsCreatedObjects || roots.Length == 0) return;
-            // Publish a complete snapshot only after discovery succeeds. Traversal itself has no
-            // ownership side effects, and readers never observe a partially built graph.
-            HashSet<object> injected;
+            // Discover outside the ownership lock: user getters can enter tracker code.
+            // Publish identities only after discovery succeeds, preserving concurrent exclusions.
+            var injected = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
             lock (_ownershipLock)
-                injected = _injectedObjects is null
-                    ? new(Helpers.ReferenceEqualityComparer.Instance)
-                    : new(_injectedObjects, Helpers.ReferenceEqualityComparer.Instance);
+                foreach (var pair in _injectedObjects) injected.Add(pair.Key);
             var owned = ObjectGraphDiscoverer.DiscoverOwnedObjects(roots, injectedRoots, injected);
             lock (_ownershipLock)
             {
-                // A shared service can expose a different dependency on a later row. Its scope
-                // still owns objects already registered through an earlier snapshot.
-                if (_injectedObjects is not null) injected.UnionWith(_injectedObjects);
-                _injectedObjects = injected.Count == 0 ? null : injected;
-                if (_ownedObjects is not null) owned.UnionWith(_ownedObjects);
+                foreach (var pair in _injectedObjects) injected.Add(pair.Key);
+                foreach (var instance in injected)
+                {
+                    _injectedObjects.GetValue(instance, static _ => Membership);
+                    // Explicit scope and resolved roots always remain container-owned.
+                    if (ReferenceEquals(instance, _scope) || _roots.Contains(instance)) continue;
+                    if (_ownedObjects.Remove(instance))
+                        ExternalObjectOwnership.Unregister(instance, this);
+                }
                 owned.ExceptWith(injected);
-                _ownedObjects = owned;
+                foreach (var instance in owned)
+                {
+                    if (_ownedObjects.TryGetValue(instance, out _)) continue;
+                    _ownedObjects.Add(instance, Membership);
+                    ExternalObjectOwnership.Register(instance, this);
+                }
             }
-            foreach (var instance in owned)
-            {
-                ExternalObjectOwnership.Register(instance, this);
-                RetainWhileCounted(instance);
-            }
+            // Lock order is tracker counter -> ownership -> registry OwnerSet. Never enter
+            // a tracker counter while holding the ownership lock: callbacks can re-enter it.
+            foreach (var instance in owned) RetainWhileCounted(instance);
         }
 
         // An unrelated source may already hold this service in another session. Its existing
