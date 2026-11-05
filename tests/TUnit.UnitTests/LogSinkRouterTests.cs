@@ -83,10 +83,8 @@ public class LogSinkRouterTests
     public async Task RouteToSinks_DoesNothingWhenNoSinksRegistered()
     {
         // Should not throw when no sinks are registered
-        LogSinkRouter.RouteToSinks(LogLevel.Information, "Test message", null, null);
-
-        // Just verify no exception was thrown - test passes if we get here
-        await Assert.That(true).IsTrue();
+        await Assert.That(() => LogSinkRouter.RouteToSinks(LogLevel.Information, "Test message", null, null))
+            .ThrowsNothing();
     }
 
     [Test]
@@ -153,10 +151,8 @@ public class LogSinkRouterTests
     public async Task RouteToSinksAsync_DoesNothingWhenNoSinksRegistered()
     {
         // Should not throw when no sinks are registered
-        await LogSinkRouter.RouteToSinksAsync(LogLevel.Information, "Test message", null, null);
-
-        // Just verify no exception was thrown - test passes if we get here
-        await Assert.That(true).IsTrue();
+        await Assert.That(async () => await LogSinkRouter.RouteToSinksAsync(LogLevel.Information, "Test message", null, null))
+            .ThrowsNothing();
     }
 
     [Test]

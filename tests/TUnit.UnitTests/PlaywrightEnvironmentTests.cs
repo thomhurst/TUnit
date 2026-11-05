@@ -42,7 +42,7 @@ public class PlaywrightEnvironmentTests
 
         var applied = PlaywrightEnvironment.ApplyHeaded(options, headed);
 
-        await Assert.That(applied.Headless).IsEqualTo(false);
+        await Assert.That(applied.Headless).IsFalse();
         await Assert.That(applied.SlowMo).IsEqualTo(100);
         // The caller's options, which may be the shared settings object, are not mutated.
         await Assert.That(options.Headless).IsNull();
@@ -90,7 +90,7 @@ public class PlaywrightEnvironmentTests
         }
 
         await Assert.That(launch.BrowserName).IsEqualTo(BrowserType.Firefox);
-        await Assert.That(launch.Options!.Headless).IsEqualTo(false);
+        await Assert.That(launch.Options!.Headless).IsFalse();
     }
 
     [Test]
@@ -106,7 +106,7 @@ public class PlaywrightEnvironmentTests
         }
 
         await Assert.That(launch.BrowserName).IsEqualTo(BrowserType.Webkit);
-        await Assert.That(launch.Options!.Headless).IsEqualTo(true);
+        await Assert.That(launch.Options!.Headless).IsTrue();
     }
 
     [Test]
@@ -136,7 +136,7 @@ public class PlaywrightEnvironmentTests
         {
             await Assert.That(test.BrowserName).IsEqualTo(BrowserType.Webkit);
             var launched = test.ResolveLaunchOptions();
-            await Assert.That(launched.Headless).IsEqualTo(false);
+            await Assert.That(launched.Headless).IsFalse();
             await Assert.That(launched.SlowMo).IsEqualTo(50);
         }
 
@@ -151,7 +151,7 @@ public class PlaywrightEnvironmentTests
 
         using (new EnvironmentScope(("HEADED", "1")))
         {
-            await Assert.That(test.ResolveLaunchOptions().Headless).IsEqualTo(true);
+            await Assert.That(test.ResolveLaunchOptions().Headless).IsTrue();
         }
     }
 

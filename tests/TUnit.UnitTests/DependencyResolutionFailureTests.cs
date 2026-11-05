@@ -8,28 +8,28 @@ namespace TUnit.UnitTests;
 public class DependencyResolutionFailureTests
 {
     [Test]
-    public async Task TestWithValidDependency()
+    public Task TestWithValidDependency()
     {
         // This test should run successfully
-        await Assert.That(1 + 1).IsEqualTo(2);
+        return Task.CompletedTask;
     }
 
     [Test]
     [DependsOn("NonExistentTest")]
-    public async Task TestWithMissingDependency()
+    public Task TestWithMissingDependency()
     {
         // This test should be marked as failed due to missing dependency
         // but should not prevent other tests from running
-        await Assert.That(true).IsTrue();
+        return Task.CompletedTask;
     }
 
     [Test]
     [DependsOn(nameof(TestWithMissingDependency))]
-    public async Task TestDependingOnFailedDependencyResolution()
+    public Task TestDependingOnFailedDependencyResolution()
     {
         // This test depends on a test that failed dependency resolution
         // It should also fail or be skipped
-        await Assert.That(true).IsTrue();
+        return Task.CompletedTask;
     }
 
     [Test]
@@ -41,9 +41,9 @@ public class DependencyResolutionFailureTests
 
     [Test]
     [DependsOn("TestMethod", [typeof(string), typeof(int)])]
-    public async Task TestWithMissingOverloadDependency()
+    public Task TestWithMissingOverloadDependency()
     {
         // This test depends on a method overload that doesn't exist
-        await Assert.That(true).IsTrue();
+        return Task.CompletedTask;
     }
 }

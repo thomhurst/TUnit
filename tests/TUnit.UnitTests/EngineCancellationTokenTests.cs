@@ -69,7 +69,7 @@ public class EngineCancellationTokenTests
         var handled = token.OnTerminationSignal();
 
         await Assert.That(handled).IsTrue();
-        await Assert.That(armedWhenCallbackRan).IsEqualTo(true);
+        await Assert.That(armedWhenCallbackRan).IsTrue();
         await Assert.That(token.TerminationSignalReceived).IsTrue();
         await Assert.That(token.Token.IsCancellationRequested).IsTrue();
     }

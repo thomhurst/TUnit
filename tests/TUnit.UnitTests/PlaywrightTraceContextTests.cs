@@ -166,7 +166,7 @@ public class PlaywrightTraceContextTests
             .Do(_ => throw new PlaywrightException("route failed"));
         var test = new OriginsBrowserTest(["https://app.test"]) { Browser = browser };
 
-        await Assert.That(() => test.NewContext(new BrowserNewContextOptions())).Throws<PlaywrightException>();
+        await Assert.That(async () => { await test.NewContext(new BrowserNewContextOptions()); }).Throws<PlaywrightException>();
         await context.Received(1).CloseAsync();
     }
 
