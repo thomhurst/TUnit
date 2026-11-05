@@ -20,6 +20,8 @@ namespace TUnit.TestProject.Lookalikes
 namespace TUnit.TestProject.DerivedSources
 {
     public sealed class MethodDataSourceAttribute(string memberName) : TUnit.Core.MethodDataSourceAttribute(memberName);
+    public sealed class InstanceSourceAttribute(string memberName) : TUnit.Core.InstanceMethodDataSourceAttribute(memberName);
+    public sealed class AliasAttribute(string label) : TUnit.Core.MethodDataSourceAttribute(nameof(LookalikeDataSourceTests.RealRows));
 }
 
 namespace TUnit.TestProject.PropertyLookalikes
@@ -60,6 +62,30 @@ namespace TUnit.TestProject
         public static string? DerivedProperty { get; set; }
 
         public static string DerivedValue() => "derived method source";
+
+        public IEnumerable<int> InstanceRows() => [42];
+        public static IEnumerable<object> ObjectRows() => [42];
+        public static IEnumerable<int> DecoyRows() => [99];
+        public static IEnumerable<string> RealRows() => ["real row"];
+
+        [Test]
+        [GenerateGenericTest(typeof(object))]
+        [DerivedSources.InstanceSource(nameof(InstanceRows))]
+        [MethodDataSource(nameof(ObjectRows))]
+        public async Task Derived_instance_source_preserves_explicit_types<T>(T value)
+        {
+            await Assert.That(typeof(T)).IsEqualTo(typeof(object));
+            await Assert.That((object?)value).IsEqualTo(42);
+        }
+
+        [Test]
+        [GenerateGenericTest(typeof(string))]
+        [DerivedSources.Alias(nameof(DecoyRows))]
+        public async Task Remapped_source_uses_real_rows<T>(T value)
+        {
+            await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+            await Assert.That((object?)value).IsEqualTo("real row");
+        }
 
         [Test]
         [DerivedSources.MethodDataSource(nameof(DerivedValue))]

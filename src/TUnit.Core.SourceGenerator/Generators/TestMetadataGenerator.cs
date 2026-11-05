@@ -1227,7 +1227,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // the same instantiation first. This helper is called only for explicit method types.
             foreach (var source in testMethod.MethodAttributes)
             {
-                if (DataSourceAttributeHelper.IsBuiltIn(source.AttributeClass, "InstanceMethodDataSourceAttribute"))
+                if (DataSourceAttributeHelper.IsOrInheritsBuiltIn(source.AttributeClass, "InstanceMethodDataSourceAttribute"))
                 {
                     existing.AddRow(source, isClassRow: false);
                 }
@@ -7168,7 +7168,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         // Reflection mode runs instance sources on the explicit method types when supplied, without
         // adding declared-row instantiations. Preserve conversions enabled by those explicit types.
-        if (DataSourceAttributeHelper.IsBuiltIn(mdsAttr.AttributeClass, "InstanceMethodDataSourceAttribute")
+        if (DataSourceAttributeHelper.IsOrInheritsBuiltIn(mdsAttr.AttributeClass, "InstanceMethodDataSourceAttribute")
             && HasExplicitGenericTestTypes(testMethod))
         {
             return null;
@@ -7213,6 +7213,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var compilation = testMethod.CompilationContext.Compilation;
         foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
         {
+            // Custom constructors may remap arguments; this parser handles only the built-in layout.
             if ((!DataSourceAttributeHelper.IsBuiltIn(attribute.AttributeClass, "MethodDataSourceAttribute") || attribute.AttributeClass!.IsGenericType)
                 || attribute.ConstructorArguments is not [{ Value: string memberName }])
             {
@@ -7493,7 +7494,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr, ITypeSymbol[]? classTypes = null)
     {
-        if (mdsAttr.ConstructorArguments.Length == 0)
+        if (!DataSourceAttributeHelper.CanReadMethodSourceArguments(mdsAttr)
+            || mdsAttr.ConstructorArguments.Length == 0)
         {
             return null;
         }

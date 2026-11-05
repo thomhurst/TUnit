@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
 
@@ -33,6 +34,57 @@ internal static class DataSourceAttributeHelper
 
     public static bool IsMethodSource(INamedTypeSymbol? symbol)
         => IsOrInheritsBuiltIn(symbol, "MethodDataSourceAttribute") || IsOrInheritsBuiltIn(symbol, "InstanceMethodDataSourceAttribute");
+
+    // Only interpret a custom constructor's arguments when it forwards them unchanged to a
+    // built-in constructor. Unknown mappings stay on the runtime IDataSourceAttribute path.
+    public static bool CanReadMethodSourceArguments(AttributeData attribute)
+    {
+        if (IsBuiltIn(attribute.AttributeClass, "MethodDataSourceAttribute")
+            || IsBuiltIn(attribute.AttributeClass, "InstanceMethodDataSourceAttribute"))
+        {
+            return true;
+        }
+
+        if (attribute.AttributeClass is not { IsGenericType: false, BaseType.IsGenericType: false }
+            || attribute.AttributeConstructor is not { } constructor
+            || !(IsBuiltIn(attribute.AttributeClass?.BaseType, "MethodDataSourceAttribute")
+                || IsBuiltIn(attribute.AttributeClass?.BaseType, "InstanceMethodDataSourceAttribute")))
+        {
+            return false;
+        }
+
+        foreach (var reference in constructor.DeclaringSyntaxReferences)
+        {
+            var arguments = reference.GetSyntax() switch
+            {
+                ClassDeclarationSyntax declaration => declaration.BaseList?.Types
+                    .OfType<PrimaryConstructorBaseTypeSyntax>().SingleOrDefault()?.ArgumentList.Arguments,
+                ConstructorDeclarationSyntax { Body.Statements.Count: 0, ExpressionBody: null } declaration
+                    when declaration.Initializer?.ThisOrBaseKeyword.ValueText == "base"
+                    => declaration.Initializer.ArgumentList.Arguments,
+                _ => null
+            };
+
+            if (arguments is not { } forwarded || forwarded.Count != constructor.Parameters.Length)
+            {
+                continue;
+            }
+
+            for (var i = 0; i < forwarded.Count; i++)
+            {
+                if (forwarded[i].NameColon != null
+                    || forwarded[i].Expression is not IdentifierNameSyntax identifier
+                    || identifier.Identifier.ValueText != constructor.Parameters[i].Name)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
 
     public static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {

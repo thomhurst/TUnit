@@ -318,6 +318,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         {
             sourceAttribute = ParseArgumentsDataSourceWithAssignment(attr);
         }
+        // Custom constructors may remap arguments; instantiate them through IDataSourceAttribute below.
         else if (DataSourceAttributeHelper.IsBuiltIn(attr.AttributeClass, "MethodDataSourceAttribute"))
         {
             sourceAttribute = ParseMethodDataSourceWithAssignment(attr, staticProperty.Property.ContainingType);
