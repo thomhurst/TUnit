@@ -1,4 +1,5 @@
 using TUnit.Core;
+using TUnit.Core.Interfaces;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
 
@@ -85,7 +86,12 @@ public class ClassRowCleanupTests
         var constructorDisposals = 0;
         var rejectedDisposals = 0;
         var scopeDisposals = 0;
-        var rejectedStarts = 0;
+        var constructorInitializations = 0;
+        var constructorStarts = 0;
+        var rejectedInitializations = 0;
+        var rejectedLifecycleCalls = 0;
+        original.RegisterForInitialization(new DiscoveryInitializer(() => constructorInitializations++));
+        original.Events.OnTestStart += (_, _) => { constructorStarts++; return default; };
         original.Events.OnDispose += (_, _) => { constructorDisposals++; return default; };
         var data = new object?[] { new object() };
         var row = new TestBuilder.UnclaimedClassRow(data, null, original);
@@ -101,7 +107,17 @@ public class ClassRowCleanupTests
                 await Assert.That(context.StateBag.Items["rejected-resource"]).IsSameReferenceAs(resource);
                 rejectedDisposals++;
             };
-            rejected.Events.OnTestStart += (_, _) => { rejectedStarts++; return default; };
+            rejected.RegisterForInitialization(new DiscoveryInitializer(() => rejectedInitializations++));
+            ValueTask RejectedLifecycle(object sender, TestContext context)
+            {
+                rejectedLifecycleCalls++;
+                return default;
+            }
+            rejected.Events.OnTestRegistered += RejectedLifecycle;
+            rejected.Events.OnTestStart += RejectedLifecycle;
+            rejected.Events.OnTestEnd += RejectedLifecycle;
+            rejected.Events.OnTestSkipped += RejectedLifecycle;
+            rejected.Events.OnTestRetry += (_, _) => { rejectedLifecycleCalls++; return default; };
             (rejected.Events.DataRowScopes ??= new()).Register(new CallbackScope(() => { scopeDisposals++; return default; }));
             row.Return(data, null, rejected);
         }
@@ -112,17 +128,34 @@ public class ClassRowCleanupTests
             row.TransferCleanupTo(owner);
         else
             await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse constructor"), owner);
+        // Neither returning a rejected row nor taking the next one may release its class resource early.
+        await Assert.That(constructorDisposals).IsEqualTo(0);
+        await Assert.That(rejectedDisposals).IsEqualTo(0);
         var current = TestContext.Current!;
         var executableContext = new TestContext("Cleanup owner", current.ServiceProvider, current.ClassContext,
             owner, CancellationToken.None);
         executableContext.Metadata.TestDetails = current.TestDetails;
         try
         {
+            foreach (var lifecycleEvent in new[]
+                     {
+                         owner.Events.OnInitialize, owner.Events.OnTestRegistered, owner.Events.OnTestStart,
+                         owner.Events.OnTestEnd, owner.Events.OnTestSkipped
+                     })
+            {
+                if (lifecycleEvent is { } handlers)
+                    foreach (var handler in handlers.InvocationList)
+                        await handler.InvokeAsync(executableContext, executableContext);
+            }
+            if (owner.Events.OnTestRetry is { } retries)
+                foreach (var handler in retries.InvocationList)
+                    await handler.InvokeAsync(executableContext, (executableContext, 1));
+            await Assert.That(constructorInitializations).IsEqualTo(1);
+            await Assert.That(constructorStarts).IsEqualTo(1);
+            await Assert.That(rejectedInitializations).IsEqualTo(0);
+            await Assert.That(rejectedLifecycleCalls).IsEqualTo(0);
             foreach (var handler in owner.Events.OnDispose!.InvocationList)
                 await handler.InvokeAsync(executableContext, executableContext);
-            if (owner.Events.OnTestStart is { } starts)
-                foreach (var handler in starts.InvocationList)
-                    await handler.InvokeAsync(executableContext, executableContext);
             await DisposeRow(owner);
             await Assert.That(executableContext.StateBag.Items["rejected-resource"]).IsSameReferenceAs(ownerResource);
         }
@@ -134,7 +167,6 @@ public class ClassRowCleanupTests
         await Assert.That(constructorDisposals).IsEqualTo(1);
         await Assert.That(rejectedDisposals).IsEqualTo(2);
         await Assert.That(scopeDisposals).IsEqualTo(2);
-        await Assert.That(rejectedStarts).IsEqualTo(0);
     }
 
     [Test]
@@ -703,6 +735,15 @@ public class ClassRowCleanupTests
             await scopes.CompleteAsync() is { } exceptions)
         {
             throw new AggregateException(exceptions);
+        }
+    }
+
+    private sealed class DiscoveryInitializer(Action initialize) : IAsyncDiscoveryInitializer
+    {
+        public Task InitializeAsync()
+        {
+            initialize();
+            return Task.CompletedTask;
         }
     }
 
