@@ -175,6 +175,166 @@ public class ClassRowCleanupTests
     }
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task ConstructorReplayPreservesMutableReferencesAndLaterEnumerationWrites(bool refetch)
+    {
+        var enumeration = CreateContext();
+        var mutated = new List<int>();
+        var replaced = new List<int>();
+        enumeration.StateBag["mutable"] = mutated;
+        enumeration.StateBag["replace"] = replaced;
+        enumeration.StateBag["remove"] = new List<int>();
+        var original = enumeration.CreateChild(null);
+        var constructorValue = new List<int> { 2 };
+        var data = new object?[] { new object() };
+        void RunConstructor(TestBuilderContext context)
+        {
+            ((List<int>)context.StateBag["mutable"]!).Add(1);
+            context.StateBag["replace"] = constructorValue;
+            context.StateBag.TryRemove("remove", out _);
+        }
+        if (!refetch)
+            RunConstructor(original);
+        var row = new TestBuilder.UnclaimedClassRow(data, null, original, enumeration);
+        if (refetch)
+        {
+            var first = CreateContext();
+            await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse first row"), first);
+            row.ClaimCleanupTo(first);
+            var fetched = enumeration.CreateChild(null);
+            await row.TakeOrFetchAsync(() =>
+            {
+                RunConstructor(fetched);
+                return Task.FromResult<object?[]?>(data);
+            }, fetched);
+            row.Return(data, null, fetched);
+            // A saved replay must not read a factory's dictionary again after capture.
+            fetched.StateBag["replace"] = new object();
+        }
+
+        for (var repeat = 0; repeat < 3; repeat++)
+        {
+            var target = enumeration.CreateChild(null);
+            var methodValue = new object();
+            if (repeat == 1)
+                target.StateBag["mutable"] = methodValue;
+            else if (repeat == 2)
+                target.StateBag.TryRemove("mutable", out _);
+            target.StateBag["replace"] = methodValue;
+            target.StateBag["remove"] = methodValue;
+            await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse rejected row"), target);
+            await Assert.That(target.StateBag["replace"]).IsSameReferenceAs(constructorValue);
+            await Assert.That(target.StateBag.ContainsKey("remove")).IsFalse();
+            await Assert.That(target.StateBag.ContainsKey("mutable")).IsEqualTo(repeat != 2);
+            if (repeat != 2)
+                await Assert.That(target.StateBag["mutable"]).IsSameReferenceAs(repeat == 0 ? mutated : methodValue);
+            row.Return(data, null, target);
+        }
+        await Assert.That(mutated.Count).IsEqualTo(1);
+        await Assert.That(replaced.Count).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task RowLifetimeRestoresAccessorAfterCleanupFailure()
+    {
+        var source = CreateContext();
+        var factory = source.CreateChild(null);
+        var accessor = new TestBuilderContextAccessor(factory);
+        factory.Events.OnDispose += (_, _) => throw new InvalidOperationException("Cleanup failure");
+        var row = new TestBuilder.UnclaimedClassRow([], null, factory);
+        var failures = 0;
+        using (var lifetime = new TestBuilder.RowContextLifetime(accessor, source, row))
+        {
+            var cleanupErrors = await lifetime.ReleaseAsync(CreateCleanupContext);
+            failures = cleanupErrors!.Count;
+        }
+        await Assert.That(failures).IsEqualTo(1);
+        await Assert.That(accessor.Current).IsSameReferenceAs(source);
+        await Assert.That(TestBuilderContext.Current).IsSameReferenceAs(source);
+    }
+
+    [Test]
+    public async Task RowLifetimeTransfersFailureCleanupBeforeRestoringAccessorOnException()
+    {
+        var source = CreateContext();
+        var factory = source.CreateChild(null);
+        var accessor = new TestBuilderContextAccessor(factory);
+        var callbacks = 0;
+        factory.Events.OnDispose += (_, _) => { callbacks++; return default; };
+        var row = new TestBuilder.UnclaimedClassRow([], null, factory, factory.CreateChild(null));
+        var failed = CreateContext();
+        try
+        {
+            using var lifetime = new TestBuilder.RowContextLifetime(accessor, source, row);
+            accessor.Current = factory.CreateChild(null);
+            lifetime.TransferCleanupToCurrent();
+            failed = lifetime.ClaimFailureContext();
+            throw new InvalidOperationException("Temporary instance disposal failure");
+        }
+        catch (InvalidOperationException)
+        {
+            await Assert.That(accessor.Current).IsSameReferenceAs(source);
+            await Assert.That(TestBuilderContext.Current).IsSameReferenceAs(source);
+        }
+        using var context = CreateCleanupContext(failed);
+        context.RemoveFromRegistry();
+        foreach (var callback in failed.Events.OnDispose!.InvocationList)
+            await callback.InvokeAsync(context, context);
+        await Assert.That(callbacks).IsEqualTo(1);
+        await Assert.That(await row.ReleaseAsync(CreateCleanupContext)).IsNull();
+    }
+
+    [Test]
+    [NotInParallel]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task ManyRejectedRowsCreateOnlyOneCleanupContextPerOwner(bool claimed)
+    {
+        const int rejectedRows = 64;
+        var original = CreateContext();
+        var classCalls = 0;
+        original.Events.OnDispose += (_, _) => { classCalls++; return default; };
+        var data = new object?[] { new object() };
+        var row = new TestBuilder.UnclaimedClassRow(data, null, original);
+        var calls = new int[rejectedRows];
+        for (var i = 0; i < rejectedRows; i++)
+        {
+            var index = i;
+            var rejected = CreateContext();
+            await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse constructor"), rejected);
+            rejected.StateBag["row"] = i;
+            rejected.Events.OnDispose += async (_, context) =>
+            {
+                await Assert.That(context.StateBag.Items["row"]).IsEqualTo(index);
+                calls[index]++;
+            };
+            row.Return(data, null, rejected);
+        }
+        var owner = CreateContext();
+        using var start = CreateCleanupContext(owner);
+        var startId = start.IsolationUniqueId;
+        start.RemoveFromRegistry();
+        if (claimed)
+        {
+            await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse constructor"), owner);
+            row.ClaimCleanupTo(owner);
+            foreach (var callback in owner.Events.OnDispose!.InvocationList)
+                await callback.InvokeAsync(start, start);
+        }
+        else
+            await row.ReleaseAsync(CreateCleanupContext);
+        using var end = CreateCleanupContext(owner);
+        end.RemoveFromRegistry();
+        // The exclusive test sees every temporary allocation through the monotonic context ID.
+        // Nested re-wrapping would create N(N+1)/2 contexts while still invoking each callback once.
+        await Assert.That(end.IsolationUniqueId - startId).IsEqualTo(rejectedRows + (claimed ? 1 : 2));
+        await Assert.That(classCalls).IsEqualTo(1);
+        await Assert.That(calls.All(count => count == 1)).IsTrue();
+        await Assert.That(await row.ReleaseAsync(CreateCleanupContext)).IsNull();
+    }
+
+    [Test]
     public async Task InstanceConstructorSubscriptionsReachExecutableRow()
     {
         var current = TestContext.Current!;

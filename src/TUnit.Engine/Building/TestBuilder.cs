@@ -266,7 +266,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                     var needsInstanceForMethodDataSources = HasInstanceDataAccessor(metadata.DataSources);
 
-                    var classEnumerationContext = contextAccessor.Current;
+                    using var rowLifetime = new RowContextLifetime(contextAccessor, classSourceContext, unclaimedClassRow);
                     object? instanceForMethodDataSources = null;
                     try
                     {
@@ -287,7 +287,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                             if (!instanceResult.Success)
                             {
-                                unclaimedClassRow.TransferCleanupTo(contextAccessor.Current);
+                                rowLifetime.TransferCleanupToCurrent();
                                 var failedTest = CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!, classData, contextAccessor.Current);
                                 tests.Add(failedTest);
                                 continue;
@@ -568,11 +568,7 @@ internal sealed class TestBuilder : ITestBuilder
                     {
                         // Enumeration may resume on a context whose class cleanup already belongs
                         // to a runnable row. Only the unclaimed row may lend cleanup to this failure.
-                        var failureContext = ReferenceEquals(contextAccessor.Current, classEnumerationContext)
-                            ? unclaimedClassRow.CreateEnumerationFailureContext(classEnumerationContext)
-                            : contextAccessor.Current;
-                        unclaimedClassRow.ClaimCleanupTo(failureContext);
-                        contextAccessor.Current = failureContext;
+                        var failureContext = rowLifetime.ClaimFailureContext();
                         var failedTest = CreateFailedTestForDataGenerationError(metadata, ex,
                             new TestDataCombination(), methodData: unclaimedClassRow.TakeLentObjects(),
                             rowContext: failureContext);
@@ -582,10 +578,9 @@ internal sealed class TestBuilder : ITestBuilder
                     finally
                     {
                         await DisposeInstanceForMethodDataSourcesAsync(instanceForMethodDataSources);
-                        if (await unclaimedClassRow.ReleaseAsync(CreateCleanupContext) is { Count: > 0 } cleanupErrors)
+                        if (await rowLifetime.ReleaseAsync(CreateCleanupContext) is { Count: > 0 } cleanupErrors)
                             tests.Add(CreateFailedTestForDataGenerationError(metadata, new AggregateException(cleanupErrors),
                                 new TestDataCombination { ClassDataSourceIndex = classDataAttributeIndex, ClassLoopIndex = classDataLoopIndex }));
-                        contextAccessor.Current = classSourceContext;
                     }
                 }
 
@@ -1061,6 +1056,73 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
     /// <summary>
+    /// Keeps the accessor on a row until failure cleanup has been transferred, then restores
+    /// its source even when temporary-instance disposal or row cleanup throws.
+    /// </summary>
+    internal readonly struct RowContextLifetime(
+        TestBuilderContextAccessor accessor, TestBuilderContext source, UnclaimedClassRow row) : IDisposable
+    {
+        internal void TransferCleanupToCurrent() => row.TransferCleanupTo(accessor.Current);
+
+        internal TestBuilderContext ClaimFailureContext()
+        {
+            var context = row.CreateFailureContext(accessor.Current);
+            row.ClaimCleanupTo(context);
+            accessor.Current = context;
+            return context;
+        }
+
+        internal ValueTask<List<Exception>?> ReleaseAsync(Func<TestBuilderContext, TestContext> createContext)
+            => row.ReleaseAsync(createContext);
+
+        public void Dispose() => accessor.Current = source;
+    }
+
+    /// <summary>
+    /// An immutable log of constructor dictionary writes and removals, captured before any
+    /// method factory runs. An inherited value with the same reference is not a dictionary
+    /// write: in-place mutations stay visible to consumers of that object, but do not undo a
+    /// later method-enumeration replacement or removal of its key. Values are never deep-cloned.
+    /// </summary>
+    private readonly struct ConstructorStateReplay(
+        List<KeyValuePair<string, object?>>? writes, List<string>? removals)
+    {
+        internal static ConstructorStateReplay Capture(Dictionary<string, object?>? baseline, TestBuilderContext saved)
+        {
+            List<KeyValuePair<string, object?>>? writes = null;
+            List<string>? removals = null;
+            if (saved.HasStateBag)
+            {
+                foreach (var entry in saved.StateBag)
+                {
+                    if (baseline is null || !baseline.TryGetValue(entry.Key, out var inherited)
+                        || !ReferenceEquals(inherited, entry.Value))
+                        (writes ??= []).Add(entry);
+                }
+            }
+            if (baseline is not null)
+            {
+                foreach (var key in baseline.Keys)
+                {
+                    if (!saved.HasStateBag || !saved.StateBag.ContainsKey(key))
+                        (removals ??= []).Add(key);
+                }
+            }
+            return new(writes, removals);
+        }
+
+        internal void ApplyTo(TestBuilderContext target)
+        {
+            if (removals is not null && target.HasStateBag)
+                foreach (var key in removals)
+                    target.StateBag.TryRemove(key, out _);
+            if (writes is not null)
+                foreach (var entry in writes)
+                    target.StateBag[entry.Key] = entry.Value;
+        }
+    }
+
+    /// <summary>
     /// The objects of a class data row that were fetched but that no test holds yet. The builder fetches a
     /// class row once before it evaluates the method data sources, and its tests used to fetch it again,
     /// so a non-shared source created an extra instance per class row that nothing tracked or disposed.
@@ -1080,12 +1142,8 @@ internal sealed class TestBuilder : ITestBuilder
         private object?[]? _lent;
 
         private readonly TestBuilderContext _enumerationContext = enumerationContext ?? rowContext;
-        // Compare each saved constructor row against its own pre-factory state.
-        // Method enumeration can change between constructor fetches.
-        private Dictionary<string, object?>? _constructorBaseline = enumerationContext?.HasStateBag == true
-            ? new(enumerationContext.StateBag)
-            : null;
-        private TestBuilderContext _rowContext = rowContext;
+        private ConstructorStateReplay _constructorState = ConstructorStateReplay.Capture(
+            enumerationContext?.HasStateBag == true ? new(enumerationContext.StateBag) : null, rowContext);
         // Snapshot before any method factory can mutate the class subscriptions.
         private TestContextEvents? _lifecycleEvents = LifecycleEvents(rowContext);
         private RowCleanupOwner? _cleanup = RowCleanupOwner.Capture(rowContext);
@@ -1127,15 +1185,9 @@ internal sealed class TestBuilder : ITestBuilder
 
             async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> FetchAsync(Func<Task<object?[]?>> factory, TestBuilderContext target)
             {
-                _constructorBaseline = target.HasStateBag ? new(target.StateBag) : null;
+                var baseline = target.HasStateBag ? new Dictionary<string, object?>(target.StateBag) : null;
                 var row = DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
-                _rowContext = target with { };
-                // Record cloning shares the bag, so even a materialized empty bag must
-                // be detached before a rejected method factory can mutate the target.
-                if (target.HasStateBag)
-                {
-                    _rowContext.StateBag = new ConcurrentDictionary<string, object?>(target.StateBag);
-                }
+                _constructorState = ConstructorStateReplay.Capture(baseline, target);
                 _lifecycleEvents = LifecycleEvents(target);
                 _cleanup = RowCleanupOwner.Capture(target);
                 _pending = true;
@@ -1149,30 +1201,7 @@ internal sealed class TestBuilder : ITestBuilder
 
         private void ApplySavedContextTo(TestBuilderContext context)
         {
-            // Keep method-enumeration state, but replay constructor-factory updates
-            // and removals of inherited keys as well as newly added constructor state.
-            if (_rowContext.HasStateBag)
-            {
-                if (_constructorBaseline is not null && context.HasStateBag)
-                {
-                    foreach (var key in _constructorBaseline.Keys)
-                    {
-                        if (!_rowContext.StateBag.ContainsKey(key))
-                        {
-                            context.StateBag.TryRemove(key, out _);
-                        }
-                    }
-                }
-                foreach (var entry in _rowContext.StateBag)
-                {
-                    if (_constructorBaseline is null
-                        || !_constructorBaseline.TryGetValue(entry.Key, out var inherited)
-                        || !ReferenceEquals(inherited, entry.Value))
-                    {
-                        context.StateBag[entry.Key] = entry.Value;
-                    }
-                }
-            }
+            _constructorState.ApplyTo(context);
             if (_lifecycleEvents is { } savedEvents)
             {
                 context.Events = savedEvents.Clone();
