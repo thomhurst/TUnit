@@ -7318,6 +7318,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return true;
             }
 
+            // Enum.ToObject accepts integral values when the binder reconstructs tuple elements.
+            if (reconstructTupleElements && stringTarget.TypeKind == TypeKind.Enum
+                && row.SpecialType is SpecialType.System_SByte or SpecialType.System_Byte
+                    or SpecialType.System_Int16 or SpecialType.System_UInt16
+                    or SpecialType.System_Int32 or SpecialType.System_UInt32
+                    or SpecialType.System_Int64 or SpecialType.System_UInt64)
+            {
+                return true;
+            }
+
             // CastHelper supports numeric and user-defined conversions when reconstructing elements.
             // Whole-row binding still requires identity; it cannot rebuild the tuple.
             if (conversion.Exists

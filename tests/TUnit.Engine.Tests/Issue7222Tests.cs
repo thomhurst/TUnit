@@ -242,7 +242,7 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    [Arguments("SingleTupleElementConversionTests", 14)]
+    [Arguments("SingleTupleElementConversionTests", 16)]
     [Arguments("ClosedClassParameterInferredSourceTests*", 1)]
     [Arguments("ExplicitClassParameterInferredSourceTests*", 1)]
     [Arguments("ClosedClassTupleInferenceTests*", 3)]

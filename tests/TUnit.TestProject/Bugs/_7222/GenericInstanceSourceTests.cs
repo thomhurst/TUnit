@@ -320,6 +320,22 @@ public class SingleTupleElementConversionTests
             throw new InvalidOperationException("Expected narrowing numeric reference element conversion");
     }
 
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void EnumElement<T>((T, DayOfWeek) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != DayOfWeek.Tuesday)
+            throw new InvalidOperationException("Expected integral-to-enum element conversion");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(NarrowReferenceRows))]
+    public void EnumReferenceElement<T>(Tuple<T, DayOfWeek> row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != DayOfWeek.Thursday)
+            throw new InvalidOperationException("Expected integral-to-enum reference element conversion");
+    }
+
     public static IEnumerable<(int, string)> StringRows() => [(1, "2")];
     public IEnumerable<Tuple<int, string>> StringReferenceRows() => [Tuple.Create(3, "4.5")];
 

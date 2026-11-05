@@ -44,6 +44,8 @@ internal class InstanceMethodTypeInferenceTests : TestsBase
             await Assert.That(source).Contains("CrossFamily<int>");
             await Assert.That(source).Contains("NullableElement<int>");
             await Assert.That(source).Contains("NumericElement<int>");
+            await Assert.That(source).Contains("EnumElement<int>");
+            await Assert.That(source).Contains("EnumReferenceElement<int>");
             await Assert.That(source).Contains("StringElement<int>");
             await Assert.That(source).Contains("StringReferenceElement<int>");
             await Assert.That(source).Contains("OperatorElement<int>");
