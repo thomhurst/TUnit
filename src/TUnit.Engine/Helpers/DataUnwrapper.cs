@@ -48,8 +48,12 @@ internal class DataUnwrapper
         ParameterMetadata[]? expectedParameters)
     {
         // First check for TestDataRow wrapper
+        var reconstructTuple = false;
+        var tupleType = values is [ITestDataRow]
+            ? GetTupleDataParameterType(expectedParameters, out reconstructTuple)
+            : null;
         var (unwrapped, metadata) = TestDataRowUnwrapper.UnwrapArray(values,
-            values is [ITestDataRow] ? GetTupleDataParameterType(expectedParameters) : null);
+            tupleType, reconstructTuple);
 
         // Then apply type-aware unwrapping
         var data = UnwrapWithTypesInternal(unwrapped, expectedParameters);
@@ -59,13 +63,18 @@ internal class DataUnwrapper
     public static object?[] UnwrapWithTypes(object?[] values, ParameterMetadata[]? expectedParameters)
     {
         // First handle TestDataRow unwrapping
+        var reconstructTuple = false;
+        var tupleType = values is [ITestDataRow]
+            ? GetTupleDataParameterType(expectedParameters, out reconstructTuple)
+            : null;
         var (unwrapped, _) = TestDataRowUnwrapper.UnwrapArray(values,
-            values is [ITestDataRow] ? GetTupleDataParameterType(expectedParameters) : null);
+            tupleType, reconstructTuple);
         return UnwrapWithTypesInternal(unwrapped, expectedParameters);
     }
 
-    private static Type? GetTupleDataParameterType(ParameterMetadata[]? parameters)
+    private static Type? GetTupleDataParameterType(ParameterMetadata[]? parameters, out bool reconstructTuple)
     {
+        reconstructTuple = false;
         if (parameters is null)
         {
             return null;
@@ -77,6 +86,18 @@ internal class DataUnwrapper
             if (dataType == typeof(CancellationToken))
             {
                 continue;
+            }
+
+            // A sole tuple parameter reconstructs elements across tuple families. Preserve its
+            // payload boundary even when strict whole-row matching would reject it.
+            reconstructTuple = true;
+            for (var j = i + 1; j < parameters.Length; j++)
+            {
+                if (parameters[j].Type != typeof(CancellationToken))
+                {
+                    reconstructTuple = false;
+                    break;
+                }
             }
 
             // Wrapped and unwrapped rows must use the same whole-tuple binding rule.
@@ -163,7 +184,20 @@ internal class DataUnwrapper
             // A reference tuple with a lone null must retain its container: [null] also
             // represents an actual null argument. Value tuples always reconstruct from null.
             var tupleElements = DataSourceHelpers.RetainTupleElements(values[0]);
-            return !lastDataParameterType.IsValueType && tupleElements is [null] ? values : tupleElements;
+            if (!lastDataParameterType.IsValueType && tupleElements is [null])
+            {
+                return values;
+            }
+
+            // A singleton tuple element is a flattened column, not a preserved whole row.
+            // Retain its boundary explicitly so invocation can reconstruct the outer tuple
+            // without guessing from the inner tuple's arity.
+            if (tupleElements is [var element] && element is not TupleArgument && DataSourceHelpers.IsTuple(element))
+            {
+                tupleElements[0] = new TupleArgument(element!.GetType(), DataSourceHelpers.RetainTupleElements(element));
+            }
+
+            return tupleElements;
         }
 
         // A tuple that is already an instance of the first data parameter's tuple type binds to it
