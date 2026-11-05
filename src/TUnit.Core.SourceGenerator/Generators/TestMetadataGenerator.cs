@@ -7150,10 +7150,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
-    private static bool IsMethodDataSourceAttribute(INamedTypeSymbol? attributeClass) =>
-        attributeClass?.GloballyQualifiedNonGeneric() is
-            "global::TUnit.Core.MethodDataSourceAttribute" or InstanceMethodDataSourceAttributeName;
-
     private static bool HasExplicitGenericTestTypes(TestMethodMetadata testMethod) =>
         testMethod.MethodAttributes.Any(static attribute =>
             attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
