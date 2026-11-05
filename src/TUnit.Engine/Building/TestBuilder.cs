@@ -689,7 +689,7 @@ internal sealed class TestBuilder : ITestBuilder
         TestContext CreateCleanupContext(TestBuilderContext rowContext)
         {
             var details = CreateFailedTestDetails(metadata, TestIdentifierService.GenerateFailedTestId(metadata, new TestDataCombination()), []);
-            return CreateFailedTestContext(metadata, details, rowContext);
+            return CreateFailedTestContext(metadata, details, rowContext, registerAsTest: false);
         }
     }
 
@@ -1952,7 +1952,7 @@ internal sealed class TestBuilder : ITestBuilder
         return attributes;
     }
 
-    private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, TestBuilderContext? rowContext)
+    private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, TestBuilderContext? rowContext, bool registerAsTest = true)
     {
         var builderContext = new TestBuilderContext { TestMetadata = metadata.MethodMetadata };
         if (rowContext is not null)
@@ -1965,7 +1965,8 @@ internal sealed class TestBuilder : ITestBuilder
             metadata.TestClassType,
             builderContext,
             testDetails,
-            CancellationToken.None);
+            CancellationToken.None,
+            registerAsTest);
 
         return context;
     }

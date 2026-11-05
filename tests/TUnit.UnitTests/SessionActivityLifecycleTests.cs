@@ -364,7 +364,8 @@ public class SessionActivityLifecycleTests
             Type classType,
             TestBuilderContext testBuilderContext,
             TestDetails testDetails,
-            CancellationToken cancellationToken) =>
+            CancellationToken cancellationToken,
+            bool registerAsTest = true) =>
             throw new NotSupportedException();
     }
 

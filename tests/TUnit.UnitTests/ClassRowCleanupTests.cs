@@ -533,6 +533,7 @@ public class ClassRowCleanupTests
             InvokeTypedTest = (_, _, _) => ValueTask.CompletedTask
         };
         var tests = (await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null))).ToArray();
+        await Assert.That(current.ClassContext.Tests.Any(test => test.TestDetails.TestName == metadata.TestName)).IsFalse();
         await Assert.That(tests.Length).IsEqualTo(0);
         await Assert.That(source.Callbacks).IsEqualTo(1);
     }

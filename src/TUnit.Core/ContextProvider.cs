@@ -122,7 +122,8 @@ internal class ContextProvider(IServiceProvider serviceProvider, string testSess
         Type classType,
         TestBuilderContext testBuilderContext,
         TestDetails testDetails,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool registerAsTest = true)
     {
         var classContext = GetOrCreateClassContext(classType);
 
@@ -133,7 +134,8 @@ internal class ContextProvider(IServiceProvider serviceProvider, string testSess
             TestDetails = testDetails,
         };
 
-        classContext.AddTest(testContext);
+        if (registerAsTest)
+            classContext.AddTest(testContext);
 
         return testContext;
     }
