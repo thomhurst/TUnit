@@ -336,6 +336,25 @@ public class SingleTupleElementConversionTests
             throw new InvalidOperationException("Expected integral-to-enum reference element conversion");
     }
 
+    public static IEnumerable<(int, bool)> ConvertibleRows() => [(1, true)];
+    public IEnumerable<Tuple<int, int>> ConvertibleReferenceRows() => [Tuple.Create(2, 1)];
+
+    [Test]
+    [MethodDataSource(nameof(ConvertibleRows))]
+    public void ConvertibleElement<T>((T, int) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != 1)
+            throw new InvalidOperationException("Expected IConvertible element conversion");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(ConvertibleReferenceRows))]
+    public void ConvertibleReferenceElement<T>(Tuple<T, bool?> row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != true)
+            throw new InvalidOperationException("Expected nullable IConvertible reference element conversion");
+    }
+
     public static IEnumerable<(int, string)> StringRows() => [(1, "2")];
     public IEnumerable<Tuple<int, string>> StringReferenceRows() => [Tuple.Create(3, "4.5")];
 

@@ -7318,6 +7318,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 return true;
             }
 
+            // CastHelper's IConvertible fallback also handles conversions with no C#
+            // conversion, such as bool to int. Nullable values box as their underlying type.
+            var convertibleSource = row is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableSource
+                ? nullableSource.TypeArguments[0] : row;
+            if (reconstructTupleElements
+                && convertibleSource.AllInterfaces.Any(type => type.MetadataName == "IConvertible"
+                    && type.ContainingNamespace.ToDisplayString() == "System")
+                && stringTarget.SpecialType is SpecialType.System_Boolean or SpecialType.System_Char
+                    or SpecialType.System_SByte or SpecialType.System_Byte
+                    or SpecialType.System_Int16 or SpecialType.System_UInt16
+                    or SpecialType.System_Int32 or SpecialType.System_UInt32
+                    or SpecialType.System_Int64 or SpecialType.System_UInt64
+                    or SpecialType.System_Single or SpecialType.System_Double or SpecialType.System_Decimal
+                    or SpecialType.System_String or SpecialType.System_DateTime)
+            {
+                return true;
+            }
+
             // Enum.ToObject accepts integral values when the binder reconstructs tuple elements.
             if (reconstructTupleElements && stringTarget.TypeKind == TypeKind.Enum
                 && row.SpecialType is SpecialType.System_SByte or SpecialType.System_Byte
