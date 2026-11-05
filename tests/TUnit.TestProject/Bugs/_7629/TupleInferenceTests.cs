@@ -1074,9 +1074,24 @@ public class ExplicitCrossFamilyTupleInferenceTests
     private static void Verify<T>(T value, string text)
     {
         if (typeof(T) != typeof(int) && typeof(T) != typeof(long)
-            || value is not (int or long) || text != "tuple")
+            || value is not (int or long) || Convert.ToInt64(value) != 1 || text != "tuple")
             throw new InvalidOperationException("Expected both explicit long and inferred int tuple instantiations");
     }
 }
 
+#pragma warning restore TUnit0001
+
+// #7622: analyzer spreads whole reference-tuple rows for a bare type parameter.
+#pragma warning disable TUnit0001
+public class ExplicitBareReferenceTupleInferenceTests
+{
+    public static IEnumerable<Func<Tuple<int, string>>> Rows() => [() => Tuple.Create(1, "tuple")];
+
+    [Test, GenerateGenericTest(typeof(Tuple<int, string>)), MethodDataSource(nameof(Rows))]
+    public void WholeRow<T>(T row)
+    {
+        if (typeof(T) != typeof(Tuple<int, string>) || row is not Tuple<int, string> { Item1: 1, Item2: "tuple" })
+            throw new InvalidOperationException("Expected only the whole reference-tuple instantiation");
+    }
+}
 #pragma warning restore TUnit0001

@@ -2960,13 +2960,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         var typeArguments = new Type?[genericParameterCount];
         var rowType = funcType.GetGenericArguments()[0];
+        // This path supplements explicit method types. Like the generator, a sole bare T
+        // receives a reference tuple whole, so the inferred and explicit tuple types deduplicate.
         var receivesWholeTuple = parameters.Length > 0
-            && GetTupleElementTypes(parameters[0].ParameterType) is not null
-            && parameters.Skip(1).All(parameter => parameter.IsOptional
-                || parameter.IsDefined(typeof(ParamArrayAttribute), false)
-                || IsParamCollection(parameter)
-                || (parameter == parameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
-            && (parameters.Length == 1 || TupleHelper.MatchesOpenTuple(parameters[0].ParameterType, rowType));
+            && ((GetTupleElementTypes(parameters[0].ParameterType) is not null
+                    && parameters.Skip(1).All(parameter => parameter.IsOptional
+                        || parameter.IsDefined(typeof(ParamArrayAttribute), false)
+                        || IsParamCollection(parameter)
+                        || (parameter == parameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
+                    && (parameters.Length == 1 || TupleHelper.MatchesOpenTuple(parameters[0].ParameterType, rowType)))
+                || (parameters.Length == 1 && parameters[0].ParameterType.IsGenericParameter && !rowType.IsValueType));
 
         if (receivesWholeTuple)
         {
