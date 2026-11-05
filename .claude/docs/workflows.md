@@ -58,3 +58,27 @@ Verify against local packages:
 ```powershell
 ./scripts/Verify-DocSnippets.ps1 -PackagesPath <package-directory> -Version <semver>
 ```
+
+## Native macOS crashes
+
+The macOS modular pipeline enables .NET crash dumps and uploads them as
+`NativeCrashDumps-macos-latest`, retained for seven days. An exit such as 139
+before test results can be a native runtime fault; keep the failing exit code
+and inspect the dump rather than treating a passing rerun as a fix.
+
+To capture a recurrence locally, use an absolute evidence directory outside the
+checkout (replace the example path with your item’s evidence directory):
+
+```sh
+mkdir -p /absolute/path/TUnit-evidence/issue-7434
+DOTNET_DbgEnableMiniDump=1 \
+DOTNET_DbgMiniDumpType=2 \
+DOTNET_DbgMiniDumpName=/absolute/path/TUnit-evidence/issue-7434/crash.%e.%p.dmp \
+dotnet test --project tests/TUnit.UnitTests --framework net10.0
+```
+
+Type 2 includes heap information for managed and native diagnosis. Preserve the
+SDK/runtime versions, commit, command, exit code, and macOS DiagnosticReports
+stack with the dump. Dumps can contain process memory; review them before
+sharing outside the repository. A matching native stack alone does not establish
+that an older upstream runtime bug is the cause.

@@ -190,6 +190,17 @@ jobs:
         with:
           user: ${{ secrets.NUGET_USER }}
 
+      # Capture native runtime faults (including exit 139 before MTP reports tests).
+      # Use an absolute path because the pipeline launches tests from several directories.
+      - name: Enable macOS crash dumps
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/tunit-crash-dumps"
+          echo "DOTNET_DbgEnableMiniDump=1" >> "$GITHUB_ENV"
+          echo "DOTNET_DbgMiniDumpType=2" >> "$GITHUB_ENV"
+          echo "DOTNET_DbgMiniDumpName=$RUNNER_TEMP/tunit-crash-dumps/crash.%e.%p.dmp" >> "$GITHUB_ENV"
+
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
         with:
@@ -214,6 +225,15 @@ jobs:
           # suites, apart from the .NET Framework TFMs only Windows can run (see PipelineScope).
           # Manual runs, which publish, keep every suite on every OS.
           os-specific-only: ${{ github.event_name == 'pull_request' && matrix.os != 'ubuntu-latest' }}
+
+      - name: Upload macOS crash dumps
+        uses: actions/upload-artifact@v7.0.2
+        if: always() && runner.os == 'macOS'
+        with:
+          name: NativeCrashDumps-${{matrix.os}}
+          path: ${{ runner.temp }}/tunit-crash-dumps/*.dmp
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.2
