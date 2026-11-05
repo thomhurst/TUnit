@@ -40,7 +40,7 @@ public class GenericClassSourceRuntimeTests
         public bool ToBoolean(IFormatProvider? provider) => throw new NotSupportedException();
         public byte ToByte(IFormatProvider? provider) => throw new NotSupportedException();
         public char ToChar(IFormatProvider? provider) => throw new NotSupportedException();
-        public DateTime ToDateTime(IFormatProvider? provider) => throw new NotSupportedException();
+        public DateTime ToDateTime(IFormatProvider? provider) => throws ? throw new InvalidOperationException("Partitioning must not convert user values") : DateTime.MinValue;
         public decimal ToDecimal(IFormatProvider? provider) => throw new NotSupportedException();
         public double ToDouble(IFormatProvider? provider) => throw new NotSupportedException();
         public short ToInt16(IFormatProvider? provider) => throw new NotSupportedException();
@@ -51,6 +51,53 @@ public class GenericClassSourceRuntimeTests
         public ushort ToUInt16(IFormatProvider? provider) => throw new NotSupportedException();
         public uint ToUInt32(IFormatProvider? provider) => throw new NotSupportedException();
         public ulong ToUInt64(IFormatProvider? provider) => throw new NotSupportedException();
+    }
+
+    public sealed class Parsed<T> : IParsable<Parsed<T>>
+    {
+        public static Parsed<T> Parse(string value, IFormatProvider? provider)
+            => value == "throw" ? throw new InvalidOperationException("Partitioning must not parse user values") : new();
+        public static bool TryParse(string? value, IFormatProvider? provider, out Parsed<T> result)
+            => throw new InvalidOperationException("Partitioning must not parse user values");
+    }
+
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(true, false)]
+    [Arguments(false, true)]
+    [Arguments(true, true)]
+    public async Task Partition_Retains_NonPrimitive_And_Constructed_Parsing_Conversions(bool generated, bool parsing)
+    {
+        var target = parsing ? typeof(Parsed<int>) : typeof(DateTime);
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(target) { Name = "first", TypeInfo = generated
+                ? parsing ? new ConstructedGeneric(typeof(Parsed<>), [new GenericParameter(0, false)]) : new GenericParameter(0, false)
+                : new ConcreteType(target), CachedIsOptional = false },
+            new ParameterMetadata(typeof(string)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true }
+        ];
+        object?[][] original = parsing ? [[new Parsed<int>()], ["valid"], ["throw"]]
+            : [[DateTime.MinValue], [new DeferredConvertible(false)], [new DeferredConvertible(true)]];
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create([parsing ? typeof(int) : target, typeof(string)], GenericClassRowFallback.AllRows, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata)) rows.Add(await factory());
+        await Assert.That(rows.Count).IsEqualTo(original.Length);
+        for (var i = 0; i < rows.Count; i++) await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+        if (parsing) await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<Parsed<int>>(original[1][0])).IsNotNull();
+        else await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<DateTime>(original[1][0])).IsEqualTo(DateTime.MinValue);
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
     }
 
     [Test]

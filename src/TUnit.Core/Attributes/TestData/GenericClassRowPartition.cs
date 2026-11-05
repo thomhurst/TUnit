@@ -472,6 +472,22 @@ public static class GenericClassRowPartition
 
         if (target is null)
         {
+#if NET
+            // An open self-parsing interface preserves its identity after substitution.
+            // Inspect the definition without constructing the closed target or calling Parse.
+            if (value is string && description is ConstructedGeneric constructed
+                // Native AOT can omit interfaces on open definitions even when the closed
+                // type supports parsing. Retain uncertain strings there for the binder.
+                && (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported
+                    || GetConstructorRowInterfaces(constructed.GenericDefinition).Any(candidate =>
+                    candidate.IsGenericType && candidate.GetGenericTypeDefinition() == typeof(IParsable<>)
+                    && candidate.GenericTypeArguments[0].IsGenericType
+                    && candidate.GenericTypeArguments[0].GetGenericTypeDefinition() == constructed.GenericDefinition
+                    && candidate.GenericTypeArguments[0].GetGenericArguments().SequenceEqual(constructed.GenericDefinition.GetGenericArguments()))))
+            {
+                return true;
+            }
+#endif
             return Converters.AotConverterRegistry.HasConverter(value.GetType(), (description, classTypeArguments),
                 static (registeredTarget, state) => MatchesConstructorParameterType(
                     state.description, registeredTarget, state.classTypeArguments, direction: 0));
@@ -535,7 +551,9 @@ public static class GenericClassRowPartition
 
         // Custom IConvertible implementations are user code: only the binder may
         // call them. Built-in conversions above still reject known invalid values.
-        return value is IConvertible && (target.IsPrimitive || target == typeof(decimal));
+        // The reflection fallback also calls ChangeType for non-primitive targets,
+        // including DateTime and custom ToType implementations. Preserve uncertain rows.
+        return value is IConvertible;
     }
 
     // Array descriptions emitted outside a generic class erase T[] to object. The existing lazy
