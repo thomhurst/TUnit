@@ -295,8 +295,7 @@ public static class GenericClassRowPartition
                         var row = await rowFactory().ConfigureAwait(false) is { } fetched ? EvaluateWrappedFactory(fetched) : null;
                         // Retain declared constructor-position and own-class null inference.
                         var infers = RowInfers(dataSources[index], row, ClassTypeArguments)
-                            || (dataSources[index] is MethodDataSourceAttribute { ClassProvidingDataSource: null, InferredClassTypeArguments: null }
-                                && MatchesConstructorRow(row, dataGeneratorMetadata.MembersToGenerate, ClassTypeArguments));
+                            || FitsConstructor(dataSources[index], row, dataGeneratorMetadata.MembersToGenerate);
                         anyRowInfers |= infers;
                         rows.Add(new EvaluatedRow(new EvaluatedDataRow(row, rowFactory), infers));
                     }
@@ -315,6 +314,17 @@ public static class GenericClassRowPartition
 
             return new Evaluation(rowsByIndex, anyRowInfers);
         }
+
+        // With a compile-time class row, a row whose values infer other type arguments belongs to that
+        // instantiation even when the binder could convert it here, as reflection groups it. Without one,
+        // every row is a candidate, because the AllRows fallback converts rows of any type.
+        private bool FitsConstructor(IDataSourceAttribute source, object?[]? row, IMemberMetadata[] parameters)
+            => source is MethodDataSourceAttribute { ClassProvidingDataSource: null, InferredClassTypeArguments: null }
+                && row is not null
+                && (Fallback != GenericClassRowFallback.None
+                    || GetWholeTuple(row, parameters, ClassTypeArguments) is not null
+                    || InferClassTypeArguments(row, ClassTypeArguments.Length) is null)
+                && MatchesConstructorRow(row, parameters, ClassTypeArguments);
     }
 
     // A declared reference-array row cannot tell us whether constructor values infer every type argument.
@@ -326,7 +336,9 @@ public static class GenericClassRowPartition
             return false;
         }
 
-        var (values, _) = TestDataRowUnwrapper.UnwrapArray(row);
+        var values = GetWholeTuple(row, parameters, classTypeArguments) is { } tuple
+            ? [tuple]
+            : TestDataRowUnwrapper.UnwrapArray(row).Data;
         var trailing = parameters.LastOrDefault() is ParameterMetadata last
             ? GetTrailingConstructorElement(last, classTypeArguments) : null;
         var regularCount = parameters.Length - (trailing is null ? 0 : 1);
@@ -371,6 +383,49 @@ public static class GenericClassRowPartition
         }
 
         return true;
+    }
+
+    // A wrapped tuple that fits the first data parameter stays whole, as typed unwrapping keeps it.
+    // Compare the description rather than the parameter's Type, which generated metadata erases to object.
+    private static object? GetWholeTuple(object?[] row, IMemberMetadata[] parameters, Type[] classTypeArguments)
+    {
+        if (row is not [ITestDataRow wrapped] || wrapped.GetData() is not { } data || !DataSourceHelpers.IsTuple(data)
+            || TestDataRowUnwrapper.GetSoleRequiredDataParameter(parameters) is not { } parameter)
+        {
+            return null;
+        }
+
+        var description = GetConstructorTypeInfo(parameter);
+        var isTupleParameter = ResolveClosedType(description, classTypeArguments) is { } closed
+            ? TupleHelper.IsTupleType(closed)
+            : description is ConstructedGeneric { GenericDefinition: var definition } && TupleHelper.IsTupleType(definition);
+        return isTupleParameter && MatchesConstructorParameterType(description, data.GetType(), classTypeArguments, direction: 1)
+            ? data
+            : null;
+    }
+
+    private static Type? ResolveClosedType(TypeInfo description, Type[] classTypeArguments) => description switch
+    {
+        GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
+        ConcreteType concrete => concrete.Type,
+        _ => null
+    };
+
+    // Framework scalars cannot define custom conversions, so probing them never runs user code.
+    private static bool IsFrameworkScalar(Type type) => type.IsPrimitive || type.IsEnum
+        || type == typeof(string) || type == typeof(decimal) || type == typeof(DateTime);
+
+    private static bool CanChangeType(object value, Type target)
+    {
+        try
+        {
+            _ = Convert.ChangeType(value, target);
+            return true;
+        }
+        catch (Exception exception) when (exception is InvalidCastException or FormatException or OverflowException)
+        {
+            return false;
+        }
     }
 
     private static TypeInfo? GetTrailingConstructorElement(ParameterMetadata parameter, Type[] classTypeArguments)
@@ -424,6 +479,39 @@ public static class GenericClassRowPartition
         return true;
     }
 
+    // Unlike a trailing array, whose elements each go through Cast<T>, CastHelper.TryConvertArray stores
+    // non-IConvertible elements directly and converts the rest with Convert.ChangeType. Operators and
+    // parsers therefore never apply to an ordinary array's elements. Null stores the element's default.
+    private static bool MayConvertArrayElement(TypeInfo element, object? value, Type[] classTypeArguments)
+    {
+        if (value is null)
+        {
+            return true;
+        }
+
+        var source = value.GetType();
+        if (value is not IConvertible)
+        {
+            return MatchesConstructorParameterType(element, source, classTypeArguments, direction: 1);
+        }
+
+        // A custom ToType is user code, so only the binder may call it.
+        return !IsFrameworkScalar(source)
+            || (ResolveClosedType(element, classTypeArguments) is { } target && CanChangeType(value, target));
+    }
+
+    private static bool MayConvertArrayElements(Array values, TypeInfo element, Type[] classTypeArguments)
+    {
+        for (var i = 0; i < values.Length; i++)
+        {
+            if (!MayConvertArrayElement(element, values.GetValue(i), classTypeArguments))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     // TODO(#7615): consolidate structural matching with the binder and its parity coverage.
     // Conversion belongs to the binder. Do not execute user converters while partitioning;
     // retain candidates for registered conversions and built-in scalar CastHelper paths.
@@ -436,12 +524,7 @@ public static class GenericClassRowPartition
         {
             description = underlying;
         }
-        var target = description switch
-        {
-            GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
-            ConcreteType concrete => concrete.Type,
-            _ => null
-        };
+        var target = ResolveClosedType(description, classTypeArguments);
 
         // CastHelper's non-AOT array fallback converts vector elements (or a single
         // IConvertible value). Inspect candidates without invoking user conversions.
@@ -455,11 +538,11 @@ public static class GenericClassRowPartition
         if (arrayElement is not null)
         {
             if (value is Array { Rank: 1 } array && array.GetLowerBound(0) == 0
-                && MatchesTrailingArrayElements(array, arrayElement, classTypeArguments))
+                && MayConvertArrayElements(array, arrayElement, classTypeArguments))
             {
                 return true;
             }
-            if (value is IConvertible && MatchesConstructorValue(arrayElement, value, classTypeArguments))
+            if (value is IConvertible && MayConvertArrayElement(arrayElement, value, classTypeArguments))
             {
                 return true;
             }
@@ -478,8 +561,7 @@ public static class GenericClassRowPartition
         if (target is null)
         {
             var sourceType = value.GetType();
-            if (value is IConvertible && !sourceType.IsPrimitive && !sourceType.IsEnum
-                && sourceType != typeof(string) && sourceType != typeof(decimal) && sourceType != typeof(DateTime))
+            if (value is IConvertible && !IsFrameworkScalar(sourceType))
             {
                 return true; // Custom ToType belongs to the binder, including structural targets.
             }
@@ -549,7 +631,10 @@ public static class GenericClassRowPartition
             return true;
         }
 
-        if (target.IsEnum)
+        // Enum.ToObject reads a value's type code, which is user code on a custom IConvertible,
+        // and rejects what its ToType may still bind. Only framework scalars are probed here.
+        var source = value.GetType();
+        if (target.IsEnum && IsFrameworkScalar(source))
         {
             try
             {
@@ -557,21 +642,6 @@ public static class GenericClassRowPartition
                 return true;
             }
             catch (ArgumentException)
-            {
-                return false;
-            }
-        }
-
-        var source = value.GetType();
-        if ((source.IsPrimitive || source.IsEnum || source == typeof(string) || source == typeof(decimal))
-            && (target.IsPrimitive || target == typeof(decimal)))
-        {
-            try
-            {
-                _ = Convert.ChangeType(value, target);
-                return true;
-            }
-            catch (Exception exception) when (exception is InvalidCastException or FormatException or OverflowException)
             {
                 return false;
             }
@@ -588,20 +658,7 @@ public static class GenericClassRowPartition
 
         // Framework scalar implementations cannot define custom ToType behavior.
         // Probe only these known values; custom IConvertible stays deferred to the binder.
-        if (source.IsPrimitive || source.IsEnum || source == typeof(string)
-            || source == typeof(decimal) || source == typeof(DateTime))
-        {
-            try
-            {
-                _ = Convert.ChangeType(value, target);
-                return true;
-            }
-            catch (Exception exception) when (exception is InvalidCastException or FormatException or OverflowException)
-            {
-                return false;
-            }
-        }
-        return true;
+        return !IsFrameworkScalar(source) || CanChangeType(value, target);
     }
 
     private static bool MatchesStructuralOperator(ConstructedGeneric target, Type result, Type input,

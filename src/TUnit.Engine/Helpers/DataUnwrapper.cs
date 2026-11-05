@@ -65,37 +65,9 @@ internal class DataUnwrapper
     }
 
     private static Type? GetTupleDataParameterType(ParameterMetadata[]? parameters)
-    {
-        Type? dataType = null;
-        if (parameters is null)
-        {
-            return null;
-        }
-
-        foreach (var parameter in parameters)
-        {
-            if (parameter.Type == typeof(CancellationToken))
-            {
-                continue;
-            }
-
-            // Keep scanning after the tuple: only a required later data parameter prevents
-            // the wrapped row from binding whole (injected tokens do not consume row values).
-            if (dataType is not null)
-            {
-                if (!parameter.IsOptional && !parameter.IsParams)
-                {
-                    return null;
-                }
-            }
-            else
-            {
-                dataType = parameter.Type;
-            }
-        }
-
-        return TupleHelper.IsTupleType(dataType) ? dataType : null;
-    }
+        => TestDataRowUnwrapper.GetSoleRequiredDataParameter(parameters)?.Type is { } type && TupleHelper.IsTupleType(type)
+            ? type
+            : null;
 
     private static object?[] UnwrapWithTypesInternal(object?[] values, ParameterMetadata[]? expectedParameters)
     {

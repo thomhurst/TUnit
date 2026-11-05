@@ -1127,6 +1127,161 @@ public class GenericClassSourceRuntimeTests
         }
     }
 
+    private static IMemberMetadata[] OptionalSecondParameter(Type firstType, TypeInfo first) =>
+    [
+        new ParameterMetadata(firstType) { Name = "first", TypeInfo = first, CachedIsOptional = false, CachedIsParams = false },
+        new ParameterMetadata(typeof(object)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true, CachedIsParams = false },
+    ];
+
+    private static async Task<List<object?[]?>> ReadPartition(Type[] arguments, GenericClassRowFallback fallback, IMemberMetadata[] parameters, object?[][] original)
+    {
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create(arguments, fallback, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata))
+        {
+            rows.Add(await factory());
+        }
+        return rows;
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original)
+            {
+                yield return () => Task.FromResult<object?[]?>(row);
+            }
+            await Task.CompletedTask;
+        }
+    }
+
+    [Test]
+    public async Task Compile_Time_Row_Keeps_Rows_Inferring_Another_Instantiation_Off_This_One()
+    {
+        // CastHelper could convert 2 to "2", but reflection groups the row on C<int>, its own instantiation.
+        IMemberMetadata[] parameters = [new ParameterMetadata(typeof(object)) { Name = "value", TypeInfo = new GenericParameter(0, false), CachedIsOptional = false, CachedIsParams = false }];
+        object?[][] original = [[2], ["x"]];
+
+        var onString = await ReadPartition([typeof(string)], GenericClassRowFallback.None, parameters, original);
+        await Assert.That(onString.Count).IsEqualTo(1);
+        await Assert.That(ReferenceEquals(onString[0], original[1])).IsTrue();
+
+        var onInt = await ReadPartition([typeof(int)], GenericClassRowFallback.None, parameters, original);
+        await Assert.That(onInt.Count).IsEqualTo(1);
+        await Assert.That(ReferenceEquals(onInt[0], original[0])).IsTrue();
+    }
+
+    [Test]
+    public async Task Compile_Time_Row_Retains_Rows_That_Infer_No_Instantiation()
+    {
+        var parameters = OptionalSecondParameter(typeof(object), new GenericParameter(0, false));
+        object?[][] original = [[1, "a"], [1], [new object()]];
+
+        var rows = await ReadPartition([typeof(int), typeof(string)], GenericClassRowFallback.None, parameters, original);
+
+        await Assert.That(rows.Count).IsEqualTo(2);
+        await Assert.That(ReferenceEquals(rows[0], original[0])).IsTrue();
+        await Assert.That(ReferenceEquals(rows[1], original[1])).IsTrue();
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Enum_Targets_Defer_Custom_Convertibles_And_Reject_Invalid_Scalars(bool generated)
+    {
+        var parameters = OptionalSecondParameter(typeof(RowEnum), generated ? new GenericParameter(0, false) : new ConcreteType(typeof(RowEnum)));
+        Type[] arguments = [typeof(RowEnum), typeof(string)];
+
+        // Throwing proves the partition leaves the conversion to the binder.
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new DeferredConvertible(throws: true)], parameters, arguments)).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([RowEnum.A], parameters, arguments)).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([1], parameters, arguments)).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow(["A"], parameters, arguments)).IsFalse();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([1.5m], parameters, arguments)).IsFalse();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new object()], parameters, arguments)).IsFalse();
+    }
+
+    [Test]
+    [Arguments(0)]
+    [Arguments(1)]
+    [Arguments(2)]
+    public async Task Wrapped_Tuples_Stay_Whole_For_A_Tuple_Parameter(int shape)
+    {
+        // Concrete, closed through a type argument, and generated metadata that erases the type to object
+        var (firstType, first, firstArgument) = shape switch
+        {
+            0 => (typeof(Tuple<int>), (TypeInfo)new ConcreteType(typeof(Tuple<int>)), typeof(int)),
+            1 => (typeof(object), new GenericParameter(0, false), typeof(Tuple<int>)),
+            _ => (typeof(object), new ConstructedGeneric(typeof(Tuple<>), [new GenericParameter(0, false)]), typeof(int)),
+        };
+        var parameters = OptionalSecondParameter(firstType, first);
+        Type[] arguments = [firstArgument, typeof(string)];
+        object?[] wrapped = [new TestDataRow<Tuple<int>>(Tuple.Create(1))];
+
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow(wrapped, parameters, arguments)).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new TestDataRow<Tuple<string>>(Tuple.Create("a"))], parameters, arguments)).IsFalse();
+
+        // A null row turns filtering on, which must not cost the tuple row.
+        var rows = await ReadPartition(arguments, GenericClassRowFallback.AllRows, parameters, [wrapped, [null]]);
+        await Assert.That(rows.Count).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task Wrapped_Tuples_Spread_When_A_Later_Parameter_Is_Required()
+    {
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(typeof(object)) { Name = "first", TypeInfo = new GenericParameter(0, false), CachedIsOptional = false, CachedIsParams = false },
+            new ParameterMetadata(typeof(object)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = false, CachedIsParams = false },
+        ];
+
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new TestDataRow<Tuple<int, string>>(Tuple.Create(1, "a"))], parameters, [typeof(int), typeof(string)])).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new TestDataRow<Tuple<int, string>>(Tuple.Create(1, "a"))], parameters, [typeof(Tuple<int, string>), typeof(string)])).IsFalse();
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Ordinary_Arrays_Follow_The_Binders_Element_Rule(bool generated)
+    {
+        var parameters = OptionalSecondParameter(typeof(object), generated ? new GenericParameter(0, false) : new ConcreteType(typeof(Guid[])));
+        Type[] guids = [typeof(Guid[]), typeof(int)];
+
+        // Convert.ChangeType cannot parse, so the Cast<T> parsing of trailing arrays does not apply.
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new[] { Guid.Empty.ToString() }], parameters, guids)).IsFalse();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([Guid.Empty.ToString()], parameters, guids)).IsFalse();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new object?[] { Guid.Empty.ToString() }], parameters, guids)).IsFalse();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new object?[] { Guid.Empty, null }], parameters, guids)).IsTrue();
+        await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<Guid[]>(new object?[] { Guid.Empty, null })!.Length).IsEqualTo(2);
+
+        parameters = OptionalSecondParameter(typeof(object), generated ? new GenericParameter(0, false) : new ConcreteType(typeof(int[])));
+        Type[] integers = [typeof(int[]), typeof(string)];
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new long[] { 1 }], parameters, integers)).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new object?[] { new DeferredConvertible(throws: true) }], parameters, integers)).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new long[] { long.MaxValue }], parameters, integers)).IsFalse();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new object?[] { new object() }], parameters, integers)).IsFalse();
+
+        // The CLR assigns int[] to an int-backed enum array. Other element types need Enum.ToObject,
+        // which only trailing arrays reach through Cast<T>.
+        parameters = OptionalSecondParameter(typeof(object), generated ? new GenericParameter(0, false) : new ConcreteType(typeof(RowEnum[])));
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new int[] { 1 }], parameters, [typeof(RowEnum[]), typeof(string)])).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new long[] { 1 }], parameters, [typeof(RowEnum[]), typeof(string)])).IsFalse();
+    }
+
+    [Test]
+    public async Task Trailing_Arrays_Keep_Their_Cast_Element_Rule()
+    {
+        IMemberMetadata[] parameters = [new ParameterMetadata(typeof(object)) { Name = "items", TypeInfo = new ConcreteType(typeof(Guid[])), CachedIsOptional = false, CachedIsParams = true }];
+
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new[] { Guid.Empty.ToString() }], parameters, [])).IsTrue();
+        await Assert.That(TUnit.Core.Helpers.CastHelper.ToTrailingArray<Guid>(new[] { Guid.Empty.ToString() })[0]).IsEqualTo(Guid.Empty);
+    }
+
     private class ConstraintSubject<T> where T : struct;
 
     private static async IAsyncEnumerable<Func<Task<object?[]?>>> OneRow(Func<Task<object?[]?>> factory)
