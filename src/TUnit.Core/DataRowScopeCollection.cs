@@ -225,6 +225,16 @@ internal sealed class DataRowScopeCollection
         // reference keeps the owner handle alive even after this row/session has completed.
         // The generic count callback releases that handle with the last reference, not forever.
         internal void RetainWhileCounted(object instance)
+            => Tracking.ObjectTracker.UpdateExternalOwnerPin(instance, this, release: false);
+
+        internal void RemoveCountedPin(object instance)
+        {
+            lock (_ownershipLock) _pinnedObjects.Remove(instance);
+        }
+
+        // Called under the tracker counter lock, so a retired counter cannot remove
+        // a pin being reused by a concurrent consumer of a replacement counter.
+        internal void RetainWhileCountedCore(object instance)
         {
             if (instance is not IDisposable and not IAsyncDisposable) return;
             lock (_ownershipLock)
@@ -235,7 +245,7 @@ internal sealed class DataRowScopeCollection
             // while entering the counter, whose callbacks also run during tracker cleanup.
             Tracking.ObjectTracker.OnDisposed(instance, () =>
             {
-                lock (_ownershipLock) _pinnedObjects.Remove(instance);
+                Tracking.ObjectTracker.UpdateExternalOwnerPin(instance, this, release: true);
             });
         }
 

@@ -476,6 +476,18 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         ExternalObjectOwnership.FindOwner(obj)?.RetainWhileCounted(obj);
     }
 
+    internal static void UpdateExternalOwnerPin(object instance, DataRowScopeCollection.ScopeOwner owner, bool release)
+    {
+        lock (s_sharedInstanceLock)
+        {
+            if (release) owner.RemoveCountedPin(instance);
+            // A zero-count callback can itself acquire a new reference. Re-arm its pin
+            // if that happened, as well as serializing against other threads' retirement.
+            if (!release || (s_trackedObjects.TryGetValue(instance, out var counter) && counter.CurrentCount > 0))
+                owner.RetainWhileCountedCore(instance);
+        }
+    }
+
     /// <summary>
     /// Decrements a single object's reference count, disposing it (and removing it from the
     /// static tracking dictionary) when the count reaches zero. Used by owners that hold their
@@ -542,7 +554,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
                     throw new InvalidOperationException("Reference count for object went below zero. This indicates a bug in the reference counting logic.");
                 }
 
-                if (count == 0)
+                // A zero-count subscriber may synchronously acquire another reference.
+                // Retire only if the counter is still empty after callbacks complete.
+                if (count == 0 && counter.CurrentCount == 0)
                 {
                     shouldDispose = TestDataContainer.IsCached(obj)
                         ? TryRetireSharedInstance(obj, counter)

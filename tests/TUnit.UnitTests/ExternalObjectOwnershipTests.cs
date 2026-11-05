@@ -7,6 +7,40 @@ namespace TUnit.UnitTests;
 public class ExternalObjectOwnershipTests
 {
     [Test]
+    public async Task Reentrant_Consumer_Keeps_Owner_Pinned_After_Zero_Count_Callback()
+    {
+        var tracker = new TUnit.Core.Tracking.ObjectTracker(new(), GlobalContext.Current.Disposer);
+        var instance = new Initializer();
+        var owner = RegisterReentrantConsumer(tracker, instance);
+        await tracker.ReleaseStaticLeaseObjectAsync(instance);
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        await Assert.That(IsOwnerAlive(owner)).IsTrue();
+        await tracker.ReleaseStaticLeaseObjectAsync(instance);
+        CollectOwner(owner);
+        await Assert.That(owner.TryGetTarget(out _)).IsFalse();
+        await Assert.That(instance.DisposeCount).IsEqualTo(0);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static bool IsOwnerAlive(WeakReference<DataRowScopeCollection.ScopeOwner> owner)
+        => owner.TryGetTarget(out _);
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference<DataRowScopeCollection.ScopeOwner> RegisterReentrantConsumer(
+        TUnit.Core.Tracking.ObjectTracker tracker, Initializer instance)
+    {
+        tracker.TrackStaticLeaseObject(instance);
+        // Subscribe first: this consumer can re-enter before the owner's callback runs.
+        TUnit.Core.Tracking.ObjectTracker.OnDisposed(instance, () => tracker.TrackStaticLeaseObject(instance));
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new Scope());
+        scopes.RegisterObject(owner, instance);
+        return new(owner);
+    }
+
+    [Test]
     public async Task Never_Tracked_Dependency_Is_Not_Pinned_By_Live_Owner()
     {
         var service = new Service();
