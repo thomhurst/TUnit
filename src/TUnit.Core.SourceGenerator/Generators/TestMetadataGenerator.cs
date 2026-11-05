@@ -1428,6 +1428,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     {
                         uninferredMethodDataSources?.Remove(mdsAttr);
                     }
+                    else
+                    {
+                        // Constructor-supplied types keep every method source, including one whose
+                        // declared rows infer the same class. It must join the constructor's entry.
+                        (uninferredMethodDataSources ??= []).Add(mdsAttr);
+                    }
                 }
                 else
                 {

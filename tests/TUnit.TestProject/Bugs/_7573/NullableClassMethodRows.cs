@@ -391,3 +391,20 @@ public class NullableRowsBase<T> where T : struct
 {
     public static IEnumerable<int> InheritedRows() => [4];
 }
+
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1)]
+public class ConstructorOptionalScalarRows<T>(T seed)
+{
+    public static IEnumerable<int> Rows() => [42];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public async Task RetainsConstructorOptionalScalar(T value, int extra = 17)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(seed).IsEqualTo((T)(object)1);
+        await Assert.That(value).IsEqualTo((T)(object)42);
+        await Assert.That(extra).IsEqualTo(17);
+    }
+}

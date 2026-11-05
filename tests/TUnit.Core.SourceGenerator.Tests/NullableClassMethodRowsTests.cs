@@ -33,6 +33,9 @@ internal class NullableClassMethodRowsTests : TestsBase
         var constructedConstructor = generatedFiles.Single(file => file.Contains("\"ConstructedConstructorType\""));
         await Assert.That(constructedConstructor.Contains("ConstructorConstructedNullableClassRows<int>")).IsFalse();
 
+        var optionalConstructor = generatedFiles.Single(file => file.Contains("\"RetainsConstructorOptionalScalar\""));
+        await Assert.That(optionalConstructor.Contains("ConstructorOptionalScalarRows<int>.Rows()")).IsTrue();
+
         var partitionedSources = generatedFiles.Single(file => file.Contains("\"PartitionsBesideLiteral\""));
         var intSources = partitionedSources.Split("testDataSources:")[1].Split("classDataSources:")[0];
         await Assert.That(intSources.Contains(".IntRows()")).IsTrue();
