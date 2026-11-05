@@ -2917,13 +2917,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Mirrors the generator's <c>InferTypesFromMethodDataSource</c>. It only reads attributes whose first
     /// constructor argument is the member name (<c>[MethodDataSource("Rows")]</c> and
-    /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), looks for a static parameterless method of that name
-    /// declared on the test class (or on <c>T</c>), and requires its declared return type to be
+    /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), resolves the member using the same lookup as source invocation
+    /// on the test class (or on <c>T</c>), and requires its declared type to be
     /// a supported row source, including asynchronous wrappers. Each tuple element is matched against the data parameter
     /// at the same position, including type arguments nested in generic parameter types. The caller passes
     /// the parameters without any CancellationToken, as the generator's <c>GetDataParameters</c> does.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source methods")]
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     private static Type[]? InferTypesFromMethodDataSource(
         Type testClass,
         MethodDataSourceAttribute methodDataSource,
@@ -2941,16 +2941,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // [MethodDataSource<T>("Rows")] reads Rows from T, not from the test class
         var providerType = methodDataSource.ClassProvidingDataSource ?? testClass;
-        var dataMethod = providerType.GetMethod(
-            methodDataSource.MethodNameProvidingDataSource,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly,
-            binder: null,
-            Type.EmptyTypes,
-            modifiers: null);
+        var memberType = methodDataSource.GetDeclaredMemberType(providerType);
 
         // Normalize the same asynchronous and sequence wrappers as runtime row reading before
         // supplementing explicit method types. Retain the bounded outer/inner Func unwrapping.
-        if (dataMethod is null || MethodDataSourceAttribute.GetDeclaredRowType(dataMethod.ReturnType) is not { } rowType
+        if (memberType is null || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType
             || GetTupleElementTypes(rowType) is not { } tupleElements)
         {
             return null;

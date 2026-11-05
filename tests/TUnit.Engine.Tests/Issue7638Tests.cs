@@ -21,6 +21,8 @@ public class Issue7638Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("DerivedRowWholeTupleInferenceTests", 2, 0)]
     [Arguments("SingletonWholeTupleInferenceTests", 2, 0)]
     [Arguments("AsyncWholeTupleInferenceTests", 6, 3)]
+    [Arguments("MutableWholeTupleReviewTests", 2, 0)]
+    [Arguments("MemberWholeTupleReviewTests", 4, 2)]
     public async Task Whole_Tuple_Discovery_And_Failures_Agree(string className, int total, int failed)
     {
         await RunTestsWithFilter(
