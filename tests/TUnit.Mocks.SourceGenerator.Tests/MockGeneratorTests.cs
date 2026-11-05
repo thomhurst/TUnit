@@ -243,6 +243,7 @@ public class MockGeneratorTests : SnapshotTestBase
             }
             """;
 
+        AssertGeneratedCodeHasNoNullableWarnings(source);
         return VerifyGeneratorOutput(source);
     }
 
@@ -271,6 +272,7 @@ public class MockGeneratorTests : SnapshotTestBase
             }
             """;
 
+        AssertGeneratedCodeHasNoNullableWarnings(source);
         return VerifyGeneratorOutput(source);
     }
 
@@ -298,6 +300,7 @@ public class MockGeneratorTests : SnapshotTestBase
             }
             """;
 
+        AssertGeneratedCodeHasNoNullableWarnings(source);
         return VerifyGeneratorOutput(source);
     }
 

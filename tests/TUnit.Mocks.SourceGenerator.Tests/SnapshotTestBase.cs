@@ -2,6 +2,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using TUnit.Tests.Shared;
 
 namespace TUnit.Mocks.SourceGenerator.Tests;
@@ -212,7 +214,7 @@ public abstract class SnapshotTestBase
 
     /// <summary>
     /// Compiles the generator output under nullable-enabled context and asserts that no
-    /// CS86xx-family nullable warnings (CS8600, CS8602, CS8603, CS8604, CS8618, CS8625)
+    /// CS86xx-family nullable warnings (including CS8604 and CS8612–CS8615)
     /// are emitted. Used as a regression guard for #5626 and #5424/#5425/#5251.
     /// Other compiler diagnostics (e.g. CS1520 from C# 14 extension() blocks not parseable
     /// by the test-pinned Roslyn) are intentionally not asserted because they're
@@ -221,9 +223,11 @@ public abstract class SnapshotTestBase
     protected static void AssertGeneratedCodeHasNoNullableWarnings(
         string source,
         IEnumerable<MetadataReference>? additionalReferences = null,
-        CSharpParseOptions? parseOptions = null)
+        CSharpParseOptions? parseOptions = null,
+        Func<string, string>? transformGeneratedSource = null)
     {
-        var (_, diagnostics) = RunGeneratorWithCompilationDiagnostics(source, additionalReferences, parseOptions);
+        var (_, diagnostics) = RunGeneratorWithCompilationDiagnostics(
+            source, additionalReferences, parseOptions, restoreNullableWarnings: true, transformGeneratedSource);
         var nullableWarnings = diagnostics
             .Where(d => d.Severity >= DiagnosticSeverity.Warning && d.Id.StartsWith("CS86", StringComparison.Ordinal))
             .ToList();
@@ -265,7 +269,9 @@ public abstract class SnapshotTestBase
     private static (Compilation Compilation, IReadOnlyList<Diagnostic> Diagnostics) RunGeneratorWithCompilationDiagnostics(
         string source,
         IEnumerable<MetadataReference>? additionalReferences,
-        CSharpParseOptions? parseOptions)
+        CSharpParseOptions? parseOptions,
+        bool restoreNullableWarnings = false,
+        Func<string, string>? transformGeneratedSource = null)
     {
         parseOptions ??= GeneratorTestInput.ParseOptions;
         var syntaxTree = CSharpSyntaxTree.ParseText(source, parseOptions);
@@ -292,6 +298,32 @@ public abstract class SnapshotTestBase
         {
             var errorMessages = string.Join(Environment.NewLine, generatorErrors.Select(e => e.ToString()));
             throw new InvalidOperationException($"Generator produced errors:{Environment.NewLine}{errorMessages}");
+        }
+
+        if (restoreNullableWarnings)
+        {
+            // Compilation options cannot override a generated #pragma warning disable.
+            // Restore the whole family checked by the guard after each suppression, in
+            // test-only trees. Keep production output and snapshot text untouched.
+            var restoreDirective = "#pragma warning restore " + string.Join(", ",
+                Enumerable.Range(8600, 100).Select(id => $"CS{id}")) + "\n";
+            foreach (var tree in driver.GetRunResult().GeneratedTrees)
+            {
+                var text = tree.GetText();
+                if (transformGeneratedSource is not null)
+                {
+                    text = SourceText.From(transformGeneratedSource(text.ToString()), text.Encoding);
+                }
+
+                var testTree = CSharpSyntaxTree.ParseText(text, parseOptions, tree.FilePath);
+                var restorations = testTree.GetRoot().DescendantTrivia()
+                    .Select(trivia => trivia.GetStructure())
+                    .OfType<PragmaWarningDirectiveTriviaSyntax>()
+                    .Where(directive => directive.DisableOrRestoreKeyword.IsKind(SyntaxKind.DisableKeyword))
+                    .Select(directive => new TextChange(new TextSpan(directive.FullSpan.End, 0), restoreDirective));
+                var restoredTree = CSharpSyntaxTree.ParseText(text.WithChanges(restorations), parseOptions, tree.FilePath);
+                outputCompilation = outputCompilation.ReplaceSyntaxTree(tree, restoredTree);
+            }
         }
 
         return (outputCompilation, outputCompilation.GetDiagnostics());

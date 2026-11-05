@@ -94,7 +94,7 @@ public class Issue6505Tests : SnapshotTestBase
         var (sources, diagnostics) = RunGeneratorForDiagnostics(source);
 
         var collisions = diagnostics.Where(d => d.Id == "TM008").ToList();
-        await Assert.That(collisions).HasCount(2);
+        await Assert.That(collisions).Count().IsEqualTo(2);
         await Assert.That(collisions[0].GetMessage()).Contains("A___B_IFoo");
         // Both culprits are named, so the message says what to rename.
         await Assert.That(collisions.Select(d => d.GetMessage()).Any(m => m.Contains("A_.B.IFoo"))).IsTrue();
