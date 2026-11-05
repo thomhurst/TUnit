@@ -12,8 +12,8 @@ public class Issue7617Tests(TestMode testMode) : InvokableTestBase(testMode)
         const string filter = "/*/TUnit.TestProject.Bugs._7617/ConvertibleOptionalRowTests/*";
         List<Action<TrxTools.TrxParser.TestRun>> assertions =
         [
-            result => result.ResultSummary.Counters.Total.ShouldBe(3),
-            result => result.ResultSummary.Counters.Passed.ShouldBe(3),
+            result => result.ResultSummary.Counters.Total.ShouldBe(9),
+            result => result.ResultSummary.Counters.Passed.ShouldBe(9),
             result => result.ResultSummary.Counters.Failed.ShouldBe(0)
         ];
         await RunTestsWithFilter(filter, assertions);

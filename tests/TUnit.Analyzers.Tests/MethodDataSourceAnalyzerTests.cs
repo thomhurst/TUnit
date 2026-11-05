@@ -902,6 +902,54 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("int extra = 5", "object, int")]
+    [Arguments("params int[] rest", "object, int[]")]
+    public async Task Nullable_Tuple_Row_Rejects_Omitted_Tail(string tail, string expectedTypes)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public static IEnumerable<(int, string)?> Rows() => [(1, "bad")];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(object value, {{tail}}) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("(int, string)?", expectedTypes));
+    }
+
+    [Test]
+    [Arguments("ITuple", "ITuple", "int extra = 5")]
+    [Arguments("ITuple", "ITuple", "params int[] rest")]
+    [Arguments("Row", "Row", "int extra = 5")]
+    [Arguments("Row", "ITuple", "int extra = 5")]
+    [Arguments("Row", "Row", "params int[] rest")]
+    public async Task Runtime_Tuple_Row_Allows_Whole_Binding(string rowType, string parameterType, string tail)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using System.Runtime.CompilerServices;
+            using TUnit.Core;
+            public class Tests
+            {
+                public sealed class Row : ITuple
+                {
+                    public int Length => 2;
+                    public object this[int index] => index;
+                }
+                #pragma warning disable TUnit0046
+                public static IEnumerable<{{rowType}}> Rows() => [new Row()];
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run({{parameterType}} value, {{tail}}) { }
+            }
+            """);
+    }
+
+    [Test]
     public async Task Convertible_Row_Rejects_Required_Test_Parameters()
     {
         await Verifier.VerifyAnalyzerAsync(
