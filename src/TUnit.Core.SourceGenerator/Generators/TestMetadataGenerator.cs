@@ -7382,9 +7382,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             && row is INamedTypeSymbol { IsGenericType: true } rowNamed
             && SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, rowNamed.OriginalDefinition))
         {
+            var validateCandidate = reconstructTupleElements && !overwriteBindings;
             for (var i = 0; i < named.TypeArguments.Length; i++)
             {
+                // Infer the open arguments first. Closed arguments are checked on the completed
+                // candidate below, where interface variance has its correct direction and scope.
+                if (validateCandidate && !CodeGenerationHelpers.ContainsTypeParameter(named.TypeArguments[i])) continue;
                 if (!MatchesOpenRowType(named.TypeArguments[i], rowNamed.TypeArguments[i], compilation, bindings, reconstructTupleElements, overwriteBindings)) return false;
+            }
+            if (validateCandidate)
+            {
+                var typeParameters = bindings.Keys.Cast<ITypeParameterSymbol>().ToImmutableArray();
+                var typeArguments = typeParameters.Select(typeParameter => bindings[typeParameter]).ToArray();
+                var completedParameter = SubstituteTypeParameters(parameter, typeParameters, typeArguments, compilation);
+                return SatisfiesTypeConstraint(row, completedParameter, compilation);
             }
             return true;
         }

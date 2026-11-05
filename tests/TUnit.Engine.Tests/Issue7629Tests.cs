@@ -21,6 +21,8 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TupleNestedInterfaceBaseTests", 2)]
     [Arguments("TupleMultiParameterCandidateTests", 2)]
     [Arguments("TupleClosedCandidateArgumentTests", 2)]
+    [Arguments("TupleVariantCandidateTests", 4)]
+    [Arguments("TupleInvariantBaseCandidateTests", 2)]
     [Arguments("WholeTupleWithTrailingParametersTests", 6)]
     public async Task Tuple_Inference_And_Conversion_Agree_In_Both_Modes(string className, int expectedCount)
     {

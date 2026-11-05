@@ -686,6 +686,8 @@ internal sealed class TestGenericTypeResolver
                 {
                     for (var i = 0; i < paramGenericArgs.Length; i++)
                     {
+                        if (tupleElement && !overwriteBindings && !paramGenericArgs[i].ContainsGenericParameters)
+                            continue;
                         // Tuple invocation converts closed elements (including nullable/numeric
                         // values). Only open elements contribute to generic inference.
                         if (tupleElement && TupleHelper.IsTupleType(parameterType) && !paramGenericArgs[i].ContainsGenericParameters)
@@ -714,7 +716,8 @@ internal sealed class TestGenericTypeResolver
                             return false;
                         }
                     }
-                    return true;
+                    return !tupleElement || overwriteBindings
+                        || SubstituteCandidateParameters(parameterType, typeMapping).IsAssignableFrom(argumentType);
                 }
             }
         }
@@ -753,6 +756,12 @@ internal sealed class TestGenericTypeResolver
                         if (paramGenericArgs.Length == implGenericArgs.Length)
                         {
                             var candidateMapping = new Dictionary<Type, Type>(typeMapping);
+                            if (tupleElement)
+                            {
+                                if (!TryInferTypeMapping(parameterType, implementedInterface, candidateMapping, tupleElement: true)) continue;
+                                foreach (var mapping in candidateMapping) typeMapping[mapping.Key] = mapping.Value;
+                                return true;
+                            }
                             var allMapped = true;
                             for (var i = 0; i < paramGenericArgs.Length; i++)
                             {
@@ -775,6 +784,32 @@ internal sealed class TestGenericTypeResolver
 
         // Non-generic types must match exactly or be assignable
         return parameterType.IsAssignableFrom(argumentType);
+    }
+
+    // Open candidate types are only rebuilt during reflection inference. Validate the entire
+    // constructed type: assignability of its individual invariant arguments is insufficient.
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Open generic tuple candidates are resolved only in reflection mode; source-generated tests are already closed.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2055", Justification = "Candidate definitions and inferred arguments come from the test parameter and data types already in use.")]
+    private static Type SubstituteCandidateParameters(Type type, Dictionary<Type, Type> bindings)
+    {
+        if (!type.ContainsGenericParameters) return type;
+        if (type.IsGenericParameter) return bindings.TryGetValue(type, out var bound) ? bound : type;
+        if (type.IsArray)
+        {
+            var element = type.GetElementType()!;
+            var substituted = SubstituteCandidateParameters(element, bindings);
+            return type == element.MakeArrayType()
+                ? substituted.MakeArrayType()
+                : substituted.MakeArrayType(type.GetArrayRank());
+        }
+        if (type.IsGenericType)
+        {
+            var arguments = type.GetGenericArguments();
+            for (var i = 0; i < arguments.Length; i++)
+                arguments[i] = SubstituteCandidateParameters(arguments[i], bindings);
+            return type.GetGenericTypeDefinition().MakeGenericType(arguments);
+        }
+        return type;
     }
 
     /// <param name="constraints">The constraints of the generic parameters that <paramref name="resolvedTypes"/> fill.</param>

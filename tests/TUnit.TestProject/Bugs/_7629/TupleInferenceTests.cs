@@ -633,3 +633,72 @@ public class SpreadMatchingFamilyTupleInferenceTests
 #pragma warning restore TUnit0001
     public void Value<T>((Base<T>, int) row, int extra) { }
 }
+
+
+public class TupleVariantCandidateTests
+{
+    public interface IPair<T, out U> { }
+    public interface IConsumer<T, in U> { }
+    public sealed class Source : IPair<int, string>, IConsumer<int, object> { }
+    public static IEnumerable<(Source, int)> ValueRows() => [(new Source(), 7)];
+    public static IEnumerable<Tuple<Source, int>> ReferenceRows() => [Tuple.Create(new Source(), 7)];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void Value<T>((IPair<T, object>, int) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item1 is not Source || row.Item2 != 7)
+            throw new InvalidOperationException("Expected covariant interface conversion");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<IPair<T, object>, int> row)
+    {
+        if (typeof(T) != typeof(int) || row.Item1 is not Source || row.Item2 != 7)
+            throw new InvalidOperationException("Expected covariant interface conversion");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void ContravariantValue<T>((IConsumer<T, string>, int) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item1 is not Source || row.Item2 != 7)
+            throw new InvalidOperationException("Expected contravariant interface conversion");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void ContravariantReference<T>(Tuple<IConsumer<T, string>, int> row)
+    {
+        if (typeof(T) != typeof(int) || row.Item1 is not Source || row.Item2 != 7)
+            throw new InvalidOperationException("Expected contravariant interface conversion");
+    }
+}
+
+
+public class TupleInvariantBaseCandidateTests
+{
+    public interface IBox<T> { }
+    public class Base<T, U> { }
+    public sealed class Derived : Base<int, string> { }
+    public sealed class Dual : IBox<Derived>, IBox<Base<long, object>> { }
+    public static IEnumerable<(Dual, int)> ValueRows() => [(new Dual(), 7)];
+    public static IEnumerable<Tuple<Dual, int>> ReferenceRows() => [Tuple.Create(new Dual(), 7)];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void Value<T>((IBox<Base<T, object>>, int) row)
+    {
+        if (typeof(T) != typeof(long) || row.Item1 is not Dual || row.Item2 != 7)
+            throw new InvalidOperationException("Expected compatible invariant base candidate");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<IBox<Base<T, object>>, int> row)
+    {
+        if (typeof(T) != typeof(long) || row.Item1 is not Dual || row.Item2 != 7)
+            throw new InvalidOperationException("Expected compatible invariant base candidate");
+    }
+}
