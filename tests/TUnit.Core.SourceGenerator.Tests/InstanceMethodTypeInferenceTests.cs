@@ -21,6 +21,10 @@ internal class InstanceMethodTypeInferenceTests : TestsBase
             await Assert.That(source).Contains("NonGenericInstanceSourceTests");
             await Assert.That(source).DoesNotContain("WholeRow<int>");
             await Assert.That(source).Contains("WholeRow<global::System.Tuple<int, string>>");
+            await Assert.That(source).Contains("BothSources<string>");
+            await Assert.That(source).Contains("InstanceElement<int>");
+            await Assert.That(source).Contains("StaticElement<int>");
+            await Assert.That(source).DoesNotContain("InstanceElement<global::System.Tuple<int>>");
             await Assert.That(source).Contains("Valid<int>");
             await Assert.That(source).Contains("Valid<string>");
         });

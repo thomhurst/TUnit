@@ -70,3 +70,38 @@ public class WholeReferenceTupleSourceTests
             throw new InvalidOperationException("Expected the whole reference tuple");
     }
 }
+
+[GenerateGenericTest(typeof(int))]
+public class ExplicitClassInstanceSourcesTests<TClass>
+{
+    public IEnumerable<string> Rows() => ["first"];
+    public IEnumerable<string> MoreRows() => ["second"];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(Rows))]
+    [InstanceMethodDataSource(nameof(MoreRows))]
+    public void BothSources<T>(T item) where T : class
+    {
+        if (item is not string) throw new InvalidOperationException("Expected string");
+    }
+}
+
+public class InferredReferenceTupleSourceTests
+{
+    public IEnumerable<Tuple<int>> InstanceRows() => [Tuple.Create(1)];
+    public static IEnumerable<Tuple<int>> StaticRows() => [Tuple.Create(2)];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    public void InstanceElement<T>(T value) where T : struct
+    {
+        if (value is not int) throw new InvalidOperationException("Expected int");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(StaticRows))]
+    public void StaticElement<T>(T value) where T : struct
+    {
+        if (value is not int) throw new InvalidOperationException("Expected int");
+    }
+}

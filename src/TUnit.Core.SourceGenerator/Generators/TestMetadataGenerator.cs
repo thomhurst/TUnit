@@ -891,7 +891,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // that infers an existing instantiation's types joins it (#7163). With [GenerateGenericTest], a later
         // non-[Arguments] source inferring the same types is dropped, as reflection mode does (#7092).
         var joinsDuplicateMethodSources = testMethod is { IsGenericMethod: true, IsGenericType: false }
-            && !testMethod.MethodAttributes.Any(static a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
+            && !HasExplicitGenericTestTypes(testMethod);
 
         // Without a complete set of constructor-supplied types, method sources supply the class types
         // and partition their rows. Incomplete constructor rows supply values on those instantiations.
@@ -1043,13 +1043,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // A generic method on a non-generic class runs only the sources scoped to its
                     // instantiation, so any method data source that infers the same types as an earlier
                     // one (a second [MethodDataSource] declared like the first, say) joins it too.
-                    // Otherwise its rows would be reported as uninferable (#7163). With method-level
-                    // [GenerateGenericTest], duplicate inferred sources are dropped, as in reflection.
-                    // Non-generic methods inferring class types group sources of the same types too.
-                    // The name also matches [Arguments<T>], a literal row that joins as well (#7214).
+                    // Inferred sources join matching instantiations for class and method inference.
+                    // Instance sources also join when explicit class types close a generic class.
+                    // Explicit method types retain reflection mode's duplicate-source behavior.
                     if (specificAttr is not null && GenericMethodInferencePolicy.JoinsDuplicate(
                         isLiteralRow: specificAttr.AttributeClass?.Name == "ArgumentsAttribute",
-                        joinsInferredSources: (joinsDuplicateMethodSources || scopesClassMethodSources) && !isClassRow))
+                        joinsInferredSources: !isClassRow && (joinsDuplicateMethodSources || scopesClassMethodSources
+                            || (specificAttr.AttributeClass?.Name == "InstanceMethodDataSourceAttribute"
+                                && !HasExplicitGenericTestTypes(testMethod)))))
                     {
                         existing.AddRow(specificAttr, isClassRow);
                     }
@@ -1058,7 +1059,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // Explicit method types retain reflection mode's duplicate-source behavior.
                     if (methodRow?.AttributeClass?.Name == "ArgumentsAttribute"
                         || (methodRow?.AttributeClass?.Name == "InstanceMethodDataSourceAttribute"
-                            && !testMethod.MethodAttributes.Any(static a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)))
+                            && !HasExplicitGenericTestTypes(testMethod)))
                     {
                         existing.AddRow(methodRow, isClassRow: false);
                     }
@@ -7045,6 +7046,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
+    private static bool HasExplicitGenericTestTypes(TestMethodMetadata testMethod) =>
+        testMethod.MethodAttributes.Any(static attribute =>
+            attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
+
     /// <summary>
     /// Infers a generic test method's type arguments from a [MethodDataSource] member's declared row type. Returns
     /// null when the row type does not determine them, or when one of them is a type the generated code cannot name,
@@ -7056,8 +7061,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Reflection mode runs instance sources on the explicit method types when supplied, without
         // adding declared-row instantiations. Preserve conversions enabled by those explicit types.
         if (mdsAttr.AttributeClass?.Name == "InstanceMethodDataSourceAttribute"
-            && testMethod.MethodAttributes.Any(attribute =>
-                attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true))
+            && HasExplicitGenericTestTypes(testMethod))
         {
             return null;
         }
@@ -7270,13 +7274,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var genericParams = testMethod.MethodSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
-        // A reference tuple binds whole to a single open type parameter, just as it did
-        // before reference-tuple spreading was supported. In particular, this must deduplicate
-        // against an explicit GenerateGenericTest<Tuple<...>> rather than infer its first element.
+        // A typed tuple parameter receives the whole row. A bare type parameter normally
+        // receives the first element, as reflection mode unwraps tuple rows before inference.
+        // With explicit method types, preserve whole reference-tuple inference so it deduplicates
+        // against GenerateGenericTest<Tuple<...>> instead of adding a first-element instantiation.
         var receivesWholeTuple = testMethodParams.Length == 1
             && (GetTupleElementTypes(testMethodParams[0].Type) is not null
                 || (testMethodParams[0].Type is ITypeParameterSymbol
-                    && rowType is INamedTypeSymbol { IsTupleType: false }));
+                    && rowType is INamedTypeSymbol { IsTupleType: false }
+                    && HasExplicitGenericTestTypes(testMethod)));
 
         if (GetTupleElementTypes(rowType) is { } tupleElements && !receivesWholeTuple)
         {

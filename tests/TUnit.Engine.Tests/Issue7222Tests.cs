@@ -180,6 +180,19 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    [Arguments("ExplicitClassInstanceSourcesTests*")]
+    [Arguments("InferredReferenceTupleSourceTests")]
+    public async Task Inferred_Instance_Sources_Preserve_All_Rows_And_Unwrap_Tuples(string className)
+    {
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7222/{className}/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2)
+            ]);
+    }
+
+    [Test]
     public async Task Generic_Class_Instance_Source_Infers_Method_Types()
     {
         await RunTestsWithFilter(
