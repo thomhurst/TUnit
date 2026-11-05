@@ -16,6 +16,9 @@ public class Issue7210Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("WrappedRowInfersItsValue", 2)]
     [Arguments("WrappedFactoryInvokedOnce", 1)]
     [Arguments("WrappedFactoryFreshPerTest", 3)]
+    [Arguments("NullLeadingRowInfersFirstNonNull", 2)]
+    [Arguments("AllNullRowsUseAllRowsFallback", 1)]
+    [Arguments("NullLeadingTwoParameterRowUsesFallback", 1)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests)
     {
         await RunTestsWithFilter(
@@ -41,6 +44,22 @@ public class Issue7210Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Passed.ShouldBe(0),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0),
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(expectedTests)
+            ]);
+    }
+
+    [Test]
+    public async Task All_Null_Rows_Do_Not_Infer_An_Unmatched_Instantiation()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7210/AllNullRowsUseNoClassRowFallback*/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Failed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single(x => x.Outcome == "Failed")
+                    .Output.ShouldNotBeNull().ErrorInfo.ShouldNotBeNull().Message
+                    .ShouldContain("none of the class-level data rows infer")
             ]);
     }
 
