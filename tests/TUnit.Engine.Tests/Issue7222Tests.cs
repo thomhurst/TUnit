@@ -174,11 +174,12 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7222/GenericInstanceSourceTests*/*",
             [
-                result => result.ResultSummary.Counters.Total.ShouldBe(4),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Total.ShouldBe(7),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(5),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(2),
-                result => result.Results.Where(x => x.Output?.ErrorInfo?.Message != null)
-                    .ShouldAllBe(x => x.Output!.ErrorInfo!.Message!.Contains(
+                result => result.Results.Where(x => x.Outcome == "Failed")
+                    .ShouldAllBe(x => x.Output != null && x.Output.ErrorInfo != null
+                        && x.Output.ErrorInfo.Message != null && x.Output.ErrorInfo.Message.Contains(
                         "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'"))
             ]);
     }

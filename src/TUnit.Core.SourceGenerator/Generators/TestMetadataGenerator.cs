@@ -1054,10 +1054,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         existing.AddRow(specificAttr, isClassRow);
                     }
 
-                    // Only a method [Arguments] row joins. Any other method source (a typed source or
-                    // [MethodDataSource]) inferring types an earlier source instantiated is dropped, as on a
-                    // non-generic class and in reflection mode's AddInstantiation.
-                    if (methodRow?.AttributeClass?.Name == "ArgumentsAttribute")
+                    // Literal rows and inferred instance sources join the existing class/method pair.
+                    // Explicit method types retain reflection mode's duplicate-source behavior.
+                    if (methodRow?.AttributeClass?.Name == "ArgumentsAttribute"
+                        || (methodRow?.AttributeClass?.Name == "InstanceMethodDataSourceAttribute"
+                            && !testMethod.MethodAttributes.Any(static a => a.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true)))
                     {
                         existing.AddRow(methodRow, isClassRow: false);
                     }
@@ -7269,14 +7270,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var genericParams = testMethod.MethodSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
-        if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType
-            && !(testMethodParams.Length == 1 && testMethodParams[0].Type.IsTupleType))
+        if (GetTupleElementTypes(rowType) is { } tupleElements
+            && !(testMethodParams.Length == 1 && GetTupleElementTypes(testMethodParams[0].Type) is not null))
         {
             // A tuple row is spread across the test method's parameters
-            var tupleElements = tupleType.TupleElements;
             for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
             {
-                ProcessTypeForGenerics(testMethodParams[i].Type, tupleElements[i].Type, genericParams, genericParamMap);
+                ProcessTypeForGenerics(testMethodParams[i].Type, tupleElements[i], genericParams, genericParamMap);
             }
         }
         else if (testMethodParams.Length > 0)

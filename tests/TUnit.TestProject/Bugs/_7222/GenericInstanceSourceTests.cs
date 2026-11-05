@@ -11,8 +11,27 @@ public class GenericInstanceSourceTests<TClass>(TClass value)
 
     [Test]
     [InstanceMethodDataSource(nameof(Rows))]
+    [InstanceMethodDataSource(nameof(MoreRows))]
     public void Valid<T>(T item) where T : class
     {
+    }
+
+    public IEnumerable<string> MoreRows() => ["extra"];
+
+    public IEnumerable<Tuple<int, string>> TupleRows() => [Tuple.Create(1, "tuple")];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(TupleRows))]
+    public void ReferenceTuple<T>(T first, string second)
+    {
+        if (typeof(T) != typeof(int)) throw new InvalidOperationException("Expected int");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(TupleRows))]
+    public void PreservedTuple<T>(Tuple<T, string> row)
+    {
+        if (typeof(T) != typeof(int)) throw new InvalidOperationException("Expected int");
     }
 
     // Intentional failures: checked in both modes by Issue7222Tests.
