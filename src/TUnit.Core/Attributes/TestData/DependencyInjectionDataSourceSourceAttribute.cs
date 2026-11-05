@@ -53,7 +53,10 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                     void RefreshOwner(object instance)
                     {
                         if (refreshed.Add(instance))
-                            ExternalObjectOwnership.FindOwner(instance)?.CaptureOwnershipFor(instance, [], retainPartialGraphOnError: true);
+                        {
+                            foreach (var existingOwner in ExternalObjectOwnership.FindOwners(instance))
+                                existingOwner.CaptureOwnershipFor(instance, [], retainPartialGraphOnError: true);
+                        }
                     }
                     for (var i = 0; i < resolvedCount; i++)
                     {

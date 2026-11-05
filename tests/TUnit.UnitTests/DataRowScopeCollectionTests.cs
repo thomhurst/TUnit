@@ -247,6 +247,39 @@ public class DataRowScopeCollectionTests
         GC.KeepAlive(external);
     }
 
+    [Test]
+    public async Task FailedRowRefreshesEveryOwnerOfASharedRoot()
+    {
+        var root = new ChangingInitializerRoot();
+        var first = new DataRowScopeCollection();
+        var second = new DataRowScopeCollection();
+        var firstOwner = first.Register(new Scope());
+        var secondOwner = second.Register(new Scope());
+        first.RegisterObject(firstOwner, root);
+        second.RegisterObject(secondOwner, root);
+        first.CaptureOwnership();
+        second.CaptureOwnership();
+        root.Nested = new NestedInitializer();
+
+        var context = new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
+        await Assert.That(() => new FailingSource(false, root).Resolve(context))
+            .Throws<InvalidOperationException>().WithMessage("Resolution failed");
+        await context.Events.DataRowScopes!.CompleteAsync();
+
+        // Either handle can outlive the other. Both must protect the changed dependency,
+        // even if a later cached consumer counts it without rediscovering the root graph.
+        await Assert.That(firstOwner.Owns(root.Nested)).IsTrue();
+        await Assert.That(secondOwner.Owns(root.Nested)).IsTrue();
+        var tracker = new TUnit.Core.Tracking.ObjectTracker(new(), GlobalContext.Current.Disposer);
+        tracker.TrackStaticLeaseObject(root.Nested);
+        await tracker.ReleaseStaticLeaseObjectAsync(root.Nested);
+        await Assert.That(root.Nested.DisposeCount).IsEqualTo(0);
+        await first.CompleteAsync();
+        await second.CompleteAsync();
+        GC.KeepAlive(first);
+        GC.KeepAlive(second);
+    }
+
     private sealed class ChangingInitializerRoot
     {
         public bool Throw;

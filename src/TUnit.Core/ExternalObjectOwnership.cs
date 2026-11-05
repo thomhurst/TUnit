@@ -74,6 +74,35 @@ internal static class ExternalObjectOwnership
         return null;
     }
 
+    // Refresh callers need every live owner, rather than any owner that suppresses disposal.
+    // Return strong handles before invoking discovery: user getters must not run under this lock.
+    internal static IReadOnlyList<DataRowScopeCollection.ScopeOwner> FindOwners(object instance)
+    {
+        if (!s_hasOwners || !Owners.TryGetValue(instance, out var owners))
+        {
+            return [];
+        }
+        lock (owners)
+        {
+            var snapshot = new List<DataRowScopeCollection.ScopeOwner>();
+            var node = owners.Values.First;
+            while (node is not null)
+            {
+                var next = node.Next;
+                if (node.Value.TryGetTarget(out var owner))
+                {
+                    snapshot.Add(owner);
+                }
+                else
+                {
+                    owners.Values.Remove(node);
+                }
+                node = next;
+            }
+            return snapshot;
+        }
+    }
+
     private sealed class OwnerSet
     {
         // Membership uses weak identity keys, so adding another owner never scans existing rows.
