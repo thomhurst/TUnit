@@ -7162,9 +7162,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// </summary>
     private static ITypeSymbol[]? InferTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr, ITypeSymbol[]? classTypes = null)
     {
-        // Reflection mode runs instance sources on the explicit method types when supplied, without
-        // adding declared-row instantiations. Preserve conversions enabled by those explicit types.
-        if (DataSourceAttributeHelper.IsOrInheritsBuiltIn(mdsAttr.AttributeClass, "InstanceMethodDataSourceAttribute")
+        // Reflection mode runs instance and custom derived sources on explicit method types,
+        // without adding declared-row instantiations. Preserve that discovery behavior.
+        if (!DataSourceAttributeHelper.IsBuiltIn(mdsAttr.AttributeClass, "MethodDataSourceAttribute")
             && HasExplicitGenericTestTypes(testMethod))
         {
             return null;

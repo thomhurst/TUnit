@@ -29,7 +29,7 @@ namespace TUnit.TestProject.DerivedSources
         }
     }
     public sealed class InstanceSourceAttribute(string memberName) : TUnit.Core.InstanceMethodDataSourceAttribute(memberName);
-    public sealed class ClassAliasAttribute(string label) : TUnit.Core.MethodDataSourceAttribute(typeof(LookalikeDataSourceTests), nameof(LookalikeDataSourceTests.RealRows));
+    public sealed class ClassAliasAttribute(string label) : TUnit.Core.MethodDataSourceAttribute(typeof(LookalikeDataSourceTests), nameof(LookalikeDataSourceTests.RealRows)); // External source isolates runtime bug #7654.
     public sealed class AliasAttribute(string label) : TUnit.Core.MethodDataSourceAttribute(nameof(LookalikeDataSourceTests.RealRows));
 }
 
@@ -99,6 +99,18 @@ namespace TUnit.TestProject
         {
             await Assert.That(typeof(T)).IsEqualTo(typeof(object));
             await Assert.That((object?)value).IsEqualTo(42);
+        }
+
+        public static IEnumerable<(int, int)> TupleRows() => [(1, 2)];
+
+        [Test]
+        [GenerateGenericTest(typeof(object))]
+        [DerivedSources.MethodDataSource(nameof(TupleRows))]
+        public async Task Derived_static_source_preserves_explicit_types<T>(T first, T second)
+        {
+            await Assert.That(typeof(T)).IsEqualTo(typeof(object));
+            await Assert.That((object?)first).IsEqualTo(1);
+            await Assert.That((object?)second).IsEqualTo(2);
         }
 
         [Test]

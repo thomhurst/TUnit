@@ -22,6 +22,27 @@ public class ReimplementedMethodSourceTests
         yield return () => Task.FromResult<object?[]?>(["custom row"]);
     }
 
+    public sealed class ConfiguredSourceAttribute(string memberName) : MethodDataSourceAttribute(memberName)
+    {
+        public bool UseIntegers
+        {
+            get => false;
+            set => Arguments = value ? [1] : [];
+        }
+    }
+
+    public static IEnumerable<string> OverloadedRows() => ["wrong row"];
+    public static IEnumerable<int> OverloadedRows(int value) => [value];
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [ConfiguredSource(nameof(OverloadedRows), UseIntegers = true)]
+    public async Task Named_setter_preserves_types<T>(T value)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That((object?)value).IsEqualTo(1);
+    }
+
     public static IEnumerable<int> DecoyRows() => [42];
 
     [Test]

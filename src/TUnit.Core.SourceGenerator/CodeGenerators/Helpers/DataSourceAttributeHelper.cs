@@ -36,7 +36,8 @@ internal static class DataSourceAttributeHelper
         => IsOrInheritsBuiltIn(symbol, "MethodDataSourceAttribute") || IsOrInheritsBuiltIn(symbol, "InstanceMethodDataSourceAttribute");
 
     // Only interpret a custom constructor's arguments when it forwards them unchanged to a
-    // built-in constructor. Unknown mappings stay on the runtime IDataSourceAttribute path.
+    // built-in constructor. Source syntax is intentionally required: metadata-only constructors,
+    // constructor chains, and other unproven shapes stay on the runtime IDataSourceAttribute path.
     public static bool CanReadMethodSourceArguments(AttributeData attribute)
     {
         if (IsBuiltIn(attribute.AttributeClass, "MethodDataSourceAttribute")
@@ -45,7 +46,7 @@ internal static class DataSourceAttributeHelper
             return true;
         }
 
-        if (attribute.AttributeClass is not { IsGenericType: false, BaseType.IsGenericType: false }
+        if (attribute.AttributeClass is not { IsGenericType: false, BaseType.IsGenericType: false } attributeClass
             || attribute.AttributeConstructor is not { } constructor
             || !(IsBuiltIn(attribute.AttributeClass?.BaseType, "MethodDataSourceAttribute")
                 || IsBuiltIn(attribute.AttributeClass?.BaseType, "InstanceMethodDataSourceAttribute")))
@@ -53,13 +54,34 @@ internal static class DataSourceAttributeHelper
             return false;
         }
 
+        // Named custom or hidden setters can mutate the source after construction. Only trust
+        // supplied members that resolve to the built-in configuration properties.
+        foreach (var namedArgument in attribute.NamedArguments)
+        {
+            ISymbol? member = null;
+            for (var type = attributeClass; type is not null; type = type.BaseType)
+            {
+                member = type.GetMembers(namedArgument.Key).FirstOrDefault();
+                if (member is not null)
+                {
+                    break;
+                }
+            }
+
+            if (member is not IPropertySymbol property
+                || !IsBuiltIn(property.ContainingType, "MethodDataSourceAttribute"))
+            {
+                return false;
+            }
+        }
+
         // Forwarding the constructor is insufficient if the subclass replaces the row provider.
         // Resolve the interface slot so both explicit and implicit reimplementations use runtime rows.
-        var sourceInterface = attribute.AttributeClass.AllInterfaces
+        var sourceInterface = attributeClass.AllInterfaces
             .FirstOrDefault(type => IsBuiltIn(type, "IDataSourceAttribute"));
         var rowMethod = sourceInterface?.GetMembers("GetDataRowsAsync").OfType<IMethodSymbol>().SingleOrDefault();
         if (rowMethod is null
-            || attribute.AttributeClass.FindImplementationForInterfaceMember(rowMethod) is not IMethodSymbol implementation
+            || attributeClass.FindImplementationForInterfaceMember(rowMethod) is not IMethodSymbol implementation
             || !IsBuiltIn(implementation.ContainingType, "MethodDataSourceAttribute"))
         {
             return false;

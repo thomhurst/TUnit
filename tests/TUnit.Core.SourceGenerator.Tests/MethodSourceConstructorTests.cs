@@ -17,16 +17,25 @@ internal class MethodSourceConstructorTests
     [Arguments("Factory = null;", "", false)]
     [Arguments("Configure();", "private void Configure() { }", false)]
     [Arguments("SkipIfEmpty = Configure();", "private bool Configure() => true;", false)]
-    public async Task Only_independent_configuration_preserves_argument_mapping(string body, string members, bool expected)
+    [Arguments("", "public bool Custom { get; set; }", false, ", Custom = true")]
+    [Arguments("", "public new bool SkipIfEmpty { get; set; }", false, ", SkipIfEmpty = true")]
+    [Arguments("", "", true, ", SkipIfEmpty = true, DeferEnumeration = false")]
+    [Arguments("", "", true, ", Arguments = new object[] { 1 }")]
+    [Arguments("SkipIfEmpty = true;", "", false, "", "IntermediateAttribute")]
+    public async Task Only_independent_configuration_preserves_argument_mapping(string body, string members, bool expected, string namedArguments = "", string baseType = "MethodDataSourceAttribute")
     {
         var source = $$"""
             using TUnit.Core;
-            public sealed class SourceAttribute : MethodDataSourceAttribute
+            public class IntermediateAttribute(string memberName) : MethodDataSourceAttribute(memberName)
+            {
+                public new bool SkipIfEmpty { get; set; }
+            }
+            public sealed class SourceAttribute : {{baseType}}
             {
                 public SourceAttribute(string memberName) : base(memberName) { {{body}} }
                 {{members}}
             }
-            [Source("Rows")] public class Subject { }
+            [Source("Rows"{{namedArguments}})] public class Subject { }
             """;
         var compilation = CSharpCompilation.Create("ConstructorConfiguration",
             [CSharpSyntaxTree.ParseText(source)], ReferencesHelper.References,
