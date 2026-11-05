@@ -795,3 +795,81 @@ public class OpenTupleRuntimeCastTests
             throw new InvalidOperationException("Expected inference from a later element after a runtime cast");
     }
 }
+
+
+#pragma warning disable TUnit0001 // #7622: analyzer tuple reconstruction and whole-row matching.
+public class NestedSingletonBoundaryTests
+{
+    public static IEnumerable<Tuple<ValueTuple<int>>> Rows() => [Tuple.Create(new ValueTuple<int>(7))];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void ReferenceOuter(Tuple<Tuple<int>> row)
+    {
+        if (row.Item1.Item1 != 7)
+            throw new InvalidOperationException("Expected nested singleton reconstruction");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void ValueOuter(ValueTuple<Tuple<int>> row)
+    {
+        if (row.Item1.Item1 != 7)
+            throw new InvalidOperationException("Expected preserved whole singleton reconstruction");
+    }
+}
+
+public class WrappedWholeTupleInferenceTests
+{
+    public static IEnumerable<TestDataRow<(int, string)>> ValueRows() => [new((1, "tuple"))];
+    public static IEnumerable<TestDataRow<Tuple<int, string>>> ReferenceRows() => [new(Tuple.Create(1, "tuple"))];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void ValueOptional<T>((T, string) row, int extra = 5)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra != 5)
+            throw new InvalidOperationException("Expected whole value tuple and default optional value");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void ValueParams<T>((T, string) row, params int[] extra)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra.Length != 0)
+            throw new InvalidOperationException("Expected whole value tuple and empty params");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void ValueArray<T>((T, string) row, int[] extra)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra.Length != 0)
+            throw new InvalidOperationException("Expected whole value tuple and empty collecting array");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void ReferenceOptional<T>(Tuple<T, string> row, int extra = 5)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra != 5)
+            throw new InvalidOperationException("Expected whole reference tuple and default optional value");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void ReferenceParams<T>(Tuple<T, string> row, params int[] extra)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra.Length != 0)
+            throw new InvalidOperationException("Expected whole reference tuple and empty params");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void ReferenceArray<T>(Tuple<T, string> row, int[] extra)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra.Length != 0)
+            throw new InvalidOperationException("Expected whole reference tuple and empty collecting array");
+    }
+}
+#pragma warning restore TUnit0001

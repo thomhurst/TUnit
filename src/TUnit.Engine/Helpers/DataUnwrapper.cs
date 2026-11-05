@@ -163,7 +163,20 @@ internal class DataUnwrapper
             // A reference tuple with a lone null must retain its container: [null] also
             // represents an actual null argument. Value tuples always reconstruct from null.
             var tupleElements = DataSourceHelpers.RetainTupleElements(values[0]);
-            return !lastDataParameterType.IsValueType && tupleElements is [null] ? values : tupleElements;
+            if (!lastDataParameterType.IsValueType && tupleElements is [null])
+            {
+                return values;
+            }
+
+            // A singleton tuple element is a flattened column, not a preserved whole row.
+            // Retain its boundary explicitly so invocation can reconstruct the outer tuple
+            // without guessing from the inner tuple's arity.
+            if (tupleElements is [var element] && element is not TupleArgument && DataSourceHelpers.IsTuple(element))
+            {
+                tupleElements[0] = new TupleArgument(element!.GetType(), DataSourceHelpers.RetainTupleElements(element));
+            }
+
+            return tupleElements;
         }
 
         // A tuple that is already an instance of the first data parameter's tuple type binds to it
