@@ -618,8 +618,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             try
             {
-                // Class data sources hold only the rows that inferred this instantiation
-                AddTestsForInstantiation(discoveredTests, genericTypeDefinition, typeArguments, testMethods, classRowSources, methodRowTypeArguments: null, methodRowClassTypeArguments);
+                // Type-free rows also join methods that infer the types established by this class row.
+                AddTestsForInstantiation(discoveredTests, genericTypeDefinition, typeArguments, testMethods, classRowSources, methodRowTypeArguments: null, methodRowClassTypeArguments, typeFreeClassRows);
             }
             catch (Exception ex)
             {
@@ -658,7 +658,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         MethodInfo[] testMethods,
         IDataSourceAttribute[]? classRowSources,
         Dictionary<MethodInfo, List<Type[]>>? methodRowTypeArguments,
-        Type[]?[]?[]? methodRowClassTypeArguments)
+        Type[]?[]?[]? methodRowClassTypeArguments,
+        IDataSourceAttribute[]? typeFreeClassRows = null)
     {
         // Create concrete type with validation
         var concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
@@ -674,6 +675,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
 
             var rowTypeArguments = methodRowClassTypeArguments?[methodIndex];
+            // A method-inferred instantiation also uses type-free constructor rows when another
+            // class row already established the same types, matching generated discovery (#7387).
+            var methodClassRowSources = classRowSources;
+            if (classRowSources != null && typeFreeClassRows != null && InfersTypeArguments(rowTypeArguments, typeArguments))
+            {
+                methodClassRowSources = [.. classRowSources, .. typeFreeClassRows];
+            }
 
             // Resolve method-level generic instantiations
             foreach (var (resolvedMethod, methodFailedMetadata, methodArguments) in ResolveMethodInstantiations(concreteType, concreteMethod))
@@ -721,7 +729,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     }
                 }
 
-                discoveredTests.Add(BuildTestMetadata(concreteType, resolvedMethod, classRowSources, methodRows));
+                discoveredTests.Add(BuildTestMetadata(concreteType, resolvedMethod, methodClassRowSources, methodRows));
             }
         }
     }

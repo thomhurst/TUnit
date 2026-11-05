@@ -1918,16 +1918,19 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             foreach (var instantiation in rowInstantiations.Values)
             {
-                if (instantiation.HasMethodRows && !instantiation.HasClassRows)
+                // Type-free rows also join an instantiation already supplied by a type-bearing class row.
+                // Their constructor values still apply when a method row infers the same class types.
+                var hadClassRows = instantiation.HasClassRows;
+                if (instantiation.HasMethodRows)
                 {
-                    var hasClassDataSource = false;
+                    var hasClassDataSource = hadClassRows;
                     foreach (var typeFreeClassRow in typeFreeClassRows ?? [])
                     {
                         instantiation.AddRow(typeFreeClassRow, isClassRow: true);
                         hasClassDataSource = true;
                     }
 
-                    foreach (var (attribute, classTypes) in otherClassDataSources ?? [])
+                    foreach (var (attribute, classTypes) in hadClassRows ? [] : otherClassDataSources ?? [])
                     {
                         if (GenericClassInferencePolicy.IncludesRow(classTypes is null ? null : InferredTypesMatch(classTypes, instantiation.ClassTypeArgs), includeUninferred: true))
                         {
@@ -1938,7 +1941,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // The class data source makes this a class row instantiation after the pass above gave
                     // those the method rows that infer no type, so they join it here, as in reflection mode
-                    if (hasClassDataSource && addUninferredMethodDataSources)
+                    if (!hadClassRows && hasClassDataSource && addUninferredMethodDataSources)
                     {
                         foreach (var uninferred in uninferredMethodDataSources!)
                         {
@@ -6704,11 +6707,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Expanded trailing values bind to the array's elements; an explicitly supplied array
             // keeps its array shape, matching reflection's constructor-row inference.
             var constructorParamType = constructorParam.Type;
-            if (constructorParam.CollectsTrailingArguments()
-                && constructorParamType is IArrayTypeSymbol arrayType
-                && argValue.Type is not IArrayTypeSymbol)
+            var isExpandedTrailingValue = collectsTrailingArguments
+                && argIndex >= constructorParams.Length - 1
+                && constructorParamType is IArrayTypeSymbol
+                && !argValue.IsNull
+                && argValue.Type is not IArrayTypeSymbol;
+            if (isExpandedTrailingValue)
             {
-                constructorParamType = arrayType.ElementType;
+                constructorParamType = ((IArrayTypeSymbol)constructorParamType).ElementType;
             }
 
             // A value infers each type parameter its constructor parameter's type mentions, by matching the value's
@@ -6766,6 +6772,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         if (shapeInferredTypeParameters?.Contains(typeParam.Name) != true)
                         {
                             inferredTypes[typeParam.Name] = argType;
+                            // Expanded array elements fix T from the first non-null value, as reflection
+                            // discovery does. Later elements must bind to that same array element type.
+                            if (isExpandedTrailingValue)
+                            {
+                                (shapeInferredTypeParameters ??= []).Add(typeParam.Name);
+                            }
                         }
                     }
                     else

@@ -227,7 +227,9 @@ public class TypeFreeClassRowWithParams<T>(params int[] numbers)
     [Arguments("s")]
     public async Task Run(T value)
     {
-        await Assert.That(numbers).IsEquivalentTo(new[] { 1, 2 });
+        await Assert.That(numbers.Length).IsEqualTo(2);
+        await Assert.That(numbers[0]).IsEqualTo(1);
+        await Assert.That(numbers[1]).IsEqualTo(2);
         await Assert.That(typeof(T)).IsEqualTo(value!.GetType());
     }
 }
@@ -310,5 +312,51 @@ public static class UnrelatedAttributes
     public sealed class ArgumentsAttribute<T>(T value) : Attribute
     {
         public T Value { get; } = value;
+    }
+}
+
+// A null trailing array supplies no element type and must not infer object beside the explicit int instantiation.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(int))]
+[Arguments(42, null)]
+public class NullTrailingClassArray<T>(int number, T[]? values) where T : struct
+{
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That(number).IsEqualTo(42);
+        await Assert.That(values).IsNull();
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+    }
+}
+
+// The first expanded element fixes T, just as an explicitly supplied array fixes its element type.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(1, 2L)]
+public class MixedTrailingClassValues<T>(params T[] values)
+{
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values.Length).IsEqualTo(2);
+        await Assert.That((object?)values[0]).IsEqualTo(1);
+        await Assert.That((object?)values[1]).IsEqualTo(2);
+    }
+}
+
+// Constructor inference uses the expanded elements, rather than a fixed prefix's unrelated type.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments("prefix", 1, 2L)]
+public class PrefixedMixedTrailingClassValues<T>(string prefix, params T[] values)
+{
+    [Test]
+    public async Task Run()
+    {
+        await Assert.That(prefix).IsEqualTo("prefix");
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(values.Length).IsEqualTo(2);
+        await Assert.That((object?)values[0]).IsEqualTo(1);
+        await Assert.That((object?)values[1]).IsEqualTo(2);
     }
 }

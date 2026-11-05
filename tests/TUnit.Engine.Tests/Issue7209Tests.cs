@@ -27,6 +27,9 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypeFreeGenericClassRow", 2)]
     [Arguments("MixedTypeFreeAndTypeBearingClassRows", 2)]
     [Arguments("TypeFreeClassRowWithUnrelatedArgumentsAttributes", 2)]
+    [Arguments("NullTrailingClassArray", 1)]
+    [Arguments("MixedTrailingClassValues", 1)]
+    [Arguments("PrefixedMixedTrailingClassValues", 1)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests)
     {
         await RunTestsWithFilter(
