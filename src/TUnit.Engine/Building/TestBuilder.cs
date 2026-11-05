@@ -579,7 +579,8 @@ internal sealed class TestBuilder : ITestBuilder
                     {
                         await DisposeInstanceForMethodDataSourcesAsync(instanceForMethodDataSources);
                         if (await unclaimedClassRow.ReleaseAsync(CreateCleanupContext) is { Count: > 0 } cleanupErrors)
-                            tests.Add(CreateFailedTestForDataGenerationError(metadata, new AggregateException(cleanupErrors)));
+                            tests.Add(CreateFailedTestForDataGenerationError(metadata, new AggregateException(cleanupErrors),
+                                new TestDataCombination { ClassDataSourceIndex = classDataAttributeIndex, ClassLoopIndex = classDataLoopIndex }));
                         contextAccessor.Current = classSourceContext;
                     }
                 }

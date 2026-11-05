@@ -538,6 +538,62 @@ public class ClassRowCleanupTests
         await Assert.That(source.Callbacks).IsEqualTo(1);
     }
 
+    [Test]
+    public async Task UnclaimedCleanupFailuresHaveDistinctClassRowIds()
+    {
+        var current = TestContext.Current!;
+        var builder = (ITestBuilder)current.ServiceProvider.GetService(typeof(ITestBuilder))!;
+        var metadata = new TestMetadata<ClassRowCleanupTests>
+        {
+            TestClassType = typeof(ClassRowCleanupTests),
+            TestMethodName = nameof(UnclaimedCleanupFailuresHaveDistinctClassRowIds),
+            TestName = "Unclaimed cleanup failure IDs",
+            FilePath = "Unknown",
+            LineNumber = 0,
+            AttributeFactory = () => [],
+            MethodMetadata = current.TestDetails.MethodMetadata,
+            DataSources = [new EmptySource()],
+            ClassDataSources = [new FailingCleanupSource(), new FailingCleanupSource()],
+            PropertyDataSources = [],
+            InstanceFactory = (_, _) => new ClassRowCleanupTests(),
+            InvokeTypedTest = (_, _, _) => ValueTask.CompletedTask
+        };
+        var tests = (await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null))).ToArray();
+        try
+        {
+            await Assert.That(tests.Length).IsEqualTo(4);
+            await Assert.That(tests.Select(test => test.Context.TestDetails.TestId).Distinct().Count()).IsEqualTo(4);
+        }
+        finally
+        {
+            foreach (var test in tests)
+            {
+                test.Context.RemoveFromRegistry();
+                test.Context.Dispose();
+            }
+        }
+    }
+
+    private sealed class FailingCleanupSource : Attribute, IDataSourceAttribute
+    {
+        public bool SkipIfEmpty { get; set; }
+        public bool DeferEnumeration { get; set; }
+
+        public async IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata metadata)
+        {
+            await Task.CompletedTask;
+            for (var i = 0; i < 2; i++)
+            {
+                yield return () =>
+                {
+                    metadata.TestBuilderContext.Current.Events.OnDispose += (_, _) =>
+                        throw new InvalidOperationException("Class row cleanup failed");
+                    return Task.FromResult<object?[]?>([new object()]);
+                };
+            }
+        }
+    }
+
     private static TestContext CreateCleanupContext(TestBuilderContext builderContext)
     {
         var current = TestContext.Current!;
