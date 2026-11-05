@@ -69,7 +69,7 @@ internal sealed class StaticPropertyHandler
                             methodMetadata: null, _context.Events).ConfigureAwait(false);
                         // Use execution's ownership-aware traversal: DI-owned children stay with
                         // their scope, while TUnit-injected fixtures retain independent ownership.
-                        var graph = new ObjectGraphDiscoverer().DiscoverStaticPropertyTrackableObjects(value, cancellationToken);
+                        var graph = new ObjectGraphDiscoverer().DiscoverTrackableObjectGraph(value, cancellationToken);
                         foreach (var level in graph)
                         {
                             foreach (var obj in level.Value)

@@ -552,6 +552,7 @@ namespace
         public abstract object? Create(TScope scope,  type);
         public abstract TScope CreateScope(.DataGeneratorMetadata dataGeneratorMetadata);
         protected override .<<object?[]?>> GenerateDataSources(.DataGeneratorMetadata dataGeneratorMetadata) { }
+        protected virtual bool ScopeOwnsCreatedObjects(TScope scope) { }
     }
     [(.Class | .Method, AllowMultiple=true)]
     public class DependsOnAttribute : .TUnitAttribute
