@@ -17,6 +17,15 @@ public class NullableClassMethodRows<T> where T : struct
 
     [Test]
     [MethodDataSource(nameof(Values))]
+    public async Task OptionalScalar(T? value, int extra = 17)
+    {
+        await Assert.That(typeof(T)).IsEqualTo(typeof(int));
+        await Assert.That(value).IsEqualTo((T)(object)42);
+        await Assert.That(extra).IsEqualTo(17);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(Values))]
     public async Task Value(T? value)
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
@@ -61,12 +70,13 @@ public class NullableClassMethodRows<T> where T : struct
 
 [EngineTest(ExpectedResult.Pass)]
 [GenerateGenericTest(typeof(int))]
-public class ExplicitNullableClassMethodRows<T> where T : struct
+public class ExplicitNullableClassMethodRows<T> : NullableRowsBase<T> where T : struct
 {
     public static IEnumerable<int> OwnRows() => [1];
     public IEnumerable<int> InstanceRows() => [2];
 
     [Test]
+    [MethodDataSource(nameof(InheritedRows))]
     [MethodDataSource(nameof(OwnRows))]
     [MethodDataSource(nameof(InstanceRows))]
     [MethodDataSource(typeof(NullableClassRowsProvider), nameof(NullableClassRowsProvider.ExternalRows))]
@@ -375,4 +385,9 @@ public class ConstructorConstructedNullableClassRows<T>(T seed) where T : struct
         await Assert.That(seed).IsEqualTo((T)(object)1d);
         await Assert.That(values).IsNull();
     }
+}
+
+public class NullableRowsBase<T> where T : struct
+{
+    public static IEnumerable<int> InheritedRows() => [4];
 }

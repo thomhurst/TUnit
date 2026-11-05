@@ -52,7 +52,7 @@ internal class NullableClassMethodRowsTests : TestsBase
                 && file.Contains("ArrayClassMethodRows<int>"))).IsTrue();
         }
 
-        foreach (var method in new[] { "Value", "NullableValue", "Factory", "Tuple", "MultipleSources" })
+        foreach (var method in new[] { "OptionalScalar", "Value", "NullableValue", "Factory", "Tuple", "MultipleSources" })
         {
             await Assert.That(generatedFiles.Any(file => file.Contains($"NullableClassMethodRows_T_{method}_")
                 && file.Contains("NullableClassMethodRows<int>"))).IsTrue();

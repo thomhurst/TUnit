@@ -1337,7 +1337,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 || testMethod.TypeSymbol.GetAttributesIncludingBaseTypes().Any(a =>
                     a.AttributeClass is { } attributeClass
                     && DataSourceAttributeHelper.IsDataSourceAttribute(attributeClass)
-                    && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a, testMethod.CompilationContext.Compilation)));
+                    && !(attributeClass.Name == "ArgumentsAttribute" && ClassRowSuppliesNoTypeArguments(testMethod.TypeSymbol, a, testMethod.CompilationContext.Compilation, includePartialRows: true)));
 
             // classTypeArgumentsSupplied already includes explicit [GenerateGenericTest] class types.
             foreach (var methodArgAttr in methodArgumentsAttributes)
@@ -7839,7 +7839,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
         // If it's a single type that matches a class type parameter
-        else if (testMethodParams.Length == 1)
+        else if (testMethodParams.Length > 0 && testMethodParams.Skip(1).All(parameter => parameter.IsOptional))
         {
             var paramType = testMethodParams[0].Type;
             ProcessTypeForGenerics(paramType, dataType, classTypeParams, genericParamMap);

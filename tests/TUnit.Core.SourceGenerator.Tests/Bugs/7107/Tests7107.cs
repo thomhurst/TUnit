@@ -33,6 +33,10 @@ internal class Tests7107 : TestsBase
                 await Assert.That(source).DoesNotContain($"{className}<string>");
             }
 
+            var partialConstructor = SourceFor("PartialConstructorMethodConstraintTests");
+            await Assert.That(partialConstructor).Contains("RegisterGenericConstraintViolations(");
+            await Assert.That(partialConstructor).Contains(structViolation);
+
             // The only class row is invalid: no TestEntry, only the violation.
             var onlyInvalid = SourceFor("OnlyInvalidClassRowConstraintTests");
             await Assert.That(onlyInvalid).Contains("RegisterGenericConstraintViolations(");
