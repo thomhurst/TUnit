@@ -1,5 +1,3 @@
-// Pending nullable analyzer support is tracked in #7610.
-#pragma warning disable TUnit0001
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7573;
