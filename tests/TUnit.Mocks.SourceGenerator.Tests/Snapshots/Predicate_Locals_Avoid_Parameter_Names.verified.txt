@@ -17,6 +17,11 @@ public sealed class IServiceMock : global::TUnit.Mocks.Mock<global::IService>, g
     {
         Object.Escaped(@event, __fa_event);
     }
+
+    void global::IService.Generic<__fa_value_1>(__fa_value_1 value, out int __fa_value)
+    {
+        Object.Generic<__fa_value_1>(value, out __fa_value);
+    }
 }
 
 
@@ -46,6 +51,17 @@ file sealed class IServiceMockImpl : global::IService, global::TUnit.Mocks.IRais
     public void Escaped(string @event, string __fa_event)
     {
         _engine.HandleCall<string, string>(1, "Escaped", @event, __fa_event);
+    }
+
+    public void Generic<__fa_value_1>(__fa_value_1 value, out int __fa_value)
+    {
+        __fa_value = default!;
+        _engine.HandleCall(2, "Generic", new object?[] { value }, global::TUnit.Mocks.TypeArguments.Of<__fa_value_1>.Value);
+        var __outRef = global::TUnit.Mocks.Setup.OutRefContext.Consume();
+        if (__outRef is not null)
+        {
+            if (__outRef.TryGetValue(1, out var __v1)) __fa_value = (int)__v1!;
+        }
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -196,6 +212,19 @@ namespace TUnit.Mocks.Generated
             return new IService_Escaped_M1_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "Escaped", matchers);
         }
 
+        public static IService_Generic_M2_MockCall<__fa_value_1> Generic<__fa_value_1>(this global::TUnit.Mocks.Mock<global::IService> mock, global::TUnit.Mocks.Arguments.Arg<__fa_value_1> value)
+        {
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { value.Matcher };
+            return new IService_Generic_M2_MockCall<__fa_value_1>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Generic", matchers, global::TUnit.Mocks.TypeArguments.Of<__fa_value_1>.Value);
+        }
+
+        public static IService_Generic_M2_MockCall<__fa_value_1> Generic<__fa_value_1>(this global::TUnit.Mocks.Mock<global::IService> mock, global::System.Func<__fa_value_1, bool>? value)
+        {
+            global::TUnit.Mocks.Arguments.Arg<__fa_value_1> __fa_value_2 = value is null ? global::TUnit.Mocks.Arguments.Arg.Is<__fa_value_1>(default(__fa_value_1)!) : (global::TUnit.Mocks.Arguments.Arg<__fa_value_1>)value;
+            var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_value_2.Matcher };
+            return new IService_Generic_M2_MockCall<__fa_value_1>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "Generic", matchers, global::TUnit.Mocks.TypeArguments.Of<__fa_value_1>.Value);
+        }
+
         #if NET9_0_OR_GREATER
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
         public static void ClearCalls(this global::TUnit.Mocks.Mock<global::IService> mock)
@@ -284,6 +313,30 @@ namespace TUnit.Mocks.Generated
             EnsureSetup().Throws(args => exceptionFactory((string)args[0]!, (string)args[1]!));
             return this;
         }
+    }
+
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed class IService_Generic_M2_MockCall<__fa_value_1> : global::TUnit.Mocks.VoidMockMethodCallBase<IService_Generic_M2_MockCall<__fa_value_1>>
+    {
+        internal IService_Generic_M2_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers, global::System.Collections.Immutable.ImmutableArray<global::System.Type> typeArguments)
+            : base(engine, memberId, memberName, matchers, typeArguments) { }
+
+        /// <summary>Execute a typed callback using the actual method parameters.</summary>
+        public IService_Generic_M2_MockCall<__fa_value_1> Callback(global::System.Action<__fa_value_1> callback)
+        {
+            EnsureSetup().Callback(callback);
+            return this;
+        }
+
+        /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
+        public IService_Generic_M2_MockCall<__fa_value_1> Throws(global::System.Func<__fa_value_1, global::System.Exception> exceptionFactory)
+        {
+            EnsureSetup().Throws(args => exceptionFactory((__fa_value_1)args[0]!));
+            return this;
+        }
+
+        /// <summary>Sets the '__fa_value' out parameter to the specified value when this setup matches.</summary>
+        public IService_Generic_M2_MockCall<__fa_value_1> SetsOut__fa_value(int __fa_value) { EnsureSetup().SetsOutParameter(1, __fa_value); return this; }
     }
 }
 

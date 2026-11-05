@@ -1535,8 +1535,10 @@ internal static class MockMembersBuilder
             // A null predicate (including null/default literals) matches the parameter type’s default.
             // This also handles value-type instantiations of unconstrained generic parameters.
             // Keep non-null predicates on the existing implicit-conversion path.
-            // Reserve all parameter identifiers, including escaped names, before allocating locals.
+            // Reserve parameter and type parameter identifiers, including escaped names, before allocating locals.
             var usedNames = new HashSet<string>(method.Parameters.Select(p => p.Name.TrimStart('@')), StringComparer.Ordinal);
+            usedNames.UnionWith(model.TypeParameters.Select(tp => tp.Name.TrimStart('@')));
+            usedNames.UnionWith(method.TypeParameters.Select(tp => tp.Name.TrimStart('@')));
             var predicateLocals = new Dictionary<int, string>();
             foreach (var idx in funcIndices.OrderBy(i => i))
             {

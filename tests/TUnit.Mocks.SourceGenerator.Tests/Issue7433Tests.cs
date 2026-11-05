@@ -12,6 +12,7 @@ public class Issue7433Tests : SnapshotTestBase
             {
                 void Send(string value, string __fa_value, string __fa_value_1);
                 void Escaped(string @event, string @__fa_event);
+                void Generic<__fa_value_1>(__fa_value_1 value, out int __fa_value);
             }
 
             public class Usage
