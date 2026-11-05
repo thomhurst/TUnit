@@ -7270,8 +7270,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var genericParams = testMethod.MethodSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
-        if (GetTupleElementTypes(rowType) is { } tupleElements
-            && !(testMethodParams.Length == 1 && GetTupleElementTypes(testMethodParams[0].Type) is not null))
+        // A reference tuple binds whole to a single open type parameter, just as it did
+        // before reference-tuple spreading was supported. In particular, this must deduplicate
+        // against an explicit GenerateGenericTest<Tuple<...>> rather than infer its first element.
+        var receivesWholeTuple = testMethodParams.Length == 1
+            && (GetTupleElementTypes(testMethodParams[0].Type) is not null
+                || (testMethodParams[0].Type is ITypeParameterSymbol
+                    && rowType is INamedTypeSymbol { IsTupleType: false }));
+
+        if (GetTupleElementTypes(rowType) is { } tupleElements && !receivesWholeTuple)
         {
             // A tuple row is spread across the test method's parameters
             for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)

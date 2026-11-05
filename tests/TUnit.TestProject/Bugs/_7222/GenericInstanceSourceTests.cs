@@ -53,3 +53,20 @@ public class NonGenericInstanceSourceTests(int value)
     {
     }
 }
+
+public class WholeReferenceTupleSourceTests
+{
+    public static IEnumerable<Tuple<int, string>> Rows() => [Tuple.Create(1, "tuple")];
+
+    [Test]
+    [GenerateGenericTest(typeof(Tuple<int, string>))]
+    // #7622: the analyzer spreads the row before substituting the explicit generic type.
+#pragma warning disable TUnit0001
+    [MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public void WholeRow<T>(T row)
+    {
+        if (row is not Tuple<int, string> { Item1: 1, Item2: "tuple" })
+            throw new InvalidOperationException("Expected the whole reference tuple");
+    }
+}

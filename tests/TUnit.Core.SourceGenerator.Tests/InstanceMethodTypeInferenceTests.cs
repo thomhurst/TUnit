@@ -19,6 +19,8 @@ internal class InstanceMethodTypeInferenceTests : TestsBase
             await Assert.That(source).Contains("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'");
             await Assert.That(source).Contains("GenericInstanceSourceTests<int>");
             await Assert.That(source).Contains("NonGenericInstanceSourceTests");
+            await Assert.That(source).DoesNotContain("WholeRow<int>");
+            await Assert.That(source).Contains("WholeRow<global::System.Tuple<int, string>>");
             await Assert.That(source).Contains("Valid<int>");
             await Assert.That(source).Contains("Valid<string>");
         });
