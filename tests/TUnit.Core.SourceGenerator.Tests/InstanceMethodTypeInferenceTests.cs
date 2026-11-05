@@ -32,6 +32,9 @@ internal class InstanceMethodTypeInferenceTests : TestsBase
             await Assert.That(source).Contains("StaticElement<int>");
             await Assert.That(source).DoesNotContain("InstanceElement<global::System.Tuple<int>>");
             await Assert.That(source).Contains("ClosedNested<int>");
+            await Assert.That(source).Contains("RepeatedValue<string>");
+            await Assert.That(source).Contains("RepeatedReference<int>");
+            await Assert.That(source).Contains("RepeatedWhole<int>");
             await Assert.That(source).Contains("Valid<int>");
             await Assert.That(source).Contains("Valid<string>");
         });

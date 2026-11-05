@@ -203,8 +203,8 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(4),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(4),
-                result => result.Results.Count(x => x.TestName.StartsWith("InstanceFirst<", StringComparison.Ordinal)).ShouldBe(2),
-                result => result.Results.Count(x => x.TestName.StartsWith("StaticFirst<", StringComparison.Ordinal)).ShouldBe(2)
+                result => result.Results.Count(x => x.TestName.StartsWith("InstanceFirst<string>", StringComparison.Ordinal)).ShouldBe(2),
+                result => result.Results.Count(x => x.TestName.StartsWith("StaticFirst<string>", StringComparison.Ordinal)).ShouldBe(2)
             ]);
     }
 
@@ -227,6 +227,17 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(1)
+            ]);
+    }
+
+    [Test]
+    public async Task Repeated_Tuple_Parameters_Require_Consistent_Bindings()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/RepeatedTupleBindingTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(3)
             ]);
     }
 

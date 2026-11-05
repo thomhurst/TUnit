@@ -7234,23 +7234,38 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             : null;
     }
 
-    private static bool MatchesOpenRowType(ITypeSymbol parameter, ITypeSymbol row, Compilation compilation)
+    private static bool MatchesOpenRowType(ITypeSymbol parameter, ITypeSymbol row, Compilation compilation,
+        Dictionary<ITypeSymbol, ITypeSymbol> bindings, bool reconstructTupleElements)
     {
-        if (parameter is ITypeParameterSymbol) return true;
+        if (parameter is ITypeParameterSymbol)
+        {
+            if (bindings.TryGetValue(parameter, out var bound))
+                return SymbolEqualityComparer.Default.Equals(bound, row);
+            bindings.Add(parameter, row);
+            return true;
+        }
         // Closed constructed types must be assignable as a whole, just like the runtime matcher.
-        // Recursing first would allow boxing inside invariant tuples or arrays.
+        // A sole tuple parameter also supports element conversions through tuple reconstruction.
         if (!CodeGenerationHelpers.ContainsTypeParameter(parameter))
         {
             var conversion = compilation.ClassifyCommonConversion(row, parameter);
-            return conversion.Exists && conversion.IsImplicit
+            if (conversion.Exists && conversion.IsImplicit
                 && (conversion.IsIdentity || conversion.IsReference
-                    || row.IsValueType && !parameter.IsValueType && !conversion.IsUserDefined);
+                    || row.IsValueType && !parameter.IsValueType && !conversion.IsUserDefined))
+            {
+                return true;
+            }
+
+            var reconstructibleTuple = GetTupleElementTypes(parameter) is not null
+                || parameter is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable
+                    && GetTupleElementTypes(nullable.TypeArguments[0]) is not null;
+            if (!reconstructTupleElements || !reconstructibleTuple) return false;
         }
 
         if (parameter is IArrayTypeSymbol array)
         {
             return row is IArrayTypeSymbol rowArray && array.Rank == rowArray.Rank
-                && MatchesOpenRowType(array.ElementType, rowArray.ElementType, compilation);
+                && MatchesOpenRowType(array.ElementType, rowArray.ElementType, compilation, bindings, reconstructTupleElements);
         }
 
         if (parameter is INamedTypeSymbol { IsGenericType: true } named
@@ -7259,7 +7274,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             for (var i = 0; i < named.TypeArguments.Length; i++)
             {
-                if (!MatchesOpenRowType(named.TypeArguments[i], rowNamed.TypeArguments[i], compilation)) return false;
+                if (!MatchesOpenRowType(named.TypeArguments[i], rowNamed.TypeArguments[i], compilation, bindings, reconstructTupleElements)) return false;
             }
             return true;
         }
@@ -7315,8 +7330,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var receivesWholeTuple = testMethodParams.Length > 0
             && ((GetTupleElementTypes(testMethodParams[0].Type) is not null
                     && testMethodParams.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams)
-                    && (testMethodParams.Length == 1
-                        || MatchesOpenRowType(testMethodParams[0].Type, rowType, compilation)))
+                    && MatchesOpenRowType(testMethodParams[0].Type, rowType, compilation,
+                        new Dictionary<ITypeSymbol, ITypeSymbol>(SymbolEqualityComparer.Default), testMethodParams.Length == 1))
                 || (testMethodParams.Length == 1
                     && testMethodParams[0].Type is ITypeParameterSymbol
                     && rowType is INamedTypeSymbol { IsTupleType: false }

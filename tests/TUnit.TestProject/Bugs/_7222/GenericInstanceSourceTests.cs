@@ -233,3 +233,35 @@ public class ClosedNestedTupleConversionTests
             throw new InvalidOperationException("Expected separate columns with a closed nested tuple");
     }
 }
+
+public class RepeatedTupleBindingTests
+{
+    public static IEnumerable<((string, string), int)> ValueRows() => [(("a", "b"), 7)];
+    public IEnumerable<Tuple<Tuple<int, int>, Tuple<int, string>>> ReferenceRows() =>
+        [Tuple.Create(Tuple.Create(1, 2), Tuple.Create(7, "extra"))];
+    public static IEnumerable<(int, int)> WholeRows() => [(1, 2)];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void RepeatedValue<T>((T, T) row, int extra = 0)
+    {
+        if (typeof(T) != typeof(string) || extra != 7)
+            throw new InvalidOperationException("Expected consistent string binding and separate extra column");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(ReferenceRows))]
+    public void RepeatedReference<T>(Tuple<T, T> row, Tuple<int, string>? extra = null)
+    {
+        if (typeof(T) != typeof(int) || extra?.Item2 != "extra")
+            throw new InvalidOperationException("Expected consistent int binding and separate extra column");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(WholeRows))]
+    public void RepeatedWhole<T>((T, T) row)
+    {
+        if (typeof(T) != typeof(int))
+            throw new InvalidOperationException("Expected consistent whole-row int binding");
+    }
+}
