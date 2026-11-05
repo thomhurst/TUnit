@@ -38,12 +38,14 @@ internal interface IContextProvider
     /// <summary>
     /// Creates a test context. <paramref name="testDetails"/> is assigned before the context
     /// becomes observable via <see cref="ClassHookContext.Tests"/> so hooks never see a
-    /// partially-built context.
+    /// partially-built context. Cleanup-only contexts pass <paramref name="registerAsTest"/> as false
+    /// to stay out of the class and session test lists.
     /// </summary>
     TestContext CreateTestContext(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)]
         Type classType,
         TestBuilderContext testBuilderContext,
         TestDetails testDetails,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken,
+        bool registerAsTest = true);
 }
