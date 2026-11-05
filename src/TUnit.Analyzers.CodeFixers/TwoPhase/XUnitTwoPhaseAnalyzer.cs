@@ -767,14 +767,11 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         var actual = $"{pair}.{(actualFirst ? "Item1" : "Item2")}";
         var expected = $"{pair}.{(actualFirst ? "Item2" : "Item1")}";
 
-        // Tuple elements have no target type for null/default literals or target-typed new.
+        // Preserve the parameter types for explicit interface methods and target-typed expressions.
         string Capture(ArgumentSyntax argument)
         {
             var expression = argument.Expression;
-            if ((expression.IsKind(SyntaxKind.NullLiteralExpression) ||
-                 expression.IsKind(SyntaxKind.DefaultLiteralExpression) ||
-                 expression is ImplicitObjectCreationExpressionSyntax) &&
-                SemanticModel.GetTypeInfo(expression).ConvertedType is { } type)
+            if (SemanticModel.GetTypeInfo(expression).ConvertedType is { } type)
             {
                 return $"({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})({expression})";
             }
