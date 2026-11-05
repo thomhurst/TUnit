@@ -18,6 +18,10 @@ public class StaticPropertyHandlerCleanupTests
         var owner = scopes.Register(new OwnershipScope());
         scopes.RegisterObject(owner, service);
         scopes.CaptureOwnership();
+        var secondScopes = new DataRowScopeCollection();
+        var secondOwner = secondScopes.Register(new OwnershipScope());
+        secondScopes.RegisterObject(secondOwner, service);
+        secondScopes.CaptureOwnership();
         var previous = service.Child;
         service.Child = new NestedLeaseFixture();
         object root = nested ? new SharedServiceFixture { Service = service } : service;
@@ -31,6 +35,8 @@ public class StaticPropertyHandlerCleanupTests
         try
         {
             await InitializeWithoutAmbientTestAsync(handler, metadata);
+            await Assert.That(owner.Owns(service.Child)).IsTrue();
+            await Assert.That(secondOwner.Owns(service.Child)).IsTrue();
             await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
             await Assert.That(ExternalObjectOwnership.IsOwned(previous)).IsTrue();
             await handler.DisposeStaticPropertiesAsync([], []);
@@ -44,6 +50,7 @@ public class StaticPropertyHandlerCleanupTests
             await handler.ReleaseSessionCallbacksAfterFailedInitializationAsync();
             await tracker.DisposeAndClearStaticTrackingAsync();
             GC.KeepAlive(scopes);
+            GC.KeepAlive(secondScopes);
         }
     }
 

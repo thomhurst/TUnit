@@ -198,8 +198,13 @@ public class ObjectTrackerRollbackTests
     {
         var service = new ExternalObjectOwnershipTests.Service();
         var scopes = new DataRowScopeCollection();
-        scopes.RegisterObject(scopes.Register(new ExternalObjectOwnershipTests.Scope()), service);
+        var owner = scopes.Register(new ExternalObjectOwnershipTests.Scope());
+        scopes.RegisterObject(owner, service);
         scopes.CaptureOwnership();
+        var secondScopes = new DataRowScopeCollection();
+        var secondOwner = secondScopes.Register(new ExternalObjectOwnershipTests.Scope());
+        secondScopes.RegisterObject(secondOwner, service);
+        secondScopes.CaptureOwnership();
         var previous = service.Child;
         service.Child = new ExternalObjectOwnershipTests.Initializer();
         var discoverer = new FakeDiscoverer
@@ -214,11 +219,14 @@ public class ObjectTrackerRollbackTests
         var context = CreateContext();
 
         tracker.TrackObjects(context);
+        await Assert.That(owner.Owns(service.Child)).IsTrue();
+        await Assert.That(secondOwner.Owns(service.Child)).IsTrue();
         await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
         await Assert.That(ExternalObjectOwnership.IsOwned(previous)).IsTrue();
         await tracker.UntrackObjects(context);
         await tracker.DisposeAndClearStaticTrackingAsync();
         GC.KeepAlive(scopes);
+        GC.KeepAlive(secondScopes);
     }
 
     [Test]

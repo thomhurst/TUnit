@@ -70,14 +70,16 @@ internal sealed class StaticPropertyHandler
                         _context.EventsIfCreated?.DataRowScopes?.CaptureOwnership();
                         // A non-owning initializer may return an existing scope's service. Refresh
                         // only the consumed graph, after injection, retaining known injected exclusions.
-                        ExternalObjectOwnership.FindOwner(value)?.CaptureOwnershipFor(value, []);
+                        foreach (var owner in ExternalObjectOwnership.FindOwners(value))
+                            owner.CaptureOwnershipFor(value, []);
                         var graph = new ObjectGraphDiscoverer().DiscoverStaticPropertyTrackableObjects(value, cancellationToken);
                         foreach (var level in graph)
                         {
                             foreach (var obj in level.Value)
                             {
                                 if (ReferenceEquals(obj, value)) continue;
-                                ExternalObjectOwnership.FindOwner(obj)?.CaptureOwnershipFor(obj, []);
+                                foreach (var owner in ExternalObjectOwnership.FindOwners(obj))
+                                    owner.CaptureOwnershipFor(obj, []);
                                 _tracker.TrackStaticLeaseObject(obj);
                                 _trackedObjects.Add(obj);
                             }

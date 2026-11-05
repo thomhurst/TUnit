@@ -84,6 +84,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             if (s_staticLeaseObjects.TryGetValue(obj, out var leases) && leases.Count > 0) return;
             lock (s_sharedInstanceLock)
             {
+                // Counted consumers pin their owner via RetainWhileCounted until zero;
+                // contexts also retain their own row handles until untracking finishes.
+                // Thus a live ownership entry is backed by a deterministic strong link,
+                // including across sessions, rather than depending on GC timing.
                 if (!s_trackedObjects.TryGetValue(obj, out var counter) || counter.CurrentCount > 0
                     || !RemoveCounter(obj, counter) || ExternalObjectOwnership.IsOwned(obj)) return;
             }
@@ -158,12 +162,16 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             HashSet<object>? refreshed = null;
             void RefreshOwner(object? instance)
             {
-                if (instance is not null
-                    && ExternalObjectOwnership.FindOwner(instance) is { } owner
-                    && !owners.Contains(owner)
+                if (instance is null) return;
+                var registeredOwners = ExternalObjectOwnership.FindOwners(instance);
+                if (registeredOwners.Count > 0
                     && (refreshed ??= new(Helpers.ReferenceEqualityComparer.Instance)).Add(instance))
                 {
-                    owner.CaptureOwnershipFor(instance, testContext.TestDetails?.TestClassInjectedPropertyArguments.Values ?? []);
+                    foreach (var owner in registeredOwners)
+                    {
+                        if (!owners.Contains(owner))
+                            owner.CaptureOwnershipFor(instance, testContext.TestDetails?.TestClassInjectedPropertyArguments.Values ?? []);
+                    }
                 }
             }
 
