@@ -37,9 +37,10 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                     values[resolvedCount++] = created;
                     cleanup.RegisterObject(owner, created);
 
-                    if (scopeOwnsCreatedObjects)
+                    if (scopeOwnsCreatedObjects || ReferenceEquals(created, scope))
                     {
-                        // The scope owns what it resolves; the tracker must not dispose it again.
+                        // Row cleanup always owns the scope itself, even when it does not own services.
+                        // The tracker must not dispose either kind of scope-owned value again.
                         ObjectTracker.MarkExternallyOwned(created);
                     }
                 }
@@ -52,6 +53,7 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                 {
                     // No row reaches the tracker after a factory failure. Retain its resolved
                     // services for asynchronous cleanup, without replacing the resolution error.
+                    // A service returned for several members needs only one reference per failed row.
                     var retained = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
                     for (var i = 0; i < resolvedCount; i++)
                     {

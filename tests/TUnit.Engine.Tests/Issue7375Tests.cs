@@ -13,8 +13,8 @@ public class Issue7375Tests(TestMode testMode) : InvokableTestBase(testMode)
             [
                 // One resolution fails deliberately; its observer verifies the earlier service's cleanup.
                 result => result.ResultSummary.Outcome.ShouldBe("Failed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(4),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(3),
+                result => result.ResultSummary.Counters.Total.ShouldBe(6),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(5),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1)
             ]);
     }

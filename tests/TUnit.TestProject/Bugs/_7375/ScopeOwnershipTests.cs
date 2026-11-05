@@ -89,3 +89,39 @@ public class PartiallyFailedResolutionObserverTests
         await Assert.That(scope.Service.DisposeCount).IsEqualTo(1);
     }
 }
+
+public sealed class SelfResolvingScopeAttribute : DependencyInjectionDataSourceAttribute<UntrackingScope>
+{
+    public static ConcurrentBag<UntrackingScope> Created { get; } = [];
+
+    public override UntrackingScope CreateScope(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        var scope = new UntrackingScope(record: false);
+        Created.Add(scope);
+        return scope;
+    }
+
+    protected override bool ScopeOwnsCreatedObjects(UntrackingScope scope) => false;
+    public override object Create(UntrackingScope scope, Type type) => scope;
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class SelfResolvingScopeTests
+{
+    [Test]
+    [SelfResolvingScope]
+    public async Task Scope_Is_Alive(UntrackingScope scope)
+        => await Assert.That(scope.DisposeCount).IsEqualTo(0);
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class SelfResolvingScopeObserverTests
+{
+    [Test]
+    [DependsOn(typeof(SelfResolvingScopeTests))]
+    public async Task Scope_Is_Disposed_Once()
+    {
+        await Assert.That(SelfResolvingScopeAttribute.Created.Count).IsEqualTo(1);
+        await Assert.That(SelfResolvingScopeAttribute.Created.Single().DisposeCount).IsEqualTo(1);
+    }
+}
