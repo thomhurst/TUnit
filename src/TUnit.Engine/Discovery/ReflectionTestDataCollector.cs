@@ -3929,9 +3929,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 // Singleton value-tuple rows stay wrapped through DataUnwrapper, including
                 // incompatible containers whose elements need conversion. Match the generated
                 // invoker instead of treating that container as an already-flattened element.
+                // A retained TupleArgument is an inner element of a flattened row, so its
+                // singleton shape must not hide the outer tuple boundary.
                 if (tupleElements is { Length: > 0 }
                     && args.Length == tupleElements.Length + parameters.Length - 1
                     && (tupleElements.Length > 1
+                        || args[singleDataIndex] is TupleArgument
                         || args[singleDataIndex] is { } singleValue
                             && !(DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue) is [null])
                             && !parameters[singleDataIndex].ParameterType.IsInstanceOfType(singleValue)

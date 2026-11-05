@@ -73,7 +73,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "extra", new glo
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.ConvertedAndGenericTupleOptionalTests.Generic_Tuple_And_Optional<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 356,
+            lineNumber: 400,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -948,6 +948,116 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
                 }
                 case 10:
                 {
+                    switch (args.Length)
+                    {
+                        case 2:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Object_Target(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1])));
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 2 arguments, but got {args.Length}");
+                    }
+                }
+                case 11:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Object_Before_Params(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), global::System.Array.Empty<int>()));
+                            }
+                        case 2:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Object_Before_Params(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), (args[1] is null ? null : args[1] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[1]))));
+                            }
+                        case 3:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Object_Before_Params(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]) }));
+                            }
+                        case 4:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Object_Before_Params(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]) }));
+                            }
+                        case 5:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Object_Before_Params(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]) }));
+                            }
+                        case 6:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Object_Before_Params(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]) }));
+                            }
+                        case 7:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Object_Before_Params(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[6]) }));
+                            }
+                        default:
+                            if (args.Length < 1)
+                            {
+                                throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
+                            }
+                            return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Object_Before_Params(global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[0]), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>())));
+                    }
+                }
+                case 12:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Params_Elements(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::System.Array.Empty<object>()));
+                            }
+                        case 2:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Params_Elements(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] is null ? null : args[1] is object[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<object>(args[1]))));
+                            }
+                        case 3:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Params_Elements(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new object[] { global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[2]) }));
+                            }
+                        case 4:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Params_Elements(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new object[] { global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[3]) }));
+                            }
+                        case 5:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Params_Elements(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new object[] { global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[4]) }));
+                            }
+                        case 6:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Params_Elements(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new object[] { global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[5]) }));
+                            }
+                        case 7:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Params_Elements(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), new object[] { global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[6]) }));
+                            }
+                        default:
+                            if (args.Length < 1)
+                            {
+                                throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
+                            }
+                            return new global::System.Threading.Tasks.ValueTask(instance.Spread_Mutable_Tuple_Params_Elements(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<object>(args[i]))) : global::System.Array.Empty<object>())));
+                    }
+                }
+                case 13:
+                {
+                    // Special handling for single tuple parameter
+                    if (args.Length == 1 && args[0] is not global::System.Runtime.CompilerServices.ITuple { Length: 1 })
+                    {
+                        // Arguments are unwrapped tuple elements, reconstruct the tuple
+                        return new global::System.Threading.Tasks.ValueTask(instance.Nested_Mutable_Singleton_Tuple(new global::System.ValueTuple<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>)new global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>>(__tupleFallback0) }))));
+                    }
+                    else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+                    {
+                        // Rare case: tuple is wrapped as a single argument
+                        return new global::System.Threading.Tasks.ValueTask(instance.Nested_Mutable_Singleton_Tuple((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>>)new global::System.ValueTuple<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>>((__tupleInput0[0] switch { var __tupleValue1 when __tupleValue1 is not global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue1) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue1) is { Length: 1 } __tupleInput1 => (global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>)new global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>(__tupleInput1[0])), var __tupleFallback1 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>>(__tupleFallback1) })), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>>>(__tupleFallback0) })));
+                    }
+                    else
+                    {
+                        throw new global::System.ArgumentException($"Expected 1 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+                    }
+                }
+                case 14:
+                {
                     // Special handling for single tuple parameter
                     if (args.Length == 2)
                     {
@@ -964,7 +1074,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
                         throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
                     }
                 }
-                case 11:
+                case 15:
                 {
                     // Special handling for single tuple parameter
                     if (args.Length == 2)
@@ -982,7 +1092,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
                         throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
                     }
                 }
-                case 12:
+                case 16:
                 {
                     // Special handling for single tuple parameter
                     if (args.Length == 2)
@@ -1000,7 +1110,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
                         throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
                     }
                 }
-                case 13:
+                case 17:
                 {
                     // Special handling for single tuple parameter
                     if (args.Length == 2)
@@ -1049,7 +1159,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
     public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>[] Entries = __CreateEntries();
     private static global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>[] __CreateEntries()
     {
-        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>[14];
+        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>[18];
         __FillEntries0(entries);
         __FillEntries1(entries);
         return entries;
@@ -1323,10 +1433,109 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
     private static void __FillEntries1(global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>[] entries)
     {
         entries[10] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
+            methodName: "Spread_Mutable_Tuple_Object_Target",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Spread_Mutable_Tuple_Object_Target",
+            filePath: "",
+            lineNumber: 243,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ErasedNestedRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.ErasedNestedRows()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests), "Spread_Mutable_Tuple_Object_Target", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "nested", new global::TUnit.Core.ConcreteType(typeof(object)), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 10,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[11] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
+            methodName: "Spread_Mutable_Tuple_Object_Before_Params",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Spread_Mutable_Tuple_Object_Before_Params",
+            filePath: "",
+            lineNumber: 251,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ErasedNestedRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.ErasedNestedRows()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests), "Spread_Mutable_Tuple_Object_Before_Params", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "nested", new global::TUnit.Core.ConcreteType(typeof(object)), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "values", new global::TUnit.Core.ConcreteType(typeof(int[])), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 11,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[12] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
+            methodName: "Spread_Mutable_Tuple_Params_Elements",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Spread_Mutable_Tuple_Params_Elements",
+            filePath: "",
+            lineNumber: 266,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ErasedParamsRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.ErasedParamsRows()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests), "Spread_Mutable_Tuple_Params_Elements", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "first", new global::TUnit.Core.ConcreteType(typeof(int)), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object[]), "values", new global::TUnit.Core.ConcreteType(typeof(object[])), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 12,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[13] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
+            methodName: "Nested_Mutable_Singleton_Tuple",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Nested_Mutable_Singleton_Tuple",
+            filePath: "",
+            lineNumber: 281,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("NestedSingletonRow")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromValue(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.NestedSingletonRow()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests), "Nested_Mutable_Singleton_Tuple", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.ValueTuple<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>>), "pair", new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Fixture>>)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 13,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[14] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
             methodName: "Nested_Mutable_Reference_Object_Target",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Nested_Mutable_Reference_Object_Target",
             filePath: "",
-            lineNumber: 248,
+            lineNumber: 292,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1343,14 +1552,14 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 10,
+            methodIndex: 14,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[11] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
+        entries[15] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
             methodName: "Nested_Mutable_Tuple_Interface_Target",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Nested_Mutable_Tuple_Interface_Target",
             filePath: "",
-            lineNumber: 256,
+            lineNumber: 300,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1367,14 +1576,14 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 11,
+            methodIndex: 15,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[12] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
+        entries[16] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
             methodName: "Private_Mutable_Tuple_Object_Target",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Private_Mutable_Tuple_Object_Target",
             filePath: "",
-            lineNumber: 269,
+            lineNumber: 313,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1391,14 +1600,14 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 12,
+            methodIndex: 16,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
-        entries[13] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
+        entries[17] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests>(
             methodName: "Long_Mutable_Tuple_Object_Target",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Long_Mutable_Tuple_Object_Target",
             filePath: "",
-            lineNumber: 285,
+            lineNumber: 329,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1415,7 +1624,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 13,
+            methodIndex: 17,
             createAttributes: __attributes,
             attributeGroupIndex: 0);
     }
@@ -1514,7 +1723,7 @@ internal static class TUnit_TestProject_Bugs__7212_ConvertedAndGenericTupleOptio
             methodName: "Convertible_List_And_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.ConvertedAndGenericTupleOptionalTests.Convertible_List_And_Optional",
             filePath: "",
-            lineNumber: 349,
+            lineNumber: 393,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

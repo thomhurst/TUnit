@@ -275,6 +275,15 @@ public class MutableTupleWithOptionalParameterTests
         }
     }
 
+    public static Func<ValueTuple<ValueTuple<Fixture>>> NestedSingletonRow()
+        => () => new(new ValueTuple<Fixture>(CreateFixture()));
+
+    [Test, MethodDataSource(nameof(NestedSingletonRow))]
+    public async Task Nested_Mutable_Singleton_Tuple(ValueTuple<ValueTuple<Fixture>> pair)
+    {
+        await Check(pair.Item1.Item1, 26);
+    }
+
     public static IEnumerable<object[]> ErasedReferenceRows()
     {
         yield return [(Tuple.Create(CreateFixture(), 26), 27)];
