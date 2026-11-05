@@ -10,25 +10,45 @@ namespace TUnit.UnitTests;
 public class DataSourceFactoriesRuntimeValueTests
 {
     [Test]
-    public async Task FromRuntimeValue_Null_Yields_One_Row_Holding_Null()
+    public async Task FromRuntimeValue_Null_Yields_No_Rows()
     {
         var rows = await ReadRowsAsync(DataSourceFactories.FromRuntimeValue(CreateMetadata(instance: null), static () => null));
 
-        await Assert.That(rows).Count().IsEqualTo(1);
-        await Assert.That(rows[0]).IsNotNull();
-        await Assert.That(rows[0]!).Count().IsEqualTo(1);
-        await Assert.That(rows[0]![0]).IsNull();
+        await Assert.That(rows).IsEmpty();
     }
 
     [Test]
-    public async Task FromInstanceRuntimeValue_Null_Yields_One_Row_Holding_Null()
+    public async Task FromInstanceRuntimeValue_Null_Yields_No_Rows()
     {
         var rows = await ReadRowsAsync(DataSourceFactories.FromInstanceRuntimeValue(CreateMetadata(instance: new object()), static _ => null));
 
-        await Assert.That(rows).Count().IsEqualTo(1);
-        await Assert.That(rows[0]).IsNotNull();
-        await Assert.That(rows[0]!).Count().IsEqualTo(1);
-        await Assert.That(rows[0]![0]).IsNull();
+        await Assert.That(rows).IsEmpty();
+    }
+
+    [Test]
+    public async Task Null_Sources_And_Awaited_Null_Results_Yield_No_Rows()
+    {
+        var metadata = CreateMetadata(new object());
+        IAsyncEnumerable<Func<Task<object?[]?>>>[] sources =
+        [
+            DataSourceFactories.FromValue(static () => null),
+            DataSourceFactories.FromEnumerable(static () => null),
+            DataSourceFactories.FromTask<string?>(static () => null!),
+            DataSourceFactories.FromTask(static () => Task.FromResult<string?>(null)),
+            DataSourceFactories.FromValueTask(static () => ValueTask.FromResult<string?>(null)),
+            DataSourceFactories.FromAsyncEnumerable<string>(static () => null!),
+            DataSourceFactories.FromInstanceValue(metadata, static _ => null),
+            DataSourceFactories.FromInstanceEnumerable(metadata, static _ => null),
+            DataSourceFactories.FromInstanceTask<string?>(metadata, static _ => null!),
+            DataSourceFactories.FromInstanceTask(metadata, static _ => Task.FromResult<string?>(null)),
+            DataSourceFactories.FromInstanceValueTask(metadata, static _ => ValueTask.FromResult<string?>(null)),
+            DataSourceFactories.FromInstanceAsyncEnumerable<string>(metadata, static _ => null!),
+        ];
+
+        foreach (var source in sources)
+        {
+            await Assert.That(await ReadRowsAsync(source)).IsEmpty();
+        }
     }
 
     [Test]

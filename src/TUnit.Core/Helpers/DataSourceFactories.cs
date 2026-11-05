@@ -93,6 +93,11 @@ public static class DataSourceFactories
     {
         var result = invoke();
 
+        if (result is null)
+        {
+            yield break;
+        }
+
         yield return () => Task.FromResult<object?[]?>(ToRow(result, tupleRowBinding));
     }
 
@@ -123,7 +128,7 @@ public static class DataSourceFactories
         }
 
         var taskResult = await result;
-        if (taskResult is null && IsDeclaredCollection<T>())
+        if (taskResult is null)
         {
             yield break;
         }
@@ -137,7 +142,7 @@ public static class DataSourceFactories
     private static async IAsyncEnumerable<Func<Task<object?[]?>>> FromValueTaskCore<T>(Func<ValueTask<T>> invoke, TupleRowBinding tupleRowBinding)
     {
         var taskResult = await invoke();
-        if (taskResult is null && IsDeclaredCollection<T>())
+        if (taskResult is null)
         {
             yield break;
         }
@@ -170,6 +175,11 @@ public static class DataSourceFactories
     {
         var result = invoke(GetRequiredInstance(dataGeneratorMetadata));
         var tupleRowBinding = GetTupleRowBinding(dataGeneratorMetadata);
+
+        if (result is null)
+        {
+            yield break;
+        }
 
         yield return () => Task.FromResult<object?[]?>(ToRow(result, tupleRowBinding));
     }
@@ -205,7 +215,7 @@ public static class DataSourceFactories
         }
 
         var taskResult = await result;
-        if (taskResult is null && IsDeclaredCollection<T>())
+        if (taskResult is null)
         {
             yield break;
         }
@@ -223,7 +233,7 @@ public static class DataSourceFactories
         var tupleRowBinding = GetTupleRowBinding(dataGeneratorMetadata);
 
         var taskResult = await result;
-        if (taskResult is null && IsDeclaredCollection<T>())
+        if (taskResult is null)
         {
             yield break;
         }
@@ -256,13 +266,12 @@ public static class DataSourceFactories
     /// A data source field, or a private or protected property that the generated code reads by reflection, whose
     /// declared type does not say whether it holds one row or many, such as <c>object</c>. The value's runtime type decides,
     /// as it does when <see cref="MethodDataSourceAttribute"/> has no factory and reads the member itself.
-    /// A null value is one row holding null, as <see cref="FromValue(Func{object?})"/> gives.
+    /// A null value is an empty source, as <see cref="FromValue(Func{object?})"/> gives.
     /// </summary>
     public static async IAsyncEnumerable<Func<Task<object?[]?>>> FromRuntimeValue(DataGeneratorMetadata dataGeneratorMetadata, Func<object?> invoke)
     {
         if (invoke() is not { } result)
         {
-            yield return NullValueRow;
             yield break;
         }
 
@@ -277,7 +286,6 @@ public static class DataSourceFactories
     {
         if (invoke(GetRequiredInstance(dataGeneratorMetadata)) is not { } result)
         {
-            yield return NullValueRow;
             yield break;
         }
 
@@ -286,10 +294,6 @@ public static class DataSourceFactories
             yield return row;
         }
     }
-
-    // A null value is one row holding null, as FromValue gives for a member whose declared type picks it. Yielding
-    // nothing instead would become an empty row, so the test would fail for a missing argument.
-    private static readonly Func<Task<object?[]?>> NullValueRow = static () => Task.FromResult<object?[]?>([null]);
 
     // Splits a data member's value into rows the way FromEnumerable always has: an enumerable other than a string gives
     // one row per item, anything else is one row.
@@ -348,9 +352,6 @@ public static class DataSourceFactories
 
         return DataSourceHelpers.ToObjectArray(item);
     }
-
-    private static bool IsDeclaredCollection<T>() =>
-        typeof(T) != typeof(string) && typeof(IEnumerable).IsAssignableFrom(typeof(T));
 
     private static object GetRequiredInstance(DataGeneratorMetadata dataGeneratorMetadata)
     {

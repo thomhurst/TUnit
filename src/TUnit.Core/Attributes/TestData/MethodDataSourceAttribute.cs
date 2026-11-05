@@ -289,22 +289,19 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             }
         }
 
-        // Handle different return types
-        if (methodResult == null)
-        {
-            yield break;
-        }
-
         var hasAnyItems = false;
-        await foreach (var row in GetRowsFromRuntimeValueAsync(methodResult, dataGeneratorMetadata))
+        if (methodResult is not null)
         {
-            hasAnyItems = true;
-            yield return row;
+            await foreach (var row in GetRowsFromRuntimeValueAsync(methodResult, dataGeneratorMetadata))
+            {
+                hasAnyItems = true;
+                yield return row;
+            }
         }
 
-        // If the source was empty, yield one empty result like NoDataSource does
+        // If the source was null or empty, yield one empty result like NoDataSource does
         // unless SkipIfEmpty is true, in which case we yield nothing (test will be skipped)
-        if (!hasAnyItems && !SkipIfEmpty)
+        if (!hasAnyItems && !SkipIfEmpty && !FilterClassRows)
         {
             yield return () => Task.FromResult<object?[]?>([]);
         }
@@ -317,7 +314,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
     /// Used by the reflection fallback above and by the source-generated factory for a field, or a private or protected
     /// property, whose declared type does not say which of these it holds, so both read such a member the same way.
     /// Resultless Task and ValueTask sources are awaited and yield one row containing null.
-    /// An empty source yields nothing; the caller decides whether that becomes an empty row.
+    /// An empty source or a generic task with a null result yields nothing; the caller decides whether that becomes an empty row.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Method data sources require runtime discovery. AOT users should use Factory property.")]
@@ -394,7 +391,7 @@ public class MethodDataSourceAttribute : Attribute, IDataSourceAttribute
             await task.ConfigureAwait(false);
             var taskResult = GetTaskResult(task);
             if (taskResult is null && GetTaskResultType(task.GetType()) is { } resultType
-                && resultType != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(resultType))
+                && resultType.FullName != "System.Threading.Tasks.VoidTaskResult")
             {
                 yield break;
             }
