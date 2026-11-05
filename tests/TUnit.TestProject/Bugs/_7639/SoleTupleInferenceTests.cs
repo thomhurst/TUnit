@@ -765,3 +765,33 @@ public class CrossFamilySoleTupleInferenceTests
 }
 
 #pragma warning restore TUnit0001
+
+
+public class ContainingGenericTypeInferenceTests
+{
+    public class Outer<T>
+    {
+        public interface IBox<TValue> { }
+        public interface IBox { }
+    }
+
+    public sealed class Source : Outer<int>.IBox<string>, Outer<int>.IBox { }
+
+    public static IEnumerable<(Source, int)> Rows() => [(new Source(), 1)];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void GenericNestedInterface<T>((Outer<T>.IBox<string>, int) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != 1)
+            throw new InvalidOperationException("Expected inference from containing generic type");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void NonGenericNestedInterface<T>((Outer<T>.IBox, int) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != 1)
+            throw new InvalidOperationException("Expected inference from containing generic type");
+    }
+}

@@ -5089,7 +5089,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         return "object";
 
-        // Unlike CodeGenerationHelpers.ContainsTypeParameter, this also looks at containing types:
+        // Include containing types when checking for open generic parameters:
         // Outer<T>.Inner has no type arguments of its own, but still mentions T.
         static bool ReferencesTypeParameter(ITypeSymbol type) => type switch
         {
@@ -7383,6 +7383,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             && SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, rowNamed.OriginalDefinition))
         {
             var validateCandidate = reconstructTupleElements && !overwriteBindings;
+            // Nested symbols expose only their own arguments; infer enclosing arguments too.
+            if (named.ContainingType is { } containingType
+                && rowNamed.ContainingType is { } rowContainingType
+                && !MatchesOpenRowType(containingType, rowContainingType, compilation, bindings,
+                    reconstructTupleElements, overwriteBindings)) return false;
             for (var i = 0; i < named.TypeArguments.Length; i++)
             {
                 // Infer the open arguments first. Closed arguments are checked on the completed

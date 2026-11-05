@@ -6637,6 +6637,198 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7639_ContainingGenericTypeInferenceTests_GenericNestedInterfac_5003E484_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests)),
+        Name = "ContainingGenericTypeInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7639",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("GenericNestedInterface", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests), "GenericNestedInterface", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<>.IBox<>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(string))]), new global::TUnit.Core.ConcreteType(typeof(int))]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single tuple parameter
+            if (args.Length == 2)
+            {
+                // Arguments are unwrapped tuple elements, reconstruct the tuple
+                instance.GenericNestedInterface<int>((global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox<string>>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+            {
+                // Rare case: tuple is wrapped as a single argument
+                instance.GenericNestedInterface<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox<string>, int> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox<string>, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox<string>>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox<string>, int>>(__tupleFallback0) }));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests>(
+            methodName: "GenericNestedInterface<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.GenericNestedInterface<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 782,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Rows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox<string>, int>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox<string>, int>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7639_ContainingGenericTypeInferenceTests_GenericNestedInterfac_5003E484_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests>(static () => TUnit_TestProject_Bugs__7639_ContainingGenericTypeInferenceTests_GenericNestedInterfac_5003E484_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7639_ContainingGenericTypeInferenceTests_NonGenericNestedInter_24850C6E_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests)),
+        Name = "ContainingGenericTypeInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7639",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("NonGenericNestedInterface", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests), "NonGenericNestedInterface", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<>.IBox), [new global::TUnit.Core.GenericParameter(0, true, "T")]), new global::TUnit.Core.ConcreteType(typeof(int))]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single tuple parameter
+            if (args.Length == 2)
+            {
+                // Arguments are unwrapped tuple elements, reconstruct the tuple
+                instance.NonGenericNestedInterface<int>((global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+            {
+                // Rare case: tuple is wrapped as a single argument
+                instance.NonGenericNestedInterface<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox, int> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox, int>>(__tupleFallback0) }));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests>(
+            methodName: "NonGenericNestedInterface<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.NonGenericNestedInterface<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 790,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("Rows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Rows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox, int>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.Outer<int>.IBox, int>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7639_ContainingGenericTypeInferenceTests_NonGenericNestedInter_24850C6E_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests>(static () => TUnit_TestProject_Bugs__7639_ContainingGenericTypeInferenceTests_NonGenericNestedInter_24850C6E_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7639_NestedSingletonBoundaryTests__TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.NestedSingletonBoundaryTests", new global::TUnit.Core.ClassMetadata

@@ -9,6 +9,7 @@ public class Issue7639Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("RepeatedConvertibleTupleTests", 2)]
     [Arguments("RepeatedNullableTupleTests", 6)]
     [Arguments("RepeatedNestedGenericTupleTests", 3)]
+    [Arguments("ContainingGenericTypeInferenceTests", 2)]
     [Arguments("SingleTupleElementConversionTests", 18)]
     [Arguments("CrossFamilySoleTupleInferenceTests", 3)]
     [Arguments("BoxedTupleElementConversionTests", 2)]
