@@ -202,7 +202,7 @@ internal static class CodeGenerationHelpers
         // typeof(dynamic) does not compile (CS1962); dynamic is object at runtime.
         var fullyQualifiedName = typeSymbol.TypeKind == TypeKind.Dynamic
             ? "object"
-            : typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+            : typeSymbol.ToDisplayString(DisplayFormats.CSharpType);
         return $"typeof({fullyQualifiedName})";
     }
 

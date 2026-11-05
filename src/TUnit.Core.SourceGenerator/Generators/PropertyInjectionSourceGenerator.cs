@@ -25,8 +25,7 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     public const string ConcreteGenericTypesStep = "PropertyInjection_ConcreteGenericTypes";
 
     // Generated code lives in namespace TUnit.Core, so type names need global:: and keyword escaping (@event)
-    private static readonly SymbolDisplayFormat GlobalTypeNameFormat = DisplayFormats.FullyQualifiedGenericWithGlobalPrefix
-        .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+    private static readonly SymbolDisplayFormat GlobalTypeNameFormat = DisplayFormats.CSharpType;
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {

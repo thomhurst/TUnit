@@ -199,7 +199,7 @@ internal static class FileNameHelper
                 // Replace invalid filename characters and special type characters with underscore
                 if (c == '<' || c == '>' || c == ':' || c == '"' || c == '/' || c == '\\' ||
                     c == '|' || c == '?' || c == '*' || c == '.' || c == ',' || c == ' ' ||
-                    c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}')
+                    c == '@' || c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}')
                 {
                     span[index] = '_';
                 }
