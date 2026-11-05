@@ -222,10 +222,10 @@ public class UninferredMethodRowWithTypedClassSource<T>(T value)
     }
 }
 
-// A class row [Arguments<string>(null)] declares string, so its null value makes a string instantiation, and
+// A class row [Arguments<string>(null!)] declares string, so its null value makes a string instantiation, and
 // the method row "a" runs on it: Test("a") on <string> with a null constructor value.
 [EngineTest(ExpectedResult.Pass)]
-[Arguments<string>(null)]
+[Arguments<string>(null!)]
 public class NullTypedClassRow<T>(T? value)
 {
     [Test]
@@ -238,10 +238,10 @@ public class NullTypedClassRow<T>(T? value)
     }
 }
 
-// A class row [Arguments<string[]>(null)] binds its null value to the constructor's T[] parameter, so it infers T
+// A class row [Arguments<string[]>(null!)] binds its null value to the constructor's T[] parameter, so it infers T
 // as string, not string[], and the method row "a" runs on <string> with a null constructor value.
 [EngineTest(ExpectedResult.Pass)]
-[Arguments<string[]>(null)]
+[Arguments<string[]>(null!)]
 public class ArrayParameterNullTypedClassRow<T>(T[]? values)
 {
     [Test]
