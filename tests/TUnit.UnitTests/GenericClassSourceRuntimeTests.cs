@@ -113,6 +113,41 @@ public class GenericClassSourceRuntimeTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
+    public async Task Partition_Retains_Conversions_To_Array_Valued_Generic_Parameters(bool generated)
+    {
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(typeof(int[])) { Name = "first", TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(typeof(int[])), CachedIsOptional = false },
+            new ParameterMetadata(typeof(string)) { Name = "second", TypeInfo = generated ? new GenericParameter(1, false) : new ConcreteType(typeof(string)), CachedIsOptional = true }
+        ];
+        object?[][] original = [[new int[] { 1 }], [new long[] { 2 }], [new object[] { new DeferredConvertible(true) }], [3]];
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create([typeof(int[]), typeof(string)], GenericClassRowFallback.AllRows, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata)) rows.Add(await factory());
+        await Assert.That(rows.Count).IsEqualTo(original.Length);
+        for (var i = 0; i < rows.Count; i++) await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+        await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<int[]>(original[1][0])![0]).IsEqualTo(2);
+        await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<int[]>(original[3][0])![0]).IsEqualTo(3);
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new string[] { "invalid" }], parameters, [typeof(int[]), typeof(string)])).IsFalse();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new long[,] { { 2 } }], parameters, [typeof(int[]), typeof(string)])).IsFalse();
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
     public async Task Partition_Retains_Enumerable_Scalar_Rows_Without_Enumeration(bool generated)
     {
         IMemberMetadata[] parameters =

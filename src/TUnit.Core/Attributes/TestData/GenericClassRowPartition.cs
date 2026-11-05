@@ -424,13 +424,27 @@ public static class GenericClassRowPartition
     // retain candidates for registered conversions and built-in scalar CastHelper paths.
     private static bool MayConvertConstructorValue(TypeInfo description, object value, Type[] classTypeArguments)
     {
+        var target = description switch
+        {
+            GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
+            ConcreteType concrete => concrete.Type,
+            ConstructedGeneric { GenericDefinition: var definition, TypeArguments: [var underlying] }
+                when definition == typeof(Nullable<>) => underlying switch
+                {
+                    GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
+                    ConcreteType concrete => concrete.Type,
+                    _ => null
+                },
+            _ => null
+        };
+
         // CastHelper's non-AOT array fallback converts vector elements (or a single
         // IConvertible value). Inspect candidates without invoking user conversions.
         var arrayElement = description switch
         {
             ConstructorArray { Rank: 1, IsVector: true } array => array.Element,
-            ConcreteType { Type: { IsArray: true } array } when array.GetArrayRank() == 1
-                && array.Name.EndsWith("[]", StringComparison.Ordinal) => new ConcreteType(array.GetElementType()!),
+            _ when target is { IsArray: true } && target.GetArrayRank() == 1
+                && target.Name.EndsWith("[]", StringComparison.Ordinal) => new ConcreteType(target.GetElementType()!),
             _ => null
         };
         if (arrayElement is not null)
@@ -446,19 +460,6 @@ public static class GenericClassRowPartition
             }
         }
 
-        var target = description switch
-        {
-            GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
-            ConcreteType concrete => concrete.Type,
-            ConstructedGeneric { GenericDefinition: var definition, TypeArguments: [var underlying] }
-                when definition == typeof(Nullable<>) => underlying switch
-                {
-                    GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
-                    ConcreteType concrete => concrete.Type,
-                    _ => null
-                },
-            _ => null
-        };
         // CastHelper unwraps the first item of non-array enumerables for scalar targets.
         // Keep the candidate without enumerating: user data may be lazy or have side effects.
         var enumerableTarget = target ?? (description as ConstructedGeneric)?.GenericDefinition;
