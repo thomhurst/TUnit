@@ -42,6 +42,7 @@ public class Issue7437Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("*InvalidPrivateAttributeClass", "Issue7437PrivateInt32", 1)]
     [Arguments("*InvalidPrivateAttributeClass", "Issue7437PrivateString", 1)]
     [Arguments("*InvalidPrivateAttributeClass", "Issue7437PrivateDouble", 1)]
+    [Arguments("*InvalidInheritedClass", "Issue7437Derived", 1)]
     [Arguments("InvalidConstructorClass", "Issue7437Constructor", 2)]
     [Arguments("InvalidUnusedSourceClass", "Issue7437UnusedSource", 1)]
     public Task Failure_Attributes_Do_Not_Replace_Constraint_Errors(string className, string category, int count) =>
@@ -52,6 +53,13 @@ public class Issue7437Tests(TestMode testMode) : InvokableTestBase(testMode)
             result => result.Results.Where(x => x.Outcome == "Failed").All(x =>
                 x.Output?.ErrorInfo?.Message?.Contains("constraint", StringComparison.OrdinalIgnoreCase) == true).ShouldBeTrue()
         ]);
+
+    [Test]
+    [Arguments("Issue7437NotInherited")]
+    [Arguments("Issue7437Shadowed")]
+    public Task Failure_Does_Not_Inherit_Excluded_Attributes(string category) =>
+        RunTestsWithFilter($"/*/TUnit.TestProject.Bugs._7437/*InvalidInheritedClass*/Run[Category={category}]",
+            [result => result.ResultSummary.Counters.Total.ShouldBe(0)]);
 
     private Task AssertSelected(string filter, int expectedFailed) => RunTestsWithFilter(filter,
     [

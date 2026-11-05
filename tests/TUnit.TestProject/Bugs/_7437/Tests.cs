@@ -113,3 +113,28 @@ public sealed class ThrowingDependency
 {
     public ThrowingDependency() => throw new InvalidOperationException("Unused data source property injected");
 }
+
+// Deliberately vary inherited category usage to exercise reflection inheritance parity.
+#pragma warning disable TUnit0028
+public class InheritedPrivateAttributeContainer
+{
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
+    private sealed class NonInheritedCategoryAttribute() : CategoryAttribute("Issue7437NotInherited");
+
+    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
+    private sealed class SingleCategoryAttribute(string category) : CategoryAttribute(category);
+
+    [NonInheritedCategory]
+    [SingleCategory("Issue7437Shadowed")]
+    public abstract class Base;
+
+    [GenerateGenericTest(typeof(string))]
+    [SingleCategory("Issue7437Derived")]
+    public class InvalidInheritedClass<T> : Base where T : struct
+    {
+        [Test]
+        public void Run() { }
+    }
+}
+
+#pragma warning restore TUnit0028

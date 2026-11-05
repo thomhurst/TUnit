@@ -681,8 +681,53 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     private static IEnumerable<AttributeData> GetConstraintViolationAttributes(TestMethodMetadata testMethod) =>
-        GetTestAttributes(testMethod)
+        testMethod.MethodSymbol.GetAttributes()
+            .Concat(GetConstraintViolationClassAttributes(testMethod.TypeSymbol))
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
             .Where(attribute => !DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass));
+
+    private static IEnumerable<AttributeData> GetConstraintViolationClassAttributes(INamedTypeSymbol type)
+    {
+        // Match Type.GetCustomAttributes(inherit: true), used by both reflection discovery
+        // and the inaccessible-attribute accessor. Occurrence indices must see the same list.
+        var seen = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+        foreach (var current in type.GetSelfAndBaseTypes())
+        {
+            var declared = current.GetAttributes();
+            foreach (var attribute in declared)
+            {
+                if (attribute.AttributeClass is not { } attributeType)
+                {
+                    continue;
+                }
+
+                var usage = attributeType.GetSelfAndBaseTypes()
+                    .SelectMany(symbol => symbol.GetAttributes())
+                    .FirstOrDefault(candidate => candidate.AttributeClass?.ToDisplayString() == "System.AttributeUsageAttribute");
+                var inherited = true;
+                var allowMultiple = false;
+                if (usage is not null)
+                {
+                    foreach (var argument in usage.NamedArguments)
+                    {
+                        if (argument.Key == "Inherited") inherited = (bool)argument.Value.Value!;
+                        if (argument.Key == "AllowMultiple") allowMultiple = (bool)argument.Value.Value!;
+                    }
+                }
+
+                if (SymbolEqualityComparer.Default.Equals(current, type)
+                    || (inherited && (allowMultiple || !seen.Contains(attributeType))))
+                {
+                    yield return attribute;
+                }
+            }
+
+            foreach (var attribute in declared)
+            {
+                if (attribute.AttributeClass is { } attributeType) seen.Add(attributeType);
+            }
+        }
+    }
 
     private static void WriteConstraintViolationAttributes(CodeWriter writer, TestMethodMetadata testMethod, AttributeData[] attributes)
     {
