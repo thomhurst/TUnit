@@ -47,16 +47,19 @@ internal static class TestDataRowUnwrapper
     }
 
     /// <summary>
-    /// Gets the inner data type from a <see cref="TestDataRow{T}"/> type.
+    /// Gets the inner data type from a <see cref="TestDataRow{T}"/> type or a derived record.
     /// </summary>
     public static Type? GetInnerDataType(Type testDataRowType)
     {
-        if (!IsTestDataRowType(testDataRowType))
+        for (var current = testDataRowType; current is not null; current = current.BaseType)
         {
-            return null;
+            if (IsTestDataRowType(current))
+            {
+                return current.GetGenericArguments()[0];
+            }
         }
 
-        return testDataRowType.GetGenericArguments()[0];
+        return null;
     }
 
     /// <summary>
@@ -83,7 +86,11 @@ internal static class TestDataRowUnwrapper
             }
 
             // Check if the data is a tuple that should be expanded
-            if (DataSourceHelpers.IsTuple(data) && (expectedTupleType is null || !expectedTupleType.IsInstanceOfType(data)))
+            if (DataSourceHelpers.IsTuple(data)
+                && !(expectedTupleType is not null
+                    && (expectedTupleType.IsInstanceOfType(data)
+                        || expectedTupleType.ContainsGenericParameters
+                            && TupleHelper.MatchesOpenTuple(expectedTupleType, data!.GetType()))))
             {
                 return (data.ToObjectArray(), metadata);
             }

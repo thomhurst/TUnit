@@ -2919,7 +2919,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// constructor argument is the member name (<c>[MethodDataSource("Rows")]</c> and
     /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), looks for a static parameterless method of that name
     /// declared on the test class (or on <c>T</c>), and requires its declared return type to be
-    /// <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched against the data parameter
+    /// a supported row source, including asynchronous wrappers. Each tuple element is matched against the data parameter
     /// at the same position, including type arguments nested in generic parameter types. The caller passes
     /// the parameters without any CancellationToken, as the generator's <c>GetDataParameters</c> does.
     /// </summary>
@@ -2948,19 +2948,31 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             Type.EmptyTypes,
             modifiers: null);
 
-        if (dataMethod?.ReturnType is not { IsGenericType: true } returnType
-            || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>)
-            || returnType.GetGenericArguments()[0] is not { IsGenericType: true } funcType
-            || funcType.GetGenericTypeDefinition() != typeof(Func<>)
-            || GetValueTupleElementTypes(funcType.GetGenericArguments()[0]) is not { } tupleElements)
+        // Normalize the same asynchronous and sequence wrappers as runtime row reading before
+        // supplementing explicit method types. Retain the bounded outer/inner Func unwrapping.
+        if (dataMethod is null || MethodDataSourceAttribute.GetDeclaredRowType(dataMethod.ReturnType) is not { } rowType
+            || GetTupleElementTypes(rowType) is not { } tupleElements)
         {
             return null;
         }
 
         var typeArguments = new Type?[genericParameterCount];
-        for (var i = 0; i < parameters.Length && i < tupleElements.Length; i++)
+        var receivesWholeTuple = parameters.Length > 0
+            && ((GetTupleElementTypes(parameters[0].ParameterType) is not null
+                    && parameters.Skip(1).All(parameter => parameter.IsOptional
+                        || parameter.IsDefined(typeof(ParamArrayAttribute), false)
+                        || IsParamCollection(parameter)
+                        || (parameter == parameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
+                    && (parameters.Length == 1 || TupleHelper.MatchesOpenTuple(parameters[0].ParameterType, rowType)))
+                || (parameters.Length == 1 && parameters[0].ParameterType.IsGenericParameter && !rowType.IsValueType));
+        if (receivesWholeTuple)
         {
-            MapGenericParameters(parameters[i].ParameterType, tupleElements[i], typeArguments);
+            MapGenericParameters(parameters[0].ParameterType, rowType, typeArguments);
+        }
+        else
+        {
+            for (var i = 0; i < parameters.Length && i < tupleElements.Length; i++)
+                MapGenericParameters(parameters[i].ParameterType, tupleElements[i], typeArguments);
         }
 
         foreach (var typeArgument in typeArguments)
@@ -3125,6 +3137,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 typeArguments[parameterType.GenericParameterPosition] = actualType;
             }
 
+            return;
+        }
+
+        // Ordinary spread columns retain last-column inference through nullable values and arrays.
+        if (Nullable.GetUnderlyingType(parameterType) is { } nullableParameter
+            && actualType.IsValueType && Nullable.GetUnderlyingType(actualType) is null)
+        {
+            MapGenericParameters(nullableParameter, actualType, typeArguments);
+            return;
+        }
+        if (parameterType.IsArray && actualType.IsArray && parameterType.GetArrayRank() == actualType.GetArrayRank())
+        {
+            MapGenericParameters(parameterType.GetElementType()!, actualType.GetElementType()!, typeArguments);
             return;
         }
 

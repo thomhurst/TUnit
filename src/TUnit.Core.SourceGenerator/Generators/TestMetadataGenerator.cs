@@ -7288,7 +7288,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return namedType.TupleElements.Select(element => element.Type).ToArray();
         }
 
-        if (namedType is not { Name: "Tuple", Arity: >= 1 and <= 8, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } })
+        if (namedType is not { Name: "Tuple" or "ValueTuple", Arity: >= 1 and <= 8, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } })
         {
             return null;
         }
@@ -7301,6 +7301,35 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return GetTupleElementTypes(namedType.TypeArguments[7]) is { } rest
             ? namedType.TypeArguments.Take(7).Concat(rest).ToArray()
             : null;
+    }
+
+    // A tuple passed as one argument must match its complete constructed shape. In particular,
+    // repeated generic parameters bind consistently and closed tuple arguments stay invariant.
+    private static bool MatchesOpenRowType(ITypeSymbol parameter, ITypeSymbol row,
+        Dictionary<ITypeSymbol, ITypeSymbol> bindings)
+    {
+        if (parameter is ITypeParameterSymbol)
+        {
+            if (bindings.TryGetValue(parameter, out var bound))
+                return SymbolEqualityComparer.Default.Equals(bound, row);
+            bindings.Add(parameter, row);
+            return true;
+        }
+
+        if (!CodeGenerationHelpers.ContainsTypeParameter(parameter))
+            return SymbolEqualityComparer.Default.Equals(parameter, row);
+
+        if (parameter is IArrayTypeSymbol array && row is IArrayTypeSymbol rowArray)
+            return array.Rank == rowArray.Rank && MatchesOpenRowType(array.ElementType, rowArray.ElementType, bindings);
+
+        if (parameter is not INamedTypeSymbol { IsGenericType: true } named
+            || row is not INamedTypeSymbol { IsGenericType: true } rowNamed
+            || !SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, rowNamed.OriginalDefinition))
+            return false;
+
+        for (var i = 0; i < named.TypeArguments.Length; i++)
+            if (!MatchesOpenRowType(named.TypeArguments[i], rowNamed.TypeArguments[i], bindings)) return false;
+        return true;
     }
 
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr, ITypeSymbol[]? classTypes = null)
@@ -7346,14 +7375,33 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var genericParams = testMethod.MethodSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
-        if (rowType is INamedTypeSymbol { IsTupleType: true } tupleType
-            && !(testMethodParams.Length == 1 && testMethodParams[0].Type.IsTupleType))
+        Dictionary<ITypeSymbol, ITypeSymbol>? wholeTupleBindings = null;
+        var receivesWholeTuple = testMethodParams.Length > 1
+            && GetTupleElementTypes(CloseClassType(testMethodParams[0].Type)) is not null
+            && testMethodParams.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams
+                || SymbolEqualityComparer.Default.Equals(parameter, testMethodParams[^1]) && parameter.CollectsTrailingArguments())
+            && MatchesOpenRowType(CloseClassType(testMethodParams[0].Type), rowType,
+                wholeTupleBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(SymbolEqualityComparer.Default));
+        var receivesBareReferenceTuple = testMethodParams.Length == 1
+            && testMethodParams[0].Type is ITypeParameterSymbol
+            && rowType is INamedTypeSymbol { IsTupleType: false, IsValueType: false }
+            && GetTupleElementTypes(rowType) is not null
+            && testMethod.MethodAttributes.Any(static attribute => attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
+
+        if (receivesWholeTuple)
+        {
+            foreach (var binding in wholeTupleBindings!)
+                if (binding.Key is ITypeParameterSymbol parameter && genericParams.Contains(parameter))
+                    genericParamMap[parameter.Name] = binding.Value;
+        }
+        else if (GetTupleElementTypes(rowType) is { } tupleElements
+            && !receivesBareReferenceTuple
+            && !(testMethodParams.Length == 1 && GetTupleElementTypes(testMethodParams[0].Type) is not null))
         {
             // A tuple row is spread across the test method's parameters
-            var tupleElements = tupleType.TupleElements;
             for (var i = 0; i < testMethodParams.Length && i < tupleElements.Length; i++)
             {
-                ProcessTypeForGenerics(CloseClassType(testMethodParams[i].Type), tupleElements[i].Type, genericParams, genericParamMap);
+                ProcessTypeForGenerics(CloseClassType(testMethodParams[i].Type), tupleElements[i], genericParams, genericParamMap);
             }
         }
         else if (testMethodParams.Length > 0)
@@ -7797,9 +7845,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Func inside it. Anything nested deeper reaches the test as a value (e.g. a Func<int> row
         // from Func<Func<int>>), so inference must see that value's type too.
         type = Unwrap(type, funcType);
-        if (TryUnwrap(type, testDataRowType, out var rowData))
+        // Runtime unwrapping uses ITestDataRow, including records derived from TestDataRow<T>.
+        for (var candidate = type as INamedTypeSymbol; candidate is not null; candidate = candidate.BaseType)
         {
-            type = Unwrap(rowData, funcType);
+            if (TryUnwrap(candidate, testDataRowType, out var rowData))
+            {
+                type = Unwrap(rowData, funcType);
+                break;
+            }
         }
 
         if (type.SpecialType == SpecialType.System_Object
