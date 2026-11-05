@@ -37,6 +37,9 @@ public sealed class GenericConstraintViolationEntry
     /// <summary>Optional row-backed violations; empty sources contribute no failing rows.</summary>
     public IDataSourceAttribute[]? DataSources { get; init; }
 
+    /// <summary>Original method, class, and assembly attributes used for filtering.</summary>
+    public Func<Attribute[]>? AttributeFactory { get; init; }
+
     internal TestMetadata ToTestMetadata([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicMethods)] Type genericTypeDefinition, string testSessionId)
     {
         if (DataSources is not null)
@@ -55,7 +58,8 @@ public sealed class GenericConstraintViolationEntry
             MethodMetadata,
             FilePath,
             LineNumber,
-            DataSources ?? CreateUnconditionalDataSources());
+            DataSources ?? CreateUnconditionalDataSources(),
+            AttributeFactory);
         metadata.TestSessionId = testSessionId;
         return metadata;
     }
@@ -86,7 +90,8 @@ internal sealed class GenericConstraintViolationTestMetadata : TestMetadata
         MethodMetadata methodMetadata,
         string filePath,
         int lineNumber,
-        IReadOnlyList<string> messages)
+        IReadOnlyList<string> messages,
+        Func<Attribute[]>? attributeFactory = null)
     {
         var dataSources = new IDataSourceAttribute[messages.Count];
         for (var i = 0; i < dataSources.Length; i++)
@@ -94,7 +99,7 @@ internal sealed class GenericConstraintViolationTestMetadata : TestMetadata
             dataSources[i] = GenericConstraintViolationDataSource.Create(messages[i]);
         }
 
-        return Create(testClassType, methodName, methodMetadata, filePath, lineNumber, dataSources);
+        return Create(testClassType, methodName, methodMetadata, filePath, lineNumber, dataSources, attributeFactory);
     }
 
     /// <summary>

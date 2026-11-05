@@ -122,7 +122,10 @@ internal sealed class ReflectionGenericConstraintViolations(
                 ReflectionMetadataBuilder.CreateMethodMetadata(genericTypeDefinition, testMethod),
                 testAttribute?.File ?? "Unknown",
                 testAttribute?.Line ?? 0,
-                messages);
+                messages,
+                () => TestBuilder.ScopeRowAttributesToTest(
+                    ReflectionAttributeExtractor.GetAllAttributes(genericTypeDefinition, testMethod),
+                    null, null));
         }
     }
 

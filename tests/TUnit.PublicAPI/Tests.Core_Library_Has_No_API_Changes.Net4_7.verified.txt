@@ -793,6 +793,7 @@ namespace
     public sealed class GenericConstraintViolationEntry
     {
         public GenericConstraintViolationEntry() { }
+        public <[]>? AttributeFactory { get; init; }
         public .IDataSourceAttribute[]? DataSources { get; init; }
         public required string FilePath { get; init; }
         public required int LineNumber { get; init; }

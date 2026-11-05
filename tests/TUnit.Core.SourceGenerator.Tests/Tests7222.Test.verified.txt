@@ -1762,6 +1762,11 @@ internal static class TUnit_TestProject_Bugs__7222_PointerClassTypeArgumentTests
             FilePath = "",
             LineNumber = 27,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute(),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int*))
+            },
             Messages = new string[] { "Type arguments 'Int32*' do not satisfy the generic constraints of type 'PointerClassTypeArgumentTests`1'" },
         },
     };
@@ -1845,6 +1850,13 @@ internal static class TUnit_TestProject_Bugs__7222_PointerClassTypeArgumentGener
             FilePath = "",
             LineNumber = 37,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute(),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string)),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int*)),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int))
+            },
             Messages = new string[] { "Type arguments 'Int32*' do not satisfy the generic constraints of type 'PointerClassTypeArgumentGenericMethodTests`1'" },
         },
     };

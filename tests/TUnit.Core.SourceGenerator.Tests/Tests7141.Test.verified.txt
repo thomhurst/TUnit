@@ -274,6 +274,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             FilePath = "",
             LineNumber = 41,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute()
+            },
             Messages = new string[] { "Type 'Object' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };

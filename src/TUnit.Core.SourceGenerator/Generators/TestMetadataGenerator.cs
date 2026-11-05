@@ -698,6 +698,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"FilePath = {SymbolDisplay.FormatLiteral(testMethod.FilePath ?? "", quote: true)},");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber.ToString(CultureInfo.InvariantCulture)},");
         writer.AppendLine("MethodMetadata = __mm_0,");
+        writer.AppendLine("AttributeFactory = static () => new global::System.Attribute[]");
+        writer.AppendLine("{");
+        writer.Indent();
+        // Keep the same precedence as regular tests, without reflecting over the open type in AOT.
+        var attributes = testMethod.MethodSymbol.GetAttributes()
+            .Concat(testMethod.TypeSymbol.GetAttributesIncludingBaseTypes())
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
+            .Where(attribute => !DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass));
+        testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
+        writer.Unindent();
+        writer.AppendLine("},");
         writer.AppendLine($"Messages = new string[] {{ {string.Join(", ", messages.Select(m => $"\"{EscapeString(m)}\""))} }},");
         writer.Unindent();
         writer.AppendLine("},");
