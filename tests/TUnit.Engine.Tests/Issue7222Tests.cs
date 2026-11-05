@@ -242,7 +242,9 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    [Arguments("SingleTupleElementConversionTests", 12)]
+    [Arguments("SingleTupleElementConversionTests", 14)]
+    [Arguments("ClosedClassParameterInferredSourceTests*", 1)]
+    [Arguments("ExplicitClassParameterInferredSourceTests*", 1)]
     [Arguments("ClosedClassTupleInferenceTests*", 3)]
     public async Task Tuple_Inference_Preserves_Element_Conversions_And_Concrete_Class_Types(string className, int count)
     {

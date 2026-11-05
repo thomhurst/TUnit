@@ -320,6 +320,25 @@ public class SingleTupleElementConversionTests
             throw new InvalidOperationException("Expected narrowing numeric reference element conversion");
     }
 
+    public static IEnumerable<(int, string)> StringRows() => [(1, "2")];
+    public IEnumerable<Tuple<int, string>> StringReferenceRows() => [Tuple.Create(3, "4.5")];
+
+    [Test]
+    [MethodDataSource(nameof(StringRows))]
+    public void StringElement<T>((T, int) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != 2)
+            throw new InvalidOperationException("Expected parsed string element conversion");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(StringReferenceRows))]
+    public void StringReferenceElement<T>(Tuple<T, decimal?> row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != 4.5m)
+            throw new InvalidOperationException("Expected parsed nullable string reference element conversion");
+    }
+
     public class Source
     {
         public int Value { get; init; }

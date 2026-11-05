@@ -1587,6 +1587,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                 }
 
+                var uninferredClassSources = new List<(ITypeSymbol[] ClassTypes, AttributeData? Source, AttributeData? ClassRow)>();
+
                 // A retry that still cannot infer method types must report its rows on this closed
                 // class. Keep its constructor row, so another class pairing cannot duplicate the failure.
                 void ReportUninferredClassSource(ITypeSymbol[] classTypes, AttributeData? source, AttributeData? classRow = null)
@@ -1594,6 +1596,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (hasExplicitMethodTypes || source is null
                         || !ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, compilation)) return;
                     var concreteClassName = GetConcreteClassName(classTypes);
+                    // Parameter attributes may have already inferred a method that runs this source.
+                    // Check after all pairings so source declaration order cannot add a false failure.
+                    if (results.Any(result => result.ConcreteClassName == concreteClassName
+                        && result.MethodConstraintViolations is null
+                        && (result.SpecificArgumentsAttribute is null || result.IsSpecificMethodDataSource(source)))) return;
                     var existing = results.FirstOrDefault(result => result.ConcreteClassName == concreteClassName
                         && result.MethodConstraintViolations is not null);
                     if (existing?.MethodConstraintViolations?.Any(violation => violation.RowSource is { } row && AreSameAttribute(row, source)) is not true)
@@ -1621,7 +1628,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             : methodTypes;
                         if (concreteMethodTypes is null)
                         {
-                            ReportUninferredClassSource(classGenericTest.TypeArgs!, source);
+                            uninferredClassSources.Add((classGenericTest.TypeArgs!, source, null));
                             continue;
                         }
                         TryAddInstantiation(CloseOverClass(classGenericTest.TypeArgs!, concreteMethodTypes), source,
@@ -1648,7 +1655,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                             : methodTypes;
                         if (concreteMethodTypes is null)
                         {
-                            ReportUninferredClassSource(classTypes, source, classAttr);
+                            uninferredClassSources.Add((classTypes, source, classAttr));
                             continue;
                         }
                         if (source is not null)
@@ -1687,6 +1694,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                                 ? methodGenericTest.Attribute
                                 : classGenericTest.Attribute);
                     }
+                }
+                foreach (var (classTypes, source, classRow) in uninferredClassSources)
+                {
+                    ReportUninferredClassSource(classTypes, source, classRow);
                 }
             }
             else
@@ -7291,6 +7302,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (!CodeGenerationHelpers.ContainsTypeParameter(parameter))
         {
             var conversion = compilation.ClassifyCommonConversion(row, parameter);
+            // CastHelper also parses strings when reconstructing tuple elements, including
+            // nullable targets. Whole-row binding cannot rebuild or convert its elements.
+            var stringTarget = parameter is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableTarget
+                ? nullableTarget.TypeArguments[0] : parameter;
+            if (reconstructTupleElements && row.SpecialType == SpecialType.System_String
+                && (parameter.IsParsableFromString() || stringTarget.SpecialType is
+                    SpecialType.System_Boolean or SpecialType.System_Char or
+                    SpecialType.System_SByte or SpecialType.System_Byte or
+                    SpecialType.System_Int16 or SpecialType.System_UInt16 or
+                    SpecialType.System_Int32 or SpecialType.System_UInt32 or
+                    SpecialType.System_Int64 or SpecialType.System_UInt64 or
+                    SpecialType.System_Single or SpecialType.System_Double or SpecialType.System_Decimal))
+            {
+                return true;
+            }
+
             // CastHelper supports numeric and user-defined conversions when reconstructing elements.
             // Whole-row binding still requires identity; it cannot rebuild the tuple.
             if (conversion.Exists
