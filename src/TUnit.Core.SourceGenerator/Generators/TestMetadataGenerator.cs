@@ -1924,11 +1924,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 if (instantiation.HasMethodRows)
                 {
                     var hasClassDataSource = hadClassRows;
-                    foreach (var typeFreeClassRow in typeFreeClassRows ?? [])
+                    // Uninferred method rows (for example null) were attached to every class above.
+                    // They do not establish class types and must not bring in optional constructor rows.
+                    var hasInferringMethodRow = (instantiation.SpecificArgumentsAttribute is { } methodRow
+                            && !instantiation.SpecificIsClassRow && InfersClassTypes(methodRow))
+                        || instantiation.AdditionalArgumentsAttributes?.Any(InfersClassTypes) == true;
+                    if (hasInferringMethodRow)
                     {
-                        instantiation.AddRow(typeFreeClassRow, isClassRow: true);
-                        hasClassDataSource = true;
+                        foreach (var typeFreeClassRow in typeFreeClassRows ?? [])
+                        {
+                            instantiation.AddRow(typeFreeClassRow, isClassRow: true);
+                            hasClassDataSource = true;
+                        }
                     }
+
+                    bool InfersClassTypes(AttributeData row) => uninferredMethodDataSources is null
+                        || !uninferredMethodDataSources.Any(uninferred => AreSameAttribute(uninferred, row));
 
                     foreach (var (attribute, classTypes) in hadClassRows ? [] : otherClassDataSources ?? [])
                     {

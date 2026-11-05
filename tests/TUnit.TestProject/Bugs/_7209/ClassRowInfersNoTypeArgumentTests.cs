@@ -360,3 +360,27 @@ public class PrefixedMixedTrailingClassValues<T>(string prefix, params T[] value
         await Assert.That((object?)values[1]).IsEqualTo(2);
     }
 }
+
+// A null method row runs on C<int>, but does not infer int and cannot add its optional class row.
+[EngineTest(ExpectedResult.Pass)]
+[Arguments(42, 1)]
+[Arguments(42)]
+public class MixedClassRowsWithNullMethodRow<T>(int number, T value = default!)
+{
+    [Test]
+    [Arguments("s")]
+    [Arguments(null)]
+    public async Task Run(T methodValue)
+    {
+        await Assert.That(number).IsEqualTo(42);
+        if (typeof(T) == typeof(int))
+        {
+            await Assert.That((object?)value).IsEqualTo(1);
+        }
+        else
+        {
+            await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+            await Assert.That((object?)value).IsNull();
+        }
+    }
+}

@@ -26,6 +26,7 @@ public class Issue7209Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TypeBearingClassRowWithParams", 1)]
     [Arguments("TypeFreeGenericClassRow", 2)]
     [Arguments("MixedTypeFreeAndTypeBearingClassRows", 2)]
+    [Arguments("MixedClassRowsWithNullMethodRow", 3)]
     [Arguments("TypeFreeClassRowWithUnrelatedArgumentsAttributes", 2)]
     [Arguments("NullTrailingClassArray", 1)]
     [Arguments("MixedTrailingClassValues", 1)]
