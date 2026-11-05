@@ -1535,11 +1535,21 @@ internal static class MockMembersBuilder
             // A null predicate (including null/default literals) matches the parameter type’s default.
             // This also handles value-type instantiations of unconstrained generic parameters.
             // Keep non-null predicates on the existing implicit-conversion path.
+            // Reserve all parameter identifiers, including escaped names, before allocating locals.
+            var usedNames = new HashSet<string>(method.Parameters.Select(p => p.Name.TrimStart('@')), StringComparer.Ordinal);
+            var predicateLocals = new Dictionary<int, string>();
             foreach (var idx in funcIndices.OrderBy(i => i))
             {
                 var p = method.Parameters[idx];
                 var rawName = p.Name.StartsWith("@", StringComparison.Ordinal) ? p.Name[1..] : p.Name;
-                writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> __fa_{rawName} = {p.Name} is null ? global::TUnit.Mocks.Arguments.Arg.Is<{p.FullyQualifiedType}>(default({p.FullyQualifiedType})!) : (global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}>){p.Name};");
+                var baseName = $"__fa_{rawName}";
+                var localName = baseName;
+                for (var suffix = 1; !usedNames.Add(localName); suffix++)
+                {
+                    localName = $"{baseName}_{suffix.ToString(CultureInfo.InvariantCulture)}";
+                }
+                predicateLocals.Add(idx, localName);
+                writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> {localName} = {p.Name} is null ? global::TUnit.Mocks.Arguments.Arg.Is<{p.FullyQualifiedType}>(default({p.FullyQualifiedType})!) : (global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}>){p.Name};");
             }
 
             // Build matchers array
@@ -1550,8 +1560,7 @@ internal static class MockMembersBuilder
                 if (p.Direction == ParameterDirection.Out) continue;
                 if (!includeRefStructArgs && p.IsRefStruct) continue;
 
-                var rawName = p.Name.StartsWith("@", StringComparison.Ordinal) ? p.Name[1..] : p.Name;
-                matcherExprs.Add(funcIndices.Contains(i) ? $"__fa_{rawName}.Matcher" : $"{p.Name}.Matcher");
+                matcherExprs.Add(funcIndices.Contains(i) ? $"{predicateLocals[i]}.Matcher" : $"{p.Name}.Matcher");
             }
 
             if (matcherExprs.Count == 0)
