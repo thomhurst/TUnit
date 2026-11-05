@@ -3738,8 +3738,17 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
                 for (var i = 0; i < paramGenArgs.Length && i < argGenArgs.Length; i++)
                 {
-                    InferGenericTypeMapping(paramGenArgs[i], argGenArgs[i], typeMapping,
-                        isTopLevel: TupleHelper.IsTupleType(paramType) && paramGenArgs[i].IsGenericParameter);
+                    var parameterElement = paramGenArgs[i];
+                    var argumentElement = argGenArgs[i];
+                    if (TupleHelper.IsTupleType(paramType)
+                        && Nullable.GetUnderlyingType(parameterElement) is { } nullableElement
+                        && argumentElement.IsValueType)
+                    {
+                        parameterElement = nullableElement;
+                        argumentElement = Nullable.GetUnderlyingType(argumentElement) ?? argumentElement;
+                    }
+                    InferGenericTypeMapping(parameterElement, argumentElement, typeMapping,
+                        isTopLevel: TupleHelper.IsTupleType(paramType) && parameterElement.IsGenericParameter);
                 }
             }
             else

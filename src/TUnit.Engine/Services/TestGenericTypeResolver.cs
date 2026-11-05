@@ -684,11 +684,22 @@ internal sealed class TestGenericTypeResolver
                         if (TupleHelper.IsTupleType(parameterType) && !paramGenericArgs[i].ContainsGenericParameters)
                             continue;
                         // A sole tuple is reconstructed with conversions. Match the generator's
-                        // last-element inference for repeated direct tuple type parameters.
-                        if (TupleHelper.IsTupleType(parameterType) && paramGenericArgs[i].IsGenericParameter)
+                        // last-element inference for direct or nullable tuple type parameters.
+                        if (TupleHelper.IsTupleType(parameterType))
                         {
-                            typeMapping[paramGenericArgs[i]] = argGenericArgs[i];
-                            continue;
+                            var parameterElement = paramGenericArgs[i];
+                            var argumentElement = argGenericArgs[i];
+                            if (Nullable.GetUnderlyingType(parameterElement) is { } nullableElement
+                                && argumentElement.IsValueType)
+                            {
+                                parameterElement = nullableElement;
+                                argumentElement = Nullable.GetUnderlyingType(argumentElement) ?? argumentElement;
+                            }
+                            if (parameterElement.IsGenericParameter)
+                            {
+                                typeMapping[parameterElement] = argumentElement;
+                                continue;
+                            }
                         }
                         if (!TryInferTypeMapping(paramGenericArgs[i], argGenericArgs[i], typeMapping))
                         {

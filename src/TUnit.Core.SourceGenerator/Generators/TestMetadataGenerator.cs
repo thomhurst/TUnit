@@ -7341,11 +7341,22 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             for (var i = 0; i < parameterElements.Length; i++)
             {
                 // Sole tuple arguments are rebuilt with per-element conversions. Preserve
-                // the existing last-element inference for repeated direct type parameters;
+                // the existing last-element inference for direct or nullable type parameters;
                 // nested interface/base candidates still require consistent bindings.
-                if (parameterElements[i] is ITypeParameterSymbol)
+                var parameterElement = parameterElements[i];
+                var rowElement = rowElements[i];
+                if (parameterElement is INamedTypeSymbol
+                    { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableElement
+                    && rowElement.IsValueType)
                 {
-                    bindings[parameterElements[i]] = rowElements[i];
+                    parameterElement = nullableElement.TypeArguments[0];
+                    if (rowElement is INamedTypeSymbol
+                        { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableRowElement)
+                        rowElement = nullableRowElement.TypeArguments[0];
+                }
+                if (parameterElement is ITypeParameterSymbol)
+                {
+                    bindings[parameterElement] = rowElement;
                     continue;
                 }
                 if (!MatchesOpenRowType(parameterElements[i], rowElements[i], compilation, bindings, true)) return false;

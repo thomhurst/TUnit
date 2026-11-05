@@ -461,3 +461,32 @@ public class RepeatedConvertibleTupleTests
             throw new InvalidOperationException("Expected long inference and converted reference elements");
     }
 }
+
+public class RepeatedNullableTupleTests
+{
+    public static IEnumerable<(int, long)> ValueRows() => [(1, 2L)];
+    public static IEnumerable<(int, long?)> NullableRows() => [(1, 2L), (1, null)];
+    public static IEnumerable<Tuple<int, long>> ReferenceRows() => [Tuple.Create(3, 4L)];
+    public static IEnumerable<Tuple<int, long?>> NullableReferenceRows() =>
+        [Tuple.Create<int, long?>(3, 4L), Tuple.Create<int, long?>(3, null)];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    [MethodDataSource(nameof(NullableRows))]
+    public void Value<T>((T, T?) row) where T : struct
+    {
+        if (typeof(T) != typeof(long) || !Equals(row.Item1, 1L)
+            || row.Item2 is not null && !Equals(row.Item2, 2L))
+            throw new InvalidOperationException("Expected long inference through nullable element and converted first element");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    [MethodDataSource(nameof(NullableReferenceRows))]
+    public void Reference<T>(Tuple<T, T?> row) where T : struct
+    {
+        if (typeof(T) != typeof(long) || !Equals(row.Item1, 3L)
+            || row.Item2 is not null && !Equals(row.Item2, 4L))
+            throw new InvalidOperationException("Expected long inference through nullable reference-tuple element");
+    }
+}
