@@ -206,7 +206,7 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal static class TUnit_TestProject_Bugs__7437_PrivateAttributeContainer_InvalidPrivateAttributeClass_T_Run_TestSource
+internal static class TUnit_TestProject_Bugs__7437_PrivateAttributeContainer_InvalidPrivateAttributeClass_T_Run__T_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7437.PrivateAttributeContainer.InvalidPrivateAttributeClass<>", new global::TUnit.Core.ClassMetadata
     {
@@ -230,7 +230,10 @@ Parent = null
 })
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7437.PrivateAttributeContainer.InvalidPrivateAttributeClass<>);
-    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Run", __classType, typeof(void), __classMetadata);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Run", __classType, typeof(void), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7437.PrivateAttributeContainer.InvalidPrivateAttributeClass<>), "Run", false, 0, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+}));
     public static readonly global::TUnit.Core.GenericConstraintViolationEntry[] ConstraintViolations = new global::TUnit.Core.GenericConstraintViolationEntry[]
     {
         new global::TUnit.Core.GenericConstraintViolationEntry
@@ -255,7 +258,7 @@ Parent = null
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__7437_PrivateAttributeContainer_InvalidPrivateAttributeClass_T_Run_TestSource_ConstraintViolations = global::TUnit.Core.SourceRegistrar.RegisterGenericConstraintViolations(typeof(global::TUnit.TestProject.Bugs._7437.PrivateAttributeContainer.InvalidPrivateAttributeClass<>), static () => TUnit_TestProject_Bugs__7437_PrivateAttributeContainer_InvalidPrivateAttributeClass_T_Run_TestSource.ConstraintViolations);
+    static readonly int _r_TUnit_TestProject_Bugs__7437_PrivateAttributeContainer_InvalidPrivateAttributeClass_T_Run__T_TestSource_ConstraintViolations = global::TUnit.Core.SourceRegistrar.RegisterGenericConstraintViolations(typeof(global::TUnit.TestProject.Bugs._7437.PrivateAttributeContainer.InvalidPrivateAttributeClass<>), static () => TUnit_TestProject_Bugs__7437_PrivateAttributeContainer_InvalidPrivateAttributeClass_T_Run__T_TestSource.ConstraintViolations);
 }
 
 
@@ -289,7 +292,7 @@ internal static class TUnit_TestProject_Bugs__7437_InvalidConstructorClass_T_Run
         {
             MethodName = "Run",
             FilePath = "",
-            LineNumber = 74,
+            LineNumber = 79,
             MethodMetadata = __mm_0,
             AttributeFactory = static () => new global::System.Attribute[]
             {
@@ -341,7 +344,7 @@ internal static class TUnit_TestProject_Bugs__7437_InvalidUnusedSourceClass_T_Ru
         {
             MethodName = "Run",
             FilePath = "",
-            LineNumber = 91,
+            LineNumber = 96,
             MethodMetadata = __mm_0,
             AttributeFactory = static () => new global::System.Attribute[]
             {

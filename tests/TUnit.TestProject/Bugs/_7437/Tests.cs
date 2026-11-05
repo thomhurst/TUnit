@@ -61,7 +61,12 @@ public class PrivateAttributeContainer
     {
         [Test]
         [PrivateCategory<double>]
-        public void Run() { }
+        [Arguments("invalid")]
+        public void Run(T value) { }
+
+        // These unannotated overloads must never supply the test method's attributes.
+        public void Run(string value) { }
+        public void Run(object value) { }
     }
 }
 
