@@ -819,6 +819,30 @@ public class NestedSingletonBoundaryTests
     }
 }
 
+public class WrappedNestedSingletonInferenceTests
+{
+    public static IEnumerable<TestDataRow<Tuple<ValueTuple<int>>>> Rows() =>
+        [new(Tuple.Create(new ValueTuple<int>(7)))];
+    public static IEnumerable<TestDataRow<ValueTuple<Tuple<int>>>> ValueRows() =>
+        [new(new ValueTuple<Tuple<int>>(Tuple.Create(7)))];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void ReferenceOuter<T>(Tuple<Tuple<T>> row)
+    {
+        if (typeof(T) != typeof(int) || !Equals(row.Item1.Item1, 7))
+            throw new InvalidOperationException("Expected wrapped nested singleton inference");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void ValueOuter<T>(ValueTuple<ValueTuple<T>> row)
+    {
+        if (typeof(T) != typeof(int) || !Equals(row.Item1.Item1, 7))
+            throw new InvalidOperationException("Expected wrapped value nested singleton inference");
+    }
+}
+
 public class WrappedWholeTupleInferenceTests
 {
     public static IEnumerable<TestDataRow<(int, string)>> ValueRows() => [new((1, "tuple"))];

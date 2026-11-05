@@ -25,6 +25,7 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("TupleInvariantBaseCandidateTests", 2)]
     [Arguments("TupleConstrainedCandidateTests", 2)]
     [Arguments("NestedSingletonBoundaryTests", 2)]
+    [Arguments("WrappedNestedSingletonInferenceTests", 2)]
     [Arguments("WrappedWholeTupleInferenceTests", 6)]
     [Arguments("SingletonTupleInferenceTests", 3)]
     [Arguments("OpenTupleRuntimeCastTests", 3)]
