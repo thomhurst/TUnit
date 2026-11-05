@@ -17,6 +17,11 @@ internal class LookalikeDataSourceTests : TestsBase
         Path.Combine(Git.TestsDirectory.FullName, "TUnit.Core.SourceGenerator.Tests", "LookalikeClassMethodSources.cs.txt"),
         _ => Task.CompletedTask);
 
+    [Test]
+    public Task Reimplemented_rows() => TestMetadataGenerator.RunTest(
+        Path.Combine(Git.TestsDirectory.FullName, "TUnit.TestProject", "ReimplementedMethodSourceTests.cs"),
+        _ => Task.CompletedTask);
+
     private static string Fixture => Path.Combine(Git.TestsDirectory.FullName,
         "TUnit.TestProject", "LookalikeDataSourceTests.cs");
 }

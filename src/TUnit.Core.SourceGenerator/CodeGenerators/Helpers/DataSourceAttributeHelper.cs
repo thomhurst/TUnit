@@ -53,6 +53,18 @@ internal static class DataSourceAttributeHelper
             return false;
         }
 
+        // Forwarding the constructor is insufficient if the subclass replaces the row provider.
+        // Resolve the interface slot so both explicit and implicit reimplementations use runtime rows.
+        var sourceInterface = attribute.AttributeClass.AllInterfaces
+            .FirstOrDefault(type => IsBuiltIn(type, "IDataSourceAttribute"));
+        var rowMethod = sourceInterface?.GetMembers("GetDataRowsAsync").OfType<IMethodSymbol>().SingleOrDefault();
+        if (rowMethod is null
+            || attribute.AttributeClass.FindImplementationForInterfaceMember(rowMethod) is not IMethodSymbol implementation
+            || !IsBuiltIn(implementation.ContainingType, "MethodDataSourceAttribute"))
+        {
+            return false;
+        }
+
         foreach (var reference in constructor.DeclaringSyntaxReferences)
         {
             var arguments = reference.GetSyntax() switch
