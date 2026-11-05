@@ -13,6 +13,21 @@ public class DataSourceHelpersTests
     private static void ObjectTuple<T>(Tuple<T, object> row) { }
 
     [Test]
+    public async Task NullRow_DoesNotMatchOpenTupleWithTrailingParameter()
+    {
+        var parameter = typeof(DataSourceHelpersTests).GetMethod(nameof(OpenTuple),
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)!.GetParameters()[0].ParameterType;
+        object?[] values = [null];
+        var result = TUnit.Engine.Helpers.DataUnwrapper.UnwrapWithTypes(values,
+            [new ParameterMetadata(parameter) { Name = "row", TypeInfo = new ConcreteType(parameter) },
+                new ParameterMetadata(typeof(int)) { Name = "extra", TypeInfo = new ConcreteType(typeof(int)), CachedIsOptional = true }]);
+
+        await Assert.That(result.Length).IsEqualTo(1);
+        await Assert.That(result[0]).IsNull();
+    }
+
+
+    [Test]
     public async Task OpenTupleBinding_RequiresOuterAssignability()
     {
         var parameter = typeof(DataSourceHelpersTests).GetMethod(nameof(ObjectTuple),

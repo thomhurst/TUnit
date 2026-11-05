@@ -9,6 +9,7 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("NestedTupleWithTrailingParametersTests", 4)]
     [Arguments("ClosedNestedTupleConversionTests", 1)]
     [Arguments("RepeatedTupleBindingTests", 3)]
+    [Arguments("RepeatedConvertibleTupleTests", 2)]
     [Arguments("OpenTupleAssignabilityTests", 3)]
     [Arguments("SingleTupleElementConversionTests", 18)]
     [Arguments("BoxedTupleElementConversionTests", 2)]

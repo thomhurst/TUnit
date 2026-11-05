@@ -439,3 +439,25 @@ public class WholeTupleWithTrailingParametersTests
     }
 }
 #pragma warning restore TUnit0001
+
+public class RepeatedConvertibleTupleTests
+{
+    public static IEnumerable<(int, long)> ValueRows() => [(1, 2L)];
+    public static IEnumerable<Tuple<int, long>> ReferenceRows() => [Tuple.Create(3, 4L)];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void Value<T>((T, T) row)
+    {
+        if (typeof(T) != typeof(long) || !Equals(row.Item1, 1L) || !Equals(row.Item2, 2L))
+            throw new InvalidOperationException("Expected long inference and converted first element");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<T, T> row)
+    {
+        if (typeof(T) != typeof(long) || !Equals(row.Item1, 3L) || !Equals(row.Item2, 4L))
+            throw new InvalidOperationException("Expected long inference and converted reference elements");
+    }
+}

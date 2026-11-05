@@ -683,6 +683,13 @@ internal sealed class TestGenericTypeResolver
                         // values). Only open elements contribute to generic inference.
                         if (TupleHelper.IsTupleType(parameterType) && !paramGenericArgs[i].ContainsGenericParameters)
                             continue;
+                        // A sole tuple is reconstructed with conversions. Match the generator's
+                        // last-element inference for repeated direct tuple type parameters.
+                        if (TupleHelper.IsTupleType(parameterType) && paramGenericArgs[i].IsGenericParameter)
+                        {
+                            typeMapping[paramGenericArgs[i]] = argGenericArgs[i];
+                            continue;
+                        }
                         if (!TryInferTypeMapping(paramGenericArgs[i], argGenericArgs[i], typeMapping))
                         {
                             return false;
