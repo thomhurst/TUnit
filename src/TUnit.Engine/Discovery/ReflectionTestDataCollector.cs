@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
@@ -2977,7 +2978,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         || (parameter == parameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
                     && (parameters.Length == 1 || TupleHelper.MatchesOpenTuple(parameters[0].ParameterType, rowType)))
                 || (parameters.Length == 1 && parameters[0].ParameterType.IsGenericParameter && !rowType.IsValueType));
-        if (receivesWholeTuple)
+        if (parameters.Length == 1 && GetTupleElementTypes(parameters[0].ParameterType) is not null)
+        {
+            // Explicit method types supplement, rather than replace, declared-row inference.
+            // Reconstruct sole tuples using the same policy as generated discovery and runtime
+            // inference; optional/params tails retain strict whole-tuple mapping below.
+            var bindings = new Dictionary<Type, Type>();
+            if (!SoleTupleInference.TryInfer(parameters[0].ParameterType, rowType, bindings)) return null;
+            foreach (var binding in bindings)
+                if (binding.Key.IsGenericParameter && binding.Key.DeclaringMethod is not null)
+                    typeArguments[binding.Key.GenericParameterPosition] = binding.Value;
+        }
+        else if (receivesWholeTuple)
         {
             MapGenericParameters(parameters[0].ParameterType, rowType, typeArguments);
         }
@@ -3728,13 +3740,25 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Infers generic type mappings from parameter and argument types
     /// </summary>
-    private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping, bool isTopLevel = false)
+    private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping, bool isTopLevel = false, bool tupleElement = false)
     {
+        // Tuple reconstruction uses the same strict candidate selection as discovery. Ordinary
+        // parameters retain the existing nested/params-array inference policy below.
+        if (tupleElement)
+        {
+            if (!SoleTupleInference.TryInfer(paramType, argType, typeMapping))
+            {
+                throw new GenericTypeResolutionException(
+                    $"Type mismatch: Cannot use argument of type '{argType.Name}' for parameter of type '{paramType.Name}'");
+            }
+            return;
+        }
+
         // Match discovery inference when a nullable tuple element has been boxed as its value.
         if (Nullable.GetUnderlyingType(paramType) is { } underlyingParameter
             && argType.IsValueType && Nullable.GetUnderlyingType(argType) is null)
         {
-            InferGenericTypeMapping(underlyingParameter, argType, typeMapping, isTopLevel);
+            InferGenericTypeMapping(underlyingParameter, argType, typeMapping, isTopLevel, tupleElement);
             return;
         }
 
@@ -4074,6 +4098,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         ? Array.FindIndex(methodParams, static p => p.ParameterType != typeof(CancellationToken))
                         : 0;
                     var inferenceCount = flattenedTupleTypes?.Length ?? methodParams.Length;
+                    var reconstructTuple = flattenedTupleTypes is not null
+                        || GetSingleDataParameter(methodParams) is { ParameterType: var soleType }
+                            && TupleHelper.IsTupleType(soleType);
 
                     // Build type mapping from method parameters (or flattened tuple elements) and actual arguments.
                     for (var j = 0; j < inferenceCount && j + tupleOffset < args.Length; j++)
@@ -4083,7 +4110,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         {
                             var paramType = flattenedTupleTypes?[j] ?? methodParams[j].ParameterType;
                             var argType = GetArgumentInferenceType(arg);
-                            InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true);
+                            InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true, tupleElement: reconstructTuple);
                         }
                     }
 
@@ -4174,8 +4201,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         || args[singleDataIndex] is { } singleValue
                             && !(DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue) is [null])
                             && !parameters[singleDataIndex].ParameterType.IsInstanceOfType(singleValue)
-                            && !(parameters[singleDataIndex].ParameterType.IsValueType
-                                && DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue).Length == 1)))
+                            && !(DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue).Length == 1)))
                 {
                     // DataUnwrapper spreads an incompatible tuple so each element can be
                     // converted before constructing the target, as the generated invoker does.

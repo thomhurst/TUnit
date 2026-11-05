@@ -489,7 +489,8 @@ internal sealed class TestGenericTypeResolver
                 else
                 {
                     // Try to infer nested generic types
-                    InferTypeMapping(paramType, argType, typeMapping, genericMethodInfo.ParameterPositions);
+                    InferTypeMapping(paramType, argType, typeMapping, tupleElementTypes is not null
+                        || dataParameterCount == 1 && TupleHelper.IsTupleType(paramType));
                 }
             }
             else if (paramType is { IsGenericParameter: true, DeclaringMethod: not null })
@@ -608,9 +609,11 @@ internal sealed class TestGenericTypeResolver
         Type parameterType,
         Type argumentType,
         Dictionary<Type, Type> typeMapping,
-        int[] genericParameterPositions)
+        bool tupleElement = false)
     {
-        if (!TryInferTypeMapping(parameterType, argumentType, typeMapping))
+        if (!(tupleElement
+            ? SoleTupleInference.TryInfer(parameterType, argumentType, typeMapping)
+            : TryInferTypeMapping(parameterType, argumentType, typeMapping)))
         {
             throw new GenericTypeResolutionException(
                 $"Type mismatch: Cannot use argument of type '{argumentType.Name}' for parameter of type '{parameterType.Name}'");
@@ -620,111 +623,50 @@ internal sealed class TestGenericTypeResolver
 #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
 #endif
-    private static bool TryInferTypeMapping(
+    internal static bool TryInferTypeMapping(
         Type parameterType,
         Type argumentType,
         Dictionary<Type, Type> typeMapping)
     {
-        // A populated Nullable<T> boxes as T, including flattened tuple elements.
         if (Nullable.GetUnderlyingType(parameterType) is { } underlyingParameter
             && argumentType.IsValueType && Nullable.GetUnderlyingType(argumentType) is null)
         {
             return TryInferTypeMapping(underlyingParameter, argumentType, typeMapping);
         }
 
-        // Direct generic parameter
         if (parameterType.IsGenericParameter)
         {
             if (typeMapping.TryGetValue(parameterType, out var existingMapping))
-            {
-                // Verify consistency
-                if (existingMapping != argumentType)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                typeMapping[parameterType] = argumentType;
-            }
+                return existingMapping == argumentType;
+            typeMapping[parameterType] = argumentType;
             return true;
         }
 
-        // Array types
         if (parameterType.IsArray && argumentType.IsArray)
+            return TryInferTypeMapping(parameterType.GetElementType()!, argumentType.GetElementType()!, typeMapping);
+
+        if (parameterType.IsGenericType && argumentType.IsGenericType
+            && parameterType.GetGenericTypeDefinition() == argumentType.GetGenericTypeDefinition())
         {
-            return TryInferTypeMapping(
-                parameterType.GetElementType()!,
-                argumentType.GetElementType()!,
-                typeMapping);
+            var parameters = parameterType.GetGenericArguments();
+            var arguments = argumentType.GetGenericArguments();
+            for (var i = 0; i < parameters.Length; i++)
+                if (!TryInferTypeMapping(parameters[i], arguments[i], typeMapping)) return false;
+            return true;
         }
 
-        // Generic types (e.g., List<T>, Dictionary<K,V>)
-        if (parameterType.IsGenericType && argumentType.IsGenericType)
-        {
-            var paramGenericDef = parameterType.GetGenericTypeDefinition();
-            var argGenericDef = argumentType.IsGenericTypeDefinition 
-                ? argumentType 
-                : argumentType.GetGenericTypeDefinition();
-
-            if (paramGenericDef == argGenericDef)
-            {
-                var paramGenericArgs = parameterType.GetGenericArguments();
-                var argGenericArgs = argumentType.GetGenericArguments();
-
-                if (paramGenericArgs.Length == argGenericArgs.Length)
-                {
-                    for (var i = 0; i < paramGenericArgs.Length; i++)
-                    {
-                        if (!TryInferTypeMapping(paramGenericArgs[i], argGenericArgs[i], typeMapping))
-                        {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-            }
-        }
-
-        // Handle case where parameter is a generic interface and argument implements it
         if (parameterType is { IsGenericType: true, IsInterface: true })
         {
-            var implementedInterfaces = AssemblyReferenceCache.GetInterfaces(argumentType);
-            foreach (var implementedInterface in implementedInterfaces)
+            foreach (var candidate in AssemblyReferenceCache.GetInterfaces(argumentType))
             {
-                if (implementedInterface.IsGenericType)
-                {
-                    var interfaceGenericDef = implementedInterface.GetGenericTypeDefinition();
-                    var paramGenericDef = parameterType.GetGenericTypeDefinition();
-
-                    if (interfaceGenericDef == paramGenericDef)
-                    {
-                        // Found matching interface, now map generic arguments
-                        var paramGenericArgs = parameterType.GetGenericArguments();
-                        var implGenericArgs = implementedInterface.GetGenericArguments();
-
-                        if (paramGenericArgs.Length == implGenericArgs.Length)
-                        {
-                            var allMapped = true;
-                            for (var i = 0; i < paramGenericArgs.Length; i++)
-                            {
-                                if (!TryInferTypeMapping(paramGenericArgs[i], implGenericArgs[i], typeMapping))
-                                {
-                                    allMapped = false;
-                                    break;
-                                }
-                            }
-                            if (allMapped)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
+                if (!candidate.IsGenericType || candidate.GetGenericTypeDefinition() != parameterType.GetGenericTypeDefinition()) continue;
+                var candidateMapping = new Dictionary<Type, Type>(typeMapping);
+                if (!TryInferTypeMapping(parameterType, candidate, candidateMapping)) continue;
+                foreach (var mapping in candidateMapping) typeMapping[mapping.Key] = mapping.Value;
+                return true;
             }
         }
 
-        // Non-generic types must match exactly or be assignable
         return parameterType.IsAssignableFrom(argumentType);
     }
 
