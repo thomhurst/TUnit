@@ -625,6 +625,16 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
             
+            // A scalar row can bind the first parameter while optional test parameters keep
+            // their defaults. Typed tuple rows use their separate whole-tuple binding rules.
+            if (!isTuples && unwrappedTypes.Length == 1 && testParameterTypes.Length > 1
+                && context.Symbol is IMethodSymbol testMethod
+                && testMethod.Parameters.WithoutTestMethodCancellationTokens().Skip(1)
+                    .All(p => p.IsOptional || p.HasExplicitDefaultValue))
+            {
+                testParameterTypes = testParameterTypes.Take(1).ToImmutableArray();
+            }
+
             if (isTuples && unwrappedTypes.Length != testParameterTypes.Length)
             {
                 context.ReportDiagnostic(Diagnostic.Create(

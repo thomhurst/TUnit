@@ -827,6 +827,50 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("(int, int)")]
+    [Arguments("int")]
+    public async Task Convertible_Row_Allows_Optional_Test_Parameters(string targetType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public sealed class Row
+                {
+                    public static implicit operator {{targetType}}(Row value) => default;
+                }
+                public static IEnumerable<Row> Rows() => [new Row()];
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Run({{targetType}} value, int extra = 5, string text = "tail") { }
+            }
+            """);
+    }
+
+    [Test]
+    public async Task Convertible_Row_Rejects_Required_Test_Parameters()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class Tests
+            {
+                public sealed class Row
+                {
+                    public static implicit operator (int, int)(Row value) => default;
+                }
+                public static IEnumerable<Row> Rows() => [new Row()];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run((int, int) value, int extra) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("Tests.Row", "(int, int), int"));
+    }
+
+    [Test]
     [Arguments("int extra = 5")]
     [Arguments("params int[] rest")]
     [Arguments("int extra = 5, params int[] rest")]
