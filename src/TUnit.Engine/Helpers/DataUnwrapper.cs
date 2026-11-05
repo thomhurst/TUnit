@@ -176,7 +176,7 @@ internal class DataUnwrapper
         }
 
         // A tuple that is already an instance of the first data parameter's tuple type binds to it
-        // whole when every later data parameter can be omitted (optional or params).
+        // whole when every later data parameter can be omitted (optional, params, or a trailing collecting array).
         var firstDataParameterType = expectedParameters[firstDataParameterIndex].Type;
         if (dataParameterCount > 1
             && TupleHelper.IsTupleType(firstDataParameterType)
@@ -205,10 +205,19 @@ internal class DataUnwrapper
 
     private static bool RemainingDataParametersAreOmittable(ParameterMetadata[] parameters, int firstDataParameterIndex)
     {
+        var lastDataParameterIndex = parameters.Length - 1;
+        while (lastDataParameterIndex > firstDataParameterIndex
+               && parameters[lastDataParameterIndex].Type == typeof(CancellationToken))
+        {
+            lastDataParameterIndex--;
+        }
+
         for (var i = firstDataParameterIndex + 1; i < parameters.Length; i++)
         {
             var parameter = parameters[i];
-            if (parameter.Type != typeof(CancellationToken) && !parameter.IsOptional && !parameter.IsParams)
+            if (parameter.Type != typeof(CancellationToken) && !parameter.IsOptional && !parameter.IsParams
+                && !(i == lastDataParameterIndex
+                    && parameter.Type.IsSZArray))
             {
                 return false;
             }

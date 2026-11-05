@@ -7,6 +7,22 @@ public class ReferenceTupleMethodDataSourceTests : BaseAnalyzerTests
     // Runtime binding coverage: StaticTupleDataSourceTests in TUnit.TestProject,
     // executed in both generated and reflection modes.
     [Test]
+    public async Task WholeTupleBeforePlainArray()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class C {
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Test(Tuple<int, string> row, int[] extra) {}
+                public static IEnumerable<Tuple<int, string>> Rows() => [Tuple.Create(5, "b")];
+            }
+            """);
+    }
+
+    [Test]
     public async Task Method()
     {
         await Verifier.VerifyAnalyzerAsync(
