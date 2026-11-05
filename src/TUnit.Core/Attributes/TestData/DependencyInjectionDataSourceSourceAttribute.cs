@@ -37,11 +37,14 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                     values[resolvedCount++] = created;
                     cleanup.RegisterObject(owner, created);
 
-                    if (scopeOwnsCreatedObjects || ReferenceEquals(created, scope))
+                    if (scopeOwnsCreatedObjects)
                     {
-                        // Row cleanup always owns the scope itself, even when it does not own services.
-                        // The tracker must not dispose either kind of scope-owned value again.
+                        // The scope owns the resolved value and its initializer graph.
                         ObjectTracker.MarkExternallyOwned(created);
+                    }
+                    else if (ReferenceEquals(created, scope) && created is IDisposable or IAsyncDisposable)
+                    {
+                        ObjectTracker.MarkRowOwnedScope(created);
                     }
                 }
 

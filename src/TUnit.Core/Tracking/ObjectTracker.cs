@@ -768,10 +768,24 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     }
 
     /// <summary>
-    /// Whether <see cref="MarkExternallyOwned"/> marked <paramref name="obj"/>.
+    /// Whether another owner disposes <paramref name="obj"/> itself.
     /// </summary>
     internal static bool IsExternallyOwned(object obj)
+        => HasExternallyOwnedGraph(obj)
+           || (s_hasRowOwnedScopes && s_rowOwnedScopes.TryGetValue(obj, out _));
+
+    internal static bool HasExternallyOwnedGraph(object obj)
         => s_hasExternallyOwned && s_externallyOwned.TryGetValue(obj, out _);
+
+    private static readonly ConditionalWeakTable<object, object> s_rowOwnedScopes = new();
+    private static volatile bool s_hasRowOwnedScopes;
+
+    // Row cleanup owns only the scope itself. Its initializer graph remains tracker-owned.
+    internal static void MarkRowOwnedScope(object obj)
+    {
+        s_rowOwnedScopes.GetValue(obj, static _ => s_externallyOwnedMarker);
+        s_hasRowOwnedScopes = true;
+    }
 
     // Objects whose lifetime another owner controls (a dependency injection scope, for example).
     // The tracker balances references but never disposes them; their owner controls disposal.

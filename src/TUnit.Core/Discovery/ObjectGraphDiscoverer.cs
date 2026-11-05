@@ -209,7 +209,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         HashSet<object>? injectedValues = null;
         void DiscoverRoot(object obj)
         {
-            if (ObjectTracker.IsExternallyOwned(obj) && injectedValues is null)
+            if (ObjectTracker.HasExternallyOwnedGraph(obj) && injectedValues is null)
             {
                 injectedValues = new HashSet<object>(ReferenceComparer);
                 foreach (var value in testDetails.TestClassInjectedPropertyArguments.Values)
@@ -368,7 +368,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return;
         }
 
-        var externallyOwned = heldByExternalOwner || ObjectTracker.IsExternallyOwned(obj);
+        var externallyOwned = heldByExternalOwner || ObjectTracker.HasExternallyOwnedGraph(obj);
         if (externallyOwned)
         {
             injectedValues ??= new HashSet<object>(ReferenceComparer);
