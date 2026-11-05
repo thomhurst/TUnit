@@ -58,6 +58,17 @@ public class TupleParameterWithOptionalParameterTests
         await Assert.That(rest).IsEmpty();
     }
 
+    public static IEnumerable<TestDataRow<Tuple<int, string>>> WrappedReferenceRows() =>
+        [new(Tuple.Create(25, "tuple"))];
+
+    [Test, MethodDataSource(nameof(WrappedReferenceRows))]
+    public async Task Wrapped_Reference_Tuple_And_Array(Tuple<int, string> pair, int[] rest)
+    {
+        await Assert.That(pair.Item1).IsEqualTo(25);
+        await Assert.That(pair.Item2).IsEqualTo("tuple");
+        await Assert.That(rest).IsEmpty();
+    }
+
     // Generic whole-row analyzer matching is tracked by #7622.
 #pragma warning disable TUnit0001
     [Test, GenerateGenericTest(typeof(int)), MethodDataSource(nameof(ReferenceRows))]
@@ -70,7 +81,7 @@ public class TupleParameterWithOptionalParameterTests
 
 #pragma warning restore TUnit0001
 
-    [Test, MethodDataSource(nameof(TypedTupleRows))]
+    [Test, MethodDataSource(nameof(TypedTupleRows)), MethodDataSource(nameof(WrappedTupleRows))]
     public async Task Tuple_And_Array((int, int) pair, int[] rest, CancellationToken token)
     {
         await Assert.That(pair).IsEqualTo((25, 26));
