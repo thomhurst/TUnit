@@ -42,6 +42,8 @@ internal class InstanceMethodTypeInferenceTests : TestsBase
             await Assert.That(source).Contains("NumericElement<int>");
             await Assert.That(source).Contains("OpenNullableElement<int>");
             await Assert.That(source).Contains("OpenNullableReferenceElement<int>");
+            await Assert.That(source).Contains("BaseElement<int>");
+            await Assert.That(source).Contains("BaseReferenceElement<int>");
             await Assert.That(source).Contains("InterfaceElement<int>");
             await Assert.That(source).Contains("InterfaceReferenceElement<int>");
             await Assert.That(source).Contains("NullableClass<int>");

@@ -242,7 +242,7 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    [Arguments("SingleTupleElementConversionTests", 6)]
+    [Arguments("SingleTupleElementConversionTests", 8)]
     [Arguments("ClosedClassTupleInferenceTests*", 3)]
     public async Task Tuple_Inference_Preserves_Element_Conversions_And_Concrete_Class_Types(string className, int count)
     {

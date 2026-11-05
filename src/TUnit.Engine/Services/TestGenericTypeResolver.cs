@@ -693,6 +693,20 @@ internal sealed class TestGenericTypeResolver
             }
         }
 
+        // A reconstructed tuple element may be a derived instance of an open generic base.
+        if (parameterType is { IsGenericType: true, IsClass: true })
+        {
+            var parameterDefinition = parameterType.GetGenericTypeDefinition();
+            for (var baseType = argumentType.BaseType; baseType is not null; baseType = baseType.BaseType)
+            {
+                if (!baseType.IsGenericType || baseType.GetGenericTypeDefinition() != parameterDefinition) continue;
+                var candidateMapping = new Dictionary<Type, Type>(typeMapping);
+                if (!TryInferTypeMapping(parameterType, baseType, candidateMapping)) continue;
+                foreach (var mapping in candidateMapping) typeMapping[mapping.Key] = mapping.Value;
+                return true;
+            }
+        }
+
         // Handle case where parameter is a generic interface and argument implements it
         if (parameterType is { IsGenericType: true, IsInterface: true })
         {

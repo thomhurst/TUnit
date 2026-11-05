@@ -7312,6 +7312,20 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return true;
         }
 
+        // The binder also supports converting a derived element to a generic base class.
+        // Only reconstruction permits this conversion; whole multi-parameter rows stay invariant.
+        if (reconstructTupleElements && parameter is INamedTypeSymbol { IsGenericType: true, TypeKind: TypeKind.Class } classParameter)
+        {
+            for (var baseType = row.BaseType; baseType is not null; baseType = baseType.BaseType)
+            {
+                if (!SymbolEqualityComparer.Default.Equals(classParameter.OriginalDefinition, baseType.OriginalDefinition)) continue;
+                var candidateBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(bindings, SymbolEqualityComparer.Default);
+                if (!MatchesOpenRowType(parameter, baseType, compilation, candidateBindings, true)) continue;
+                foreach (var binding in candidateBindings) bindings[binding.Key] = binding.Value;
+                return true;
+            }
+        }
+
         // Reconstructed tuple elements may bind a concrete collection to an open interface.
         // Keep candidate bindings isolated so a rejected interface cannot affect another match.
         if (reconstructTupleElements && parameter is INamedTypeSymbol { IsGenericType: true, TypeKind: TypeKind.Interface } interfaceParameter)

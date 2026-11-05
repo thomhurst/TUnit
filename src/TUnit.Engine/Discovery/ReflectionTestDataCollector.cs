@@ -3706,6 +3706,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return;
         }
 
+        // Mirror discovery's generic base-class inference when constructing the invocation.
+        if (paramType is { IsGenericType: true, IsClass: true })
+        {
+            var parameterDefinition = paramType.GetGenericTypeDefinition();
+            for (var baseType = argType.BaseType; baseType is not null; baseType = baseType.BaseType)
+            {
+                if (!baseType.IsGenericType || baseType.GetGenericTypeDefinition() != parameterDefinition) continue;
+                InferGenericTypeMapping(paramType, baseType, typeMapping);
+                return;
+            }
+        }
+
         // Generic types (e.g., IEnumerable<T>, Func<T1,T2>, etc.)
         if (paramType.IsGenericType && argType.IsGenericType)
         {

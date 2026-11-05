@@ -302,6 +302,28 @@ public class SingleTupleElementConversionTests
 {
     public static IEnumerable<(int, int)> Rows() => [(1, 2)];
 
+    public class Base<T> { }
+    public class Derived : Base<int> { }
+
+    public static IEnumerable<(Derived, int)> BaseRows() => [(new Derived(), 7)];
+    public IEnumerable<Tuple<Derived, int>> BaseReferenceRows() => [Tuple.Create(new Derived(), 8)];
+
+    [Test]
+    [MethodDataSource(nameof(BaseRows))]
+    public void BaseElement<T>((Base<T>, T) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item1 is not Derived || !Equals(row.Item2, 7))
+            throw new InvalidOperationException("Expected generic base-class element conversion");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(BaseReferenceRows))]
+    public void BaseReferenceElement<T>(Tuple<Base<T>, T> row)
+    {
+        if (typeof(T) != typeof(int) || row.Item1 is not Derived || !Equals(row.Item2, 8))
+            throw new InvalidOperationException("Expected generic base-class reference element conversion");
+    }
+
     public static IEnumerable<(int[], int)> InterfaceRows() => [(new[] { 5 }, 5)];
     public IEnumerable<Tuple<List<int>, int>> InterfaceReferenceRows() => [Tuple.Create(new List<int> { 6 }, 6)];
 
