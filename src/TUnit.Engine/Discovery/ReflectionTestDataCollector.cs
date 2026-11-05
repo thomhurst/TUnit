@@ -163,12 +163,63 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
             while (currentType != null && currentType != typeof(object))
             {
-                methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
+                foreach (var method in currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+                {
+                    // Match source-generated inheritance: only tests declared on the requested
+                    // class hide base tests; overrides retain their existing handling.
+                    if (currentType != t && IsHiddenByDeclaredTest(method, t, methods))
+                    {
+                        continue;
+                    }
+
+                    methods.Add(method);
+                }
                 currentType = currentType.BaseType;
             }
 
             return methods.ToArray();
         });
+    }
+
+    private static bool IsHiddenByDeclaredTest(MethodInfo baseMethod, Type type, List<MethodInfo> methods)
+    {
+        foreach (var derived in methods)
+        {
+            if (derived.DeclaringType == type
+                && derived.IsDefined(typeof(TestAttribute), inherit: false)
+                && HidesBaseMethod(derived, baseMethod))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HidesBaseMethod(MethodInfo derivedMethod, MethodInfo baseMethod)
+    {
+        if (derivedMethod.Name != baseMethod.Name || derivedMethod.GetBaseDefinition() != derivedMethod)
+        {
+            return false;
+        }
+
+        var derivedParameters = derivedMethod.GetParameters();
+        var baseParameters = baseMethod.GetParameters();
+        if (derivedParameters.Length != baseParameters.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < derivedParameters.Length; i++)
+        {
+            var baseType = baseParameters[i].ParameterType;
+            if (derivedParameters[i].ParameterType != baseType && !baseType.IsGenericParameter)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // Read-many during reflection discovery (one Contains per assembly).

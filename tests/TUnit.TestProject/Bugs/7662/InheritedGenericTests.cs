@@ -33,3 +33,24 @@ public class WithoutInheritance<T> : NonGenericBase
     [Test]
     public void DeclaredTest() { }
 }
+
+public abstract class HiddenTestBase<T>
+{
+    [Test]
+    public void Example() => throw new InvalidOperationException("The hidden test must not execute.");
+
+    [Test]
+    [Arguments(1)]
+    public void Overload(int value) { }
+}
+
+[InheritsTests]
+[GenerateGenericTest(typeof(int))]
+public class HidesInheritedTest<T> : HiddenTestBase<T>
+{
+    [Test]
+    public new void Example() { }
+
+    [Test]
+    public void Overload() { }
+}
