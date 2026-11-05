@@ -995,7 +995,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // type could satisfy: explain where the type argument came from (#7116).
                 if (violationSource is null
                     && specificAttr?.AttributeClass is { } dataSourceClass
-                    && (dataSourceClass.Name is "MethodDataSourceAttribute" or "InstanceMethodDataSourceAttribute" || DataSourceAttributeHelper.IsTypedDataSourceAttribute(dataSourceClass))
+                    && (IsMethodDataSourceAttribute(dataSourceClass) || DataSourceAttributeHelper.IsTypedDataSourceAttribute(dataSourceClass))
                     && TryFindConstraintViolation(testMethod.MethodSymbol.TypeParameters, methodTypeArgs, testMethod.CompilationContext.Compilation,
                         out _, out var violatingIndex, testMethod.TypeSymbol, classTypeArgs)
                     && violatingIndex >= 0
@@ -1049,7 +1049,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (specificAttr is not null && GenericMethodInferencePolicy.JoinsDuplicate(
                         isLiteralRow: specificAttr.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") == true,
                         joinsInferredSources: !isClassRow && (joinsDuplicateMethodSources || scopesClassMethodSources
-                            || (specificAttr.AttributeClass?.Name is "MethodDataSourceAttribute" or "InstanceMethodDataSourceAttribute"
+                            || (IsMethodDataSourceAttribute(specificAttr.AttributeClass)
                                 && !HasExplicitGenericTestTypes(testMethod)))))
                     {
                         existing.AddRow(specificAttr, isClassRow);
@@ -1057,9 +1057,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
                     // Literal rows and inferred static or instance sources join the existing class/method pair.
                     // Explicit method types retain reflection mode's duplicate-source behavior.
-                    if (methodRow?.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") == true
-                        || (methodRow?.AttributeClass?.Name is "MethodDataSourceAttribute" or "InstanceMethodDataSourceAttribute"
-                            && !HasExplicitGenericTestTypes(testMethod)))
+                    if (methodRow is not null
+                        && (methodRow.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") == true
+                            || (IsMethodDataSourceAttribute(methodRow.AttributeClass)
+                                && !HasExplicitGenericTestTypes(testMethod))))
                     {
                         existing.AddRow(methodRow, isClassRow: false);
                     }
@@ -1227,7 +1228,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // the same instantiation first. This helper is called only for explicit method types.
             foreach (var source in testMethod.MethodAttributes)
             {
-                if (source.AttributeClass?.Name == "InstanceMethodDataSourceAttribute")
+                if (source.AttributeClass?.GloballyQualifiedNonGeneric() == InstanceMethodDataSourceAttributeName)
                 {
                     existing.AddRow(source, isClassRow: false);
                 }
@@ -1252,13 +1253,13 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // Buckets are independent: an attribute may match more than one (e.g.
             // MethodDataSourceAttribute is also an IDataSourceAttribute), matching the original
             // behaviour where each `.Where(...)` scan was evaluated separately.
-            switch (attributeClass.Name)
+            switch (attributeClass.GloballyQualifiedNonGeneric())
             {
-                case "ArgumentsAttribute" when attributeClass.IsOrInherits("global::TUnit.Core.ArgumentsAttribute"):
+                case "global::TUnit.Core.ArgumentsAttribute":
                     (methodArgumentsBucket ??= []).Add(attribute);
                     break;
-                case "MethodDataSourceAttribute":
-                case "InstanceMethodDataSourceAttribute":
+                case "global::TUnit.Core.MethodDataSourceAttribute":
+                case InstanceMethodDataSourceAttributeName:
                     (methodDataSourceBucket ??= []).Add(attribute);
                     break;
             }
@@ -1466,7 +1467,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             foreach (var source in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
             {
                 if (source.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") != true
-                    && source.AttributeClass?.Name != "MethodDataSourceAttribute"
+                    && source.AttributeClass?.GloballyQualifiedNonGeneric() != "global::TUnit.Core.MethodDataSourceAttribute"
                     && (uninferredMethodDataSources is null || !uninferredMethodDataSources.Contains(source)))
                 {
                     (uninferredMethodDataSources ??= []).Add(source);
@@ -2058,7 +2059,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             foreach (var attribute in uncovered)
             {
-                if (attribute.AttributeClass?.Name is "MethodDataSourceAttribute" or "InstanceMethodDataSourceAttribute"
+                if (IsMethodDataSourceAttribute(attribute.AttributeClass)
                     && InferTypesFromMethodDataSourceRowType(testMethod, attribute) is { } rowTypes
                     && FindInaccessibleType(rowTypes, testMethod.CompilationContext.Compilation) is { } inaccessibleType)
                 {
@@ -7150,6 +7151,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return null;
     }
 
+    private static bool IsMethodDataSourceAttribute(INamedTypeSymbol? attributeClass) =>
+        attributeClass?.GloballyQualifiedNonGeneric() is
+            "global::TUnit.Core.MethodDataSourceAttribute" or InstanceMethodDataSourceAttributeName;
+
     private static bool HasExplicitGenericTestTypes(TestMethodMetadata testMethod) =>
         testMethod.MethodAttributes.Any(static attribute =>
             attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true);
@@ -7164,7 +7169,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     {
         // Reflection mode runs instance sources on the explicit method types when supplied, without
         // adding declared-row instantiations. Preserve conversions enabled by those explicit types.
-        if (mdsAttr.AttributeClass?.Name == "InstanceMethodDataSourceAttribute"
+        if (mdsAttr.AttributeClass?.GloballyQualifiedNonGeneric() == InstanceMethodDataSourceAttributeName
             && HasExplicitGenericTestTypes(testMethod))
         {
             return null;
@@ -7209,7 +7214,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var compilation = testMethod.CompilationContext.Compilation;
         foreach (var attribute in testMethod.TypeSymbol.GetAttributes())
         {
-            if (attribute.AttributeClass is not { Name: "MethodDataSourceAttribute", IsGenericType: false }
+            if (attribute.AttributeClass is not { IsGenericType: false } attributeClass
+                || attributeClass.GloballyQualifiedNonGeneric() != "global::TUnit.Core.MethodDataSourceAttribute"
                 || attribute.ConstructorArguments is not [{ Value: string memberName }])
             {
                 continue;
