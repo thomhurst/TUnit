@@ -584,6 +584,7 @@ public class HookMetadataGenerator : IIncrementalGenerator
     {
         return input
             .Replace("global::", "")
+            .Replace("@", "_")
             .Replace(".", "_")
             .Replace("<", "_")
             .Replace(">", "_")

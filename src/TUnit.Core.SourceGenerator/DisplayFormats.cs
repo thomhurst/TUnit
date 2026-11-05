@@ -36,6 +36,13 @@ public class DisplayFormats
 #endif
     );
 
+    // C# expressions need keyword escapes; runtime names and identity strings retain the raw formats.
+    public static readonly SymbolDisplayFormat CSharpType = FullyQualifiedGenericWithGlobalPrefix
+        .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+
+    public static readonly SymbolDisplayFormat CSharpNonGenericType = FullyQualifiedNonGenericWithGlobalPrefix
+        .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+
     public static readonly SymbolDisplayFormat FullyQualifiedNonGeneric = new(
         SymbolDisplayGlobalNamespaceStyle.Omitted,
         SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
