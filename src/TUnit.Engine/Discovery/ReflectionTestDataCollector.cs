@@ -2920,8 +2920,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// constructor argument is the member name (<c>[MethodDataSource("Rows")]</c> and
     /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), looks for a static parameterless method of that name
     /// declared on the test class (or on <c>T</c>), and requires its declared return type to be
-    /// <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched against the data parameter
-    /// at the same position, including type arguments nested in generic parameter types. The caller passes
+    /// <c>IEnumerable&lt;(...)&gt;</c> or <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched
+    /// against the data parameter at the same position, including type arguments nested in generic parameter types. The caller passes
     /// the parameters without any CancellationToken, as the generator's <c>GetDataParameters</c> does.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source methods")]
@@ -2950,16 +2950,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             modifiers: null);
 
         if (dataMethod?.ReturnType is not { IsGenericType: true } returnType
-            || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>)
-            || returnType.GetGenericArguments()[0] is not { IsGenericType: true } funcType
-            || funcType.GetGenericTypeDefinition() != typeof(Func<>)
-            || GetTupleElementTypes(funcType.GetGenericArguments()[0]) is not { } tupleElements)
+            || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>))
+        {
+            return null;
+        }
+
+        var rowType = UnwrapFunc(returnType.GetGenericArguments()[0]);
+        if (GetTupleElementTypes(rowType) is not { } tupleElements)
         {
             return null;
         }
 
         var typeArguments = new Type?[genericParameterCount];
-        var rowType = funcType.GetGenericArguments()[0];
         // This path supplements explicit method types. Like the generator, a sole bare T
         // receives a reference tuple whole, so the inferred and explicit tuple types deduplicate.
         var receivesWholeTuple = parameters.Length > 0

@@ -32,6 +32,7 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("OpenTupleRuntimeCastTests", 7)]
     [Arguments("OpenTupleArrayRuntimeCastTests", 4)]
     [Arguments("WholeTupleWithTrailingParametersTests", 6)]
+    [Arguments("ExplicitDirectTupleInferenceTests", 6)]
     [Arguments("ExplicitCrossFamilyTupleInferenceTests", 6)]
     [Arguments("ExplicitBareReferenceTupleInferenceTests", 1)]
     public async Task Tuple_Inference_And_Conversion_Agree_In_Both_Modes(string className, int expectedCount)

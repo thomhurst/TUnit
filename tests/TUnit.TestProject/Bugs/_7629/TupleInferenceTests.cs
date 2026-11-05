@@ -1095,3 +1095,28 @@ public class ExplicitBareReferenceTupleInferenceTests
     }
 }
 #pragma warning restore TUnit0001
+
+// #7622: analyzer spreads whole tuple rows before explicit method-type inference.
+#pragma warning disable TUnit0001
+public class ExplicitDirectTupleInferenceTests
+{
+    public static IEnumerable<(int, string)> ValueRows() => [(1, "tuple")];
+    public static IEnumerable<Tuple<int, string>> ReferenceRows() => [Tuple.Create(1, "tuple")];
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(ValueRows))]
+    public void Value<T>((T, string) row) => Verify(row.Item1, row.Item2);
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<T, string> row) => Verify(row.Item1, row.Item2);
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(ReferenceRows))]
+    public void ReferenceToValue<T>((T, string) row) => Verify(row.Item1, row.Item2);
+
+    private static void Verify<T>(T value, string text)
+    {
+        if (typeof(T) != typeof(int) && typeof(T) != typeof(long)
+            || value is not (int or long) || Convert.ToInt64(value) != 1 || text != "tuple")
+            throw new InvalidOperationException("Expected both explicit long and inferred int direct tuple instantiations");
+    }
+}
+#pragma warning restore TUnit0001
