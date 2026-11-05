@@ -14,7 +14,9 @@ public class ClassRowCleanupTests
     {
         var data = new object?[] { new object() };
         var row = new TestBuilder.UnclaimedClassRow(data, null, CreateContext());
-        await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse first row"), CreateContext());
+        var first = CreateContext();
+        await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse first row"), first);
+        row.ClaimCleanupTo(first);
 
         var rejected = CreateContext();
         if (removesInheritedKey)
@@ -49,7 +51,9 @@ public class ClassRowCleanupTests
         enumeration.CopyStateBagTo(original);
         var data = new object?[] { new object() };
         var row = new TestBuilder.UnclaimedClassRow(data, null, original, enumeration);
-        await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse first row"), CreateContext());
+        var first = CreateContext();
+        await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse first row"), first);
+        row.ClaimCleanupTo(first);
 
         var rejected = CreateContext();
         rejected.StateBag["method-row"] = new object();
@@ -128,6 +132,7 @@ public class ClassRowCleanupTests
             row.TransferCleanupTo(owner);
         else
             await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse constructor"), owner);
+        row.ClaimCleanupTo(owner);
         // Neither returning a rejected row nor taking the next one may release its class resource early.
         await Assert.That(constructorDisposals).IsEqualTo(0);
         await Assert.That(rejectedDisposals).IsEqualTo(0);
@@ -239,6 +244,7 @@ public class ClassRowCleanupTests
         var row = new TestBuilder.UnclaimedClassRow([new object()], null, original);
         var runnable = CreateContext();
         await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must use saved row"), runnable);
+        row.ClaimCleanupTo(runnable);
 
         var skipped = CreateContext();
         row.TransferCleanupTo(skipped);
@@ -261,7 +267,6 @@ public class ClassRowCleanupTests
         var row = new TestBuilder.UnclaimedClassRow([new object()], null, original);
         var skipped = CreateContext();
         row.TransferCleanupTo(skipped);
-        row.Clear();
         await DisposeRow(skipped);
         await Assert.That(disposals).IsEqualTo(1);
     }
@@ -311,6 +316,7 @@ public class ClassRowCleanupTests
         if (claimed)
         {
             await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must use saved row"), runnable);
+            row.ClaimCleanupTo(runnable);
         }
 
         // MoveNext throws after yielding a row (or before yielding any rows).
@@ -435,6 +441,109 @@ public class ClassRowCleanupTests
                 test.Context.Dispose();
             }
         }
+    }
+
+    [Test]
+    public async Task CleanupOwnerCanOnlyBeClaimedOnce()
+    {
+        var original = CreateContext();
+        var disposals = 0;
+        (original.Events.DataRowScopes ??= new()).Register(new CallbackScope(() =>
+        {
+            disposals++;
+            return default;
+        }));
+        var cleanup = RowCleanupOwner.Capture(original)!;
+        var first = CreateContext();
+        var second = CreateContext();
+        cleanup.ClaimTo(first);
+        cleanup.ClaimTo(second);
+        await cleanup.ReleaseAsync(_ => throw new InvalidOperationException("Claimed rows cannot release here"));
+        await DisposeRow(second);
+        await Assert.That(disposals).IsEqualTo(0);
+        await DisposeRow(first);
+        await DisposeRow(first);
+        await Assert.That(disposals).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task UnclaimedRejectedRowsReleaseEveryCleanupOnceEvenWhenCallbacksThrow()
+    {
+        var original = CreateContext();
+        var classDisposals = 0;
+        var methodDisposals = 0;
+        var callbacks = 0;
+        (original.Events.DataRowScopes ??= new()).Register(new CallbackScope(() =>
+        {
+            classDisposals++;
+            return default;
+        }));
+        var data = new object?[] { new object() };
+        var row = new TestBuilder.UnclaimedClassRow(data, null, original);
+        for (var i = 0; i < 2; i++)
+        {
+            var rejected = CreateContext();
+            await row.TakeOrFetchAsync(() => throw new InvalidOperationException("Must reuse class row"), rejected);
+            var resource = new object();
+            rejected.StateBag["resource"] = resource;
+            rejected.Events.OnDispose += async (_, context) =>
+            {
+                await Assert.That(context.StateBag.Items["resource"]).IsSameReferenceAs(resource);
+                callbacks++;
+                throw new InvalidOperationException("Cleanup failure");
+            };
+            (rejected.Events.DataRowScopes ??= new()).Register(new CallbackScope(() =>
+            {
+                methodDisposals++;
+                return default;
+            }));
+            row.Return(data, null, rejected);
+        }
+        var errors = await row.ReleaseAsync(CreateCleanupContext);
+        await Assert.That(errors!.Count).IsEqualTo(2);
+        await Assert.That(await row.ReleaseAsync(CreateCleanupContext)).IsNull();
+        await Assert.That(classDisposals).IsEqualTo(1);
+        await Assert.That(methodDisposals).IsEqualTo(2);
+        await Assert.That(callbacks).IsEqualTo(2);
+        var later = CreateContext();
+        row.ClaimCleanupTo(later);
+        await DisposeRow(later);
+        await Assert.That(classDisposals).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task EmptyMethodSourceWithoutSkipReleasesUnclaimedClassCallbacks()
+    {
+        var current = TestContext.Current!;
+        var builder = (ITestBuilder)current.ServiceProvider.GetService(typeof(ITestBuilder))!;
+        var source = new PublicCleanupSource();
+        var metadata = new TestMetadata<ClassRowCleanupTests>
+        {
+            TestClassType = typeof(ClassRowCleanupTests),
+            TestMethodName = nameof(EmptyMethodSourceWithoutSkipReleasesUnclaimedClassCallbacks),
+            TestName = "Unclaimed row cleanup regression",
+            FilePath = "Unknown",
+            LineNumber = 0,
+            AttributeFactory = () => [],
+            MethodMetadata = current.TestDetails.MethodMetadata,
+            DataSources = [new EmptySource()],
+            ClassDataSources = [source],
+            PropertyDataSources = [],
+            InstanceFactory = (_, _) => new ClassRowCleanupTests(),
+            InvokeTypedTest = (_, _, _) => ValueTask.CompletedTask
+        };
+        var tests = (await builder.BuildTestsFromMetadataAsync(metadata, new TestBuildingContext(false, null))).ToArray();
+        await Assert.That(tests.Length).IsEqualTo(0);
+        await Assert.That(source.Callbacks).IsEqualTo(1);
+    }
+
+    private static TestContext CreateCleanupContext(TestBuilderContext builderContext)
+    {
+        var current = TestContext.Current!;
+        var context = new TestContext("Unclaimed cleanup", current.ServiceProvider, current.ClassContext,
+            builderContext, CancellationToken.None);
+        context.Metadata.TestDetails = current.TestDetails;
+        return context;
     }
 
     private sealed class PublicCleanupSource : Attribute, IDataSourceAttribute
