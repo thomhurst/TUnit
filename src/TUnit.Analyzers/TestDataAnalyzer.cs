@@ -626,11 +626,12 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
             }
             
             // A scalar row can bind the first parameter while optional test parameters keep
-            // their defaults. Typed tuple rows use their separate whole-tuple binding rules.
+            // their defaults and params tails are empty. Typed tuple rows use their separate
+            // whole-tuple binding rules.
             if (!isTuples && unwrappedTypes.Length == 1 && testParameterTypes.Length > 1
                 && context.Symbol is IMethodSymbol testMethod
                 && testMethod.Parameters.WithoutTestMethodCancellationTokens().Skip(1)
-                    .All(p => p.IsOptional || p.HasExplicitDefaultValue))
+                    .All(p => p.IsOptional || p.HasExplicitDefaultValue || p.IsParams))
             {
                 testParameterTypes = testParameterTypes.Take(1).ToImmutableArray();
             }

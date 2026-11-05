@@ -827,9 +827,13 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
-    [Arguments("(int, int)")]
-    [Arguments("int")]
-    public async Task Convertible_Row_Allows_Optional_Test_Parameters(string targetType)
+    [Arguments("(int, int)", "int extra = 5, string text = \"tail\"")]
+    [Arguments("int", "int extra = 5, string text = \"tail\"")]
+    [Arguments("(int, int)", "params int[] rest")]
+    [Arguments("int", "params int[] rest")]
+    [Arguments("(int, int)", "int extra = 5, params int[] rest")]
+    [Arguments("int", "int extra = 5, params int[] rest")]
+    public async Task Convertible_Row_Allows_Optional_Test_Parameters(string targetType, string tail)
     {
         await Verifier.VerifyAnalyzerAsync(
             $$"""
@@ -843,7 +847,7 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
                 }
                 public static IEnumerable<Row> Rows() => [new Row()];
                 [Test, MethodDataSource(nameof(Rows))]
-                public void Run({{targetType}} value, int extra = 5, string text = "tail") { }
+                public void Run({{targetType}} value, {{tail}}) { }
             }
             """);
     }
