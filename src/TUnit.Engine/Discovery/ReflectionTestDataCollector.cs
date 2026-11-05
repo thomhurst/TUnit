@@ -3727,8 +3727,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // parameters retain the existing nested/params-array inference policy below.
         if (tupleElement)
         {
-            if (!TestGenericTypeResolver.TryInferTypeMapping(paramType, argType, typeMapping,
-                    tupleElement: true, overwriteBindings: isTopLevel))
+            if (!SoleTupleInference.TryInfer(paramType, argType, typeMapping))
             {
                 throw new GenericTypeResolutionException(
                     $"Type mismatch: Cannot use argument of type '{argType.Name}' for parameter of type '{paramType.Name}'");
