@@ -2137,6 +2137,150 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7639_AmbiguousTupleInterfaceInferenceTests_Value___IEnumerable_T___int__TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests)),
+        Name = "AmbiguousTupleInterfaceInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7639",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Value", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests), "Value", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.IEnumerable<>), [new global::TUnit.Core.GenericParameter(0, true, "T")]), new global::TUnit.Core.ConcreteType(typeof(int))]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Could not infer the type arguments of generic test method 'Value' from data source [MethodDataSource(nameof(ValueRows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].")));
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("ValueRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests>(
+            methodName: "Value",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests.Value",
+            filePath: "",
+            lineNumber: 247,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Could not infer the type arguments of generic test method 'Value' from data source [MethodDataSource(nameof(ValueRows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("ValueRows")
+{
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests.ValueRows()),
+}),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7639_AmbiguousTupleInterfaceInferenceTests_Value___IEnumerable_T___int__TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests>(static () => TUnit_TestProject_Bugs__7639_AmbiguousTupleInterfaceInferenceTests_Value___IEnumerable_T___int__TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7639_AmbiguousTupleInterfaceInferenceTests_Reference__Tuple_IE_2186F462_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests)),
+        Name = "AmbiguousTupleInterfaceInferenceTests",
+        Namespace = "TUnit.TestProject.Bugs._7639",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Reference", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests), "Reference", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.IEnumerable<>), [new global::TUnit.Core.GenericParameter(0, true, "T")]), new global::TUnit.Core.ConcreteType(typeof(int))]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Could not infer the type arguments of generic test method 'Reference' from data source [MethodDataSource(nameof(ReferenceRows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].")));
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("ReferenceRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests>(
+            methodName: "Reference",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests.Reference",
+            filePath: "",
+            lineNumber: 251,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Could not infer the type arguments of generic test method 'Reference' from data source [MethodDataSource(nameof(ReferenceRows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].", new global::TUnit.Core.MethodDataSourceAttribute("ReferenceRows")
+{
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests.ReferenceRows()),
+}),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7639_AmbiguousTupleInterfaceInferenceTests_Reference__Tuple_IE_2186F462_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7639.AmbiguousTupleInterfaceInferenceTests>(static () => TUnit_TestProject_Bugs__7639_AmbiguousTupleInterfaceInferenceTests_Reference__Tuple_IE_2186F462_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7639_RepeatedConvertibleTupleTests_Value___T__T__TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7639.RepeatedConvertibleTupleTests", new global::TUnit.Core.ClassMetadata
@@ -2201,7 +2345,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.RepeatedConvertibleTupleTests.Value<long>",
             methodTypeArgumentsIdentity: "<long>",
             filePath: "",
-            lineNumber: 244,
+            lineNumber: 262,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2299,7 +2443,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.RepeatedConvertibleTupleTests.Reference<long>",
             methodTypeArgumentsIdentity: "<long>",
             filePath: "",
-            lineNumber: 252,
+            lineNumber: 270,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2396,7 +2540,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.RepeatedNullableTupleTests.Value<long>",
             methodTypeArgumentsIdentity: "<long>",
             filePath: "",
-            lineNumber: 269,
+            lineNumber: 287,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2499,7 +2643,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.RepeatedNullableTupleTests.Reference<long>",
             methodTypeArgumentsIdentity: "<long>",
             filePath: "",
-            lineNumber: 279,
+            lineNumber: 297,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2599,7 +2743,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.RepeatedNestedGenericTupleTests.Value<long>",
             methodTypeArgumentsIdentity: "<long>",
             filePath: "",
-            lineNumber: 296,
+            lineNumber: 314,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2697,7 +2841,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.RepeatedNestedGenericTupleTests.Reference<long>",
             methodTypeArgumentsIdentity: "<long>",
             filePath: "",
-            lineNumber: 304,
+            lineNumber: 322,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2793,7 +2937,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.RepeatedNestedGenericTupleTests.Array<long>",
             methodTypeArgumentsIdentity: "<long>",
             filePath: "",
-            lineNumber: 312,
+            lineNumber: 330,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2865,7 +3009,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Ordinary",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OrdinaryGenericBaseInferenceTests.Ordinary",
             filePath: "",
-            lineNumber: 328,
+            lineNumber: 346,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2961,7 +3105,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleNestedInterfaceBaseTests.Value<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 341,
+            lineNumber: 359,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3059,7 +3203,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleNestedInterfaceBaseTests.Reference<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 349,
+            lineNumber: 367,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3155,7 +3299,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleMultiParameterCandidateTests.Value<string, long>",
             methodTypeArgumentsIdentity: "<string, long>",
             filePath: "",
-            lineNumber: 365,
+            lineNumber: 383,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3253,7 +3397,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleMultiParameterCandidateTests.Reference<string, long>",
             methodTypeArgumentsIdentity: "<string, long>",
             filePath: "",
-            lineNumber: 373,
+            lineNumber: 391,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3326,7 +3470,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "extra", new glo
             methodName: "Value",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.SpreadCrossFamilyTupleInferenceTests.Value",
             filePath: "",
-            lineNumber: 387,
+            lineNumber: 405,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3422,7 +3566,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleClosedCandidateArgumentTests.Value<string, long>",
             methodTypeArgumentsIdentity: "<string, long>",
             filePath: "",
-            lineNumber: 399,
+            lineNumber: 417,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3520,7 +3664,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleClosedCandidateArgumentTests.Reference<string, long>",
             methodTypeArgumentsIdentity: "<string, long>",
             filePath: "",
-            lineNumber: 407,
+            lineNumber: 425,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3593,7 +3737,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "extra", new glo
             methodName: "Value",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.SpreadMatchingFamilyTupleInferenceTests.Value",
             filePath: "",
-            lineNumber: 422,
+            lineNumber: 440,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3689,7 +3833,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleVariantCandidateTests.Value<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 436,
+            lineNumber: 454,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3787,7 +3931,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleVariantCandidateTests.Reference<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 444,
+            lineNumber: 462,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3883,7 +4027,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleVariantCandidateTests.ContravariantValue<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 452,
+            lineNumber: 470,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3981,7 +4125,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleVariantCandidateTests.ContravariantReference<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 460,
+            lineNumber: 478,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4077,7 +4221,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleInvariantBaseCandidateTests.Value<long>",
             methodTypeArgumentsIdentity: "<long>",
             filePath: "",
-            lineNumber: 479,
+            lineNumber: 497,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4175,7 +4319,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleInvariantBaseCandidateTests.Reference<long>",
             methodTypeArgumentsIdentity: "<long>",
             filePath: "",
-            lineNumber: 487,
+            lineNumber: 505,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4271,7 +4415,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleConstrainedCandidateTests.Value<TupleConstrainedCandidateTests.Foo>",
             methodTypeArgumentsIdentity: "<global::TUnit.TestProject.Bugs._7639.TupleConstrainedCandidateTests.Foo>",
             filePath: "",
-            lineNumber: 506,
+            lineNumber: 524,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4369,7 +4513,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.TupleConstrainedCandidateTests.Reference<TupleConstrainedCandidateTests.Foo>",
             methodTypeArgumentsIdentity: "<global::TUnit.TestProject.Bugs._7639.TupleConstrainedCandidateTests.Foo>",
             filePath: "",
-            lineNumber: 514,
+            lineNumber: 532,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4465,7 +4609,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.SingletonTupleInferenceTests.ReferenceToValue<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 529,
+            lineNumber: 547,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4569,7 +4713,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.SingletonTupleInferenceTests.ValueToReference<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 537,
+            lineNumber: 555,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4665,7 +4809,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.SingletonTupleInferenceTests.ValueToValue<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 545,
+            lineNumber: 563,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4761,7 +4905,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleRuntimeCastTests.Value<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 562,
+            lineNumber: 580,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4859,7 +5003,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleRuntimeCastTests.Reference<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 570,
+            lineNumber: 588,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -4955,7 +5099,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleRuntimeCastTests.Reversed<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 578,
+            lineNumber: 596,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -5051,7 +5195,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleRuntimeCastTests.Interface<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 594,
+            lineNumber: 612,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -5149,7 +5293,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleRuntimeCastTests.ReferenceInterface<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 598,
+            lineNumber: 616,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -5245,7 +5389,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleRuntimeCastTests.ReversedInterface<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 602,
+            lineNumber: 620,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -5341,7 +5485,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleRuntimeCastTests.BaseCast<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 606,
+            lineNumber: 624,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -5445,7 +5589,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.WrappedNestedSingletonInferenceTests.ReferenceOuter<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 646,
+            lineNumber: 664,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -5541,7 +5685,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.WrappedNestedSingletonInferenceTests.ValueOuter<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 654,
+            lineNumber: 672,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -5637,7 +5781,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests.Value<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 674,
+            lineNumber: 692,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -5735,7 +5879,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests.Reference<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 678,
+            lineNumber: 696,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -5831,7 +5975,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests.Interface<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 682,
+            lineNumber: 700,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -5927,7 +6071,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.OpenTupleArrayRuntimeCastTests.Reversed<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 686,
+            lineNumber: 704,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6023,7 +6167,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.NestedTupleCandidateBindingTests.Value<string, long>",
             methodTypeArgumentsIdentity: "<string, long>",
             filePath: "",
-            lineNumber: 709,
+            lineNumber: 727,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6121,7 +6265,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.NestedTupleCandidateBindingTests.Reference<string, long>",
             methodTypeArgumentsIdentity: "<string, long>",
             filePath: "",
-            lineNumber: 716,
+            lineNumber: 734,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6217,7 +6361,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.NestedTupleCandidateBindingTests.NestedValue<string, long>",
             methodTypeArgumentsIdentity: "<string, long>",
             filePath: "",
-            lineNumber: 723,
+            lineNumber: 741,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6315,7 +6459,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.NestedTupleCandidateBindingTests.NestedReference<string, long>",
             methodTypeArgumentsIdentity: "<string, long>",
             filePath: "",
-            lineNumber: 730,
+            lineNumber: 748,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6411,7 +6555,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.CrossFamilySoleTupleInferenceTests.ReferenceToValue<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 751,
+            lineNumber: 769,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6509,7 +6653,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.CrossFamilySoleTupleInferenceTests.ValueToReference<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 754,
+            lineNumber: 772,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6605,7 +6749,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.CrossFamilySoleTupleInferenceTests.WrappedReferenceToValue<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 757,
+            lineNumber: 775,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6701,7 +6845,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.GenericNestedInterface<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 782,
+            lineNumber: 800,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6797,7 +6941,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.ContainingGenericTypeInferenceTests.NonGenericNestedInterface<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 790,
+            lineNumber: 808,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6934,7 +7078,7 @@ internal static class TUnit_TestProject_Bugs__7639_NestedSingletonBoundaryTests_
             methodName: "ReferenceOuter",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.NestedSingletonBoundaryTests.ReferenceOuter",
             filePath: "",
-            lineNumber: 622,
+            lineNumber: 640,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -6957,7 +7101,7 @@ internal static class TUnit_TestProject_Bugs__7639_NestedSingletonBoundaryTests_
             methodName: "ValueOuter",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7639.NestedSingletonBoundaryTests.ValueOuter",
             filePath: "",
-            lineNumber: 630,
+            lineNumber: 648,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

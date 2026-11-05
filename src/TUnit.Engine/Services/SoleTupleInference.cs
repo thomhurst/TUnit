@@ -160,10 +160,27 @@ internal static class SoleTupleInference
         // Handle case where parameter is a generic interface and argument implements it
         if (parameterType is { IsGenericType: true, IsInterface: true })
         {
+            Dictionary<Type, Type>? agreedBindings = null;
             foreach (var candidate in AssemblyReferenceCache.GetInterfaces(argumentType))
             {
                 if (!candidate.IsGenericType || candidate.GetGenericTypeDefinition() != parameterType.GetGenericTypeDefinition()) continue;
-                if (TryMergeCandidate(parameterType, candidate, typeMapping)) return true;
+                var candidateBindings = new Dictionary<Type, Type>(typeMapping);
+                if (!TryInfer(parameterType, candidate, candidateBindings, InferenceMode.Candidate)) continue;
+                // Interface enumeration order differs between reflection and Roslyn. Only
+                // accept candidates that infer the same complete set of bindings.
+                if (agreedBindings is not null)
+                {
+                    if (agreedBindings.Count != candidateBindings.Count) return false;
+                    foreach (var binding in candidateBindings)
+                        if (!agreedBindings.TryGetValue(binding.Key, out var agreed)
+                            || agreed != binding.Value) return false;
+                }
+                agreedBindings = candidateBindings;
+            }
+            if (agreedBindings is not null)
+            {
+                foreach (var binding in agreedBindings) typeMapping[binding.Key] = binding.Value;
+                return true;
             }
         }
 

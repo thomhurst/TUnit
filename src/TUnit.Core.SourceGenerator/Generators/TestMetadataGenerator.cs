@@ -7423,12 +7423,25 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // Keep candidate bindings isolated so a rejected interface cannot affect another match.
         if (reconstructTupleElements && parameter is INamedTypeSymbol { IsGenericType: true, TypeKind: TypeKind.Interface } interfaceParameter)
         {
+            Dictionary<ITypeSymbol, ITypeSymbol>? agreedBindings = null;
             foreach (var implementedInterface in row.AllInterfaces)
             {
                 if (!SymbolEqualityComparer.Default.Equals(interfaceParameter.OriginalDefinition, implementedInterface.OriginalDefinition)) continue;
                 var candidateBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(bindings, SymbolEqualityComparer.Default);
                 if (!MatchesOpenRowType(parameter, implementedInterface, compilation, candidateBindings, true)) continue;
-                foreach (var binding in candidateBindings) bindings[binding.Key] = binding.Value;
+                // Match reflection without depending on either API's interface ordering.
+                if (agreedBindings is not null)
+                {
+                    if (agreedBindings.Count != candidateBindings.Count) return false;
+                    foreach (var binding in candidateBindings)
+                        if (!agreedBindings.TryGetValue(binding.Key, out var agreed)
+                            || !SymbolEqualityComparer.Default.Equals(agreed, binding.Value)) return false;
+                }
+                agreedBindings = candidateBindings;
+            }
+            if (agreedBindings is not null)
+            {
+                foreach (var binding in agreedBindings) bindings[binding.Key] = binding.Value;
                 return true;
             }
         }

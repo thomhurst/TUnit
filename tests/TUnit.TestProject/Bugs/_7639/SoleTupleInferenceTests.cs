@@ -236,6 +236,24 @@ public class TupleInterfaceCandidateIsolationTests
 }
 
 
+// Neither candidate is preferred when the interface element is the first source of T.
+public class AmbiguousTupleInterfaceInferenceTests
+{
+    public static IEnumerable<(TupleInterfaceCandidateIsolationTests.DualEnumerable, int)> ValueRows() =>
+        [(new TupleInterfaceCandidateIsolationTests.DualEnumerable(), 1)];
+    public static IEnumerable<Tuple<TupleInterfaceCandidateIsolationTests.DualEnumerable, int>> ReferenceRows() =>
+        [Tuple.Create(new TupleInterfaceCandidateIsolationTests.DualEnumerable(), 1)];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void Value<T>((IEnumerable<T>, int) row) { }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<IEnumerable<T>, int> row) { }
+}
+
+
 public class RepeatedConvertibleTupleTests
 {
     public static IEnumerable<(int, long)> ValueRows() => [(1, 2L)];

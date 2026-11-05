@@ -36,10 +36,10 @@ The generator uses Roslyn symbols and cannot share the runtime matcher. Keep the
 
 | Rule | Generator | Runtime |
 | --- | --- | --- |
-| A sole tuple argument is reconstructed; closed elements may convert at invocation | `MatchesOpenRowType` reconstruction path | `TestGenericTypeResolver.TryInferTypeMapping` tuple-element loop |
-| Structural open elements (direct, nullable, array, matching generic) use the last repeated binding | Reconstruction with overwrite bindings | Reconstruction with overwrite bindings |
+| A sole tuple argument is reconstructed; closed elements may convert at invocation | `MatchesOpenRowType` reconstruction path | `SoleTupleInference.TryInfer` structural mode, called by `TestGenericTypeResolver.InferTypeMapping` and `ReflectionTestDataCollector.InferGenericTypeMapping` |
+| Structural open elements (direct, nullable, array, matching generic) use the last repeated binding | Reconstruction with overwrite bindings | `SoleTupleInference` structural mode |
 | Elements without a structural match defer casts to invocation and supply no bindings | Reconstruction fallback | Reconstruction fallback |
-| Interface/base candidates isolate bindings, retain strict repeated bindings through nested tuples, and validate completed types and constraints | Candidate copies and completed-type conversion check | Candidate copies and completed-type assignability |
+| Interface/base candidates isolate bindings, retain strict repeated bindings through nested tuples, and validate completed types and constraints | Candidate copies and completed-type conversion check; reject conflicting interface bindings | Candidate copies and completed-type assignability; reject conflicting interface bindings |
 | Ordinary spread columns retain ordinary inference | `ProcessTypeForGenerics` | Ordinary `TryInferTypeMapping` and `ReflectionTestDataCollector.InferGenericTypeMapping` |
 
 Unmatched open elements, including object, interface, base and array declarations, require another element to infer method types before invocation can cast them. Closed reconstructed elements may fail at invocation if their values cannot convert; inference does not reject them from their declared types alone. Tuple payload boundaries, including nested singleton tuples and `TestDataRow` payloads, must survive unwrapping until reconstruction.

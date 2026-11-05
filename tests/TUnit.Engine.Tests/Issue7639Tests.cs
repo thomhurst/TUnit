@@ -38,16 +38,17 @@ public class Issue7639Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    [Arguments("OrdinaryGenericBaseInferenceTests")]
-    [Arguments("SpreadCrossFamilyTupleInferenceTests")]
-    [Arguments("SpreadMatchingFamilyTupleInferenceTests")]
-    public async Task Unsupported_Inference_Remains_Consistent_In_Both_Modes(string className)
+    [Arguments("AmbiguousTupleInterfaceInferenceTests", 2)]
+    [Arguments("OrdinaryGenericBaseInferenceTests", 1)]
+    [Arguments("SpreadCrossFamilyTupleInferenceTests", 1)]
+    [Arguments("SpreadMatchingFamilyTupleInferenceTests", 1)]
+    public async Task Unsupported_Inference_Remains_Consistent_In_Both_Modes(string className, int expectedCount)
     {
         await RunTestsWithFilter(
             $"/*/TUnit.TestProject.Bugs._7639/{className}/*",
             [
-                result => result.ResultSummary.Counters.Total.ShouldBe(1),
-                result => result.ResultSummary.Counters.Failed.ShouldBe(1)
+                result => result.ResultSummary.Counters.Total.ShouldBe(expectedCount),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(expectedCount)
             ]);
     }
 }
