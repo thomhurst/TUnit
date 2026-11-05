@@ -2920,7 +2920,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// constructor argument is the member name (<c>[MethodDataSource("Rows")]</c> and
     /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), looks for a static parameterless method of that name
     /// declared on the test class (or on <c>T</c>), and requires its declared return type to be
-    /// <c>IEnumerable&lt;(...)&gt;</c> or <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched
+    /// <c>IEnumerable&lt;TRow&gt;</c>, unwrapping one outer Func and one TestDataRow with its optional inner Func.
+    /// Each tuple element is matched
     /// against the data parameter at the same position, including type arguments nested in generic parameter types. The caller passes
     /// the parameters without any CancellationToken, as the generator's <c>GetDataParameters</c> does.
     /// </summary>
@@ -2956,6 +2957,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         var rowType = UnwrapFunc(returnType.GetGenericArguments()[0]);
+        if (FindTestDataRowType(rowType) is { } testDataRowType)
+        {
+            rowType = UnwrapFunc(testDataRowType.GetGenericArguments()[0]);
+        }
+
         if (GetTupleElementTypes(rowType) is not { } tupleElements)
         {
             return null;
@@ -3160,6 +3166,22 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 typeArguments[parameterType.GenericParameterPosition] = actualType;
             }
 
+            return;
+        }
+
+        // Keep ordinary column inference aligned with ProcessTypeForGenerics, including
+        // later-column overwrites through nullable values and matching-rank arrays.
+        if (Nullable.GetUnderlyingType(parameterType) is { } nullableParameter
+            && actualType.IsValueType && Nullable.GetUnderlyingType(actualType) is null)
+        {
+            MapGenericParameters(nullableParameter, actualType, typeArguments);
+            return;
+        }
+
+        if (parameterType.IsArray && actualType.IsArray
+            && parameterType.GetArrayRank() == actualType.GetArrayRank())
+        {
+            MapGenericParameters(parameterType.GetElementType()!, actualType.GetElementType()!, typeArguments);
             return;
         }
 

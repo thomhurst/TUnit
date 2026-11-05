@@ -1120,3 +1120,52 @@ public class ExplicitDirectTupleInferenceTests
     }
 }
 #pragma warning restore TUnit0001
+
+// #7622: analyzer spreads whole tuple rows with optional tails.
+#pragma warning disable TUnit0001
+public class ExplicitWrappedTupleInferenceTests
+{
+    public static IEnumerable<TestDataRow<(int, string)>> Rows() => [new((1, "tuple"))];
+    public static IEnumerable<TestDataRow<Func<(int, string)>>> InnerRows() => [new(() => (1, "tuple"))];
+    public static IEnumerable<Func<TestDataRow<Func<(int, string)>>>> OuterRows() => [() => new(() => (1, "tuple"))];
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(Rows))]
+    public void Direct<T>((T, string) row, int extra = 5) => Verify(row, extra);
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(InnerRows))]
+    public void Inner<T>((T, string) row, int extra = 5) => Verify(row, extra);
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(OuterRows))]
+    public void Outer<T>((T, string) row, int extra = 5) => Verify(row, extra);
+
+    private static void Verify<T>((T, string) row, int extra)
+    {
+        if (typeof(T) != typeof(int) || Convert.ToInt64(row.Item1) != 1 || row.Item2 != "tuple" || extra != 5)
+            throw new InvalidOperationException("Expected inferred int whole row and optional default");
+    }
+}
+#pragma warning restore TUnit0001
+
+// #7622: analyzer does not apply nullable structural inference to spread columns.
+#pragma warning disable TUnit0001
+public class ExplicitSpreadColumnInferenceTests
+{
+    public static IEnumerable<(int, long[])> ArrayRows() => [(1, [2L])];
+    public static IEnumerable<(int, long)> NullableRows() => [(1, 2L)];
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(ArrayRows))]
+    public void Array<T>(T first, T[] extra)
+    {
+        if (typeof(T) != typeof(long) || Convert.ToInt64(first) != 1 || extra.Length != 1 || Convert.ToInt64(extra[0]) != 2)
+            throw new InvalidOperationException("Expected only long inferred from the array column");
+    }
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(NullableRows))]
+    public void Nullable<T>(T first, T? extra) where T : struct
+    {
+        if (typeof(T) != typeof(long) || Convert.ToInt64(first) != 1 || Convert.ToInt64(extra) != 2)
+            throw new InvalidOperationException("Expected only long inferred from the nullable column");
+    }
+}
+
+#pragma warning restore TUnit0001

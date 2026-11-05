@@ -32,6 +32,7 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("OpenTupleRuntimeCastTests", 7)]
     [Arguments("OpenTupleArrayRuntimeCastTests", 4)]
     [Arguments("WholeTupleWithTrailingParametersTests", 6)]
+    [Arguments("ExplicitSpreadColumnInferenceTests", 2)]
     [Arguments("ExplicitDirectTupleInferenceTests", 6)]
     [Arguments("ExplicitCrossFamilyTupleInferenceTests", 6)]
     [Arguments("ExplicitBareReferenceTupleInferenceTests", 1)]
@@ -43,6 +44,19 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Total.ShouldBe(expectedCount),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(expectedCount),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task Explicit_Wrapped_Rows_Still_Infer_Whole_Tuples()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7629/ExplicitWrappedTupleInferenceTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(6),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(3),
+                // Explicit long cannot receive an int tuple with an optional tail.
+                result => result.ResultSummary.Counters.Failed.ShouldBe(3)
             ]);
     }
 
