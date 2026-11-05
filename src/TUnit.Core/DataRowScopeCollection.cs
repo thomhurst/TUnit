@@ -137,7 +137,10 @@ internal sealed class DataRowScopeCollection
             OwnsCreatedObjects = scope is IDisposable or IAsyncDisposable;
             // The row always disposes its scope, even when resolved services stay tracker-owned.
             if (scope is IDisposable or IAsyncDisposable)
+            {
                 ExternalObjectOwnership.Register(scope, this);
+                RetainWhileCounted(scope);
+            }
         }
 
         internal void RegisterObject(object instance)

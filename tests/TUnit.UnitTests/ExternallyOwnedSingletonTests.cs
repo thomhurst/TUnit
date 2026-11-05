@@ -208,6 +208,37 @@ public class ExternallyOwnedSingletonTests
         await Assert.That(singleton.DisposeCount).IsEqualTo(1);
     }
 
+    [Test]
+    public async Task Already_Counted_Scope_Retains_Its_Owner_After_Row_Completion()
+    {
+        var tracker = CreateTracker();
+        var scope = new TrackedDisposable();
+        var context = CreateContext(scope);
+        tracker.TrackObjects(context);
+
+        var owner = await CompleteTemporaryScope(scope);
+        Collect();
+        await Assert.That(OwnerIsAlive(owner)).IsTrue();
+        await Assert.That(scope.DisposeCount).IsEqualTo(1);
+        await tracker.UntrackObjects(context);
+        await Assert.That(scope.DisposeCount).IsEqualTo(1);
+        await Assert.That(IsCounted(scope)).IsFalse();
+
+        Collect();
+        await Assert.That(OwnerIsAlive(owner)).IsFalse();
+        GC.KeepAlive(tracker);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static async Task<WeakReference<DataRowScopeCollection.ScopeOwner>> CompleteTemporaryScope(object scope)
+    {
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(scope);
+        owner.OwnsCreatedObjects = false;
+        await scopes.CompleteAsync();
+        return new(owner);
+    }
+
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static WeakReference<DataRowScopeCollection.ScopeOwner> RegisterTemporaryOwnership(object instance)
     {
