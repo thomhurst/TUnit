@@ -219,18 +219,18 @@ public sealed class AllNullRowAttribute : UntypedDataSourceGeneratorAttribute
     }
 }
 
+// The typed row seeds the AOT instantiation and disables AllRows fallback. Both rows must run.
 [EngineTest(ExpectedResult.Pass)]
+[Arguments(null, 7)]
 [NullLeadingRow]
-public class NullLeadingRowInfersFirstNonNull<T>(T? value, int number) where T : struct
+public class NullLeadingRowInfersFirstNonNull<T>(T? value, T number) where T : struct
 {
     [Test]
-    [Arguments(1)]
-    public async Task Test(T arg)
+    public async Task Test()
     {
         await Assert.That(typeof(T)).IsEqualTo(typeof(int));
         await Assert.That(value).IsNull();
-        await Assert.That(number).IsEqualTo(5);
-        await Assert.That((int)(object)arg).IsEqualTo(1);
+        await Assert.That((int)(object)number).IsIn(5, 7);
     }
 }
 

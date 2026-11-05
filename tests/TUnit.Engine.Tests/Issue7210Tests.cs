@@ -16,7 +16,7 @@ public class Issue7210Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("WrappedRowInfersItsValue", 2)]
     [Arguments("WrappedFactoryInvokedOnce", 1)]
     [Arguments("WrappedFactoryFreshPerTest", 3)]
-    [Arguments("NullLeadingRowInfersFirstNonNull", 1)]
+    [Arguments("NullLeadingRowInfersFirstNonNull", 2)]
     [Arguments("AllNullRowsUseAllRowsFallback", 1)]
     [Arguments("NullLeadingTwoParameterRowUsesFallback", 1)]
     public async Task Rows_Run_On_The_Instantiation_They_Infer(string className, int expectedTests)
@@ -58,7 +58,8 @@ public class Issue7210Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Passed.ShouldBe(1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1),
                 result => result.Results.Single(x => x.Outcome == "Failed")
-                    .Output?.ErrorInfo?.Message.ShouldContain("none of the class-level data rows infer")
+                    .Output.ShouldNotBeNull().ErrorInfo.ShouldNotBeNull().Message
+                    .ShouldContain("none of the class-level data rows infer")
             ]);
     }
 
