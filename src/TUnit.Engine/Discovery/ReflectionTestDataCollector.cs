@@ -2941,7 +2941,16 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // [MethodDataSource<T>("Rows")] reads Rows from T, not from the test class
         var providerType = methodDataSource.ClassProvidingDataSource ?? testClass;
-        var memberType = methodDataSource.GetDeclaredMemberType(providerType);
+        Type? memberType;
+        try
+        {
+            memberType = methodDataSource.GetDeclaredMemberType(providerType);
+        }
+        catch (AmbiguousMatchException)
+        {
+            // Invocation reports the invalid source later; inference must not abort assembly discovery.
+            return null;
+        }
 
         // Normalize the same asynchronous and sequence wrappers as runtime row reading before
         // supplementing explicit method types. Retain the bounded outer/inner Func unwrapping.
@@ -3008,8 +3017,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor)
     {
         constructor = null;
-        if (methodDataSource.GetDeclaredMemberType(genericTypeDefinition) is not { } memberType
-            || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType)
+        Type? memberType;
+        try
+        {
+            memberType = methodDataSource.GetDeclaredMemberType(genericTypeDefinition);
+        }
+        catch (AmbiguousMatchException)
+        {
+            // Leave the invalid source to invocation instead of failing discovery for the assembly.
+            return null;
+        }
+
+        if (memberType is null || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType)
         {
             return null;
         }
