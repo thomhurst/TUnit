@@ -302,6 +302,24 @@ public class SingleTupleElementConversionTests
 {
     public static IEnumerable<(int, int)> Rows() => [(1, 2)];
 
+    public IEnumerable<Tuple<int, int>> NarrowReferenceRows() => [Tuple.Create(3, 4)];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void NarrowNumericElement<T>((T, short) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != 2)
+            throw new InvalidOperationException("Expected narrowing numeric element conversion");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(NarrowReferenceRows))]
+    public void NarrowNumericReferenceElement<T>(Tuple<T, short> row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != 4)
+            throw new InvalidOperationException("Expected narrowing numeric reference element conversion");
+    }
+
     public class Base<T> { }
     public class Derived : Base<int> { }
 

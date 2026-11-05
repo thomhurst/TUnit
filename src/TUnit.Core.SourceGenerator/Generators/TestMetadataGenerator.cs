@@ -7260,8 +7260,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (!CodeGenerationHelpers.ContainsTypeParameter(parameter))
         {
             var conversion = compilation.ClassifyCommonConversion(row, parameter);
-            if (conversion.Exists && conversion.IsImplicit
-                && (conversion.IsIdentity || reconstructTupleElements && !conversion.IsUserDefined))
+            // CastHelper supports narrowing numeric conversions when reconstructing elements.
+            // Whole-row binding still requires identity; it cannot rebuild the tuple.
+            if (conversion.Exists
+                && (conversion.IsIdentity || reconstructTupleElements && !conversion.IsUserDefined
+                    && (conversion.IsImplicit || conversion.IsNumeric)))
             {
                 return true;
             }
