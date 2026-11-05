@@ -420,7 +420,31 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// </summary>
     public ValueTask UntrackObjectAsync(object? obj) => UntrackObject(obj, testContext: null);
 
-    private async ValueTask UntrackObject(object? obj, TestContext? testContext, bool sessionReference = true)
+    // Failed factories never produce a TestContext to own these references. Keep them
+    // outside session accounting and release them with their row, through the same global counts.
+    internal static IAsyncDisposable RetainForRowCleanup(object obj)
+    {
+        lock (s_sharedInstanceLock)
+        {
+            GetOrCreateCounter(obj).Increment();
+        }
+        return new RowCleanupReference(obj, GlobalContext.Current.Disposer);
+    }
+
+    private sealed class RowCleanupReference(object obj, Disposer disposer) : IAsyncDisposable
+    {
+        private int _released;
+
+        public ValueTask DisposeAsync() => Interlocked.Exchange(ref _released, 1) == 0
+            ? UntrackObjectCore(obj, null, false, null, disposer)
+            : default;
+    }
+
+    private ValueTask UntrackObject(object? obj, TestContext? testContext, bool sessionReference = true)
+        => UntrackObjectCore(obj, testContext, sessionReference, _sessionReferences, disposer);
+
+    private static async ValueTask UntrackObjectCore(object? obj, TestContext? testContext,
+        bool sessionReference, Dictionary<object, int>? sessionReferences, Disposer disposer)
     {
         // Every disposable is counted, including externally owned objects. Ownership changes only
         // who disposes it, so each test always releases exactly the reference it took.
@@ -435,9 +459,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         {
             if (sessionReference)
             {
-                if (!_sessionReferences.TryGetValue(obj, out var ownedCount)) return;
-                if (ownedCount == 1) _sessionReferences.Remove(obj);
-                else _sessionReferences[obj] = ownedCount - 1;
+                if (!sessionReferences!.TryGetValue(obj, out var ownedCount)) return;
+                if (ownedCount == 1) sessionReferences!.Remove(obj);
+                else sessionReferences![obj] = ownedCount - 1;
             }
             if (s_trackedObjects.TryGetValue(obj, out var counter))
             {
@@ -464,7 +488,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 #if NET
             if (TryGetSharedDisposeScope(obj, out var sharedType))
             {
-                await DisposeWithSpanAsync(obj, testContext, sharedType).ConfigureAwait(false);
+                await DisposeWithSpanAsync(obj, testContext, sharedType, disposer).ConfigureAwait(false);
                 return;
             }
 #endif
@@ -498,7 +522,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     /// Disposes a shared object inside a <c>dispose &lt;Type&gt;</c> span, parented by the same rules as
     /// its <c>initialize</c> span, so the timeline shows fixture teardown cost next to its setup cost.
     /// </summary>
-    private Task DisposeWithSpanAsync(object obj, TestContext? testContext, SharedType sharedType)
+    private static Task DisposeWithSpanAsync(object obj, TestContext? testContext, SharedType sharedType, Disposer disposer)
     {
         KeyValuePair<string, object?>[] tags = testContext is null
             ? [new(TUnitActivitySource.TagTraceScope, TUnitActivitySource.GetScopeTag(sharedType))]

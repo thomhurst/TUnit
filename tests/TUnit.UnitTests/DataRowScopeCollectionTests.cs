@@ -173,6 +173,30 @@ public class DataRowScopeCollectionTests
         await Assert.That(source.Service.DisposeCount).IsEqualTo(ownsServices ? 0 : 1);
     }
 
+    [Test]
+    public async Task FailedRowsReleaseSharedServicesOnlyAfterTheFinalOwner()
+    {
+        var service = new AsyncService();
+        // Model a successful test holding the same object through the tracker.
+        var tracker = new TUnit.Core.Tracking.ObjectTracker(new(), GlobalContext.Current.Disposer);
+        tracker.TrackStaticLeaseObject(service);
+        var first = new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
+        var second = new TestBuilderContext { TestMetadata = first.TestMetadata };
+        foreach (var context in new[] { first, second })
+        {
+            await Assert.That(() => new FailingSource(false, service).Resolve(context))
+                .Throws<InvalidOperationException>();
+        }
+        var clone = first.Events.DataRowScopes!.Clone();
+        await first.Events.DataRowScopes.CompleteAsync();
+        await clone.CompleteAsync();
+        await Assert.That(service.DisposeCount).IsEqualTo(0);
+        await tracker.ReleaseStaticLeaseObjectAsync(service);
+        await Assert.That(service.DisposeCount).IsEqualTo(0);
+        await second.Events.DataRowScopes!.CompleteAsync();
+        await Assert.That(service.DisposeCount).IsEqualTo(1);
+    }
+
     private sealed class AsyncService : IAsyncDisposable
     {
         internal int DisposeCount;
@@ -183,10 +207,10 @@ public class DataRowScopeCollectionTests
         }
     }
 
-    private sealed class FailingSource(bool ownsServices) : DependencyInjectionDataSourceAttribute<Scope>
+    private sealed class FailingSource(bool ownsServices, AsyncService? shared = null) : DependencyInjectionDataSourceAttribute<Scope>
     {
         internal Scope Scope { get; } = new();
-        internal AsyncService Service { get; } = new();
+        internal AsyncService Service { get; } = shared ?? new();
         private int _calls;
 
         internal void Resolve(TestBuilderContext context)

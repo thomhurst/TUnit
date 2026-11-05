@@ -58,7 +58,10 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                         if (values[i] is { } value && !ReferenceEquals(value, scope)
                             && !ObjectTracker.IsExternallyOwned(value) && retained.Add(value))
                         {
-                            cleanup.Register(value);
+                            if (value is IDisposable or IAsyncDisposable)
+                            {
+                                cleanup.Register(ObjectTracker.RetainForRowCleanup(value));
+                            }
                         }
                     }
                 }
