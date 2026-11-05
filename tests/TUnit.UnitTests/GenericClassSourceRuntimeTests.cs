@@ -70,9 +70,11 @@ public class GenericClassSourceRuntimeTests
     }
 
     private sealed class TargetBoxRow;
+    private sealed class Wrapper<T>;
     private sealed class Box<T>
     {
         public static implicit operator Box<T>(TargetBoxRow value) => new();
+        public static implicit operator Box<T>(Wrapper<T> value) => new();
     }
     private sealed class BoxOperatorRow(bool throws)
     {
@@ -83,6 +85,12 @@ public class GenericClassSourceRuntimeTests
     private sealed class WrongBoxOperatorRow
     {
         public static implicit operator Box<string>(WrongBoxOperatorRow value) => new();
+    }
+
+    private sealed class BoxConvertible(bool throws) : DeferredConvertible(throws)
+    {
+        public override object ToType(Type conversionType, IFormatProvider? provider)
+            => throws ? throw new InvalidOperationException("Partitioning must not invoke ToType") : new Box<int>();
     }
 
     [Test]
@@ -102,12 +110,17 @@ public class GenericClassSourceRuntimeTests
                new ParameterMetadata(typeof(string)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true }]
             : [new ParameterMetadata(target) { Name = "items", TypeInfo = description, CachedIsOptional = false }];
         object?[][] original = operators
-            ? [[new Box<int>()], [new BoxOperatorRow(false)], [new BoxOperatorRow(true)], [new TargetBoxRow()]]
+            ? [[new Box<int>()], [new BoxOperatorRow(false)], [new BoxOperatorRow(true)], [new TargetBoxRow()], [new Wrapper<int>()], [new BoxConvertible(false)], [new BoxConvertible(true)]]
             : [[new int[] { 1 }], [2, 3], []];
         foreach (var row in original)
             await Assert.That(GenericClassRowPartition.MatchesConstructorRow(row, parameters, arguments)).IsTrue();
         await Assert.That(GenericClassRowPartition.MatchesConstructorRow(
             operators ? [new WrongBoxOperatorRow()] : [new object(), new object()], parameters, arguments)).IsFalse();
+        if (operators)
+        {
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new Wrapper<string>()], parameters, arguments)).IsFalse();
+            await Assert.That(TUnit.Core.Helpers.CastHelper.Cast(typeof(Box<int>), new Wrapper<string>()) is Box<int>).IsFalse();
+        }
         var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
         var partition = GenericClassRowPartition.Create(arguments, GenericClassRowFallback.AllRows, [source], 0);
         var metadata = new DataGeneratorMetadata
@@ -124,6 +137,8 @@ public class GenericClassSourceRuntimeTests
         {
             await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<Box<int>>(original[1][0]) is Box<int>).IsTrue();
             await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<Box<int>>(original[3][0]) is Box<int>).IsTrue();
+            await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<Box<int>>(original[4][0]) is Box<int>).IsTrue();
+            await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<Box<int>>(original[5][0]) is Box<int>).IsTrue();
         }
         else await Assert.That(TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(new object[] { 2, 3 }).Length).IsEqualTo(2);
 
@@ -162,11 +177,11 @@ public class GenericClassSourceRuntimeTests
             => throw new InvalidOperationException("Partitioning must not enumerate user data");
     }
 
-    private sealed class DeferredConvertible(bool throws) : IConvertible
+    private class DeferredConvertible(bool throws) : IConvertible
     {
         public TypeCode GetTypeCode() => TypeCode.Object;
         public int ToInt32(IFormatProvider? provider) => throws ? throw new InvalidOperationException("Partitioning must not convert user values") : 2;
-        public object ToType(Type conversionType, IFormatProvider? provider) => ToInt32(provider);
+        public virtual object ToType(Type conversionType, IFormatProvider? provider) => ToInt32(provider);
         public bool ToBoolean(IFormatProvider? provider) => throw new NotSupportedException();
         public byte ToByte(IFormatProvider? provider) => throw new NotSupportedException();
         public char ToChar(IFormatProvider? provider) => throw new NotSupportedException();

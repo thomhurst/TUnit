@@ -477,6 +477,12 @@ public static class GenericClassRowPartition
 
         if (target is null)
         {
+            var sourceType = value.GetType();
+            if (value is IConvertible && !sourceType.IsPrimitive && !sourceType.IsEnum
+                && sourceType != typeof(string) && sourceType != typeof(decimal) && sourceType != typeof(DateTime))
+            {
+                return true; // Custom ToType belongs to the binder, including structural targets.
+            }
 #if NET
             // An open self-parsing interface preserves its identity after substitution.
             // Inspect the definition without constructing the closed target or calling Parse.
@@ -495,8 +501,10 @@ public static class GenericClassRowPartition
 #endif
             if (description is ConstructedGeneric structural
                 && Helpers.CastHelper.HasStructuralReflectionConversion(value.GetType(), structural.GenericDefinition,
-                    (description, classTypeArguments), static (candidate, state) => MatchesConstructorParameterType(
-                        state.description, candidate, state.classTypeArguments, direction: 0)))
+                    (description, classTypeArguments, valueType: value.GetType()), static (candidate, state) => MatchesConstructorParameterType(
+                        state.description, candidate, state.classTypeArguments, direction: 0),
+                    static (result, input, state) => MatchesStructuralOperator(
+                        (ConstructedGeneric)state.description, result, input, valueType: state.valueType, state.classTypeArguments)))
             {
                 return true;
             }
@@ -594,6 +602,40 @@ public static class GenericClassRowPartition
             }
         }
         return true;
+    }
+
+    private static bool MatchesStructuralOperator(ConstructedGeneric target, Type result, Type input,
+        Type valueType, Type[] classTypeArguments)
+    {
+        return SameType(Substitute(result), target)
+            && MatchesConstructorParameterType(Substitute(input), valueType, classTypeArguments, direction: 1);
+
+        TypeInfo Substitute(Type type)
+        {
+            if (type.IsGenericParameter) return target.TypeArguments[type.GenericParameterPosition];
+            if (type.IsArray)
+                return new ConstructorArray(Substitute(type.GetElementType()!), type.GetArrayRank(), type.Name.EndsWith("[]", StringComparison.Ordinal));
+            return type.IsGenericType && type.ContainsGenericParameters
+                ? new ConstructedGeneric(type.GetGenericTypeDefinition(), type.GetGenericArguments().Select(Substitute).ToArray())
+                : new ConcreteType(type);
+        }
+
+        bool SameType(TypeInfo left, TypeInfo right)
+        {
+            if (left is GenericParameter generic) left = new ConcreteType(classTypeArguments[generic.Position]);
+            if (right is GenericParameter other) right = new ConcreteType(classTypeArguments[other.Position]);
+            if (left is ConcreteType concrete)
+                return MatchesConstructorParameterType(right, concrete.Type, classTypeArguments, direction: 0);
+            if (right is ConcreteType closed)
+                return MatchesConstructorParameterType(left, closed.Type, classTypeArguments, direction: 0);
+            if (left is ConstructorArray leftArray && right is ConstructorArray rightArray)
+                return leftArray.Rank == rightArray.Rank && leftArray.IsVector == rightArray.IsVector
+                    && SameType(leftArray.Element, rightArray.Element);
+            return left is ConstructedGeneric first && right is ConstructedGeneric second
+                && first.GenericDefinition == second.GenericDefinition
+                && first.TypeArguments.Length == second.TypeArguments.Length
+                && first.TypeArguments.Zip(second.TypeArguments, SameType).All(equal => equal);
+        }
     }
 
     // Array descriptions emitted outside a generic class erase T[] to object. The existing lazy

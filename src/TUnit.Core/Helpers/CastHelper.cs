@@ -522,10 +522,10 @@ public static class CastHelper
     private sealed record StructuralConversion(Type ReturnType, Type InputType);
 
     // Structural targets cannot be closed with MakeGenericType in AOT-safe metadata code.
-    // Match source-declared closed return types, and conservatively retain target-declared
-    // operators on the open definition for the binder to validate. Never invoke user code.
+    // Match source-declared closed return types and substitute target-declared operator
+    // signatures structurally before accepting their inputs. Never invoke user code.
     internal static bool HasStructuralReflectionConversion<TState>(Type sourceType, Type targetDefinition,
-        TState state, Func<Type, TState, bool> matchesTarget)
+        TState state, Func<Type, TState, bool> matchesTarget, Func<Type, Type, TState, bool> matchesOpenOperator)
     {
         if (IsAotMode()) return false;
         foreach (var method in GetStructuralConversionMethods(sourceType))
@@ -535,8 +535,7 @@ public static class CastHelper
         }
         foreach (var method in GetStructuralConversionMethods(targetDefinition))
         {
-            if ((method.ReturnType.ContainsGenericParameters || matchesTarget(method.ReturnType, state))
-                && (method.InputType.ContainsGenericParameters || method.InputType.IsAssignableFrom(sourceType)))
+            if (matchesOpenOperator(method.ReturnType, method.InputType, state))
                 return true;
         }
         return false;
