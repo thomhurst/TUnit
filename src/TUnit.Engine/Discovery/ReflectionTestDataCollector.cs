@@ -498,9 +498,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // Get test methods from the generic type definition first (needed for both data sources and GenerateGenericTest)
         // Optimize: Manual filtering instead of LINQ Where().ToArray()
-        var declaredMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-        var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
-        foreach (var method in declaredMethods)
+        var methods = genericTypeDefinition.IsDefined(typeof(InheritsTestsAttribute), inherit: false)
+            ? GetAllTestMethods(genericTypeDefinition)
+            : genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        var testMethodsList = new List<MethodInfo>();
+        foreach (var method in methods)
         {
             if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
             {
@@ -984,13 +986,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
-    /// Finds the method on a constructed generic type that corresponds to a method of its generic type
+    /// Finds the method on a constructed generic type or its bases that corresponds to a method of its generic type
     /// definition. Matches by metadata identity rather than name so overloaded test methods resolve to
     /// their own counterpart instead of throwing <see cref="AmbiguousMatchException"/>.
     /// </summary>
     private static MethodInfo? FindConcreteMethod(Type concreteType, MethodInfo genericMethod)
     {
-        foreach (var method in concreteType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+        foreach (var method in GetAllTestMethods(concreteType))
         {
             if (method.MetadataToken == genericMethod.MetadataToken && method.Module == genericMethod.Module)
             {
