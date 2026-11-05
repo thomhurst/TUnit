@@ -880,6 +880,28 @@ public class MethodDataSourceAnalyzerTests : BaseAnalyzerTests
     }
 
     [Test]
+    [Arguments("int extra = 5", "object, int")]
+    [Arguments("params int[] rest", "object, int[]")]
+    public async Task ITuple_Interface_Row_Rejects_Omitted_Tail(string tail, string expectedTypes)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System.Collections.Generic;
+            using System.Runtime.CompilerServices;
+            using TUnit.Core;
+            public class Tests
+            {
+                #pragma warning disable TUnit0046
+                public static IEnumerable<ITuple> Rows() => [(1, "bad")];
+                [Test, {|#0:MethodDataSource(nameof(Rows))|}]
+                public void Run(object value, {{tail}}) { }
+            }
+            """,
+            Verifier.Diagnostic(Rules.WrongArgumentTypeTestData).WithLocation(0)
+                .WithArguments("ITuple", expectedTypes));
+    }
+
+    [Test]
     public async Task Convertible_Row_Rejects_Required_Test_Parameters()
     {
         await Verifier.VerifyAnalyzerAsync(
