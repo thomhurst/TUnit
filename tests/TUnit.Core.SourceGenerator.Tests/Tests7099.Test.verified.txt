@@ -21,7 +21,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayTests_Expli
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Explicit_Many", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests), "Explicit_Many", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -132,7 +132,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayTests_Expli
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Explicit_One_Reference", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests), "Explicit_One_Reference", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -243,7 +243,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayTests_Expli
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Explicit_Zero", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests), "Explicit_Zero", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -355,7 +355,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayTests_Expli
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Explicit_Leading", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests), "Explicit_Leading", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "label", new global::TUnit.Core.ConcreteType(typeof(string)), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -470,7 +470,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayTests_Expli
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Explicit_Many_Reference", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests), "Explicit_Many_Reference", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -581,7 +581,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayTests_Expli
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Explicit_ArrayArgument", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests), "Explicit_ArrayArgument", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -692,7 +692,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayTests_Expli
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Explicit_PlainArray", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests), "Explicit_PlainArray", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -917,7 +917,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericClassParamsArrayTests_
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.GenericClassParamsArrayTests<>);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("ClassTypeParameter", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericClassParamsArrayTests<>), "ClassTypeParameter", false, 0, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, false, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericClassParamsArrayTests<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1028,7 +1028,7 @@ internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Inferred_FromLeading", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests), "Inferred_FromLeading", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "first", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1143,7 +1143,7 @@ internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Inferred_FromLeading_Reference", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests), "Inferred_FromLeading_Reference", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "first", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1257,7 +1257,7 @@ internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTes
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Inferred_FromArrayArgument", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests), "Inferred_FromArrayArgument", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1367,7 +1367,7 @@ internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTes
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Inferred_FromPlainArrayArgument", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests), "Inferred_FromPlainArrayArgument", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1477,7 +1477,7 @@ internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTes
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Inferred_FromPlainArrayArgument_With_Token", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests), "Inferred_FromPlainArrayArgument_With_Token", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
@@ -1590,7 +1590,7 @@ internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Inferred_ArrayElements", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests), "Inferred_ArrayElements", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "first", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1705,7 +1705,7 @@ internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Inferred_FromLeading_PlainArray", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests), "Inferred_FromLeading_PlainArray", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "first", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1821,7 +1821,7 @@ internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTes
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "first", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -1939,7 +1939,7 @@ internal static class TUnit_TestProject_Bugs__7099_InferredGenericParamsArrayTes
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "label", new global::TUnit.Core.ConcreteType(typeof(string)), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "first", new global::TUnit.Core.GenericParameter(0, true, "T"), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "rest", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.InferredGenericParamsArrayTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -2055,7 +2055,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Optional_Before_Params", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests), "Optional_Before_Params", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "count", new global::TUnit.Core.ConcreteType(typeof(int)), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -2171,7 +2171,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Optional_Omitted_Before_Params", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests), "Optional_Omitted_Before_Params", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "count", new global::TUnit.Core.ConcreteType(typeof(int)), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -2287,7 +2287,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Optional_Omitted_Before_Array_With_Token", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests), "Optional_Omitted_Before_Array_With_Token", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "count", new global::TUnit.Core.ConcreteType(typeof(int)), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), true),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), true),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
@@ -2404,7 +2404,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("MultiDimensional", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests), "MultiDimensional", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 2), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -2486,7 +2486,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("PlainArray_Before_Token", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests), "PlainArray_Before_Token", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
@@ -2600,7 +2600,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Token_Before_Params", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests), "Token_Before_Params", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -2714,7 +2714,7 @@ internal static class TUnit_TestProject_Bugs__7099_GenericParamsArrayEdgeCaseTes
 {
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(string), "label", new global::TUnit.Core.ConcreteType(typeof(string)), false),
 global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Threading.CancellationToken), "token", new global::TUnit.Core.ConcreteType(typeof(global::System.Threading.CancellationToken)), false),
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7099.GenericParamsArrayEdgeCaseTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {
@@ -2944,7 +2944,7 @@ internal static class TUnit_TestProject_Bugs__7099_OptionalArrayOverloadTests_Ge
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Generic_Optional_Array", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests), "Generic_Optional_Array", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), true)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), true)
 }));
     private static global::TUnit.TestProject.Bugs._7099.OptionalArrayOverloadTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {

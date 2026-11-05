@@ -23,6 +23,7 @@ internal static class ReflectionMetadataBuilder
     {
         return new MethodMetadata
         {
+            ReflectionInfo = method,
             Name = method.Name,
             Type = type,
             TypeInfo = CreateTypeInfo(type),

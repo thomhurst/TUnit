@@ -1682,7 +1682,7 @@ internal static class TUnit_TestProject_Bugs__7118_ArrayParameterNullTypedClassR
         Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
         Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7118.ArrayParameterNullTypedClassRow<>), true, new global::TUnit.Core.ParameterMetadata[]
         {
-            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), true)
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, false, "T"), 1), true)
         }),
         Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
         Parent = null

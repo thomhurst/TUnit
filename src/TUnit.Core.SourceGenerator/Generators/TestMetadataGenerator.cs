@@ -680,6 +680,146 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
     }
 
+    private static IEnumerable<AttributeData> GetConstraintViolationAttributes(TestMethodMetadata testMethod) =>
+        GetConstraintViolationInheritedAttributes(GetOverrideChain(testMethod.MethodSymbol))
+            .Concat(GetConstraintViolationInheritedAttributes(testMethod.TypeSymbol.GetSelfAndBaseTypes()))
+            .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
+            .Where(attribute => !DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass));
+
+    private static IEnumerable<IMethodSymbol> GetOverrideChain(IMethodSymbol method)
+    {
+        for (IMethodSymbol? current = method; current is not null; current = current.OverriddenMethod)
+        {
+            yield return current;
+        }
+    }
+
+    private static IEnumerable<AttributeData> GetConstraintViolationInheritedAttributes(IEnumerable<ISymbol> scopes)
+    {
+        // Match GetCustomAttributes(inherit: true) for both types and overridden methods.
+        // This is used by both reflection discovery
+        // and the inaccessible-attribute accessor. Occurrence indices must see the same list.
+        var seen = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+        var isDeclaredScope = true;
+        foreach (var current in scopes)
+        {
+            var declared = current.GetAttributes();
+            foreach (var attribute in declared)
+            {
+                if (attribute.AttributeClass is not { } attributeType)
+                {
+                    continue;
+                }
+
+                var usage = attributeType.GetAttributes()
+                    .FirstOrDefault(candidate => candidate.AttributeClass?.ToDisplayString() == "System.AttributeUsageAttribute");
+                var inherited = true;
+                var allowMultiple = false;
+                if (usage is not null)
+                {
+                    foreach (var argument in usage.NamedArguments)
+                    {
+                        if (argument.Key == "Inherited") inherited = (bool)argument.Value.Value!;
+                        if (argument.Key == "AllowMultiple") allowMultiple = (bool)argument.Value.Value!;
+                    }
+                }
+
+                if (isDeclaredScope
+                    || (inherited && (allowMultiple || !seen.Contains(attributeType))))
+                {
+                    yield return attribute;
+                }
+            }
+
+            foreach (var attribute in declared)
+            {
+                if (attribute.AttributeClass is { } attributeType) seen.Add(attributeType);
+            }
+            isDeclaredScope = false;
+        }
+    }
+
+    private static void WriteConstraintViolationAttributes(CodeWriter writer, TestMethodMetadata testMethod, AttributeData[] attributes)
+    {
+        var compilation = testMethod.CompilationContext.Compilation;
+        var occurrences = new Dictionary<INamedTypeSymbol, int>(SymbolEqualityComparer.Default);
+        var first = true;
+        foreach (var attribute in attributes)
+        {
+            if (!first)
+            {
+                writer.AppendLine(",");
+            }
+            first = false;
+            var attributeType = attribute.AttributeClass!;
+            // Reflection matches generic definitions, so count all constructed forms together.
+            var attributeDefinition = attributeType.OriginalDefinition;
+            occurrences.TryGetValue(attributeDefinition, out var occurrence);
+            occurrences[attributeDefinition] = occurrence + 1;
+            if (CanConstructConstraintViolationAttribute(attribute, compilation))
+            {
+                testMethod.CompilationContext.AttributeWriter.WriteAttribute(writer, attribute);
+            }
+            else
+            {
+                // Private custom filter attributes cannot be named by the top-level source. The
+                // existing metadata accessor preserves their actual constructor logic and values.
+                var metadataName = attributeType.MetadataName;
+                for (var containing = attributeType.ContainingType; containing is not null; containing = containing.ContainingType)
+                {
+                    metadataName = containing.MetadataName + "+" + metadataName;
+                }
+                if (!attributeType.ContainingNamespace.IsGlobalNamespace)
+                {
+                    metadataName = attributeType.ContainingNamespace.ToDisplayString() + "." + metadataName;
+                }
+                writer.Append($"global::System.Linq.Enumerable.ElementAtOrDefault(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => (attribute.GetType().IsGenericType ? attribute.GetType().GetGenericTypeDefinition() : attribute.GetType()).FullName == {SymbolDisplay.FormatLiteral(metadataName, quote: true)}), {occurrence.ToString(CultureInfo.InvariantCulture)})!");
+            }
+        }
+    }
+
+    private static bool CanConstructConstraintViolationAttribute(AttributeData attribute, Compilation compilation) =>
+        attribute.AttributeClass is { } attributeType
+        && compilation.IsSymbolAccessibleWithin(attributeType, compilation.Assembly)
+        && attribute.AttributeConstructor is { } constructor
+        && compilation.IsSymbolAccessibleWithin(constructor, compilation.Assembly)
+        && attribute.ConstructorArguments.All(argument => CanAccessAttributeArgument(argument, compilation))
+        && attribute.NamedArguments.All(argument => CanAccessAttributeArgument(argument.Value, compilation));
+
+    private static bool CanAccessAttributeArgument(TypedConstant argument, Compilation compilation)
+    {
+        if (argument.Type is { } argumentType
+            && !compilation.IsSymbolAccessibleWithin(argumentType, compilation.Assembly))
+        {
+            return false;
+        }
+
+        if (argument is { Kind: TypedConstantKind.Type, Value: ITypeSymbol type })
+        {
+            return compilation.IsSymbolAccessibleWithin(type, compilation.Assembly);
+        }
+
+        return argument.Kind != TypedConstantKind.Array || argument.IsNull
+            || argument.Values.All(value => CanAccessAttributeArgument(value, compilation));
+    }
+
+    private static bool AttributeRequiresUnsafeContext(AttributeData attribute) =>
+        attribute.ConstructorArguments.Any(RequiresUnsafeContext)
+        || attribute.NamedArguments.Any(argument => RequiresUnsafeContext(argument.Value));
+
+    private static bool RequiresUnsafeContext(TypedConstant argument) =>
+        argument.Kind == TypedConstantKind.Array
+            ? !argument.IsNull && argument.Values.Any(RequiresUnsafeContext)
+            : argument.Value is ITypeSymbol type && RequiresUnsafeContext(type);
+
+    private static bool RequiresUnsafeContext(ITypeSymbol type) => type switch
+    {
+        IPointerTypeSymbol => true,
+        IFunctionPointerTypeSymbol => true,
+        IArrayTypeSymbol array => RequiresUnsafeContext(array.ElementType),
+        _ => false
+    };
+
     /// <summary>
     /// Emits the test method's class type arguments that break the class's generic constraints. A
     /// <c>TestEntry&lt;T&gt;</c> cannot be emitted for such a closed type, so the entry is registered
@@ -698,11 +838,40 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"FilePath = {SymbolDisplay.FormatLiteral(testMethod.FilePath ?? "", quote: true)},");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber.ToString(CultureInfo.InvariantCulture)},");
         writer.AppendLine("MethodMetadata = __mm_0,");
+        var attributes = GetConstraintViolationAttributes(testMethod)
+            .Where(testMethod.CompilationContext.AttributeWriter.CanWriteAttribute).ToArray();
+        var requiresUnsafe = attributes.Any(attribute =>
+            CanConstructConstraintViolationAttribute(attribute, testMethod.CompilationContext.Compilation)
+            && AttributeRequiresUnsafeContext(attribute));
+        if (requiresUnsafe)
+        {
+            writer.AppendLine("AttributeFactory = __CreateConstraintViolationAttributes,");
+        }
+        else
+        {
+            writer.AppendLine("AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            WriteConstraintViolationAttributes(writer, testMethod, attributes);
+            writer.Unindent();
+            writer.AppendLine("}, static attribute => attribute is not null),");
+        }
         writer.AppendLine($"Messages = new string[] {{ {string.Join(", ", messages.Select(m => $"\"{EscapeString(m)}\""))} }},");
         writer.Unindent();
         writer.AppendLine("},");
         writer.Unindent();
         writer.AppendLine("};");
+
+        if (requiresUnsafe)
+        {
+            // Limit the unsafe context to attribute construction: mixed valid entries can contain awaits.
+            writer.AppendLine("private static unsafe global::System.Attribute[] __CreateConstraintViolationAttributes() => global::System.Array.FindAll(new global::System.Attribute[]");
+            writer.AppendLine("{");
+            writer.Indent();
+            WriteConstraintViolationAttributes(writer, testMethod, attributes);
+            writer.Unindent();
+            writer.AppendLine("}, static attribute => attribute is not null);");
+        }
     }
 
     /// <summary>
