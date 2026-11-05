@@ -961,3 +961,49 @@ public class OpenTupleArrayRuntimeCastTests
 }
 
 #pragma warning restore TUnit0001
+
+public class NestedTupleCandidateBindingTests
+{
+    public interface IBox<T> { }
+    public sealed class Dual : IBox<(int, int)>, IBox<(long, string)> { }
+    public sealed class NestedDual : IBox<Tuple<(int, int)>>, IBox<Tuple<(long, string)>> { }
+
+    public static IEnumerable<(string, Dual)> ValueRows() => [("value", new Dual())];
+    public static IEnumerable<Tuple<string, Dual>> ReferenceRows() => [Tuple.Create("value", new Dual())];
+    public static IEnumerable<(string, NestedDual)> NestedValueRows() => [("value", new NestedDual())];
+    public static IEnumerable<Tuple<string, NestedDual>> NestedReferenceRows() => [Tuple.Create("value", new NestedDual())];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void Value<T, U>((T, IBox<(U, T)>) row)
+    {
+        Verify<T, U>(row.Item1);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T, U>(Tuple<T, IBox<(U, T)>> row)
+    {
+        Verify<T, U>(row.Item1);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(NestedValueRows))]
+    public void NestedValue<T, U>((T, IBox<Tuple<(U, T)>>) row)
+    {
+        Verify<T, U>(row.Item1);
+    }
+
+    [Test]
+    [MethodDataSource(nameof(NestedReferenceRows))]
+    public void NestedReference<T, U>(Tuple<T, IBox<Tuple<(U, T)>>> row)
+    {
+        Verify<T, U>(row.Item1);
+    }
+
+    private static void Verify<T, U>(T value)
+    {
+        if (typeof(T) != typeof(string) || typeof(U) != typeof(long) || !Equals(value, "value"))
+            throw new InvalidOperationException("Expected nested candidate to preserve the string binding and infer long");
+    }
+}

@@ -8731,6 +8731,394 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_Value___T__IBox__U__T____TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests)),
+        Name = "NestedTupleCandidateBindingTests",
+        Namespace = "TUnit.TestProject.Bugs._7629",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Value", __classType, typeof(void), __classMetadata, genericTypeCount: 2, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests), "Value", false, 2, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(1, true, "U"), new global::TUnit.Core.GenericParameter(0, true, "T")])])]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single tuple parameter
+            if (args.Length == 2)
+            {
+                // Arguments are unwrapped tuple elements, reconstruct the tuple
+                instance.Value<string, long>((global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+            {
+                // Rare case: tuple is wrapped as a single argument
+                instance.Value<string, long>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>)(global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>>(__tupleFallback0) }));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("ValueRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>(
+            methodName: "Value<string, long>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.Value<string, long>",
+            methodTypeArgumentsIdentity: "<string, long>",
+            filePath: "",
+            lineNumber: 976,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ValueRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.ValueRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_Value___T__IBox__U__T____TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>(static () => TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_Value___T__IBox__U__T____TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_Reference__Tuple_T__IBox__U__T____TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests)),
+        Name = "NestedTupleCandidateBindingTests",
+        Namespace = "TUnit.TestProject.Bugs._7629",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Reference", __classType, typeof(void), __classMetadata, genericTypeCount: 2, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests), "Reference", false, 2, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(1, true, "U"), new global::TUnit.Core.GenericParameter(0, true, "T")])])]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single reference tuple parameter
+            if (args.Length == 2)
+            {
+                instance.Reference<string, long>(new global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                switch (args.Length)
+                {
+                    case 1:
+                        {
+                            instance.Reference<string, long>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>)new global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>>(__tupleFallback0) }));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        }
+                    default:
+                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                }
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("ReferenceRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>(
+            methodName: "Reference<string, long>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.Reference<string, long>",
+            methodTypeArgumentsIdentity: "<string, long>",
+            filePath: "",
+            lineNumber: 983,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ReferenceRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.ReferenceRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.ValueTuple<long, string>>>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_Reference__Tuple_T__IBox__U__T____TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>(static () => TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_Reference__Tuple_T__IBox__U__T____TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_NestedValue___T__IBox_Tu_FEB24CC0_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests)),
+        Name = "NestedTupleCandidateBindingTests",
+        Namespace = "TUnit.TestProject.Bugs._7629",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("NestedValue", __classType, typeof(void), __classMetadata, genericTypeCount: 2, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests), "NestedValue", false, 2, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(1, true, "U"), new global::TUnit.Core.GenericParameter(0, true, "T")])])])]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single tuple parameter
+            if (args.Length == 2)
+            {
+                // Arguments are unwrapped tuple elements, reconstruct the tuple
+                instance.NestedValue<string, long>((global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+            {
+                // Rare case: tuple is wrapped as a single argument
+                instance.NestedValue<string, long>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>)(global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>>(__tupleFallback0) }));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("NestedValueRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>(
+            methodName: "NestedValue<string, long>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.NestedValue<string, long>",
+            methodTypeArgumentsIdentity: "<string, long>",
+            filePath: "",
+            lineNumber: 990,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("NestedValueRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.NestedValueRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_NestedValue___T__IBox_Tu_FEB24CC0_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>(static () => TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_NestedValue___T__IBox_Tu_FEB24CC0_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_NestedReference__Tuple_T_CD9482D8_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests)),
+        Name = "NestedTupleCandidateBindingTests",
+        Namespace = "TUnit.TestProject.Bugs._7629",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("NestedReference", __classType, typeof(void), __classMetadata, genericTypeCount: 2, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests), "NestedReference", false, 2, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(1, true, "U"), new global::TUnit.Core.GenericParameter(0, true, "T")])])])]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single reference tuple parameter
+            if (args.Length == 2)
+            {
+                instance.NestedReference<string, long>(new global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                switch (args.Length)
+                {
+                    case 1:
+                        {
+                            instance.NestedReference<string, long>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>)new global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>>(__tupleFallback0) }));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        }
+                    default:
+                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                }
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("NestedReferenceRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>(
+            methodName: "NestedReference<string, long>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.NestedReference<string, long>",
+            methodTypeArgumentsIdentity: "<string, long>",
+            filePath: "",
+            lineNumber: 997,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("NestedReferenceRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.NestedReferenceRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<string, global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests.IBox<global::System.Tuple<global::System.ValueTuple<long, string>>>>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_NestedReference__Tuple_T_CD9482D8_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7629.NestedTupleCandidateBindingTests>(static () => TUnit_TestProject_Bugs__7629_NestedTupleCandidateBindingTests_NestedReference__Tuple_T_CD9482D8_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7629_NestedSingletonBoundaryTests__TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata = global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7629.NestedSingletonBoundaryTests", new global::TUnit.Core.ClassMetadata

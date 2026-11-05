@@ -7364,10 +7364,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 }
                 if (parameterElement is ITypeParameterSymbol)
                 {
-                    bindings[parameterElement] = rowElement;
+                    if (!MatchesOpenRowType(parameterElement, rowElement, compilation, bindings, true, overwriteBindings)) return false;
                     continue;
                 }
-                if (!MatchesOpenRowType(parameterElements[i], rowElements[i], compilation, bindings, true, true)) return false;
+                if (!MatchesOpenRowType(parameterElements[i], rowElements[i], compilation, bindings, true, overwriteBindings)) return false;
             }
             return true;
         }
@@ -7488,7 +7488,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     && testMethodParams.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams
                         || SymbolEqualityComparer.Default.Equals(parameter, testMethodParams[^1]) && parameter.CollectsTrailingArguments())
                     && MatchesOpenRowType(CloseClassType(testMethodParams[0].Type), rowType, compilation,
-                        wholeTupleBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(SymbolEqualityComparer.Default), testMethodParams.Length == 1))
+                        wholeTupleBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(SymbolEqualityComparer.Default),
+                        reconstructTupleElements: testMethodParams.Length == 1, overwriteBindings: testMethodParams.Length == 1))
                 || (testMethodParams.Length == 1
                     && testMethodParams[0].Type is ITypeParameterSymbol
                     && rowType is INamedTypeSymbol { IsTupleType: false }

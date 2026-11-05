@@ -18,6 +18,7 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("WholeReferenceTupleSourceTests", 1)]
     [Arguments("InferredReferenceTupleSourceTests", 1)]
     [Arguments("TupleInterfaceCandidateIsolationTests", 2)]
+    [Arguments("NestedTupleCandidateBindingTests", 4)]
     [Arguments("TupleNestedInterfaceBaseTests", 2)]
     [Arguments("TupleMultiParameterCandidateTests", 2)]
     [Arguments("TupleClosedCandidateArgumentTests", 2)]

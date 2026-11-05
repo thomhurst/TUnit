@@ -706,7 +706,8 @@ internal sealed class TestGenericTypeResolver
                             }
                             if (parameterElement.IsGenericParameter)
                             {
-                                typeMapping[parameterElement] = argumentElement;
+                                if (!TryInferTypeMapping(parameterElement, argumentElement, typeMapping,
+                                        tupleElement, overwriteBindings)) return false;
                                 continue;
                             }
                         }
