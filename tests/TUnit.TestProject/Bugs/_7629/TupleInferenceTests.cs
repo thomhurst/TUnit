@@ -1007,3 +1007,41 @@ public class NestedTupleCandidateBindingTests
             throw new InvalidOperationException("Expected nested candidate to preserve the string binding and infer long");
     }
 }
+
+// #7622: analyzer spreads whole tuple rows with optional or collecting tails.
+#pragma warning disable TUnit0001
+public class ExplicitWholeTupleInferenceTests
+{
+    public static IEnumerable<Func<(int, string)>> Rows() => [() => (1, "tuple")];
+    public static IEnumerable<Func<((int, string), int)>> NestedRows() => [() => ((1, "tuple"), 7)];
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(Rows))]
+    public void Optional<T>((T, string) row, int extra = 5)
+    {
+        if (row.Item1 is not (int or long) || row.Item2 != "tuple" || extra != 5)
+            throw new InvalidOperationException("Expected whole tuple and optional default");
+    }
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(Rows))]
+    public void Params<T>((T, string) row, params int[] extra)
+    {
+        if (row.Item1 is not (int or long) || row.Item2 != "tuple" || extra.Length != 0)
+            throw new InvalidOperationException("Expected whole tuple and empty params");
+    }
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(Rows))]
+    public void Array<T>((T, string) row, int[] extra)
+    {
+        if (row.Item1 is not (int or long) || row.Item2 != "tuple" || extra.Length != 0)
+            throw new InvalidOperationException("Expected whole tuple and empty trailing array");
+    }
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(NestedRows))]
+    public void Nested<T>((T, string) row, int extra = 5)
+    {
+        if (row.Item1 is not (int or long) || row.Item2 != "tuple" || extra != 7)
+            throw new InvalidOperationException("Expected nested tuple with supplied column");
+    }
+}
+
+#pragma warning restore TUnit0001

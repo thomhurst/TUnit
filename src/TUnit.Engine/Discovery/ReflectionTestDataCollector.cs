@@ -2959,9 +2959,38 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         var typeArguments = new Type?[genericParameterCount];
-        for (var i = 0; i < parameters.Length && i < tupleElements.Length; i++)
+        var rowType = funcType.GetGenericArguments()[0];
+        var receivesWholeTuple = parameters.Length > 0
+            && GetTupleElementTypes(parameters[0].ParameterType) is not null
+            && parameters.Skip(1).All(parameter => parameter.IsOptional
+                || parameter.IsDefined(typeof(ParamArrayAttribute), false)
+                || IsParamCollection(parameter)
+                || (parameter == parameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
+            && (parameters.Length == 1 || TupleHelper.MatchesOpenTuple(parameters[0].ParameterType, rowType));
+
+        if (receivesWholeTuple)
         {
-            MapGenericParameters(parameters[i].ParameterType, tupleElements[i], typeArguments);
+            // Match the same whole row as generated discovery. Sole tuples reconstruct their
+            // elements; tuples with omitted trailing parameters retain strict whole-row bindings.
+            var bindings = new Dictionary<Type, Type>();
+            if (!TestGenericTypeResolver.TryInferTypeMapping(parameters[0].ParameterType, rowType, bindings,
+                    tupleElement: parameters.Length == 1, overwriteBindings: parameters.Length == 1))
+            {
+                return null;
+            }
+
+            foreach (var binding in bindings)
+            {
+                if (binding.Key.IsGenericParameter && binding.Key.DeclaringMethod is not null)
+                    typeArguments[binding.Key.GenericParameterPosition] = binding.Value;
+            }
+        }
+        else
+        {
+            for (var i = 0; i < parameters.Length && i < tupleElements.Length; i++)
+            {
+                MapGenericParameters(parameters[i].ParameterType, tupleElements[i], typeArguments);
+            }
         }
 
         foreach (var typeArgument in typeArguments)

@@ -44,6 +44,20 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task Explicit_Method_Types_Still_Infer_Whole_Tuple_Rows()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7629/ExplicitWholeTupleInferenceTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(8),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(5),
+                // The three explicit long instantiations cannot receive the whole (int, string)
+                // row with a trailing parameter. Only the inferred int instantiations match.
+                result => result.ResultSummary.Counters.Failed.ShouldBe(3)
+            ]);
+    }
+
+    [Test]
     [Arguments("OrdinaryGenericBaseInferenceTests")]
     [Arguments("SpreadCrossFamilyTupleInferenceTests")]
     [Arguments("SpreadMatchingFamilyTupleInferenceTests")]
