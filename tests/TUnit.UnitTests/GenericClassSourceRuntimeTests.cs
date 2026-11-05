@@ -69,6 +69,93 @@ public class GenericClassSourceRuntimeTests
         }
     }
 
+    private sealed class TargetBoxRow;
+    private sealed class Box<T>
+    {
+        public static implicit operator Box<T>(TargetBoxRow value) => new();
+    }
+    private sealed class BoxOperatorRow(bool throws)
+    {
+        private readonly bool throws = throws;
+        public static implicit operator Box<int>(BoxOperatorRow value)
+            => value.throws ? throw new InvalidOperationException("Partitioning must not invoke operators") : new();
+    }
+    private sealed class WrongBoxOperatorRow
+    {
+        public static implicit operator Box<string>(WrongBoxOperatorRow value) => new();
+    }
+
+    [Test]
+    [Arguments(false, false)]
+    [Arguments(true, false)]
+    [Arguments(false, true)]
+    [Arguments(true, true)]
+    public async Task Partition_Preserves_Generic_Trailing_And_Structural_Operator_Rows(bool generated, bool operators)
+    {
+        Type[] arguments = operators ? [typeof(int), typeof(string)] : [typeof(int[]), typeof(string)];
+        var target = operators ? typeof(Box<int>) : typeof(int[]);
+        TypeInfo description = generated
+            ? operators ? new ConstructedGeneric(typeof(Box<>), [new GenericParameter(0, false)]) : new GenericParameter(0, false)
+            : new ConcreteType(target);
+        IMemberMetadata[] parameters = operators
+            ? [new ParameterMetadata(target) { Name = "first", TypeInfo = description, CachedIsOptional = false },
+               new ParameterMetadata(typeof(string)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true }]
+            : [new ParameterMetadata(target) { Name = "items", TypeInfo = description, CachedIsOptional = false }];
+        object?[][] original = operators
+            ? [[new Box<int>()], [new BoxOperatorRow(false)], [new BoxOperatorRow(true)], [new TargetBoxRow()]]
+            : [[new int[] { 1 }], [2, 3], []];
+        foreach (var row in original)
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow(row, parameters, arguments)).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow(
+            operators ? [new WrongBoxOperatorRow()] : [new object(), new object()], parameters, arguments)).IsFalse();
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create(arguments, GenericClassRowFallback.AllRows, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata)) rows.Add(await factory());
+        await Assert.That(rows.Count).IsEqualTo(original.Length);
+        for (var i = 0; i < rows.Count; i++) await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+        if (operators)
+        {
+            await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<Box<int>>(original[1][0]) is Box<int>).IsTrue();
+            await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<Box<int>>(original[3][0]) is Box<int>).IsTrue();
+        }
+        else await Assert.That(TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(new object[] { 2, 3 }).Length).IsEqualTo(2);
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Generic_Parameter_Params_Interface_Collects_Expanded_Rows(bool generated)
+    {
+        IMemberMetadata[] parameters = [new ParameterMetadata(typeof(IEnumerable<int>))
+        {
+            Name = "items", CachedIsParams = true, CachedIsOptional = false,
+            TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(typeof(IEnumerable<int>))
+        }];
+        Type[] arguments = [typeof(IEnumerable<int>), typeof(string)];
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([1, 2], parameters, arguments)).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([], parameters, arguments)).IsTrue();
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new object(), new object()], parameters, arguments)).IsFalse();
+        parameters = [new ParameterMetadata(typeof(IEnumerable<int>))
+        {
+            Name = "items", CachedIsParams = false, CachedIsOptional = false,
+            TypeInfo = generated ? new GenericParameter(0, false) : new ConcreteType(typeof(IEnumerable<int>))
+        }];
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([1, 2], parameters, arguments)).IsFalse();
+    }
+
     private sealed class DeferredEnumerable : System.Collections.IEnumerable
     {
         public System.Collections.IEnumerator GetEnumerator()

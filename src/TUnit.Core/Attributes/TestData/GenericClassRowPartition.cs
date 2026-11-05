@@ -328,7 +328,7 @@ public static class GenericClassRowPartition
 
         var (values, _) = TestDataRowUnwrapper.UnwrapArray(row);
         var trailing = parameters.LastOrDefault() is ParameterMetadata last
-            ? GetTrailingConstructorElement(last) : null;
+            ? GetTrailingConstructorElement(last, classTypeArguments) : null;
         var regularCount = parameters.Length - (trailing is null ? 0 : 1);
         if (trailing is null && values.Length > parameters.Length)
         {
@@ -373,9 +373,13 @@ public static class GenericClassRowPartition
         return true;
     }
 
-    private static TypeInfo? GetTrailingConstructorElement(ParameterMetadata parameter)
+    private static TypeInfo? GetTrailingConstructorElement(ParameterMetadata parameter, Type[] classTypeArguments)
     {
         var description = GetConstructorTypeInfo(parameter);
+        if (description is GenericParameter { IsMethodParameter: false } genericParameter)
+        {
+            description = new ConcreteType(classTypeArguments[genericParameter.Position]);
+        }
         return description switch
         {
             ConstructorArray { Rank: 1 } array => array.Element,
@@ -420,6 +424,7 @@ public static class GenericClassRowPartition
         return true;
     }
 
+    // TODO(#7615): consolidate structural matching with the binder and its parity coverage.
     // Conversion belongs to the binder. Do not execute user converters while partitioning;
     // retain candidates for registered conversions and built-in scalar CastHelper paths.
     private static bool MayConvertConstructorValue(TypeInfo description, object value, Type[] classTypeArguments)
@@ -488,6 +493,13 @@ public static class GenericClassRowPartition
                 return true;
             }
 #endif
+            if (description is ConstructedGeneric structural
+                && Helpers.CastHelper.HasStructuralReflectionConversion(value.GetType(), structural.GenericDefinition,
+                    (description, classTypeArguments), static (candidate, state) => MatchesConstructorParameterType(
+                        state.description, candidate, state.classTypeArguments, direction: 0)))
+            {
+                return true;
+            }
             return Converters.AotConverterRegistry.HasConverter(value.GetType(), (description, classTypeArguments),
                 static (registeredTarget, state) => MatchesConstructorParameterType(
                     state.description, registeredTarget, state.classTypeArguments, direction: 0));
