@@ -751,22 +751,24 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
     {
         if (args.Count < 2) return (AssertionConversionKind.Contains, null, false, null);
 
+        // Keep xUnit argument evaluation order by asserting the inverse strict relation.
         // xUnit: Assert.ProperSubset(expectedSuperset, actual)
         var expectedSuperset = args[0].Expression.ToString();
         var actual = args[1].Expression.ToString();
 
-        return (AssertionConversionKind.Contains, $"await Assert.That({actual}).IsProperSubsetOf({expectedSuperset})", true, null);
+        return (AssertionConversionKind.Contains, $"await Assert.That({expectedSuperset}).IsProperSupersetOf({actual})", true, null);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertProperSuperset(SeparatedSyntaxList<ArgumentSyntax> args)
     {
         if (args.Count < 2) return (AssertionConversionKind.Contains, null, false, null);
 
+        // Keep xUnit argument evaluation order by asserting the inverse strict relation.
         // xUnit: Assert.ProperSuperset(expectedSubset, actual)
         var expectedSubset = args[0].Expression.ToString();
         var actual = args[1].Expression.ToString();
 
-        return (AssertionConversionKind.Contains, $"await Assert.That({actual}).IsProperSupersetOf({expectedSubset})", true, null);
+        return (AssertionConversionKind.Contains, $"await Assert.That({expectedSubset}).IsProperSubsetOf({actual})", true, null);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertDistinct(SeparatedSyntaxList<ArgumentSyntax> args)

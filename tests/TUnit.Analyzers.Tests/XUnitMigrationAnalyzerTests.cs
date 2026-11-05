@@ -1516,7 +1516,7 @@ public class XUnitMigrationAnalyzerTests
                     {
                         var subset = new HashSet<int> { 1, 2 };
                         var superset = new HashSet<int> { 1, 2, 3 };
-                        await Assert.That(subset).IsProperSubsetOf(superset);
+                        await Assert.That(superset).IsProperSupersetOf(subset);
                     }
                 }
                 """,
@@ -1558,12 +1558,104 @@ public class XUnitMigrationAnalyzerTests
                     {
                         var subset = new HashSet<int> { 1, 2 };
                         var superset = new HashSet<int> { 1, 2, 3 };
-                        await Assert.That(superset).IsProperSupersetOf(subset);
+                        await Assert.That(subset).IsProperSubsetOf(superset);
                     }
                 }
                 """,
                 ConfigureXUnitTest
             );
+    }
+
+    [Test]
+    public async Task Assert_ProperSubset_Preserves_Out_Variable_Evaluation_Order()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+            {|#0:using System.Collections.Generic;
+            using Xunit;
+
+            public class MyClass
+            {
+                private HashSet<int> CreateSet(out HashSet<int> actual)
+                {
+                    actual = new HashSet<int> { 1 };
+                    return new HashSet<int> { 1, 2 };
+                }
+
+                [Fact]
+                public void MyTest()
+                {
+                    Assert.ProperSubset(CreateSet(out var actual), actual);
+                }
+            }|}
+            """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            """
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+
+            public class MyClass
+            {
+                private HashSet<int> CreateSet(out HashSet<int> actual)
+                {
+                    actual = new HashSet<int> { 1 };
+                    return new HashSet<int> { 1, 2 };
+                }
+
+                [Test]
+                public async Task MyTest()
+                {
+                    await Assert.That(CreateSet(out var actual)).IsProperSupersetOf(actual);
+                }
+            }
+            """,
+            ConfigureXUnitTest);
+    }
+
+    [Test]
+    public async Task Assert_ProperSuperset_Preserves_Out_Variable_Evaluation_Order()
+    {
+        await CodeFixer.VerifyCodeFixAsync(
+            """
+            {|#0:using System.Collections.Generic;
+            using Xunit;
+
+            public class MyClass
+            {
+                private HashSet<int> CreateSet(out HashSet<int> actual)
+                {
+                    actual = new HashSet<int> { 1 };
+                    return new HashSet<int> { 1, 2 };
+                }
+
+                [Fact]
+                public void MyTest()
+                {
+                    Assert.ProperSuperset(CreateSet(out var actual), actual);
+                }
+            }|}
+            """,
+            Verifier.Diagnostic(Rules.XunitMigration).WithLocation(0),
+            """
+            using System.Collections.Generic;
+            using System.Threading.Tasks;
+
+            public class MyClass
+            {
+                private HashSet<int> CreateSet(out HashSet<int> actual)
+                {
+                    actual = new HashSet<int> { 1 };
+                    return new HashSet<int> { 1, 2 };
+                }
+
+                [Test]
+                public async Task MyTest()
+                {
+                    await Assert.That(CreateSet(out var actual)).IsProperSubsetOf(actual);
+                }
+            }
+            """,
+            ConfigureXUnitTest);
     }
 
     [Test]
