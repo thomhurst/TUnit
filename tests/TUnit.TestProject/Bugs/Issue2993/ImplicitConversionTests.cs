@@ -24,7 +24,7 @@ internal class ImplicitConversionTests
     public async Task PrivateType_WithNullableIntImplicitOperator_NonEmptyCollection()
     {
         NullableIntRecord item1 = 42;
-        NullableIntRecord item2 = null;
+        NullableIntRecord item2 = (int?)null;
         var items = new[] { item1, item2 };
 
         await Assert.That(items).IsNotEmpty();

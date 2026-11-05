@@ -18,7 +18,7 @@ public class NestedInitializerExceptionPropagationTests(
     {
         // This test should never run - it should fail during discovery/initialization
         // because the nested IAsyncInitializer throws during property access
-        throw new InvalidOperationException("This test should not have executed - nested initializer should have thrown");
+        throw new InvalidOperationException($"{factory.GetType().Name}: This test should not have executed - nested initializer should have thrown");
     }
 
     public class FailingNestedInitializerFactory : IAsyncInitializer

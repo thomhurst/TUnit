@@ -121,19 +121,16 @@ public class MultipleAfterEveryTestHooks
 public class MultipleAfterClassHooksTests
 {
     private static readonly ConcurrentBag<string> ClassHookExecutions = new();
-    private static bool _testsExecuted = false;
 
     [Test]
     public void SimpleTest1()
     {
-        _testsExecuted = true;
         // Test executed("[CLASS-HOOKS] Test 1 in class executed");
     }
 
     [Test]
     public void SimpleTest2()
     {
-        _testsExecuted = true;
         // Test executed("[CLASS-HOOKS] Test 2 in class executed");
     }
 }
@@ -236,66 +233,19 @@ public class MultipleAfterAssemblyHooksTests
 }
 
 /// <summary>
-/// Multiple AfterEveryAssembly and After(Assembly) hooks - some will fail
+/// Disabled assembly-level failure hooks retained as no-ops to avoid affecting unrelated tests.
 /// </summary>
 public class MultipleAssemblyLevelAfterHooks
 {
-    private static readonly ConcurrentBag<string> AssemblyHookExecutions = new();
-    private static bool _hooksTriggered = false;
+    // Assembly failure hooks are intentionally disabled because they affect unrelated tests.
+    [AfterEvery(Assembly)]
+    public static Task AfterEveryAssembly_Hook1_Success(AssemblyHookContext context) => Task.CompletedTask;
 
     [AfterEvery(Assembly)]
-    public static async Task AfterEveryAssembly_Hook1_Success(AssemblyHookContext context)
-    {
-        // Disabled - these hooks interfere with other tests
-        await Task.CompletedTask;
-        return;
-        
-        // Only run once for our test assembly
-        if (!_hooksTriggered && context.Assembly.GetName().Name == "TUnit.TestProject")
-        {
-            AssemblyHookExecutions.Add("AfterEveryAssembly_Hook1");
-            // Hook executed("[AFTER-ASSEMBLY] AfterEveryAssembly Hook 1 executing successfully");
-            await Task.CompletedTask;
-        }
-    }
+    public static Task AfterEveryAssembly_Hook2_Fails(AssemblyHookContext context) => Task.CompletedTask;
 
     [AfterEvery(Assembly)]
-    public static async Task AfterEveryAssembly_Hook2_Fails(AssemblyHookContext context)
-    {
-        // Disabled - these hooks interfere with other tests
-        await Task.CompletedTask;
-        return;
-        
-        if (!_hooksTriggered && context.Assembly.GetName().Name == "TUnit.TestProject")
-        {
-            AssemblyHookExecutions.Add("AfterEveryAssembly_Hook2");
-            // Hook executed("[AFTER-ASSEMBLY] AfterEveryAssembly Hook 2 executing and will fail");
-            await Task.CompletedTask;
-            throw new InvalidOperationException("AfterEveryAssembly Hook 2 intentionally failed");
-        }
-    }
-
-    [AfterEvery(Assembly)]
-    public static async Task AfterEveryAssembly_Hook3_StillExecutes(AssemblyHookContext context)
-    {
-        // Disabled - these hooks interfere with other tests
-        await Task.CompletedTask;
-        return;
-        
-        if (!_hooksTriggered && context.Assembly.GetName().Name == "TUnit.TestProject")
-        {
-            AssemblyHookExecutions.Add("AfterEveryAssembly_Hook3");
-            // Hook executed("[AFTER-ASSEMBLY] AfterEveryAssembly Hook 3 still executing");
-            await Task.CompletedTask;
-            _hooksTriggered = true;
-
-            // Verify hooks executed
-            if (AssemblyHookExecutions.Count >= 3)
-            {
-                // Hook executed("[AFTER-ASSEMBLY] SUCCESS: Multiple assembly hooks executed despite failures!");
-            }
-        }
-    }
+    public static Task AfterEveryAssembly_Hook3_StillExecutes(AssemblyHookContext context) => Task.CompletedTask;
 }
 
 /// <summary>

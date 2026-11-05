@@ -10,6 +10,8 @@ public sealed class Counter;
 [MethodDataSource(typeof(Sources), nameof(Sources.Counters))]
 public class OnlyUntypedClassSourceInfersT<T>(T value)
 {
+    public T Value { get; } = value;
+
     [Test]
     [Arguments(1)]
     [Arguments(2)]
@@ -20,6 +22,8 @@ public class OnlyUntypedClassSourceInfersT<T>(T value)
 [MethodDataSource(typeof(Sources), nameof(Sources.Counters))]
 public class ExplicitClassSource<T>(T value)
 {
+    public T Value { get; } = value;
+
     [Test]
     public void Test() { }
 }
@@ -27,6 +31,8 @@ public class ExplicitClassSource<T>(T value)
 [Arguments(1)]
 public class ArgumentsClassSource<T>(T value)
 {
+    public T Value { get; } = value;
+
     [Test]
     public void Test() { }
 }
@@ -42,6 +48,8 @@ public abstract class InheritedClassSourceBase;
 
 public class InheritedUntypedClassSource<T>(T value) : InheritedClassSourceBase
 {
+    public T Value { get; } = value;
+
     [Test]
     public void Test() { }
 }
@@ -49,6 +57,8 @@ public class InheritedUntypedClassSource<T>(T value) : InheritedClassSourceBase
 [Arguments(1)]
 public class FilteredClassSource<T>(T value) where T : struct
 {
+    public T Value { get; } = value;
+
     [Test]
     [Arguments("a")]
     public void Test(T arg) { }
@@ -57,6 +67,8 @@ public class FilteredClassSource<T>(T value) where T : struct
 [Arguments(1)]
 public class UninferredMethodWithInferredClass<T>(T value)
 {
+    public T Value { get; } = value;
+
     [Test]
     public void Test<U>() { }
 }
@@ -71,6 +83,8 @@ public class UninferredMethodWithExplicitClass<T>
 [MethodDataSource(typeof(Sources), nameof(Sources.Counters))]
 public class UninferredMethodAndClass<T>(T value)
 {
+    public T Value { get; } = value;
+
     [Test]
     public void Test<U>() { }
 }

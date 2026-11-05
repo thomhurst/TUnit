@@ -261,6 +261,7 @@ public class CombinedConstraints_VerificationTest
                     break;
                 }
             }
+            Console.WriteLine($"Query tests overlapped: {hasOverlap}");
             // This is a relaxed check - in some cases they might not overlap due to timing
             // But they should be allowed to overlap
         }

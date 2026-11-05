@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using TUnit.Core.Interfaces;
 using TUnit.TestProject.Attributes;
 using TUnit.TestProject.Models;
@@ -27,118 +26,130 @@ public class NestedClassDataSourceDrivenTests3
         await Assert.That(value.InnerClass.InnerClass.IsDisposed).IsFalse();
     }
 
-    [method: SetsRequiredMembers]
     public class MyDataProvider() : DataSourceGeneratorAttribute<SomeClass1>, IAsyncInitializer
     {
         [MyDataProvider1]
-        public required SomeClass1 InnerClass { get; init; }
+        public SomeClass1? InnerClass { get; init; }
 
         protected override IEnumerable<Func<SomeClass1>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
-            yield return () => InnerClass;
+            var innerClass = InnerClass ?? throw new InvalidOperationException("InnerClass was not injected.");
+
+            yield return () => innerClass;
         }
 
         public async Task InitializeAsync()
         {
-            await Assert.That(InnerClass).IsNotNull();
-            await Assert.That(InnerClass.IsInitialized).IsTrue();
-            await Assert.That(InnerClass.InitializedCount).IsEqualTo(1);
+            var innerClass = InnerClass ?? throw new InvalidOperationException("InnerClass was not injected.");
 
-            await Assert.That(InnerClass.InnerClass).IsNotNull();
-            await Assert.That(InnerClass.InnerClass.IsInitialized).IsTrue();
-            await Assert.That(InnerClass.InnerClass.InitializedCount).IsEqualTo(1);
+            await Assert.That(innerClass).IsNotNull();
+            await Assert.That(innerClass.IsInitialized).IsTrue();
+            await Assert.That(innerClass.InitializedCount).IsEqualTo(1);
 
-            await Assert.That(InnerClass.InnerClass.InnerClass).IsNotNull();
-            await Assert.That(InnerClass.InnerClass.InnerClass.IsInitialized).IsTrue();
-            await Assert.That(InnerClass.InnerClass.InnerClass.InitializedCount).IsEqualTo(1);
+            await Assert.That(innerClass.InnerClass).IsNotNull();
+            await Assert.That(innerClass.InnerClass.IsInitialized).IsTrue();
+            await Assert.That(innerClass.InnerClass.InitializedCount).IsEqualTo(1);
+
+            await Assert.That(innerClass.InnerClass.InnerClass).IsNotNull();
+            await Assert.That(innerClass.InnerClass.InnerClass.IsInitialized).IsTrue();
+            await Assert.That(innerClass.InnerClass.InnerClass.InitializedCount).IsEqualTo(1);
         }
     }
 
-    [method: SetsRequiredMembers]
     public class MyDataProvider1() : DataSourceGeneratorAttribute<SomeClass1>, IAsyncInitializer
     {
         [MyDataProvider2]
-        public required SomeClass2 InnerClass { get; init; }
+        public SomeClass2? InnerClass { get; init; }
 
         protected override IEnumerable<Func<SomeClass1>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
+            var innerClass = InnerClass ?? throw new InvalidOperationException("InnerClass was not injected.");
+
             yield return () =>
             {
-                if (InnerClass is null)
+                if (innerClass is null)
                 {
-                    throw new InvalidOperationException("InnerClass was not set.");
+                    throw new InvalidOperationException("innerClass was not set.");
                 }
 
-                if (InnerClass.InnerClass is null)
+                if (innerClass.InnerClass is null)
                 {
-                    throw new InvalidOperationException("InnerClass.InnerClass was not set.");
+                    throw new InvalidOperationException("innerClass.InnerClass was not set.");
                 }
 
                 return new SomeClass1
                 {
-                    InnerClass = InnerClass
+                    InnerClass = innerClass
                 };
             };
         }
 
         public async Task InitializeAsync()
         {
-            await Assert.That(InnerClass).IsNotNull();
-            await Assert.That(InnerClass.IsInitialized).IsTrue();
-            await Assert.That(InnerClass.InitializedCount).IsEqualTo(1);
+            var innerClass = InnerClass ?? throw new InvalidOperationException("InnerClass was not injected.");
 
-            await Assert.That(InnerClass.InnerClass).IsNotNull();
-            await Assert.That(InnerClass.InnerClass.IsInitialized).IsTrue();
-            await Assert.That(InnerClass.InnerClass.InitializedCount).IsEqualTo(1);
+            await Assert.That(innerClass).IsNotNull();
+            await Assert.That(innerClass.IsInitialized).IsTrue();
+            await Assert.That(innerClass.InitializedCount).IsEqualTo(1);
+
+            await Assert.That(innerClass.InnerClass).IsNotNull();
+            await Assert.That(innerClass.InnerClass.IsInitialized).IsTrue();
+            await Assert.That(innerClass.InnerClass.InitializedCount).IsEqualTo(1);
         }
     }
 
-    [method: SetsRequiredMembers]
     public class MyDataProvider2() : DataSourceGeneratorAttribute<SomeClass2>, IAsyncInitializer
     {
         [MyDataProvider3]
-        public required SomeClass3 InnerClass { get; init; }
+        public SomeClass3? InnerClass { get; init; }
 
         protected override IEnumerable<Func<SomeClass2>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
+            var innerClass = InnerClass ?? throw new InvalidOperationException("InnerClass was not injected.");
+
             yield return () =>
             {
-                if (InnerClass is null)
+                if (innerClass is null)
                 {
-                    throw new InvalidOperationException("InnerClass was not set.");
+                    throw new InvalidOperationException("innerClass was not set.");
                 }
 
                 return new SomeClass2
                 {
-                    InnerClass = InnerClass
+                    InnerClass = innerClass
                 };
             };
         }
 
         public async Task InitializeAsync()
         {
-            await Assert.That(InnerClass).IsNotNull();
-            await Assert.That(InnerClass.IsInitialized).IsTrue();
-            await Assert.That(InnerClass.InitializedCount).IsEqualTo(1);
+            var innerClass = InnerClass ?? throw new InvalidOperationException("InnerClass was not injected.");
+
+            await Assert.That(innerClass).IsNotNull();
+            await Assert.That(innerClass.IsInitialized).IsTrue();
+            await Assert.That(innerClass.InitializedCount).IsEqualTo(1);
         }
     }
 
-    [method: SetsRequiredMembers]
     public class MyDataProvider3() : DataSourceGeneratorAttribute<SomeClass3>, IAsyncInitializer
     {
         [ClassDataSource<SomeClass3>(Shared = SharedType.PerTestSession)]
-        public required SomeClass3 InnerClass { get; init; }
+        public SomeClass3? InnerClass { get; init; }
 
         protected override IEnumerable<Func<SomeClass3>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
         {
-            yield return () => InnerClass;
+            var innerClass = InnerClass ?? throw new InvalidOperationException("InnerClass was not injected.");
+
+            yield return () => innerClass;
         }
 
         public async Task InitializeAsync()
         {
-            await Assert.That(InnerClass).IsNotNull();
-            await Assert.That(InnerClass.IsInitialized).IsTrue();
-            await Assert.That(InnerClass.InitializedCount).IsEqualTo(1);
+            var innerClass = InnerClass ?? throw new InvalidOperationException("InnerClass was not injected.");
+
+            await Assert.That(innerClass).IsNotNull();
+            await Assert.That(innerClass.IsInitialized).IsTrue();
+            await Assert.That(innerClass.InitializedCount).IsEqualTo(1);
         }
     }
 

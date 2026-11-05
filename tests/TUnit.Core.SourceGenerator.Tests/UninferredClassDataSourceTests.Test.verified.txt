@@ -18,7 +18,20 @@ internal static class TUnit_TestProject_Bugs__7355_OnlyUntypedClassSourceInfersT
         {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
         }),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Properties = new global::TUnit.Core.PropertyMetadata[]
+        {
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7355.OnlyUntypedClassSourceInfersT<>).GetProperty("Value"),
+                Type = typeof(object),
+                Name = "Value",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7355.OnlyUntypedClassSourceInfersT<>), "Value"),
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7355.OnlyUntypedClassSourceInfersT<>);
@@ -32,7 +45,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "arg", new globa
         {
             MethodName = "Test",
             FilePath = "",
-            LineNumber = 13,
+            LineNumber = 15,
             MethodMetadata = __mm_0,
             Messages = new string[] { "The generic test class type arguments cannot be inferred at compile time from its data sources. Source-generated mode requires concrete types to preserve Native AOT compatibility. Use [GenerateGenericTest] to specify the class type arguments." },
         },
@@ -66,7 +79,20 @@ internal static class TUnit_TestProject_Bugs__7355_ExplicitClassSource_T_Test_Te
         {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
         }),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Properties = new global::TUnit.Core.PropertyMetadata[]
+        {
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7355.ExplicitClassSource<>).GetProperty("Value"),
+                Type = typeof(object),
+                Name = "Value",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7355.ExplicitClassSource<>), "Value"),
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7355.ExplicitClassSource<>);
@@ -102,7 +128,7 @@ internal static class TUnit_TestProject_Bugs__7355_ExplicitClassSource_T_Test_Te
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7355.ExplicitClassSource<Counter>.Test",
             filePath: "",
-            lineNumber: 23,
+            lineNumber: 27,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -147,7 +173,20 @@ internal static class TUnit_TestProject_Bugs__7355_ArgumentsClassSource_T_Test_T
         {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
         }),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Properties = new global::TUnit.Core.PropertyMetadata[]
+        {
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7355.ArgumentsClassSource<>).GetProperty("Value"),
+                Type = typeof(object),
+                Name = "Value",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7355.ArgumentsClassSource<>), "Value"),
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7355.ArgumentsClassSource<>);
@@ -182,7 +221,7 @@ internal static class TUnit_TestProject_Bugs__7355_ArgumentsClassSource_T_Test_T
             methodName: "Test",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7355.ArgumentsClassSource<int>.Test",
             filePath: "",
-            lineNumber: 30,
+            lineNumber: 36,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -233,7 +272,20 @@ internal static class TUnit_TestProject_Bugs__7355_InheritedUntypedClassSource_T
         {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
         }),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Properties = new global::TUnit.Core.PropertyMetadata[]
+        {
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7355.InheritedUntypedClassSource<>).GetProperty("Value"),
+                Type = typeof(object),
+                Name = "Value",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7355.InheritedUntypedClassSource<>), "Value"),
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7355.InheritedUntypedClassSource<>);
@@ -244,7 +296,7 @@ internal static class TUnit_TestProject_Bugs__7355_InheritedUntypedClassSource_T
         {
             MethodName = "Test",
             FilePath = "",
-            LineNumber = 45,
+            LineNumber = 53,
             MethodMetadata = __mm_0,
             Messages = new string[] { "The generic test class type arguments cannot be inferred at compile time from its data sources. Source-generated mode requires concrete types to preserve Native AOT compatibility. Use [GenerateGenericTest] to specify the class type arguments." },
         },
@@ -278,7 +330,20 @@ internal static class TUnit_TestProject_Bugs__7355_UninferredMethodWithInferredC
         {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
         }),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Properties = new global::TUnit.Core.PropertyMetadata[]
+        {
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7355.UninferredMethodWithInferredClass<>).GetProperty("Value"),
+                Type = typeof(object),
+                Name = "Value",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7355.UninferredMethodWithInferredClass<>), "Value"),
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7355.UninferredMethodWithInferredClass<>);
@@ -289,7 +354,7 @@ internal static class TUnit_TestProject_Bugs__7355_UninferredMethodWithInferredC
         {
             MethodName = "Test",
             FilePath = "",
-            LineNumber = 60,
+            LineNumber = 72,
             MethodMetadata = __mm_0,
             Messages = new string[] { "The type arguments of generic test method 'Test' cannot be inferred at compile time from its data sources. Use [GenerateGenericTest] on the method to specify its type arguments." },
         },
@@ -331,7 +396,7 @@ internal static class TUnit_TestProject_Bugs__7355_UninferredMethodWithExplicitC
         {
             MethodName = "Test",
             FilePath = "",
-            LineNumber = 67,
+            LineNumber = 79,
             MethodMetadata = __mm_0,
             Messages = new string[] { "The type arguments of generic test method 'Test' cannot be inferred at compile time from its data sources. Use [GenerateGenericTest] on the method to specify its type arguments." },
         },
@@ -365,7 +430,20 @@ internal static class TUnit_TestProject_Bugs__7355_UninferredMethodAndClass_T_Te
         {
             global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
         }),
-        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Properties = new global::TUnit.Core.PropertyMetadata[]
+        {
+            new global::TUnit.Core.PropertyMetadata
+            {
+                ReflectionInfo = typeof(global::TUnit.TestProject.Bugs._7355.UninferredMethodAndClass<>).GetProperty("Value"),
+                Type = typeof(object),
+                Name = "Value",
+                IsStatic = false,
+                IsNullable = false,
+                Getter = global::TUnit.Core.PropertyMetadataFactory.CreateGenericGetter(typeof(global::TUnit.TestProject.Bugs._7355.UninferredMethodAndClass<>), "Value"),
+                ClassMetadata = null!,
+                ContainingTypeMetadata = null!
+            }
+        },
         Parent = null
     });
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7355.UninferredMethodAndClass<>);
@@ -376,7 +454,7 @@ internal static class TUnit_TestProject_Bugs__7355_UninferredMethodAndClass_T_Te
         {
             MethodName = "Test",
             FilePath = "",
-            LineNumber = 74,
+            LineNumber = 88,
             MethodMetadata = __mm_0,
             Messages = new string[] { "The generic test class type arguments cannot be inferred at compile time from its data sources. Source-generated mode requires concrete types to preserve Native AOT compatibility. Use [GenerateGenericTest] to specify the class type arguments." },
         },

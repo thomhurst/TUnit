@@ -38,7 +38,7 @@ public class DerivedSkipWithFailingClassDataSourceTests(FailingDataSource dataSo
     [Test]
     public void Test()
     {
-        throw new Exception("This test should have been skipped, not executed!");
+        throw new Exception($"{dataSource.GetType().Name}: This test should have been skipped, not executed!");
     }
 }
 
@@ -68,6 +68,6 @@ public class DerivedSkipWithSucceedingClassDataSourceTests(SucceedingDataSource 
     [Test]
     public void Test()
     {
-        throw new Exception("This test should have been skipped, not executed!");
+        throw new Exception($"{dataSource.GetType().Name}: This test should have been skipped, not executed!");
     }
 }

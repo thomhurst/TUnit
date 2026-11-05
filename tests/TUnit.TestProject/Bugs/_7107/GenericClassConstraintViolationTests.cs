@@ -299,5 +299,5 @@ public class PartialConstructorMethodConstraintTests<T, U>(T seed) where T : str
 {
     [Test]
     [Arguments("x", "y")]
-    public void Run(T value, U other) => throw new InvalidOperationException("Must fail during discovery");
+    public void Run(T value, U other) => throw new InvalidOperationException($"Must fail during discovery (constructor seed: {seed})");
 }
