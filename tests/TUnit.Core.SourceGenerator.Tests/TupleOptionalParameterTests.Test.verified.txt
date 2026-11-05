@@ -97,7 +97,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "rest", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Generic_Reference_Tuple_And_Array<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 63,
+            lineNumber: 74,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -197,7 +197,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "extra", new glo
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.ConvertedAndGenericTupleOptionalTests.Generic_Tuple_And_Optional<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 437,
+            lineNumber: 448,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -300,6 +300,51 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
                 }
                 case 1:
                 {
+                    if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+                    {
+                        var __tupleElements = global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]);
+                        args = new object[] { new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleElements[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleElements[1])) };
+                    }
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped_Reference_Tuple_And_Array((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) }), global::System.Array.Empty<int>()));
+                            }
+                        case 2:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped_Reference_Tuple_And_Array((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) }), (args[1] is null ? null : args[1] is int[] arr ? arr : global::TUnit.Core.Helpers.CastHelper.ToTrailingArray<int>(args[1]))));
+                            }
+                        case 3:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped_Reference_Tuple_And_Array((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) }), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]) }));
+                            }
+                        case 4:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped_Reference_Tuple_And_Array((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) }), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]) }));
+                            }
+                        case 5:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped_Reference_Tuple_And_Array((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) }), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]) }));
+                            }
+                        case 6:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped_Reference_Tuple_And_Array((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) }), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]) }));
+                            }
+                        case 7:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped_Reference_Tuple_And_Array((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) }), new int[] { global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[2]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[3]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[4]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[5]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[6]) }));
+                            }
+                        default:
+                            if (args.Length < 1)
+                            {
+                                throw new global::System.ArgumentException($"Expected at least 1 argument, but got {args.Length}");
+                            }
+                            return new global::System.Threading.Tasks.ValueTask(instance.Wrapped_Reference_Tuple_And_Array((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) }), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>())));
+                    }
+                }
+                case 2:
+                {
                     var context = global::TUnit.Core.TestContext.Current;
                     if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
@@ -344,7 +389,7 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
                             return new global::System.Threading.Tasks.ValueTask(instance.Tuple_And_Array((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, int> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>>(__tupleFallback0) }), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>()), context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None));
                     }
                 }
-                case 2:
+                case 3:
                 {
                     if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
@@ -365,7 +410,7 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
                             throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
                     }
                 }
-                case 3:
+                case 4:
                 {
                     if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
@@ -390,7 +435,7 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
                             throw new global::System.ArgumentException($"Expected between 1 and 3 arguments, but got {args.Length}");
                     }
                 }
-                case 4:
+                case 5:
                 {
                     var context = global::TUnit.Core.TestContext.Current;
                     if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
@@ -412,7 +457,7 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
                             throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
                     }
                 }
-                case 5:
+                case 6:
                 {
                     var context = global::TUnit.Core.TestContext.Current;
                     if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
@@ -434,7 +479,7 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
                             throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
                     }
                 }
-                case 6:
+                case 7:
                 {
                     if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
@@ -479,7 +524,7 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
                             return new global::System.Threading.Tasks.ValueTask(instance.Tuple_And_Params((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, int> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>>(__tupleFallback0) }), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>())));
                     }
                 }
-                case 7:
+                case 8:
                 {
                     if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
@@ -524,7 +569,7 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
                             return new global::System.Threading.Tasks.ValueTask(instance.Tuple_And_Params_Collection((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, int> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, int>>(__tupleFallback0) }), (args.Length > 1 ? global::System.Linq.Enumerable.ToArray(global::System.Linq.Enumerable.Select(global::System.Linq.Enumerable.Range(1, args.Length - 1), i => global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[i]))) : global::System.Array.Empty<int>())));
                     }
                 }
-                case 8:
+                case 9:
                 {
                     if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
@@ -545,7 +590,7 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
                             throw new global::System.ArgumentException($"Expected between 1 and 2 arguments, but got {args.Length}");
                     }
                 }
-                case 9:
+                case 10:
                 {
                     if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
@@ -594,9 +639,17 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
     private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests> __createInstance = __CreateInstance;
     private static readonly global::System.Func<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
-    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>[]
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>[] Entries = __CreateEntries();
+    private static global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>[] __CreateEntries()
     {
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>[11];
+        __FillEntries0(entries);
+        __FillEntries1(entries);
+        return entries;
+    }
+    private static void __FillEntries0(global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>[] entries)
+    {
+        entries[0] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
             methodName: "Reference_Tuple_And_Array",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Reference_Tuple_And_Array",
             filePath: "",
@@ -620,18 +673,47 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
             invokeBody: __invoke,
             methodIndex: 0,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+            attributeGroupIndex: 0);
+        entries[1] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+            methodName: "Wrapped_Reference_Tuple_And_Array",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Wrapped_Reference_Tuple_And_Array",
+            filePath: "",
+            lineNumber: 64,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("WrappedReferenceRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.WrappedReferenceRows()),
+    },
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests), "Wrapped_Reference_Tuple_And_Array", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.Tuple<int, string>), "pair", new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<int, string>)), false),
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "rest", new global::TUnit.Core.ConcreteType(typeof(int[])), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 1,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[2] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
             methodName: "Tuple_And_Array",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Tuple_And_Array",
             filePath: "",
-            lineNumber: 73,
+            lineNumber: 84,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
     new global::TUnit.Core.MethodDataSourceAttribute("TypedTupleRows")
     {
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.TypedTupleRows()),
+    },
+    new global::TUnit.Core.MethodDataSourceAttribute("WrappedTupleRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.WrappedTupleRows()),
     },
 },
             returnType: typeof(global::System.Threading.Tasks.Task),
@@ -644,14 +726,14 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 1,
+            methodIndex: 2,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+            attributeGroupIndex: 0);
+        entries[3] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
             methodName: "Tuple_And_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Tuple_And_Optional",
             filePath: "",
-            lineNumber: 81,
+            lineNumber: 92,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -693,14 +775,14 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 2,
+            methodIndex: 3,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+            attributeGroupIndex: 0);
+        entries[4] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
             methodName: "Tuple_And_Two_Optionals",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Tuple_And_Two_Optionals",
             filePath: "",
-            lineNumber: 95,
+            lineNumber: 106,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -727,14 +809,14 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 3,
+            methodIndex: 4,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+            attributeGroupIndex: 0);
+        entries[5] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
             methodName: "Tuple_Optional_And_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Tuple_Optional_And_Token",
             filePath: "",
-            lineNumber: 106,
+            lineNumber: 117,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -761,14 +843,14 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 4,
+            methodIndex: 5,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+            attributeGroupIndex: 0);
+        entries[6] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
             methodName: "Token_Tuple_And_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Token_Tuple_And_Optional",
             filePath: "",
-            lineNumber: 117,
+            lineNumber: 128,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -795,14 +877,14 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 5,
+            methodIndex: 6,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+            attributeGroupIndex: 0);
+        entries[7] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
             methodName: "Tuple_And_Params",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Tuple_And_Params",
             filePath: "",
-            lineNumber: 128,
+            lineNumber: 139,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -828,14 +910,14 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 6,
+            methodIndex: 7,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+            attributeGroupIndex: 0);
+        entries[8] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
             methodName: "Tuple_And_Params_Collection",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Tuple_And_Params_Collection",
             filePath: "",
-            lineNumber: 138,
+            lineNumber: 149,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -861,14 +943,14 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 7,
+            methodIndex: 8,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+            attributeGroupIndex: 0);
+        entries[9] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
             methodName: "Tuple_And_Supplied_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Tuple_And_Supplied_Optional",
             filePath: "",
-            lineNumber: 148,
+            lineNumber: 159,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -886,14 +968,17 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 8,
+            methodIndex: 9,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
+            attributeGroupIndex: 0);
+    }
+    private static void __FillEntries1(global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>[] entries)
+    {
+        entries[10] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests>(
             methodName: "Nested_Tuple_Row_Is_Spread",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.TupleParameterWithOptionalParameterTests.Nested_Tuple_Row_Is_Spread",
             filePath: "",
-            lineNumber: 156,
+            lineNumber: 167,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -911,10 +996,10 @@ internal static class TUnit_TestProject_Bugs__7212_TupleParameterWithOptionalPar
             classMetadata: __classMetadata,
             createInstance: __createInstance,
             invokeBody: __invoke,
-            methodIndex: 9,
+            methodIndex: 10,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-    };
+            attributeGroupIndex: 0);
+    }
 }
 internal static partial class TUnit_TestRegistration
 {
@@ -1481,7 +1566,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Mutable_Tuple_And_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Mutable_Tuple_And_Optional",
             filePath: "",
-            lineNumber: 187,
+            lineNumber: 198,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1514,7 +1599,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Mutable_Tuple_And_Params",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Mutable_Tuple_And_Params",
             filePath: "",
-            lineNumber: 194,
+            lineNumber: 205,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1543,7 +1628,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Token_Mutable_Tuple_And_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Token_Mutable_Tuple_And_Optional",
             filePath: "",
-            lineNumber: 201,
+            lineNumber: 212,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1569,7 +1654,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Mutable_Tuple_Optional_And_Token",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Mutable_Tuple_Optional_And_Token",
             filePath: "",
-            lineNumber: 209,
+            lineNumber: 220,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1595,7 +1680,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Mutable_Reference_Tuple_And_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Mutable_Reference_Tuple_And_Optional",
             filePath: "",
-            lineNumber: 217,
+            lineNumber: 228,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1620,7 +1705,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Mutable_Reference_Tuple_And_Params",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Mutable_Reference_Tuple_And_Params",
             filePath: "",
-            lineNumber: 224,
+            lineNumber: 235,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1645,7 +1730,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Mutable_Reference_Tuple_And_Array",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Mutable_Reference_Tuple_And_Array",
             filePath: "",
-            lineNumber: 231,
+            lineNumber: 242,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1670,7 +1755,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Nested_Mutable_Tuple_And_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Nested_Mutable_Tuple_And_Optional",
             filePath: "",
-            lineNumber: 241,
+            lineNumber: 252,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1695,7 +1780,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Nested_Mutable_Reference_Tuple_And_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Nested_Mutable_Reference_Tuple_And_Optional",
             filePath: "",
-            lineNumber: 249,
+            lineNumber: 260,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1720,7 +1805,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Nested_Inner_Reference_Tuple_And_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Nested_Inner_Reference_Tuple_And_Optional",
             filePath: "",
-            lineNumber: 259,
+            lineNumber: 270,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1748,7 +1833,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Nested_Mutable_Tuple_Object_Target",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Nested_Mutable_Tuple_Object_Target",
             filePath: "",
-            lineNumber: 272,
+            lineNumber: 283,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1772,7 +1857,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Spread_Mutable_Tuple_Object_Target",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Spread_Mutable_Tuple_Object_Target",
             filePath: "",
-            lineNumber: 280,
+            lineNumber: 291,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1797,7 +1882,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Spread_Mutable_Tuple_Object_Before_Params",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Spread_Mutable_Tuple_Object_Before_Params",
             filePath: "",
-            lineNumber: 288,
+            lineNumber: 299,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1822,7 +1907,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Spread_Mutable_Tuple_Params_Elements",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Spread_Mutable_Tuple_Params_Elements",
             filePath: "",
-            lineNumber: 303,
+            lineNumber: 314,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1847,7 +1932,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Nested_Mutable_Singleton_Tuple",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Nested_Mutable_Singleton_Tuple",
             filePath: "",
-            lineNumber: 318,
+            lineNumber: 329,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1871,7 +1956,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Nested_Mutable_Reference_Object_Target",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Nested_Mutable_Reference_Object_Target",
             filePath: "",
-            lineNumber: 329,
+            lineNumber: 340,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1895,7 +1980,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Nested_Mutable_Tuple_Interface_Target",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Nested_Mutable_Tuple_Interface_Target",
             filePath: "",
-            lineNumber: 337,
+            lineNumber: 348,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1919,7 +2004,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Private_Mutable_Tuple_Object_Target",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Private_Mutable_Tuple_Object_Target",
             filePath: "",
-            lineNumber: 350,
+            lineNumber: 361,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1943,7 +2028,7 @@ internal static class TUnit_TestProject_Bugs__7212_MutableTupleWithOptionalParam
             methodName: "Long_Mutable_Tuple_Object_Target",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.MutableTupleWithOptionalParameterTests.Long_Mutable_Tuple_Object_Target",
             filePath: "",
-            lineNumber: 366,
+            lineNumber: 377,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2059,7 +2144,7 @@ internal static class TUnit_TestProject_Bugs__7212_ConvertedAndGenericTupleOptio
             methodName: "Convertible_List_And_Optional",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7212.ConvertedAndGenericTupleOptionalTests.Convertible_List_And_Optional",
             filePath: "",
-            lineNumber: 430,
+            lineNumber: 441,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
