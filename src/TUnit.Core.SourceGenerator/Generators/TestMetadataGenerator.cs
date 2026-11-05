@@ -3253,7 +3253,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         if (semanticModel is null)
         {
-            GenerateArgumentsAttributeFromTypedConstants(writer, attrTypeName, attr, targetParameters, attributeSyntax);
+            GenerateArgumentsAttributeFromTypedConstants(writer, attrTypeName, attr, targetParameters, attributeSyntax, compilation);
             return;
         }
 
@@ -3348,13 +3348,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         string attrTypeName,
         AttributeData attr,
         ImmutableArray<IParameterSymbol> testMethodParameters,
-        AttributeSyntax? foreignSyntax)
+        AttributeSyntax? foreignSyntax,
+        Compilation compilation)
     {
         // Build into a local buffer so a formatting failure part-way through leaves the shared writer
         // untouched; the caller's catch block then appends its own fallback to a clean line.
         var buffer = new CodeWriter(includeHeader: false);
 
-        WriteArgumentsAttributeFromTypedConstants(buffer, attrTypeName, attr, testMethodParameters, foreignSyntax);
+        WriteArgumentsAttributeFromTypedConstants(buffer, attrTypeName, attr, testMethodParameters, foreignSyntax, compilation);
 
         writer.AppendRaw(buffer.ToString());
     }
@@ -3364,9 +3365,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         string attrTypeName,
         AttributeData attr,
         ImmutableArray<IParameterSymbol> testMethodParameters,
-        AttributeSyntax? foreignSyntax)
+        AttributeSyntax? foreignSyntax,
+        Compilation compilation)
     {
-        var formatter = new TypedConstantFormatter();
+        var formatter = new TypedConstantFormatter(compilation);
 
         writer.Append($"new {attrTypeName}(");
 
