@@ -261,6 +261,42 @@ public class DataRowScopeCollectionTests
             .Throws<DataSourceException>();
     }
 
+    [Test]
+    public async Task FailedRowRetainsInitializersAfterAnInjectableGetterThrows()
+    {
+        var root = new ThrowingInjectableRoot();
+        var plan = TUnit.Core.PropertyInjection.PropertyInjectionCache.GetOrCreatePlan(root.GetType());
+        if (SourceRegistrar.IsEnabled)
+            await Assert.That(plan.SourceGeneratedProperties.Length).IsEqualTo(2);
+        else
+            await Assert.That(plan.ReflectionProperties.Length).IsEqualTo(2);
+        var context = new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
+        await Assert.That(() => new FailingSource(false, root).Resolve(context))
+            .Throws<InvalidOperationException>().WithMessage("Resolution failed");
+        await context.Events.DataRowScopes!.CompleteAsync();
+        await Assert.That(root.Later.DisposeCount).IsEqualTo(1);
+        await Assert.That(root.Later.InitializeCount).IsEqualTo(0);
+        await Assert.That(root.InjectedSibling.DisposeCount).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task NormalDiscoveryStillReportsInjectableGetterFailures()
+    {
+        await Assert.That(() => new ObjectGraphDiscoverer().DiscoverTrackableObjectGraph(new ThrowingInjectableRoot(), CancellationToken.None))
+            .Throws<Exception>();
+    }
+
+    public sealed class ThrowingInjectableRoot
+    {
+        [ClassDataSource<NestedInitializer>]
+        public NestedInitializer Broken { get => throw new InvalidOperationException("Getter failed"); set { } }
+
+        [ClassDataSource<NestedInitializer>]
+        public NestedInitializer InjectedSibling { get; set; } = new();
+
+        public NestedInitializer Later { get; } = new();
+    }
+
     private static ThrowingInitializerRoot CreateThrowingRoot(bool generatedMetadata)
     {
         if (!generatedMetadata)
@@ -297,7 +333,7 @@ public class DataRowScopeCollectionTests
         public void Dispose() => DisposeCount++;
     }
 
-    private sealed class NestedInitializer : TUnit.Core.Interfaces.IAsyncInitializer, IAsyncDisposable
+    public sealed class NestedInitializer : TUnit.Core.Interfaces.IAsyncInitializer, IAsyncDisposable
     {
         public int DisposeCount;
         public int InitializeCount;

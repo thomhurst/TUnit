@@ -418,7 +418,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         if (!externallyOwned)
         {
             // Traverse injectable properties (useSourceRegistrarCheck = true for tracking mode)
-            TraverseInjectableProperties(obj, TryAddInjected, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true);
+            TraverseInjectableProperties(obj, TryAddInjected, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true, retainPartialGraphOnError);
 
             // Also discover nested IAsyncInitializer objects from ALL properties
             TraverseInitializerProperties(obj, TryAddTracking, Recurse, currentDepth, cancellationToken, retainPartialGraphOnError);
@@ -428,7 +428,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         // TUnit injected these values even though obj is externally owned, so the tracker still owns them.
         // Keep this set across the whole traversal: a nested initializer may expose an alias of
         // an injected fixture, and that alias must not transfer ownership to the scope.
-        TraverseInjectableProperties(obj, TryAddInjected, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true);
+        TraverseInjectableProperties(obj, TryAddInjected, Recurse, currentDepth, cancellationToken, useSourceRegistrarCheck: true, retainPartialGraphOnError);
 
         // The owner of obj (a dependency injection scope) created the rest of what obj holds and disposes
         // it, so the tracker must not dispose it a second time (#7205). The objects are still tracked, so
@@ -558,7 +558,8 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         RecurseFunc recurse,
         int currentDepth,
         CancellationToken cancellationToken,
-        bool useSourceRegistrarCheck)
+        bool useSourceRegistrarCheck,
+        bool retainPartialGraphOnError = false)
     {
         var plan = PropertyInjectionCache.GetOrCreatePlan(obj.GetType());
 
@@ -574,11 +575,11 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
 
         if (useSourceGen)
         {
-            TraverseSourceGeneratedProperties(obj, plan.SourceGeneratedProperties, tryAdd, recurse, currentDepth, cancellationToken);
+            TraverseSourceGeneratedProperties(obj, plan.SourceGeneratedProperties, tryAdd, recurse, currentDepth, cancellationToken, retainPartialGraphOnError);
         }
         else if (plan.ReflectionProperties.Length > 0)
         {
-            TraverseReflectionProperties(obj, plan.ReflectionProperties, tryAdd, recurse, currentDepth, cancellationToken);
+            TraverseReflectionProperties(obj, plan.ReflectionProperties, tryAdd, recurse, currentDepth, cancellationToken, retainPartialGraphOnError);
         }
     }
 
@@ -593,25 +594,33 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         TryAddObjectFunc tryAdd,
         RecurseFunc recurse,
         int currentDepth,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool retainPartialGraphOnError)
     {
         foreach (var metadata in sourceGeneratedProperties)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            // Use the compile-time-generated getter when the source generator emitted one,
-            // otherwise fall back to a cached reflection-based getter. Eliminates the
-            // per-test Type.GetProperty reflection lookup on the hot path.
-            // null getter => property is not readable; skip.
-            var getter = metadata.GetOrCreateGetter();
-            if (getter is null)
+            try
             {
-                continue;
-            }
+                // Use the compile-time-generated getter when the source generator emitted one,
+                // otherwise fall back to a cached reflection-based getter. Eliminates the
+                // per-test Type.GetProperty reflection lookup on the hot path.
+                // null getter => property is not readable; skip.
+                var getter = metadata.GetOrCreateGetter();
+                if (getter is null)
+                {
+                    continue;
+                }
 
-            var value = getter(obj);
-            if (value != null && tryAdd(value, currentDepth))
+                var value = getter(obj);
+                if (value != null && tryAdd(value, currentDepth))
+                {
+                    recurse(value, currentDepth + 1);
+                }
+            }
+            catch when (retainPartialGraphOnError && !cancellationToken.IsCancellationRequested)
             {
-                recurse(value, currentDepth + 1);
+                // Failed-row cleanup must still discover independent sibling properties.
             }
         }
     }
@@ -626,15 +635,23 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         TryAddObjectFunc tryAdd,
         RecurseFunc recurse,
         int currentDepth,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool retainPartialGraphOnError)
     {
         foreach (var prop in reflectionProperties)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var value = prop.Property.GetValue(obj);
-            if (value != null && tryAdd(value, currentDepth))
+            try
             {
-                recurse(value, currentDepth + 1);
+                var value = prop.Property.GetValue(obj);
+                if (value != null && tryAdd(value, currentDepth))
+                {
+                    recurse(value, currentDepth + 1);
+                }
+            }
+            catch when (retainPartialGraphOnError && !cancellationToken.IsCancellationRequested)
+            {
+                // Failed-row cleanup must still discover independent sibling properties.
             }
         }
     }
