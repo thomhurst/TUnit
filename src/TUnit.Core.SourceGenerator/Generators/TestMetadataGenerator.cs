@@ -8099,7 +8099,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static ITypeSymbol[]? InferClassTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
-        if (mdsAttr.AttributeClass is { IsGenericType: true }
+        if (!DataSourceAttributeHelper.CanReadMethodSourceArguments(mdsAttr)
+            || mdsAttr.AttributeClass is { IsGenericType: true }
             || mdsAttr.ConstructorArguments.Length == 0
             || mdsAttr.NamedArguments.Any(a => a.Key == "Arguments" && a.Value.Kind == TypedConstantKind.Array
                 && !a.Value.IsNull && a.Value.Values.Length > 0))

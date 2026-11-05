@@ -21,6 +21,7 @@ namespace TUnit.TestProject.DerivedSources
 {
     public sealed class MethodDataSourceAttribute(string memberName) : TUnit.Core.MethodDataSourceAttribute(memberName);
     public sealed class InstanceSourceAttribute(string memberName) : TUnit.Core.InstanceMethodDataSourceAttribute(memberName);
+    public sealed class ClassAliasAttribute(string label) : TUnit.Core.MethodDataSourceAttribute(typeof(LookalikeDataSourceTests), nameof(LookalikeDataSourceTests.RealRows));
     public sealed class AliasAttribute(string label) : TUnit.Core.MethodDataSourceAttribute(nameof(LookalikeDataSourceTests.RealRows));
 }
 
@@ -47,6 +48,20 @@ namespace TUnit.TestProject
         {
             await Assert.That(typeof(T)).IsEqualTo(typeof(int));
             await Assert.That((object?)value).IsEqualTo(42);
+        }
+    }
+
+    [GenerateGenericTest(typeof(string))]
+    public class RemappedClassSourceTests<T>
+    {
+        public static IEnumerable<int> DecoyRows() => [99];
+
+        [Test]
+        [DerivedSources.ClassAlias(nameof(DecoyRows))]
+        public async Task Remapped_source_preserves_class_types(T value)
+        {
+            await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+            await Assert.That((object?)value).IsEqualTo("real row");
         }
     }
 
