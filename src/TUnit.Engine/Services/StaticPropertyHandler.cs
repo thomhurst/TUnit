@@ -68,14 +68,16 @@ internal sealed class StaticPropertyHandler
                         await handler._propertyInjector.Value.InjectPropertiesAsync(value, handler._sessionObjectBag,
                             methodMetadata: null, _context.Events).ConfigureAwait(false);
                         _context.EventsIfCreated?.DataRowScopes?.CaptureOwnership();
-                        // Discovery is independent of disposal ownership. Capture the scope's graph
-                        // after injection so injected fixtures retain independent ownership.
+                        // A non-owning initializer may return an existing scope's service. Refresh
+                        // only the consumed graph, after injection, retaining known injected exclusions.
+                        ExternalObjectOwnership.FindOwner(value)?.CaptureOwnershipFor(value, []);
                         var graph = new ObjectGraphDiscoverer().DiscoverStaticPropertyTrackableObjects(value, cancellationToken);
                         foreach (var level in graph)
                         {
                             foreach (var obj in level.Value)
                             {
                                 if (ReferenceEquals(obj, value)) continue;
+                                ExternalObjectOwnership.FindOwner(obj)?.CaptureOwnershipFor(obj, []);
                                 _tracker.TrackStaticLeaseObject(obj);
                                 _trackedObjects.Add(obj);
                             }

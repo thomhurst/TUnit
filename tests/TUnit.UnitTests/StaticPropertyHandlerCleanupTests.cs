@@ -9,6 +9,58 @@ namespace TUnit.UnitTests;
 public class StaticPropertyHandlerCleanupTests
 {
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Static_Lease_Refreshes_Existing_Ownership(bool nested)
+    {
+        var service = new ChangingOwnedService();
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new OwnershipScope());
+        scopes.RegisterObject(owner, service);
+        scopes.CaptureOwnership();
+        var previous = service.Child;
+        service.Child = new NestedLeaseFixture();
+        object root = nested ? new SharedServiceFixture { Service = service } : service;
+        var metadata = new StaticPropertyMetadata
+        {
+            DeclaringType = typeof(ChangingOwnedService), PropertyName = "SharedChangingService" + nested,
+            PropertyType = root.GetType(), InitializerAsync = () => Task.FromResult<object?>(root)
+        };
+        var tracker = new ObjectTracker(new(), GlobalContext.Current.Disposer);
+        var handler = CreateInitializingHandler(CreateSession(), tracker);
+        try
+        {
+            await InitializeWithoutAmbientTestAsync(handler, metadata);
+            await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
+            await Assert.That(ExternalObjectOwnership.IsOwned(previous)).IsTrue();
+            await handler.DisposeStaticPropertiesAsync([], []);
+            await Assert.That(service.DisposeCount).IsEqualTo(0);
+            await Assert.That(service.Child.DisposeCount).IsEqualTo(0);
+            service.Dispose(); // The container remains responsible for its changed graph.
+            await Assert.That(service.Child.DisposeCount).IsEqualTo(1);
+        }
+        finally
+        {
+            await handler.ReleaseSessionCallbacksAfterFailedInitializationAsync();
+            await tracker.DisposeAndClearStaticTrackingAsync();
+            GC.KeepAlive(scopes);
+        }
+    }
+
+    private sealed class ChangingOwnedService : IDisposable, IAsyncInitializer
+    {
+        public NestedLeaseFixture Child { get; set; } = new();
+        public int DisposeCount;
+        public Task InitializeAsync() => Task.CompletedTask;
+        public void Dispose() { DisposeCount++; Child.Dispose(); }
+    }
+
+    private sealed class SharedServiceFixture
+    {
+        public required ChangingOwnedService Service { get; init; }
+    }
+
+    [Test]
     public async Task Static_Callbacks_Belong_To_Their_Session_Including_Failed_Initialization()
     {
         var first = CreateSession();
