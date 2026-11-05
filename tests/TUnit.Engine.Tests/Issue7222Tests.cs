@@ -193,6 +193,21 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    [Arguments("MixedClassRowSourcesTests*")]
+    [Arguments("MixedExplicitClassSourcesTests*")]
+    public async Task Mixed_Inferred_Sources_Preserve_Both_Declaration_Orders(string className)
+    {
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7222/{className}/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4),
+                result => result.Results.Count(x => x.TestName == "InstanceFirst").ShouldBe(2),
+                result => result.Results.Count(x => x.TestName == "StaticFirst").ShouldBe(2)
+            ]);
+    }
+
+    [Test]
     public async Task Generic_Class_Instance_Source_Infers_Method_Types()
     {
         await RunTestsWithFilter(

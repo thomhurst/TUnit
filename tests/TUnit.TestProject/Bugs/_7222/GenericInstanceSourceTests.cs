@@ -105,3 +105,45 @@ public class InferredReferenceTupleSourceTests
         if (value is not int) throw new InvalidOperationException("Expected int");
     }
 }
+
+[Arguments<int>(1)]
+public class MixedClassRowSourcesTests<TClass>(TClass value)
+{
+    public IEnumerable<string> InstanceRows() => [value!.ToString()!];
+    public static IEnumerable<string> StaticRows() => ["static"];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    [MethodDataSource(nameof(StaticRows))]
+    public void InstanceFirst<T>(T item) where T : class
+    {
+    }
+
+    [Test]
+    [MethodDataSource(nameof(StaticRows))]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    public void StaticFirst<T>(T item) where T : class
+    {
+    }
+}
+
+[GenerateGenericTest(typeof(int))]
+public class MixedExplicitClassSourcesTests<TClass>
+{
+    public IEnumerable<string> InstanceRows() => ["instance"];
+    public static IEnumerable<string> StaticRows() => ["static"];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    [MethodDataSource(nameof(StaticRows))]
+    public void InstanceFirst<T>(T item) where T : class
+    {
+    }
+
+    [Test]
+    [MethodDataSource(nameof(StaticRows))]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    public void StaticFirst<T>(T item) where T : class
+    {
+    }
+}

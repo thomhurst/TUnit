@@ -1049,16 +1049,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     if (specificAttr is not null && GenericMethodInferencePolicy.JoinsDuplicate(
                         isLiteralRow: specificAttr.AttributeClass?.Name == "ArgumentsAttribute",
                         joinsInferredSources: !isClassRow && (joinsDuplicateMethodSources || scopesClassMethodSources
-                            || (specificAttr.AttributeClass?.Name == "InstanceMethodDataSourceAttribute"
+                            || (specificAttr.AttributeClass?.Name is "MethodDataSourceAttribute" or "InstanceMethodDataSourceAttribute"
                                 && !HasExplicitGenericTestTypes(testMethod)))))
                     {
                         existing.AddRow(specificAttr, isClassRow);
                     }
 
-                    // Literal rows and inferred instance sources join the existing class/method pair.
+                    // Literal rows and inferred static or instance sources join the existing class/method pair.
                     // Explicit method types retain reflection mode's duplicate-source behavior.
                     if (methodRow?.AttributeClass?.Name == "ArgumentsAttribute"
-                        || (methodRow?.AttributeClass?.Name == "InstanceMethodDataSourceAttribute"
+                        || (methodRow?.AttributeClass?.Name is "MethodDataSourceAttribute" or "InstanceMethodDataSourceAttribute"
                             && !HasExplicitGenericTestTypes(testMethod)))
                     {
                         existing.AddRow(methodRow, isClassRow: false);
