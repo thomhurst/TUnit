@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using TUnit.Core;
 using TUnit.Core.Exceptions;
+using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
 using TUnit.Engine.Helpers;
 
@@ -13,6 +14,10 @@ namespace TUnit.Engine.Services;
 /// </summary>
 internal sealed class TestGenericTypeResolver
 {
+    // Retained tuples keep their original type for inference while their element boxes initialize.
+    private static Type GetInferenceType(object value)
+        => value is TupleArgument tuple ? tuple.TupleType : value.GetType();
+
     /// <summary>
     /// Resolves generic type arguments for a test class and/or method based on the provided test data.
     /// </summary>
@@ -170,7 +175,7 @@ internal sealed class TestGenericTypeResolver
                     if (parameterTypes[i] == typeof(object) && i < methodArguments.Length && methodArguments[i] != null)
                     {
                         var resolvedTypes = new Type[1];
-                        resolvedTypes[0] = methodArguments[i]!.GetType();
+                        resolvedTypes[0] = GetInferenceType(methodArguments[i]!);
                         
                         // Validate against constraints from metadata
                         ValidateAgainstConstraints(genericMethodInfo.Constraints, resolvedTypes, classTypeArguments);
@@ -202,7 +207,7 @@ internal sealed class TestGenericTypeResolver
                     var paramIndex = objectParameterIndices[i];
                     if (paramIndex < methodArguments.Length && methodArguments[paramIndex] != null)
                     {
-                        resolvedTypes[i] = methodArguments[paramIndex]!.GetType();
+                        resolvedTypes[i] = GetInferenceType(methodArguments[paramIndex]!);
                     }
                     else
                     {
@@ -253,7 +258,7 @@ internal sealed class TestGenericTypeResolver
                 if (methodArguments[0] != null)
                 {
                     var arg0 = methodArguments[0];
-                    var arg0Type = arg0!.GetType();
+                    var arg0Type = GetInferenceType(arg0!);
                     
                     if (arg0Type.IsArray)
                     {
@@ -307,7 +312,7 @@ internal sealed class TestGenericTypeResolver
                             {
                                 if (first != null)
                                 {
-                                    sourceType = first.GetType();
+                                    sourceType = GetInferenceType(first);
                                 }
 
                                 break;
@@ -329,7 +334,7 @@ internal sealed class TestGenericTypeResolver
                 // Get TKey from second argument (Func<TSource, TKey>)
                 if (methodArguments[1] != null && sourceType != null)
                 {
-                    var arg1Type = methodArguments[1]!.GetType();
+                    var arg1Type = GetInferenceType(methodArguments[1]!);
                     if (arg1Type.IsGenericType && arg1Type.GetGenericArguments().Length == 2)
                     {
                         var funcArgs = arg1Type.GetGenericArguments();
@@ -344,7 +349,7 @@ internal sealed class TestGenericTypeResolver
                 // Get TAccumulate from third argument (Func<TKey, TAccumulate>)
                 if (methodArguments[2] != null && keyType != null)
                 {
-                    var arg2Type = methodArguments[2]!.GetType();
+                    var arg2Type = GetInferenceType(methodArguments[2]!);
                     if (arg2Type.IsGenericType && arg2Type.GetGenericArguments().Length == 2)
                     {
                         var funcArgs = arg2Type.GetGenericArguments();
@@ -390,7 +395,7 @@ internal sealed class TestGenericTypeResolver
                 // For a single generic parameter, infer from the first argument
                 if (methodArguments[0] != null)
                 {
-                    resolvedTypes[0] = methodArguments[0]!.GetType();
+                    resolvedTypes[0] = GetInferenceType(methodArguments[0]!);
                 }
                 else
                 {
@@ -473,7 +478,7 @@ internal sealed class TestGenericTypeResolver
 
             if (argValue != null)
             {
-                var argType = argValue.GetType();
+                var argType = GetInferenceType(argValue);
                 
                 // If the parameter type is a generic parameter, map it directly
                 if (paramType.IsGenericParameter)
@@ -585,7 +590,7 @@ internal sealed class TestGenericTypeResolver
 
             if (argValue != null)
             {
-                var argType = argValue.GetType();
+                var argType = GetInferenceType(argValue);
                 if (!TryInferTypeMapping(paramType, argType, typeMapping))
                 {
                     return false;

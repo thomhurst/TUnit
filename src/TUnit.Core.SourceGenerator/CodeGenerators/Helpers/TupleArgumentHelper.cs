@@ -28,22 +28,48 @@ public static class TupleArgumentHelper
         var tupleType = type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable
             ? nullable.TypeArguments[0]
             : type;
-        if (tupleType is not INamedTypeSymbol { IsTupleType: true } tuple)
+        if (tupleType is not INamedTypeSymbol tuple || !IsTuple(tuple))
         {
             return $"global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({expression})";
         }
 
-        // Bind each input once. Repeating a parent's expression in its children makes output
-        // repeat its indexing chain at every level; switch inputs avoid that duplication.
+        // Bind each input once and reconstruct retained boxes as well as incompatible tuples.
+        // IsTuple excludes ordinary lists so they keep conversion-operator behavior.
+        var value = $"__tupleValue{depth.ToString(CultureInfo.InvariantCulture)}";
         var input = $"__tupleInput{depth.ToString(CultureInfo.InvariantCulture)}";
         var fallback = $"__tupleFallback{depth.ToString(CultureInfo.InvariantCulture)}";
-        var elements = tuple.TupleElements.Select((element, index) => GenerateCastExpression(element.Type,
-            $"{input}[{index.ToString(CultureInfo.InvariantCulture)}]", depth + 1));
-        var construction = tuple.TupleElements.Length == 1
-            ? $"new {tuple.GloballyQualified()}({string.Join(", ", elements)})"
-            : $"({string.Join(", ", elements)})";
+        var index = 0;
+        var construction = ConstructTuple(tuple, input, ref index, depth);
         // Nullable tuples box as their underlying tuple, or null. The fallback preserves null.
-        return $"({expression} switch {{ global::System.Runtime.CompilerServices.ITuple {{ Length: {tuple.TupleElements.Length.ToString(CultureInfo.InvariantCulture)} }} {input} when {input} is not {tuple.GloballyQualified()} => ({type.GloballyQualified()}){construction}, var {fallback} => global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({fallback}) }})";
+        return $"({expression} switch {{ var {value} when {value} is not {tuple.GloballyQualified()} && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple({value}) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot({value}) is {{ Length: {index.ToString(CultureInfo.InvariantCulture)} }} {input} => ({type.GloballyQualified()}){construction}, var {fallback} => global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({fallback}) }})";
+    }
+
+    private static bool IsTuple(INamedTypeSymbol type)
+        => type.IsTupleType || type is { Name: "Tuple", IsGenericType: true, TypeArguments.Length: >= 1 and <= 8,
+            ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } };
+
+    private static string ConstructTuple(INamedTypeSymbol tuple, string input, ref int index, int depth)
+    {
+        var elements = new List<string>();
+        if (tuple.IsTupleType)
+        {
+            foreach (var element in tuple.TupleElements)
+            {
+                elements.Add(GenerateCastExpression(element.Type, $"{input}[{(index++).ToString(CultureInfo.InvariantCulture)}]", depth + 1));
+            }
+            return tuple.TupleElements.Length == 1
+                ? $"new {tuple.GloballyQualified()}({string.Join(", ", elements)})"
+                : $"({string.Join(", ", elements)})";
+        }
+
+        for (var i = 0; i < tuple.TypeArguments.Length; i++)
+        {
+            var element = tuple.TypeArguments[i];
+            elements.Add(i == 7 && element is INamedTypeSymbol rest && IsTuple(rest)
+                ? ConstructTuple(rest, input, ref index, depth)
+                : GenerateCastExpression(element, $"{input}[{(index++).ToString(CultureInfo.InvariantCulture)}]", depth + 1));
+        }
+        return $"new {tuple.GloballyQualified()}({string.Join(", ", elements)})";
     }
 
     /// <summary>

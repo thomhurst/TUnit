@@ -49,7 +49,7 @@ internal class DataUnwrapper
     {
         // First check for TestDataRow wrapper
         var (unwrapped, metadata) = TestDataRowUnwrapper.UnwrapArray(values,
-            values is [ITestDataRow] ? GetSingleTupleDataParameterType(expectedParameters) : null);
+            values is [ITestDataRow] ? GetTupleDataParameterType(expectedParameters) : null);
 
         // Then apply type-aware unwrapping
         var data = UnwrapWithTypesInternal(unwrapped, expectedParameters);
@@ -60,11 +60,11 @@ internal class DataUnwrapper
     {
         // First handle TestDataRow unwrapping
         var (unwrapped, _) = TestDataRowUnwrapper.UnwrapArray(values,
-            values is [ITestDataRow] ? GetSingleTupleDataParameterType(expectedParameters) : null);
+            values is [ITestDataRow] ? GetTupleDataParameterType(expectedParameters) : null);
         return UnwrapWithTypesInternal(unwrapped, expectedParameters);
     }
 
-    private static Type? GetSingleTupleDataParameterType(ParameterMetadata[]? parameters)
+    private static Type? GetTupleDataParameterType(ParameterMetadata[]? parameters)
     {
         Type? dataType = null;
         if (parameters is null)
@@ -79,12 +79,19 @@ internal class DataUnwrapper
                 continue;
             }
 
+            // Keep scanning after the tuple: only a required later data parameter prevents
+            // the wrapped row from binding whole (injected tokens do not consume row values).
             if (dataType is not null)
             {
-                return null;
+                if (!parameter.IsOptional && !parameter.IsParams)
+                {
+                    return null;
+                }
             }
-
-            dataType = parameter.Type;
+            else
+            {
+                dataType = parameter.Type;
+            }
         }
 
         return TupleHelper.IsTupleType(dataType) ? dataType : null;
@@ -130,7 +137,7 @@ internal class DataUnwrapper
 
         if (dataParameterCount == 0)
         {
-            return DataSourceHelpers.UnwrapTupleAot(values[0]);
+            return DataSourceHelpers.RetainTupleElements(values[0]);
         }
 
         var lastDataParameter = expectedParameters[lastDataParameterIndex];
@@ -143,7 +150,7 @@ internal class DataUnwrapper
             && DataSourceHelpers.IsErasedGenericTupleParameter(lastDataParameter))
         {
             return DataSourceHelpers.ShouldFlattenErasedTuple(values[0]!, lastDataParameter)
-                ? DataSourceHelpers.UnwrapTupleAot(values[0])
+                ? DataSourceHelpers.RetainTupleElements(values[0])
                 : values;
         }
 
@@ -164,7 +171,7 @@ internal class DataUnwrapper
 
             // A reference tuple with a lone null must retain its container: [null] also
             // represents an actual null argument. Value tuples always reconstruct from null.
-            var tupleElements = DataSourceHelpers.UnwrapTupleAot(values[0]);
+            var tupleElements = DataSourceHelpers.RetainTupleElements(values[0]);
             return !lastDataParameterType.IsValueType && tupleElements is [null] ? values : tupleElements;
         }
 
@@ -173,13 +180,16 @@ internal class DataUnwrapper
         var firstDataParameterType = expectedParameters[firstDataParameterIndex].Type;
         if (dataParameterCount > 1
             && TupleHelper.IsTupleType(firstDataParameterType)
-            && firstDataParameterType.IsInstanceOfType(values[0])
+            && (firstDataParameterType.IsInstanceOfType(values[0])
+                || values[0] is TupleArgument argument && argument.TupleType == firstDataParameterType)
             && RemainingDataParametersAreOmittable(expectedParameters, firstDataParameterIndex))
         {
-            return values;
+            return values[0] is not TupleArgument && DataSourceHelpers.RequiresFlattenedTupleBinding(values[0]!)
+                ? [new TupleArgument(values[0]!.GetType(), DataSourceHelpers.RetainTupleElements(values[0]))]
+                : values;
         }
 
-        var elements = DataSourceHelpers.UnwrapTupleAot(values[0]);
+        var elements = DataSourceHelpers.RetainTupleElements(values[0]);
 
         // A trailing array data parameter collects every remaining element. Otherwise extra
         // elements beyond the data parameters are dropped.

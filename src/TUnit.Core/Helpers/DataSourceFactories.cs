@@ -38,7 +38,7 @@ public static class DataSourceFactories
         => FromValueCore(invoke, tupleRowBinding: TupleRowBinding.Spread);
 
     /// <summary>
-    /// <see cref="FromValue(Func{object?})"/> that keeps a tuple row whole when the test takes a single tuple,
+    /// <see cref="FromValue(Func{object?})"/> that keeps a tuple row whole when it binds to the first tuple parameter,
     /// as the attribute's reflection path does.
     /// </summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromValue(DataGeneratorMetadata dataGeneratorMetadata, Func<object?> invoke)
@@ -49,7 +49,7 @@ public static class DataSourceFactories
         => FromEnumerableCore(invoke, tupleRowBinding: TupleRowBinding.Spread);
 
     /// <summary>
-    /// <see cref="FromEnumerable(Func{object?})"/> that keeps a tuple row whole when the test takes a single tuple,
+    /// <see cref="FromEnumerable(Func{object?})"/> that keeps a tuple row whole when it binds to the first tuple parameter,
     /// as the attribute's reflection path does.
     /// </summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromEnumerable(DataGeneratorMetadata dataGeneratorMetadata, Func<object?> invoke)
@@ -60,7 +60,7 @@ public static class DataSourceFactories
         => FromTaskCore(invoke, tupleRowBinding: TupleRowBinding.Spread);
 
     /// <summary>
-    /// <see cref="FromTask{T}(Func{Task{T}})"/> that keeps a tuple row whole when the test takes a single tuple,
+    /// <see cref="FromTask{T}(Func{Task{T}})"/> that keeps a tuple row whole when it binds to the first tuple parameter,
     /// as the attribute's reflection path does.
     /// </summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromTask<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<Task<T>> invoke)
@@ -71,7 +71,7 @@ public static class DataSourceFactories
         => FromValueTaskCore(invoke, tupleRowBinding: TupleRowBinding.Spread);
 
     /// <summary>
-    /// <see cref="FromValueTask{T}(Func{ValueTask{T}})"/> that keeps a tuple row whole when the test takes a single tuple,
+    /// <see cref="FromValueTask{T}(Func{ValueTask{T}})"/> that keeps a tuple row whole when it binds to the first tuple parameter,
     /// as the attribute's reflection path does.
     /// </summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromValueTask<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<ValueTask<T>> invoke)
@@ -82,8 +82,8 @@ public static class DataSourceFactories
         => FromAsyncEnumerableCore(invoke, tupleRowBinding: TupleRowBinding.Spread);
 
     /// <summary>
-    /// <see cref="FromAsyncEnumerable{T}(Func{IAsyncEnumerable{T}})"/> that keeps a tuple row whole when the test takes a
-    /// single tuple, as the attribute's reflection path does.
+    /// <see cref="FromAsyncEnumerable{T}(Func{IAsyncEnumerable{T}})"/> that keeps a tuple row whole when it binds to the
+    /// first tuple parameter, as the attribute's reflection path does.
     /// </summary>
     public static IAsyncEnumerable<Func<Task<object?[]?>>> FromAsyncEnumerable<T>(DataGeneratorMetadata dataGeneratorMetadata, Func<IAsyncEnumerable<T>> invoke)
         => FromAsyncEnumerableCore(invoke, GetTupleRowBinding(dataGeneratorMetadata));
@@ -310,30 +310,38 @@ public static class DataSourceFactories
 
     // Preserve tuple-valued properties and distinguish null rows from tuples holding null.
     // Method arguments with struct initializers need flattened boxes for reconstruction after initialization.
-    private enum TupleRowBinding
+    private readonly record struct TupleRowBinding(bool Preserve, Type? MatchingType = null, bool AllowMutableElements = false)
     {
-        Spread,
-        Preserve,
-        PreserveUnlessInitializer
+        public static readonly TupleRowBinding Spread = new(false);
+        public static readonly TupleRowBinding PreserveWhole = new(true, AllowMutableElements: true);
+        public static readonly TupleRowBinding PreserveUnlessInitializer = new(true);
     }
 
     private static TupleRowBinding GetTupleRowBinding(DataGeneratorMetadata dataGeneratorMetadata)
         => dataGeneratorMetadata.MembersToGenerate switch
         {
-            [PropertyMetadata property] when TupleHelper.IsTupleType(property.Type) => TupleRowBinding.Preserve,
+            [PropertyMetadata property] when TupleHelper.IsTupleType(property.Type) => TupleRowBinding.PreserveWhole,
             [ParameterMetadata parameter] when TupleHelper.IsTupleType(parameter.Type) => TupleRowBinding.PreserveUnlessInitializer,
+            // Match the row type so ((pair), extra) still spreads into two arguments.
+            [ParameterMetadata first, ..] when TupleHelper.IsTupleType(first.Type) => new(true, first.Type),
             _ => TupleRowBinding.Spread
         };
 
     private static object?[] ToRow(object? item, TupleRowBinding tupleRowBinding)
     {
-        if (tupleRowBinding != TupleRowBinding.Spread)
+        if (tupleRowBinding.Preserve)
         {
             item = DataSourceHelpers.InvokeIfFunc(item);
             if (DataSourceHelpers.IsTuple(item)
-                && (tupleRowBinding == TupleRowBinding.Preserve
-                    || !DataSourceHelpers.RequiresFlattenedTupleBinding(item!)))
+                && (tupleRowBinding.MatchingType is null || tupleRowBinding.MatchingType.IsInstanceOfType(item)))
             {
+                if (!tupleRowBinding.AllowMutableElements && DataSourceHelpers.RequiresFlattenedTupleBinding(item!))
+                {
+                    return tupleRowBinding.MatchingType is null
+                        ? DataSourceHelpers.RetainTupleElements(item)
+                        : [new TupleArgument(item!.GetType(), DataSourceHelpers.RetainTupleElements(item))];
+                }
+
                 return [item];
             }
         }

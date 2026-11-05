@@ -5,6 +5,13 @@ namespace TUnit.UnitTests;
 public class ArgumentFormatterTests
 {
     [Test]
+    public async Task Retained_Mutable_Tuple_Argument_Keeps_Tuple_Formatting()
+    {
+        var tuple = new TupleArgument(typeof((int, string)), [25, "value"]);
+        await Assert.That(ArgumentFormatter.Format(tuple, [])).IsEqualTo("(25, value)");
+    }
+
+    [Test]
     public async Task FormatDefault_ValueTuple_FormatsCorrectly()
     {
         var tuple = (1, "test", true);

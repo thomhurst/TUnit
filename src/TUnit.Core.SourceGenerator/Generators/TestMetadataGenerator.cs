@@ -2493,7 +2493,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         if (TryGetClosedParametersForSharedBinder(testMethod, entry) is { } closedParameters
-            && HasSingleElementTupleParameter(closedParameters))
+            && closedParameters.All(parameter => !CodeGenerationHelpers.ContainsTypeParameter(parameter.Type))
+            && closedParameters.Any(parameter => parameter.Type is INamedTypeSymbol tuple
+                && (tuple.IsTupleType || IsReferenceTuple(tuple))))
         {
             // The factories and engine bind using ParameterMetadata.Type, so close that metadata
             // as well as the invoker. Keep attributes and lazy reflection access from the original.
@@ -4240,32 +4242,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     // Emit tuple element conversions statically so nested Item tuples remain AOT-safe.
     private static string CastTupleElement(ITypeSymbol type, string value)
-    {
-        if (type is INamedTypeSymbol { IsTupleType: true } tuple)
-        {
-            var elements = tuple.TupleElements.Select((element, index) => CastTupleElement(element.Type,
-                $"global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot({value})[{index.ToString(CultureInfo.InvariantCulture)}]"));
-            var construction = tuple.TupleElements.Length == 1
-                ? $"new {type.GloballyQualified()}({string.Join(", ", elements)})"
-                : $"({string.Join(", ", elements)})";
-            // Only tuples can be recursively unpacked. Keep CastHelper's null-to-default
-            // and custom conversion behavior for other values.
-            return $"(global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple({value}) ? {construction} : global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({value}))";
-        }
-
-        return $"global::TUnit.Core.Helpers.CastHelper.Cast<{type.GloballyQualified()}>({value})";
-    }
+        => TupleArgumentHelper.GenerateCastExpression(type, value);
 
     // Rebuild flattened System.Tuple rows, recursively constructing Rest after the seventh element.
-    private static string ConstructReferenceTuple(INamedTypeSymbol type, ref int elementIndex)
+    private static string ConstructReferenceTuple(INamedTypeSymbol type, ref int elementIndex, string argumentsArray = "args")
     {
         var arguments = new List<string>();
         for (var i = 0; i < type.TypeArguments.Length; i++)
         {
             var element = type.TypeArguments[i];
             arguments.Add(i == 7 && element is INamedTypeSymbol rest && IsReferenceTuple(rest)
-                ? ConstructReferenceTuple(rest, ref elementIndex)
-                : CastTupleElement(element, $"args[{(elementIndex++).ToString(CultureInfo.InvariantCulture)}]"));
+                ? ConstructReferenceTuple(rest, ref elementIndex, argumentsArray)
+                : CastTupleElement(element, $"{argumentsArray}[{(elementIndex++).ToString(CultureInfo.InvariantCulture)}]"));
         }
 
         return $"new {type.GloballyQualified()}({string.Join(", ", arguments)})";
@@ -4309,6 +4297,36 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (hasCancellationToken && parametersFromArgs.Length > 0)
         {
             writer.AppendLine("var context = global::TUnit.Core.TestContext.Current;");
+        }
+
+        // Mutable elements retain their boxes inside one tuple argument until initialization finishes.
+        // Reconstruct only at invocation, before the ordinary optional/params binder consumes the row.
+        if (parametersFromArgs.Length > 1
+            && parametersFromArgs.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams)
+            && parametersFromArgs[0].Type is INamedTypeSymbol firstTuple
+            && (firstTuple.IsTupleType || IsReferenceTuple(firstTuple)))
+        {
+            writer.AppendLine("if (args.Length == 1 && args[0] is global::System.Collections.Generic.IReadOnlyList<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))");
+            writer.AppendLine("{");
+            writer.Indent();
+            writer.AppendLine("var __tupleElements = global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(args[0]);");
+            string construction;
+            if (firstTuple.IsTupleType)
+            {
+                var elements = firstTuple.TupleElements.Select((element, index) =>
+                    TupleArgumentHelper.GenerateCastExpression(element.Type, $"__tupleElements[{index.ToString(CultureInfo.InvariantCulture)}]"));
+                construction = firstTuple.TupleElements.Length == 1
+                    ? $"new {firstTuple.GloballyQualified()}({string.Join(", ", elements)})"
+                    : $"({string.Join(", ", elements)})";
+            }
+            else
+            {
+                var index = 0;
+                construction = ConstructReferenceTuple(firstTuple, ref index, "__tupleElements");
+            }
+            writer.AppendLine($"args = new object[] {{ {construction} }};");
+            writer.Unindent();
+            writer.AppendLine("}");
         }
 
         // Special case: Single tuple parameter (same as in TestInvoker)

@@ -35,12 +35,12 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             if (args.Length == 2)
             {
                 // Arguments are unwrapped tuple elements, reconstruct the tuple
-                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped<int>((global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<int, object> => (global::System.ValueTuple<int, object>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, object>>(__tupleFallback0) }))));
+                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped<int>((global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, object>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, object>>(__tupleFallback0) }))));
             }
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped<int>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<int, global::System.ValueTuple<int, object>> => (global::System.ValueTuple<int, global::System.ValueTuple<int, object>>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), (__tupleInput0[1] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput1 when __tupleInput1 is not global::System.ValueTuple<int, object> => (global::System.ValueTuple<int, object>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput1[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput1[1])), var __tupleFallback1 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, object>>(__tupleFallback1) })), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, global::System.ValueTuple<int, object>>>(__tupleFallback0) })));
+                return new global::System.Threading.Tasks.ValueTask(instance.Wrapped<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, global::System.ValueTuple<int, object>> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, global::System.ValueTuple<int, object>>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), (__tupleInput0[1] switch { var __tupleValue1 when __tupleValue1 is not global::System.ValueTuple<int, object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue1) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue1) is { Length: 2 } __tupleInput1 => (global::System.ValueTuple<int, object>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput1[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput1[1])), var __tupleFallback1 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, object>>(__tupleFallback1) })), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, global::System.ValueTuple<int, object>>>(__tupleFallback0) })));
             }
             else
             {
@@ -78,7 +78,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7514.PreservedGenericTupleTests)instance).InstanceRow() ?? global::System.Array.Empty<object>()),
     },
 },
-            methodMetadata: __mm_0,
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<int, global::System.ValueTuple<int, object>>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<int, global::System.ValueTuple<int, object>>)) } } },
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
             methodIndex: 0,
@@ -133,12 +133,12 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             if (args.Length == 2)
             {
                 // Arguments are unwrapped tuple elements, reconstruct the tuple
-                return new global::System.Threading.Tasks.ValueTask(instance.WithToken<int>(cancellationToken, (global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<int, object> => (global::System.ValueTuple<int, object>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, object>>(__tupleFallback0) }))));
+                return new global::System.Threading.Tasks.ValueTask(instance.WithToken<int>(cancellationToken, (global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, object>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, object>>(__tupleFallback0) }))));
             }
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.WithToken<int>(cancellationToken, (args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<int, global::System.ValueTuple<int, object>> => (global::System.ValueTuple<int, global::System.ValueTuple<int, object>>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), (__tupleInput0[1] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput1 when __tupleInput1 is not global::System.ValueTuple<int, object> => (global::System.ValueTuple<int, object>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput1[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput1[1])), var __tupleFallback1 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, object>>(__tupleFallback1) })), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, global::System.ValueTuple<int, object>>>(__tupleFallback0) })));
+                return new global::System.Threading.Tasks.ValueTask(instance.WithToken<int>(cancellationToken, (args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, global::System.ValueTuple<int, object>> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, global::System.ValueTuple<int, object>>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), (__tupleInput0[1] switch { var __tupleValue1 when __tupleValue1 is not global::System.ValueTuple<int, object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue1) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue1) is { Length: 2 } __tupleInput1 => (global::System.ValueTuple<int, object>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput1[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput1[1])), var __tupleFallback1 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, object>>(__tupleFallback1) })), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, global::System.ValueTuple<int, object>>>(__tupleFallback0) })));
             }
             else
             {
@@ -176,7 +176,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7514.PreservedGenericTupleTests)instance).InstanceRow() ?? global::System.Array.Empty<object>()),
     },
 },
-            methodMetadata: __mm_0,
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0], __mm_0.Parameters[1] with { Type = typeof(global::System.ValueTuple<int, global::System.ValueTuple<int, object>>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<int, global::System.ValueTuple<int, object>>)) } } },
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
             methodIndex: 0,
@@ -226,7 +226,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(global::System.ValueTu
     {
         try
         {
-            return new global::System.Threading.Tasks.ValueTask(instance.Separate<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] switch { global::System.Runtime.CompilerServices.ITuple { Length: 2 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<int, object> => (global::System.ValueTuple<int, object>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, object>>(__tupleFallback0) })));
+            return new global::System.Threading.Tasks.ValueTask(instance.Separate<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), (args[1] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, object>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, object>>(__tupleFallback0) })));
         }
         catch (global::System.Exception ex)
         {
@@ -401,7 +401,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
                 {
                     case 1:
                         {
-                            return new global::System.Threading.Tasks.ValueTask(instance.ReferenceMultipleElements<int>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(args[0])));
+                            return new global::System.Threading.Tasks.ValueTask(instance.ReferenceMultipleElements<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, string>)new global::System.Tuple<int, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, string>>(__tupleFallback0) })));
                         }
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -439,7 +439,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7514.PreservedGenericTupleTests)instance).MultiElementReferenceRow() ?? global::System.Array.Empty<object>()),
     },
 },
-            methodMetadata: __mm_0,
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<int, string>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<int, string>)) } } },
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
             methodIndex: 0,
@@ -501,7 +501,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
                 {
                     case 1:
                         {
-                            return new global::System.Threading.Tasks.ValueTask(instance.ReferenceMultipleElementConversions<object>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<object, object>>(args[0])));
+                            return new global::System.Threading.Tasks.ValueTask(instance.ReferenceMultipleElementConversions<object>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, (args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<object, object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<object, object>)new global::System.Tuple<object, object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<object, object>>(__tupleFallback0) })));
                         }
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -539,7 +539,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7514.PreservedGenericTupleTests)instance).MultiElementReferenceRow() ?? global::System.Array.Empty<object>()),
     },
 },
-            methodMetadata: __mm_0,
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0], __mm_0.Parameters[1] with { Type = typeof(global::System.Tuple<object, object>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<object, object>)) } } },
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
             methodIndex: 0,
@@ -604,7 +604,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
                 {
                     case 1:
                         {
-                            return new global::System.Threading.Tasks.ValueTask(instance.ReferenceElementConversion<object>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<object>>(args[0])));
+                            return new global::System.Threading.Tasks.ValueTask(instance.ReferenceElementConversion<object>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.Tuple<object>)new global::System.Tuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<object>>(__tupleFallback0) })));
                         }
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -642,7 +642,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7514.PreservedGenericTupleTests)instance).ReferenceRow() ?? global::System.Array.Empty<object>()),
     },
 },
-            methodMetadata: __mm_0,
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<object>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<object>)) } } },
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
             methodIndex: 0,
@@ -707,7 +707,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
                 {
                     case 1:
                         {
-                            return new global::System.Threading.Tasks.ValueTask(instance.ValueTupleToReferenceTuple<int>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int>>(args[0])));
+                            return new global::System.Threading.Tasks.ValueTask(instance.ValueTupleToReferenceTuple<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.Tuple<int>)new global::System.Tuple<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int>>(__tupleFallback0) })));
                         }
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -745,7 +745,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7514.PreservedGenericTupleTests)instance).ValueTupleIntegerRow() ?? global::System.Array.Empty<object>()),
     },
 },
-            methodMetadata: __mm_0,
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<int>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<int>)) } } },
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
             methodIndex: 0,
@@ -812,7 +812,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
                 {
                     case 1:
                         {
-                            return new global::System.Threading.Tasks.ValueTask(instance.ValueTupleToReferenceTupleConversion<object>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<object>>(args[0])));
+                            return new global::System.Threading.Tasks.ValueTask(instance.ValueTupleToReferenceTupleConversion<object>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, (args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.Tuple<object>)new global::System.Tuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<object>>(__tupleFallback0) })));
                         }
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -850,7 +850,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7514.PreservedGenericTupleTests)instance).ValueTupleStringRow() ?? global::System.Array.Empty<object>()),
     },
 },
-            methodMetadata: __mm_0,
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0], __mm_0.Parameters[1] with { Type = typeof(global::System.Tuple<object>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<object>)) } } },
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
             methodIndex: 0,
@@ -917,7 +917,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
                 {
                     case 1:
                         {
-                            return new global::System.Threading.Tasks.ValueTask(instance.NullValueTupleToReferenceTuple<object>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<object>>(args[0])));
+                            return new global::System.Threading.Tasks.ValueTask(instance.NullValueTupleToReferenceTuple<object>(context?.Execution.CancellationToken ?? global::System.Threading.CancellationToken.None, (args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.Tuple<object>)new global::System.Tuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<object>>(__tupleFallback0) })));
                         }
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -955,7 +955,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7514.PreservedGenericTupleTests)instance).NullValueTupleRow() ?? global::System.Array.Empty<object>()),
     },
 },
-            methodMetadata: __mm_0,
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0], __mm_0.Parameters[1] with { Type = typeof(global::System.Tuple<object>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<object>)) } } },
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
             methodIndex: 0,
@@ -1020,7 +1020,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
                 {
                     case 1:
                         {
-                            return new global::System.Threading.Tasks.ValueTask(instance.NullReferenceTupleConversion<object>(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<object>>(args[0])));
+                            return new global::System.Threading.Tasks.ValueTask(instance.NullReferenceTupleConversion<object>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.Tuple<object>)new global::System.Tuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<object>>(__tupleFallback0) })));
                         }
                     default:
                         throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
@@ -1058,7 +1058,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
         Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceRuntimeValue(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7514.PreservedGenericTupleTests)instance).NullReferenceTupleRow() ?? global::System.Array.Empty<object>()),
     },
 },
-            methodMetadata: __mm_0,
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<object>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<object>)) } } },
             createInstance: __CreateInstance_0,
             invokeBody: __Invoke_0,
             methodIndex: 0,
@@ -1116,7 +1116,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.SingletonValueTupleElementConversion<object>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
+                return new global::System.Threading.Tasks.ValueTask(instance.SingletonValueTupleElementConversion<object>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
             }
             else
             {
@@ -1212,7 +1212,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.SingletonValueTupleMatchingElement<int>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<int> => (global::System.ValueTuple<int>)new global::System.ValueTuple<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int>>(__tupleFallback0) })));
+                return new global::System.Threading.Tasks.ValueTask(instance.SingletonValueTupleMatchingElement<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<int>)new global::System.ValueTuple<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int>>(__tupleFallback0) })));
             }
             else
             {
@@ -1308,7 +1308,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.SingletonValueTupleNullElement<object>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
+                return new global::System.Threading.Tasks.ValueTask(instance.SingletonValueTupleNullElement<object>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
             }
             else
             {
@@ -1406,7 +1406,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.SingletonValueTupleConversionWithToken<object>(cancellationToken, (args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
+                return new global::System.Threading.Tasks.ValueTask(instance.SingletonValueTupleConversionWithToken<object>(cancellationToken, (args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
             }
             else
             {
@@ -1502,7 +1502,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.ReferenceToSingletonValueTuple<object>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
+                return new global::System.Threading.Tasks.ValueTask(instance.ReferenceToSingletonValueTuple<object>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
             }
             else
             {
@@ -1600,7 +1600,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedSingletonElement<object>(cancellationToken, (args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
+                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedSingletonElement<object>(cancellationToken, (args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
             }
             else
             {
@@ -1696,7 +1696,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
             {
                 // Rare case: tuple is wrapped as a single argument
-                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedReferenceSingletonElement<object>((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
+                return new global::System.Threading.Tasks.ValueTask(instance.GenericNestedReferenceSingletonElement<object>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
             }
             else
             {
@@ -1792,7 +1792,7 @@ internal static class TUnit_TestProject_Bugs__7514_PreservedGenericTupleTests__T
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.NestedSingletonElement((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedSingletonElement((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
                     }
                     else
                     {
@@ -1810,7 +1810,7 @@ internal static class TUnit_TestProject_Bugs__7514_PreservedGenericTupleTests__T
                     else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
                     {
                         // Rare case: tuple is wrapped as a single argument
-                        return new global::System.Threading.Tasks.ValueTask(instance.NestedReferenceSingletonElement((args[0] switch { global::System.Runtime.CompilerServices.ITuple { Length: 1 } __tupleInput0 when __tupleInput0 is not global::System.ValueTuple<object> => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
+                        return new global::System.Threading.Tasks.ValueTask(instance.NestedReferenceSingletonElement((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<object> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 1 } __tupleInput0 => (global::System.ValueTuple<object>)new global::System.ValueTuple<object>(global::TUnit.Core.Helpers.CastHelper.Cast<object>(__tupleInput0[0])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<object>>(__tupleFallback0) })));
                     }
                     else
                     {

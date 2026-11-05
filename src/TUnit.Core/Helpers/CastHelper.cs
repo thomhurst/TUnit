@@ -20,6 +20,11 @@ public static class CastHelper
         Justification = "Cast<T> is called from source-generated code that handles parseable types at compile time. The runtime TryParsableConvert fallback is only used in non-AOT scenarios.")]
     public static T? Cast<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(object? value)
     {
+        if (value is TupleArgument retained)
+        {
+            value = retained.Materialize();
+        }
+
         if (value is T t)
         {
             return t;
@@ -45,6 +50,11 @@ public static class CastHelper
     /// </remarks>
     public static T[] ToTrailingArray<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(object value)
     {
+        if (value is TupleArgument retained)
+        {
+            value = retained.Materialize();
+        }
+
         if (value is T element)
         {
             return [element];
@@ -110,6 +120,11 @@ public static class CastHelper
             | DynamicallyAccessedMemberTypes.PublicMethods)] Type type,
         object? value)
     {
+        if (value is TupleArgument retained)
+        {
+            value = retained.Materialize();
+        }
+
         if (value is null || value.GetType().IsAssignableTo(type))
         {
             return value;
@@ -130,6 +145,11 @@ public static class CastHelper
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
     public static object? Cast([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.Interfaces | DynamicallyAccessedMemberTypes.PublicMethods)] Type type, object? value)
     {
+        if (value is TupleArgument retained)
+        {
+            value = retained.Materialize();
+        }
+
         // Fast path: handle null
         if (value is null)
         {

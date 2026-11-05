@@ -646,7 +646,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 ? CompilationExtensions.InferTypeArguments(context.Compilation, unwrappedTypes, testParameterTypes)
                 : null;
 
-            var conversions = unwrappedTypes.ZipAll(testParameterTypes,
+            var wholeTupleWithOmissions = unwrappedTypes.Length == 1
+                && CanBindWholeTupleWithOmissions(context, unwrappedTypes[0], testParameterTypes);
+
+            var conversions = unwrappedTypes.ZipAll(wholeTupleWithOmissions ? testParameterTypes.Take(1) : testParameterTypes,
                 (argument, parameter) => 
                 {
                     // Handle exact type matches for property injection where types might have different metadata
@@ -700,10 +703,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
 
-            if (testParameterTypes.Length == 1
+            if (wholeTupleWithOmissions || (testParameterTypes.Length == 1
                 && unwrappedTypes.Length == 1
                 && ((!isTuples && CanConvertReferenceTuple(unwrappedTypes[0], testParameterTypes[0], context))
-                    || context.Compilation.CanBindToTestParameter(unwrappedTypes[0], testParameterTypes[0])))
+                    || context.Compilation.CanBindToTestParameter(unwrappedTypes[0], testParameterTypes[0]))))
             {
                 return;
             }
@@ -945,6 +948,24 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                || parameterType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
     }
 
+    // Only a matching tuple row binds whole before omittable parameters. A nested tuple row
+    // has a different type and continues to spread, including an explicitly supplied optional.
+    private static bool CanBindWholeTupleWithOmissions(SymbolAnalysisContext context, ITypeSymbol rowType,
+        ImmutableArray<ITypeSymbol> parameterTypes)
+    {
+        if (context.Symbol is not IMethodSymbol method || parameterTypes.Length < 2
+            || !SymbolEqualityComparer.Default.Equals(rowType, parameterTypes[0])
+            || !TryGetTupleElementTypes(rowType, context.Compilation, out _))
+        {
+            return false;
+        }
+
+        // testParameterTypes and this parameter list both exclude engine-injected tokens.
+        var cancellationToken = context.Compilation.GetTypeByMetadataName("System.Threading.CancellationToken");
+        return method.Parameters.Where(parameter => !SymbolEqualityComparer.Default.Equals(parameter.Type, cancellationToken))
+            .Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams);
+    }
+
     private ImmutableArray<ITypeSymbol> UnwrapTypes(SymbolAnalysisContext context,
         IMethodSymbol methodContainingTestData,
         ImmutableArray<ITypeSymbol> testParameterTypes,
@@ -1043,9 +1064,10 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
         // is not reconstructed: CanConvertReferenceTuple checks only the outer row here.
         if (TryGetTupleElementTypes(type, context.Compilation, out var tupleElements))
         {
-            if (testParameterTypes.Length == 1
+            if (CanBindWholeTupleWithOmissions(context, type, testParameterTypes)
+                || (testParameterTypes.Length == 1
                 && (SymbolEqualityComparer.Default.Equals(type, testParameterTypes[0])
-                    || CanConvertReferenceTuple(type, testParameterTypes[0], context)))
+                    || CanConvertReferenceTuple(type, testParameterTypes[0], context))))
             {
                 return ImmutableArray.Create(type);
             }

@@ -107,7 +107,7 @@ public static class ArgumentFormatter
             }
         }
 
-        if (TupleHelper.IsTupleType(type))
+        if (o is TupleArgument || TupleHelper.IsTupleType(type))
         {
             return FormatTuple(o);
         }
@@ -175,7 +175,7 @@ public static class ArgumentFormatter
 
     private static string FormatTuple(object tuple)
     {
-        var elements = TupleHelper.UnwrapTuple(tuple);
+        var elements = DataSourceHelpers.UnwrapTupleAot(tuple);
 
         if (elements.Length == 0)
             return "()";
