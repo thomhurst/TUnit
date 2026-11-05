@@ -11,6 +11,8 @@ public class Issue7662Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("WithoutInheritance", 1)]
     [Arguments("HidesInheritedTest", 3)]
     [Arguments("OverridesInheritedTest", 1)]
+    [Arguments("OverridesWithoutTestAttribute", 1)]
+    [Arguments("NonGenericOverridesWithoutTestAttribute", 1)]
     [Arguments("RetainsInheritedOverloads", 4)]
     [Arguments("RetainsCoincidingOverloads", 2)]
     [Arguments("RetainsLiteralArityNames", 2)]

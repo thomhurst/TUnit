@@ -141,3 +141,22 @@ public class NonGenericHidesInheritedTest : HiddenTestBase<int>
     [Test]
     public void Overload() { }
 }
+
+[InheritsTests]
+[GenerateGenericTest(typeof(int))]
+public class OverridesWithoutTestAttribute<T> : VirtualTestBase<T>
+{
+    public override Task Example() => throw new InvalidOperationException("An override without [Test] must not be discovered.");
+
+    [Test]
+    public void DeclaredTest() { }
+}
+
+[InheritsTests]
+public class NonGenericOverridesWithoutTestAttribute : VirtualTestBase<int>
+{
+    public override Task Example() => throw new InvalidOperationException("An override without [Test] must not be discovered.");
+
+    [Test]
+    public void DeclaredTest() { }
+}

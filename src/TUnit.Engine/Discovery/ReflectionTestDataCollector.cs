@@ -161,6 +161,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             var methods = new List<MethodInfo>(20);
             // Hiding is decided on the declaration, before class type arguments can
             // make distinct overloads (for example Foo(T) and Foo(string)) coincide.
+            // ConcurrentDictionary invokes this factory outside its locks, so looking up
+            // the generic definition in the same cache is safe.
             var definitionMethods = t.IsConstructedGenericType ? GetAllTestMethods(t.GetGenericTypeDefinition()) : null;
             var currentType = t;
 
@@ -168,11 +170,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 foreach (var method in currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
                 {
-                    // Match source-generated inheritance: only tests declared on the requested
-                    // class suppress base tests hidden or overridden by that declaration.
+                    // Match source-generated inheritance: overrides declared on the requested
+                    // class suppress base tests even without [Test]; hiding requires [Test].
                     if (definitionMethods != null
                         ? !ContainsMethodDefinition(definitionMethods, method)
-                        : currentType != t && IsHiddenByDeclaredTest(method, t, methods))
+                        : currentType != t && IsSuppressedByDeclaredMethod(method, t, methods))
                     {
                         continue;
                     }
@@ -199,13 +201,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
-    private static bool IsHiddenByDeclaredTest(MethodInfo baseMethod, Type type, List<MethodInfo> methods)
+    private static bool IsSuppressedByDeclaredMethod(MethodInfo baseMethod, Type type, List<MethodInfo> methods)
     {
         foreach (var derived in methods)
         {
             if (derived.DeclaringType == type
-                && derived.IsDefined(typeof(TestAttribute), inherit: false)
-                && (OverridesBaseMethod(derived, baseMethod) || HidesBaseMethod(derived, baseMethod)))
+                && (OverridesBaseMethod(derived, baseMethod)
+                    || (derived.IsDefined(typeof(TestAttribute), inherit: false) && HidesBaseMethod(derived, baseMethod))))
             {
                 return true;
             }
