@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Analyzers.Extensions;
@@ -13,10 +13,16 @@ public class TestMethodParametersAnalyzer : ConcurrentDiagnosticAnalyzer
 
     protected override void InitializeInternal(AnalysisContext context)
     {
-        context.RegisterSymbolAction(AnalyzeSymbol, SymbolKind.Method);
+        context.RegisterCompilationStartAction(compilationContext =>
+        {
+            var readOnlySpanType = compilationContext.Compilation.GetTypeByMetadataName("System.ReadOnlySpan`1");
+            var spanType = compilationContext.Compilation.GetTypeByMetadataName("System.Span`1");
+            compilationContext.RegisterSymbolAction(
+                symbolContext => AnalyzeSymbol(symbolContext, readOnlySpanType, spanType), SymbolKind.Method);
+        });
     }
 
-    private void AnalyzeSymbol(SymbolAnalysisContext context)
+    private static void AnalyzeSymbol(SymbolAnalysisContext context, INamedTypeSymbol? readOnlySpanType, INamedTypeSymbol? spanType)
     {
         if (context.Symbol is not IMethodSymbol methodSymbol)
         {
@@ -30,11 +36,7 @@ public class TestMethodParametersAnalyzer : ConcurrentDiagnosticAnalyzer
 
         foreach (var parameter in methodSymbol.Parameters)
         {
-            if (parameter.IsParams && parameter.Type is INamedTypeSymbol type
-                && (SymbolEqualityComparer.Default.Equals(type.OriginalDefinition,
-                        context.Compilation.GetTypeByMetadataName("System.ReadOnlySpan`1"))
-                    || SymbolEqualityComparer.Default.Equals(type.OriginalDefinition,
-                        context.Compilation.GetTypeByMetadataName("System.Span`1"))))
+            if (parameter.IsParams && IsSpanType(parameter.Type, readOnlySpanType, spanType))
             {
                 context.ReportDiagnostic(Diagnostic.Create(Rules.UnsupportedSpanParams,
                     parameter.Locations.FirstOrDefault(), parameter.Name));
@@ -53,5 +55,12 @@ public class TestMethodParametersAnalyzer : ConcurrentDiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(Rules.NoDataSourceProvided,
                 parameters[0].Locations.FirstOrDefault() ?? methodSymbol.Locations.FirstOrDefault()));
         }
+    }
+
+    private static bool IsSpanType(ITypeSymbol type, INamedTypeSymbol? readOnlySpanType, INamedTypeSymbol? spanType)
+    {
+        return type is INamedTypeSymbol namedType
+            && (SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, readOnlySpanType)
+                || SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, spanType));
     }
 }
