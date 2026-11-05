@@ -193,7 +193,7 @@ jobs:
       # Capture native runtime faults (including exit 139 before MTP reports tests).
       # Use an absolute path because the pipeline launches tests from several directories.
       - name: Enable macOS crash dumps
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && vars.CRASH_DUMP_ENCRYPTION_CERT != ''
         shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/tunit-crash-dumps"
@@ -226,12 +226,31 @@ jobs:
           # Manual runs, which publish, keep every suite on every OS.
           os-specific-only: ${{ github.event_name == 'pull_request' && matrix.os != 'ubuntu-latest' }}
 
-      - name: Upload macOS crash dumps
+      # Never upload raw process memory: the pipeline and its children inherit credentials.
+      - name: Encrypt macOS crash dumps
+        if: always() && runner.os == 'macOS' && vars.CRASH_DUMP_ENCRYPTION_CERT != ''
+        shell: bash
+        env:
+          CRASH_DUMP_ENCRYPTION_CERT: ${{ vars.CRASH_DUMP_ENCRYPTION_CERT }}
+        run: |
+          set -euo pipefail
+          cert="$RUNNER_TEMP/tunit-crash-dump-recipient.pem"
+          printf '%s\n' "$CRASH_DUMP_ENCRYPTION_CERT" > "$cert"
+          trap 'rm -f "$cert" "$RUNNER_TEMP"/tunit-crash-dumps/*.dmp' EXIT
+          mkdir -p "$RUNNER_TEMP/tunit-crash-dumps-encrypted"
+          shopt -s nullglob
+          for dump in "$RUNNER_TEMP"/tunit-crash-dumps/*.dmp; do
+            encrypted="$RUNNER_TEMP/tunit-crash-dumps-encrypted/$(basename "$dump").cms"
+            openssl cms -encrypt -binary -aes-256-cbc -in "$dump" -outform DER -out "$encrypted.tmp" "$cert"
+            mv "$encrypted.tmp" "$encrypted"
+          done
+
+      - name: Upload encrypted macOS crash dumps
         uses: actions/upload-artifact@v7.0.2
         if: always() && runner.os == 'macOS'
         with:
-          name: NativeCrashDumps-${{matrix.os}}
-          path: ${{ runner.temp }}/tunit-crash-dumps/*.dmp
+          name: EncryptedNativeCrashDumps-${{matrix.os}}
+          path: ${{ runner.temp }}/tunit-crash-dumps-encrypted/*.cms
           if-no-files-found: ignore
           retention-days: 7
 

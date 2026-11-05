@@ -61,8 +61,20 @@ Verify against local packages:
 
 ## Native macOS crashes
 
-The macOS modular pipeline enables .NET crash dumps and uploads them as
-`NativeCrashDumps-macos-latest`, retained for seven days. An exit such as 139
+When the repository variable `CRASH_DUMP_ENCRYPTION_CERT` contains a PEM X.509
+recipient certificate with an RSA public key, the macOS modular pipeline enables
+.NET crash dumps, encrypts them with OpenSSL CMS (AES-256), and uploads only the
+`.cms` files as `EncryptedNativeCrashDumps-macos-latest`, retained for seven days.
+Keep the matching private key outside CI. Without the variable, capture is disabled.
+Encryption failure fails the step; raw dumps are deleted and never uploaded.
+To decrypt a downloaded artifact locally:
+
+```sh
+openssl cms -decrypt -binary -inform DER -in crash.dmp.cms \
+  -recip recipient.pem -inkey recipient.key -out crash.dmp
+```
+
+Pipeline processes inherit credentials, so decrypted dumps must remain private. An exit such as 139
 before test results can be a native runtime fault; keep the failing exit code
 and inspect the dump rather than treating a passing rerun as a fix.
 
