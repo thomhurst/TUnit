@@ -573,8 +573,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.Unindent();
             writer.AppendLine("}");
 
+            // Bind inherited calls through their constructed declaring type. Calling through
+            // the derived type can select a different overload after generic substitution.
+            var invocationType = constructedType;
+            for (var current = constructedType; current != null; current = current.BaseType)
+            {
+                if (SymbolEqualityComparer.Default.Equals(current.OriginalDefinition,
+                        testMethod.MethodSymbol.ContainingType.OriginalDefinition))
+                {
+                    invocationType = current;
+                    break;
+                }
+            }
+
             // Invoke switch for this concrete type
-            writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __Invoke_{groupIndex.ToString(CultureInfo.InvariantCulture)}({concreteClassName} instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
+            writer.AppendLine($"private static global::System.Threading.Tasks.ValueTask __Invoke_{groupIndex.ToString(CultureInfo.InvariantCulture)}({invocationType.GloballyQualified()} instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)");
             writer.AppendLine("{");
             writer.Indent();
             if (entries.Count == 1)
@@ -6078,7 +6091,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     private static bool IsMethodHiding(IMethodSymbol derivedMethod, IMethodSymbol baseMethod)
     {
         // Must have same name
-        if (derivedMethod.Name != baseMethod.Name)
+        if (derivedMethod.Name != baseMethod.Name || derivedMethod.Arity != baseMethod.Arity)
         {
             return false;
         }
@@ -6090,9 +6103,18 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         // Must have matching parameters
-        if (!ParametersMatch(derivedMethod.Parameters, baseMethod.Parameters))
+        if (derivedMethod.Parameters.Length != baseMethod.Parameters.Length)
         {
             return false;
+        }
+
+        for (var i = 0; i < derivedMethod.Parameters.Length; i++)
+        {
+            if ((derivedMethod.Parameters[i].RefKind == RefKind.None) != (baseMethod.Parameters[i].RefKind == RefKind.None)
+                || !HaveSameSignatureType(derivedMethod.Parameters[i].Type, baseMethod.Parameters[i].Type))
+            {
+                return false;
+            }
         }
 
         // Derived method's containing type must be derived from base method's containing type
@@ -6119,39 +6141,101 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         return false;
     }
 
+    private static bool HaveSameSignatureType(ITypeSymbol derivedType, ITypeSymbol baseType)
+    {
+        if (SymbolEqualityComparer.Default.Equals(derivedType, baseType))
+        {
+            return true;
+        }
+
+        // dynamic is emitted as System.Object, including inside compound parameter types.
+        if ((derivedType.TypeKind == TypeKind.Dynamic && baseType.SpecialType == SpecialType.System_Object)
+            || (baseType.TypeKind == TypeKind.Dynamic && derivedType.SpecialType == SpecialType.System_Object))
+        {
+            return true;
+        }
+
+        if (derivedType is ITypeParameterSymbol derivedParameter && baseType is ITypeParameterSymbol baseParameter)
+        {
+            return derivedParameter.TypeParameterKind == TypeParameterKind.Method
+                && baseParameter.TypeParameterKind == TypeParameterKind.Method
+                && derivedParameter.Ordinal == baseParameter.Ordinal;
+        }
+
+        if (derivedType is IArrayTypeSymbol derivedArray && baseType is IArrayTypeSymbol baseArray)
+        {
+            return derivedArray.Rank == baseArray.Rank
+                && HaveSameSignatureType(derivedArray.ElementType, baseArray.ElementType);
+        }
+
+        if (derivedType is IPointerTypeSymbol derivedPointer && baseType is IPointerTypeSymbol basePointer)
+        {
+            return HaveSameSignatureType(derivedPointer.PointedAtType, basePointer.PointedAtType);
+        }
+
+        if (derivedType is not INamedTypeSymbol derivedNamed || baseType is not INamedTypeSymbol baseNamed
+            || !SymbolEqualityComparer.Default.Equals(derivedNamed.OriginalDefinition, baseNamed.OriginalDefinition))
+        {
+            return false;
+        }
+
+        if (derivedNamed.ContainingType != null && baseNamed.ContainingType != null
+            && !HaveSameSignatureType(derivedNamed.ContainingType, baseNamed.ContainingType))
+        {
+            return false;
+        }
+
+        for (var i = 0; i < derivedNamed.TypeArguments.Length; i++)
+        {
+            if (!HaveSameSignatureType(derivedNamed.TypeArguments[i], baseNamed.TypeArguments[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private static List<IMethodSymbol> CollectInheritedTestMethods(INamedTypeSymbol derivedClass)
     {
-        var allTestMethods = derivedClass.GetMembersIncludingBase()
+        var allMethods = derivedClass.GetMembersIncludingBase()
             .OfType<IMethodSymbol>()
-            .Where(m => m.GetAttributes().Any(attr => attr.IsTestAttribute()))
             .ToArray();
 
-        // Find methods declared directly on the derived class
-        var derivedClassMethods = allTestMethods
-            .Where(m => SymbolEqualityComparer.Default.Equals(m.ContainingType.OriginalDefinition, derivedClass.OriginalDefinition))
-            .ToArray();
-
-        // Filter out base methods that are hidden by derived class methods or declared directly on derived class
         var result = new List<IMethodSymbol>();
-        foreach (var method in allTestMethods)
+        foreach (var method in allMethods)
         {
-            // Skip methods declared directly on derived class
-            // (they're handled by regular test registration)
-            if (SymbolEqualityComparer.Default.Equals(method.ContainingType.OriginalDefinition, derivedClass.OriginalDefinition))
+            if (!method.GetAttributes().Any(attr => attr.IsTestAttribute())
+                || SymbolEqualityComparer.Default.Equals(method.ContainingType.OriginalDefinition, derivedClass.OriginalDefinition))
             {
                 continue;
             }
 
-            // Check if this base method is hidden by any derived class method
-            var isHidden = derivedClassMethods.Any(derived => IsMethodHiding(derived, method));
+            // Include undecorated overrides and declarations in intermediate bases.
+            // Only non-override hiding requires an explicit [Test] attribute.
+            var isSuppressed = allMethods.Any(derived => OverridesMethod(derived, method)
+                || (derived.GetAttributes().Any(attr => attr.IsTestAttribute()) && IsMethodHiding(derived, method)));
 
-            if (!isHidden)
+            if (!isSuppressed)
             {
                 result.Add(method);
             }
         }
 
         return result;
+    }
+
+    private static bool OverridesMethod(IMethodSymbol candidate, IMethodSymbol baseMethod)
+    {
+        for (var overridden = candidate.OverriddenMethod; overridden != null; overridden = overridden.OverriddenMethod)
+        {
+            if (SymbolEqualityComparer.Default.Equals(overridden, baseMethod))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static IMethodSymbol? FindConcreteMethodImplementation(INamedTypeSymbol derivedClass, IMethodSymbol baseMethod)
@@ -6162,7 +6246,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         foreach (var candidate in candidateMethods)
         {
             // Check if this method is an override or implementation of the base method
-            if (candidate.IsOverride && SymbolEqualityComparer.Default.Equals(candidate.OverriddenMethod, baseMethod))
+            if (OverridesMethod(candidate, baseMethod))
             {
                 return candidate;
             }

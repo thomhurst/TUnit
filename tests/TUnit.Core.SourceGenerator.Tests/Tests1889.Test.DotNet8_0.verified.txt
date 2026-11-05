@@ -24,7 +24,7 @@ internal static class TUnit_TestProject_Bugs__1889_DerivedTest_Test1_TestSource
     {
         return new global::TUnit.TestProject.Bugs._1889.DerivedTest();
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._1889.DerivedTest instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {
@@ -97,7 +97,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", ne
     {
         return new global::TUnit.TestProject.Bugs._1889.DerivedTest();
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._1889.DerivedTest instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {
@@ -184,7 +184,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(bool), "condition", ne
     {
         return new global::TUnit.TestProject.Bugs._1889.DerivedTest();
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._1889.DerivedTest instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Library.Bugs._1889.BaseTest<DummyReferenceTypeClass> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {

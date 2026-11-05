@@ -154,21 +154,153 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return CollectTestsAsync(testSessionId);
     }
 
-    private static IEnumerable<MethodInfo> GetAllTestMethods([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type)
+    private static MethodInfo[] GetAllTestMethods([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type)
     {
         return _typeMethodsCache.GetOrAdd(type, static t =>
         {
             var methods = new List<MethodInfo>(20);
+            // Hiding is decided on the declaration, before class type arguments can
+            // make distinct overloads (for example Foo(T) and Foo(string)) coincide.
+            // ConcurrentDictionary invokes this factory outside its locks, so looking up
+            // the generic definition in the same cache is safe.
+            var definitionMethods = t.IsConstructedGenericType ? GetAllTestMethods(t.GetGenericTypeDefinition()) : null;
+            var nearerDeclarations = definitionMethods == null ? new List<MethodInfo>(20) : null;
             var currentType = t;
 
             while (currentType != null && currentType != typeof(object))
             {
-                methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
+                var declarations = currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                foreach (var method in declarations)
+                {
+                    // Walk from nearest to furthest declarations: overrides at every level
+                    // suppress base tests even without [Test]; hiding requires [Test].
+                    if (definitionMethods != null
+                        ? !ContainsMethodDefinition(definitionMethods, method)
+                        : currentType != t && IsSuppressedByDeclaredMethod(method, nearerDeclarations!))
+                    {
+                        continue;
+                    }
+
+                    methods.Add(method);
+                }
+                // Suppressed tests still hide older declarations further up the hierarchy.
+                nearerDeclarations?.AddRange(declarations);
                 currentType = currentType.BaseType;
             }
 
             return methods.ToArray();
         });
+    }
+
+    private static bool ContainsMethodDefinition(MethodInfo[] methods, MethodInfo method)
+    {
+        foreach (var candidate in methods)
+        {
+            if (candidate.MetadataToken == method.MetadataToken && candidate.Module == method.Module)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsSuppressedByDeclaredMethod(MethodInfo baseMethod, List<MethodInfo> methods)
+    {
+        foreach (var derived in methods)
+        {
+            if (derived.DeclaringType != baseMethod.DeclaringType
+                && (OverridesBaseMethod(derived, baseMethod)
+                    || (derived.IsDefined(typeof(TestAttribute), inherit: false) && HidesBaseMethod(derived, baseMethod))))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool OverridesBaseMethod(MethodInfo derivedMethod, MethodInfo baseMethod)
+    {
+        if (!derivedMethod.IsVirtual || !baseMethod.IsVirtual)
+        {
+            return false;
+        }
+
+        var derivedDefinition = derivedMethod.GetBaseDefinition();
+        var baseDefinition = baseMethod.GetBaseDefinition();
+        return derivedDefinition.MetadataToken == baseDefinition.MetadataToken
+            && derivedDefinition.Module == baseDefinition.Module;
+    }
+
+    private static bool HidesBaseMethod(MethodInfo derivedMethod, MethodInfo baseMethod)
+    {
+        if (derivedMethod.Name != baseMethod.Name
+            || derivedMethod.GetGenericArguments().Length != baseMethod.GetGenericArguments().Length
+            || derivedMethod.GetBaseDefinition() != derivedMethod)
+        {
+            return false;
+        }
+
+        var derivedParameters = derivedMethod.GetParameters();
+        var baseParameters = baseMethod.GetParameters();
+        if (derivedParameters.Length != baseParameters.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < derivedParameters.Length; i++)
+        {
+            if (!HaveSameSignatureType(derivedParameters[i].ParameterType, baseParameters[i].ParameterType))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool HaveSameSignatureType(Type derivedType, Type baseType)
+    {
+        if (derivedType == baseType)
+        {
+            return true;
+        }
+
+        // Method type parameter names do not form part of a signature. Class type
+        // parameters have already been substituted by the constructed base hierarchy.
+        if (derivedType.IsGenericParameter && baseType.IsGenericParameter)
+        {
+            return derivedType.DeclaringMethod != null && baseType.DeclaringMethod != null
+                && derivedType.GenericParameterPosition == baseType.GenericParameterPosition;
+        }
+
+        if (derivedType.HasElementType && baseType.HasElementType)
+        {
+            return derivedType.IsArray == baseType.IsArray
+                && derivedType.IsByRef == baseType.IsByRef
+                && derivedType.IsPointer == baseType.IsPointer
+                && (!derivedType.IsArray || derivedType.GetArrayRank() == baseType.GetArrayRank())
+                && HaveSameSignatureType(derivedType.GetElementType()!, baseType.GetElementType()!);
+        }
+
+        if (!derivedType.IsGenericType || !baseType.IsGenericType
+            || derivedType.GetGenericTypeDefinition() != baseType.GetGenericTypeDefinition())
+        {
+            return false;
+        }
+
+        var derivedArguments = derivedType.GetGenericArguments();
+        var baseArguments = baseType.GetGenericArguments();
+        for (var i = 0; i < derivedArguments.Length; i++)
+        {
+            if (!HaveSameSignatureType(derivedArguments[i], baseArguments[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // Read-many during reflection discovery (one Contains per assembly).
@@ -498,9 +630,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // Get test methods from the generic type definition first (needed for both data sources and GenerateGenericTest)
         // Optimize: Manual filtering instead of LINQ Where().ToArray()
-        var declaredMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-        var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
-        foreach (var method in declaredMethods)
+        var methods = genericTypeDefinition.IsDefined(typeof(InheritsTestsAttribute), inherit: false)
+            ? GetAllTestMethods(genericTypeDefinition)
+            : genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        var testMethodsList = new List<MethodInfo>();
+        foreach (var method in methods)
         {
             if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
             {
@@ -984,13 +1118,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
-    /// Finds the method on a constructed generic type that corresponds to a method of its generic type
+    /// Finds the method on a constructed generic type or its bases that corresponds to a method of its generic type
     /// definition. Matches by metadata identity rather than name so overloaded test methods resolve to
     /// their own counterpart instead of throwing <see cref="AmbiguousMatchException"/>.
     /// </summary>
     private static MethodInfo? FindConcreteMethod(Type concreteType, MethodInfo genericMethod)
     {
-        foreach (var method in concreteType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+        foreach (var method in GetAllTestMethods(concreteType))
         {
             if (method.MetadataToken == genericMethod.MetadataToken && method.Module == genericMethod.Module)
             {

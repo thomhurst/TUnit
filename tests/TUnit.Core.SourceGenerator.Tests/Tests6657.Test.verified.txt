@@ -37,7 +37,7 @@ internal static class TUnit_TestProject_Bugs__6657_CovariantPropertyOverrideTest
     {
         return new global::TUnit.TestProject.Bugs._6657.CovariantPropertyOverrideTests();
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._6657.CovariantPropertyOverrideTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._6657.BaseTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {

@@ -24,7 +24,7 @@ internal static class TUnit_TestProject_Bugs__1899_DerivedTest_Test1_TestSource
     {
         return new global::TUnit.TestProject.Bugs._1899.DerivedTest();
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._1899.DerivedTest instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Library.Bugs._1899.BaseClass<DummyReferenceTypeClass> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {

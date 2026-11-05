@@ -5,7 +5,7 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal static class TUnit_TestProject_NonPublicTestMethodRootingTests_Internal_Generic__T_TestSource
+internal static class TUnit_TestProject_NonPublicTestMethodRootingTests_Internal_Generic___T_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.NonPublicTestMethodRootingTests", new global::TUnit.Core.ClassMetadata
     {
@@ -70,7 +70,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_NonPublicTestMethodRootingTests_Internal_Generic__T_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NonPublicTestMethodRootingTests>(static () => TUnit_TestProject_NonPublicTestMethodRootingTests_Internal_Generic__T_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_NonPublicTestMethodRootingTests_Internal_Generic___T_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.NonPublicTestMethodRootingTests>(static () => TUnit_TestProject_NonPublicTestMethodRootingTests_Internal_Generic___T_TestSource.Entries_0);
 }
 
 
