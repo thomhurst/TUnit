@@ -183,3 +183,56 @@ public class NonDisposableSelfResolvingScopeObserverTests
         await Assert.That(NonDisposableSelfResolvingScopeAttribute.Created.Single().Service.DisposeCount).IsEqualTo(1);
     }
 }
+
+public sealed class NestedScope : IDisposable, TUnit.Core.Interfaces.IAsyncInitializer
+{
+    public int DisposeCount { get; private set; }
+    public Task InitializeAsync() => Task.CompletedTask;
+    public void Dispose()
+    {
+        if (++DisposeCount > 1) throw new InvalidOperationException("Scope disposed twice");
+    }
+}
+
+public sealed class ScopeReferencingService(NestedScope scope) : IDisposable
+{
+    public NestedScope Scope { get; } = scope;
+    public int DisposeCount { get; private set; }
+    public void Dispose() => DisposeCount++;
+}
+
+public sealed class NestedScopeAttribute : DependencyInjectionDataSourceAttribute<NestedScope>
+{
+    public static ConcurrentBag<ScopeReferencingService> Created { get; } = [];
+    public override NestedScope CreateScope(DataGeneratorMetadata metadata) => new();
+    protected override bool ScopeOwnsCreatedObjects(NestedScope scope) => false;
+    public override object Create(NestedScope scope, Type type)
+    {
+        var service = new ScopeReferencingService(scope);
+        Created.Add(service);
+        return service;
+    }
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class NestedScopeTests
+{
+    [Test]
+    [NestedScope]
+    public async Task Scope_Is_Alive(ScopeReferencingService service)
+        => await Assert.That(service.Scope.DisposeCount).IsEqualTo(0);
+}
+
+[EngineTest(ExpectedResult.Pass)]
+public class NestedScopeObserverTests
+{
+    [Test]
+    [DependsOn(typeof(NestedScopeTests))]
+    public async Task Nested_Scope_Is_Disposed_Once()
+    {
+        // Run this observer with its dependency; each fixture records one execution.
+        var service = NestedScopeAttribute.Created.Single();
+        await Assert.That(service.DisposeCount).IsEqualTo(1);
+        await Assert.That(service.Scope.DisposeCount).IsEqualTo(1);
+    }
+}

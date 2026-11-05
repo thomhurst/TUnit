@@ -18,6 +18,12 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
 
             // Custom scopes can leave disposal of their resolved objects to the tracker.
             var scopeOwnsCreatedObjects = ScopeOwnsCreatedObjects(scope);
+            if (!scopeOwnsCreatedObjects && scope is (IDisposable or IAsyncDisposable))
+            {
+                // The scope can enter tracking through an initializer property, even when
+                // Create never returns it directly. Row cleanup owns only the scope itself.
+                ObjectTracker.MarkRowOwnedScope(scope);
+            }
 
             var values = new object?[dataGeneratorMetadata.MembersToGenerate.Length];
             var resolvedCount = 0;
@@ -41,10 +47,6 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                     {
                         // The scope owns the resolved value and its initializer graph.
                         ObjectTracker.MarkExternallyOwned(created);
-                    }
-                    else if (ReferenceEquals(created, scope) && created is (IDisposable or IAsyncDisposable))
-                    {
-                        ObjectTracker.MarkRowOwnedScope(created);
                     }
                 }
 
