@@ -1207,14 +1207,29 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         // this instantiation's concrete class join it.
         void JoinDeferredDataSources(ITypeSymbol[] typeArguments)
         {
+            if (rowInstantiations is null
+                || !rowInstantiations.TryGetValue(BuildTypeKey(typeArguments), out var existing))
+            {
+                return;
+            }
+
             if (deferredDataSources is not null
-                && rowInstantiations is not null
-                && deferredDataSources.TryGetValue(BuildTypeKey(typeArguments.Take(classTypeArgCount)), out var deferredForClass)
-                && rowInstantiations.TryGetValue(BuildTypeKey(typeArguments), out var existing))
+                && deferredDataSources.TryGetValue(BuildTypeKey(typeArguments.Take(classTypeArgCount)), out var deferredForClass))
             {
                 foreach (var deferred in deferredForClass)
                 {
                     existing.AddRow(deferred, isClassRow: false);
+                }
+            }
+
+            // Instance sources deliberately skip inference when explicit method types are present.
+            // They still run on those types, including when a closed-class static source created
+            // the same instantiation first. This helper is called only for explicit method types.
+            foreach (var source in testMethod.MethodAttributes)
+            {
+                if (source.AttributeClass?.Name == "InstanceMethodDataSourceAttribute")
+                {
+                    existing.AddRow(source, isClassRow: false);
                 }
             }
         }

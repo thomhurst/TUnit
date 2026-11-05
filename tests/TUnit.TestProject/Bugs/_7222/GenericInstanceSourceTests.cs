@@ -106,3 +106,43 @@ public class ExplicitMethodInstanceSourceTests
         if (typeof(T) != typeof(long)) throw new InvalidOperationException("Expected explicit long");
     }
 }
+
+// The analyzer cannot close TClass before comparing the static row with T?.
+#pragma warning disable TUnit0001
+[GenerateGenericTest(typeof(int))]
+public class ExplicitClassMethodSourceCollisionTests<TClass>
+{
+    public static IEnumerable<TClass> StaticRows() => [default!];
+    public IEnumerable<int> InstanceRows() => [1];
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [MethodDataSource(nameof(StaticRows))]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    public void BothSources<T>(T? item) where T : struct
+    {
+        if (typeof(T) != typeof(int)) throw new InvalidOperationException("Expected explicit int");
+    }
+}
+
+[Arguments<int>(1)]
+public class ClassRowMethodSourceCollisionTests<TClass>(TClass value)
+{
+    public static IEnumerable<TClass> StaticRows() => [default!];
+    public IEnumerable<int> InstanceRows()
+    {
+        _ = value;
+        return [1];
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [MethodDataSource(nameof(StaticRows))]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    public void BothSources<T>(T? item) where T : struct
+    {
+        if (typeof(T) != typeof(int)) throw new InvalidOperationException("Expected explicit int");
+    }
+}
+
+#pragma warning restore TUnit0001

@@ -153,6 +153,8 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
 
     [Test]
     [Arguments("ExplicitClassInstanceSourcesTests*", 2)]
+    [Arguments("ExplicitClassMethodSourceCollisionTests*", 2)]
+    [Arguments("ClassRowMethodSourceCollisionTests*", 2)]
     [Arguments("ExplicitMethodInstanceSourceTests", 1)]
     [Arguments("ClosedClassParameterInferredSourceTests*", 1)]
     [Arguments("ExplicitClassParameterInferredSourceTests*", 1)]
