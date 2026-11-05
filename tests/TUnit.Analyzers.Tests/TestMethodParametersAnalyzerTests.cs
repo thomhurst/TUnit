@@ -5,6 +5,61 @@ namespace TUnit.Analyzers.Tests;
 public class TestMethodParametersAnalyzerTests
 {
     [Test]
+    [Arguments("ReadOnlySpan")]
+    [Arguments("Span")]
+    public async Task Span_Params_Reports_Unsupported_Parameter(string spanType)
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            $$"""
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class MyClass
+            {
+                [Test, Rows]
+                public void MyTest<T>(T[] values, {|#1:params|} {{spanType}}<string> {|#0:rest|}) { }
+            }
+
+            public class RowsAttribute : TypedDataSourceAttribute<(int[], string)>
+            {
+                public override async IAsyncEnumerable<Func<System.Threading.Tasks.Task<(int[], string)>>> GetTypedDataRowsAsync(DataGeneratorMetadata metadata)
+                {
+                    yield return () => System.Threading.Tasks.Task.FromResult((new[] { 1 }, "hello"));
+                    await System.Threading.Tasks.Task.CompletedTask;
+                }
+            }
+            """,
+            // The verifier uses Roslyn 4.8, before C# 13 params collections.
+            Microsoft.CodeAnalysis.Testing.DiagnosticResult.CompilerError("CS0225").WithLocation(1),
+            Verifier.Diagnostic(Rules.UnsupportedSpanParams).WithLocation(0).WithArguments("rest"));
+    }
+
+    [Test]
+    public async Task Array_And_Interface_Params_And_NonTest_Spans_Are_Allowed()
+    {
+        await Verifier.VerifyAnalyzerAsync(
+            """
+            using System;
+            using System.Collections.Generic;
+            using TUnit.Core;
+
+            public class MyClass
+            {
+                [Test, Arguments("hello")]
+                public void ArrayTest(params string[] rest) { }
+
+                [Test, Arguments("hello")]
+                public void InterfaceTest({|#0:params|} IEnumerable<string> rest) { }
+
+                public void Helper({|#1:params|} ReadOnlySpan<string> rest) { }
+            }
+            """,
+            Microsoft.CodeAnalysis.Testing.DiagnosticResult.CompilerError("CS0225").WithLocation(0),
+            Microsoft.CodeAnalysis.Testing.DiagnosticResult.CompilerError("CS0225").WithLocation(1));
+    }
+
+    [Test]
     public async Task Test_No_Error()
     {
         await Verifier
