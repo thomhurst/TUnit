@@ -2761,6 +2761,200 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7222_SingleTupleElementConversionTests_OperatorElement___T__De_6F6A5BA1_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests)),
+        Name = "SingleTupleElementConversionTests",
+        Namespace = "TUnit.TestProject.Bugs._7222",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("OperatorElement", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests), "OperatorElement", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination))]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single tuple parameter
+            if (args.Length == 2)
+            {
+                // Arguments are unwrapped tuple elements, reconstruct the tuple
+                instance.OperatorElement<int>((global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+            {
+                // Rare case: tuple is wrapped as a single argument
+                instance.OperatorElement<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>>(__tupleFallback0) }));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("OperatorRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests>(
+            methodName: "OperatorElement<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.OperatorElement<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 333,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("OperatorRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.OperatorRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7222_SingleTupleElementConversionTests_OperatorElement___T__De_6F6A5BA1_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests>(static () => TUnit_TestProject_Bugs__7222_SingleTupleElementConversionTests_OperatorElement___T__De_6F6A5BA1_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7222_SingleTupleElementConversionTests_OperatorReferenceElemen_0B758462_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests)),
+        Name = "SingleTupleElementConversionTests",
+        Namespace = "TUnit.TestProject.Bugs._7222",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("OperatorReferenceElement", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests), "OperatorReferenceElement", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination))]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single reference tuple parameter
+            if (args.Length == 2)
+            {
+                instance.OperatorReferenceElement<int>(new global::System.Tuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                switch (args.Length)
+                {
+                    case 1:
+                        {
+                            instance.OperatorReferenceElement<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>)new global::System.Tuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>>(__tupleFallback0) }));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        }
+                    default:
+                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                }
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.InstanceMethodDataSourceAttribute("OperatorReferenceRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests>(
+            methodName: "OperatorReferenceElement<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.OperatorReferenceElement<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 341,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("OperatorReferenceRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceEnumerable(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests)instance).OperatorReferenceRows() ?? global::System.Array.Empty<object>()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<int, global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.Destination>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7222_SingleTupleElementConversionTests_OperatorReferenceElemen_0B758462_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests>(static () => TUnit_TestProject_Bugs__7222_SingleTupleElementConversionTests_OperatorReferenceElemen_0B758462_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7222_SingleTupleElementConversionTests_BaseElement___Base_T___T__TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests", new global::TUnit.Core.ClassMetadata
@@ -2825,7 +3019,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.BaseElement<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 329,
+            lineNumber: 355,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2923,7 +3117,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.BaseReferenceElement<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 337,
+            lineNumber: 363,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3019,7 +3213,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.InterfaceElement<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 348,
+            lineNumber: 374,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3117,7 +3311,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.InterfaceReferenceElement<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 356,
+            lineNumber: 382,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3213,7 +3407,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.NullableElement<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 364,
+            lineNumber: 390,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3309,7 +3503,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.OpenNullableElement<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 375,
+            lineNumber: 401,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3407,7 +3601,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.OpenNullableReferenceElement<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 383,
+            lineNumber: 409,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3503,7 +3697,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.SingleTupleElementConversionTests.NumericElement<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 391,
+            lineNumber: 417,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3600,7 +3794,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.ClosedClassTupleInferenceTests<int>.NullableClass<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 408,
+            lineNumber: 434,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3699,7 +3893,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.ClosedClassTupleInferenceTests<int>.NullableReferenceClass<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 416,
+            lineNumber: 442,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3800,7 +3994,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "extra", new glo
             fullyQualifiedName: "TUnit.TestProject.Bugs._7222.ClosedClassTupleInferenceTests<int>.ClosedClass<string>",
             methodTypeArgumentsIdentity: "<string>",
             filePath: "",
-            lineNumber: 424,
+            lineNumber: 450,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -3901,4 +4095,303 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "item", new g
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_Bugs__7222_InstanceSourceConstraintViolationTests_StructOnly__T_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7222.InstanceSourceConstraintViolationTests>(static () => TUnit_TestProject_Bugs__7222_InstanceSourceConstraintViolationTests_StructOnly__T_TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7222_ClosedClassUninferredInstanceSourceTests_TClass_NullableE_86E93125_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<>), [new global::TUnit.Core.GenericParameter(0, false, "TClass")]),
+        Name = "ClosedClassUninferredInstanceSourceTests",
+        Namespace = "TUnit.TestProject.Bugs._7222",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("NullableElement", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<>), "NullableElement", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Nullable<>), [new global::TUnit.Core.GenericParameter(0, true, "T")]), new global::TUnit.Core.ConcreteType(typeof(string))]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<int>();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single reference tuple parameter
+            if (args.Length == 2)
+            {
+                instance.NullableElement<int>(new global::System.Tuple<int?, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int?>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                switch (args.Length)
+                {
+                    case 1:
+                        {
+                            instance.NullableElement<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int?, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int?, string>)new global::System.Tuple<int?, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int?>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int?, string>>(__tupleFallback0) }));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        }
+                    default:
+                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                }
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.InstanceMethodDataSourceAttribute("Rows"),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string))
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<int>>(
+            methodName: "NullableElement<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<int>.NullableElement<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 31,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("Rows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceEnumerable(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<int>)instance).Rows() ?? global::System.Array.Empty<object>()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<int?, string>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<int?, string>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+    private static global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<string> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<string>();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Could not infer the type arguments of generic test method 'NullableElement' from data source [InstanceMethodDataSource(nameof(Rows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].")));
+    }
+    private static global::System.Attribute[] __Attributes_1(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.InstanceMethodDataSourceAttribute("Rows"),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
+            new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string))
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<string>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<string>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<string>>(
+            methodName: "NullableElement",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<string>.NullableElement",
+            filePath: "",
+            lineNumber: 31,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Could not infer the type arguments of generic test method 'NullableElement' from data source [InstanceMethodDataSource(nameof(Rows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].", new global::TUnit.Core.InstanceMethodDataSourceAttribute("Rows")
+{
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceEnumerable(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<string>)instance).Rows() ?? global::System.Array.Empty<object>()),
+}),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7222_ClosedClassUninferredInstanceSourceTests_TClass_NullableE_86E93125_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<int>>(static () => TUnit_TestProject_Bugs__7222_ClosedClassUninferredInstanceSourceTests_TClass_NullableE_86E93125_TestSource.Entries_0);
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7222_ClosedClassUninferredInstanceSourceTests_TClass_NullableE_86E93125_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7222.ClosedClassUninferredInstanceSourceTests<string>>(static () => TUnit_TestProject_Bugs__7222_ClosedClassUninferredInstanceSourceTests_TClass_NullableE_86E93125_TestSource.Entries_1);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7222_ClosedClassRowUninferredInstanceSourceTests_TClass_Nullab_A5110F1F_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<>), [new global::TUnit.Core.GenericParameter(0, false, "TClass")]),
+        Name = "ClosedClassRowUninferredInstanceSourceTests",
+        Namespace = "TUnit.TestProject.Bugs._7222",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "TClass"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("NullableElement", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<>), "NullableElement", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Nullable<>), [new global::TUnit.Core.GenericParameter(0, true, "T")]), new global::TUnit.Core.ConcreteType(typeof(string))]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<int> __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<int>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<int> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single reference tuple parameter
+            if (args.Length == 2)
+            {
+                instance.NullableElement<int>(new global::System.Tuple<int?, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int?>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                switch (args.Length)
+                {
+                    case 1:
+                        {
+                            instance.NullableElement<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int?, string> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int?, string>)new global::System.Tuple<int?, string>(global::TUnit.Core.Helpers.CastHelper.Cast<int?>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<string>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int?, string>>(__tupleFallback0) }));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        }
+                    default:
+                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                }
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.InstanceMethodDataSourceAttribute("Rows"),
+            new global::TUnit.Core.ArgumentsAttribute(1),
+            new global::TUnit.Core.ArgumentsAttribute("value")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<int>>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<int>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<int>>(
+            methodName: "NullableElement<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<int>.NullableElement<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 42,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.InstanceMethodDataSourceAttribute("Rows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceEnumerable(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<int>)instance).Rows() ?? global::System.Array.Empty<object>()),
+    },
+},
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute(1),
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<int?, string>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<int?, string>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+    private static global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<string> __CreateInstance_1(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<string>(global::TUnit.Core.Helpers.CastHelper.Cast<string>(args[0]));
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_1(global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<string> instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(new global::TUnit.Core.Exceptions.GenericTypeResolutionException("Could not infer the type arguments of generic test method 'NullableElement' from data source [InstanceMethodDataSource(nameof(Rows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].")));
+    }
+    private static global::System.Attribute[] __Attributes_1(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.InstanceMethodDataSourceAttribute("Rows"),
+            new global::TUnit.Core.ArgumentsAttribute(1),
+            new global::TUnit.Core.ArgumentsAttribute("value")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<string>>[] Entries_1 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<string>>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<string>>(
+            methodName: "NullableElement",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<string>.NullableElement",
+            filePath: "",
+            lineNumber: 42,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.GenericConstraintViolationDataSource.Create("Could not infer the type arguments of generic test method 'NullableElement' from data source [InstanceMethodDataSource(nameof(Rows))]. Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].", new global::TUnit.Core.InstanceMethodDataSourceAttribute("Rows")
+{
+    Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromInstanceEnumerable(dataGeneratorMetadata, static instance => (object?)((global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<string>)instance).Rows() ?? global::System.Array.Empty<object>()),
+}),
+},
+            classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.ArgumentsAttribute("value"),
+},
+            methodMetadata: __mm_0,
+            createInstance: __CreateInstance_1,
+            invokeBody: __Invoke_1,
+            methodIndex: 0,
+            createAttributes: __Attributes_1,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7222_ClosedClassRowUninferredInstanceSourceTests_TClass_Nullab_A5110F1F_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<int>>(static () => TUnit_TestProject_Bugs__7222_ClosedClassRowUninferredInstanceSourceTests_TClass_Nullab_A5110F1F_TestSource.Entries_0);
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7222_ClosedClassRowUninferredInstanceSourceTests_TClass_Nullab_A5110F1F_TestSource_1 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7222.ClosedClassRowUninferredInstanceSourceTests<string>>(static () => TUnit_TestProject_Bugs__7222_ClosedClassRowUninferredInstanceSourceTests_TClass_Nullab_A5110F1F_TestSource.Entries_1);
 }

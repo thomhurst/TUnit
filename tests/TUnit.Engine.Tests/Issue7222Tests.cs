@@ -242,7 +242,7 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    [Arguments("SingleTupleElementConversionTests", 10)]
+    [Arguments("SingleTupleElementConversionTests", 12)]
     [Arguments("ClosedClassTupleInferenceTests*", 3)]
     public async Task Tuple_Inference_Preserves_Element_Conversions_And_Concrete_Class_Types(string className, int count)
     {
@@ -251,6 +251,20 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(count),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(count)
+            ]);
+    }
+
+    [Test]
+    [Arguments("ClosedClassUninferredInstanceSourceTests*")]
+    [Arguments("ClosedClassRowUninferredInstanceSourceTests*")]
+    public async Task Closed_Class_Uninferred_Instance_Source_Is_Reported(string className)
+    {
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7222/{className}/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1)
             ]);
     }
 

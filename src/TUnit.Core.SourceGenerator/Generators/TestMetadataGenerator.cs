@@ -1493,7 +1493,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Adds a failure to the concrete class's violation entry, creating that entry when it has none. All
         // violations of one concrete class share one entry, so each gets its own data source index and test id.
-        void AddMethodViolation(string concreteClassName, ITypeSymbol[] concreteClassTypeArgs, MethodConstraintViolation violation)
+        void AddMethodViolation(string concreteClassName, ITypeSymbol[] concreteClassTypeArgs, MethodConstraintViolation violation, AttributeData? specificMethodSource = null)
         {
             var existing = results.FirstOrDefault(r => r.MethodConstraintViolations != null && r.ConcreteClassName == concreteClassName);
             if (existing != null)
@@ -1512,6 +1512,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 MethodName = methodName,
                 HasParameterizedConstructor = hasParameterizedConstructor,
                 MethodConstraintViolations = [violation],
+                SpecificArgumentsAttribute = specificMethodSource,
             });
         }
 
@@ -1586,6 +1587,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                 }
 
+                // A retry that still cannot infer method types must report its rows on this closed
+                // class. Keep its constructor row, so another class pairing cannot duplicate the failure.
+                void ReportUninferredClassSource(ITypeSymbol[] classTypes, AttributeData? source, AttributeData? classRow = null)
+                {
+                    if (hasExplicitMethodTypes || source is null
+                        || !ValidateClassTypeConstraints(testMethod.TypeSymbol, classTypes, compilation)) return;
+                    var concreteClassName = GetConcreteClassName(classTypes);
+                    var existing = results.FirstOrDefault(result => result.ConcreteClassName == concreteClassName
+                        && result.MethodConstraintViolations is not null);
+                    if (existing?.MethodConstraintViolations?.Any(violation => violation.RowSource is { } row && AreSameAttribute(row, source)) is not true)
+                    {
+                        AddMethodViolation(concreteClassName, classTypes, CreateUninferredTypeArgumentFailure(methodName, source), source);
+                    }
+                    if (classRow is not null)
+                    {
+                        results.First(result => result.ConcreteClassName == concreteClassName
+                            && result.MethodConstraintViolations is not null).AddRow(classRow, isClassRow: true);
+                    }
+                }
+
                 // With a method-level [GenerateGenericTest], a typed data source or [MethodDataSource] whose
                 // declared type breaks the method's constraints is not reported, as on a non-generic class
                 // and as reflection mode skips it on each concrete class.
@@ -1598,7 +1619,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         var concreteMethodTypes = policySource == GenericMethodInferencePolicy.Source.MethodDataSource && source is not null
                             ? InferTypesFromMethodDataSource(testMethod, source, classGenericTest.TypeArgs!)
                             : methodTypes;
-                        if (concreteMethodTypes is null) continue;
+                        if (concreteMethodTypes is null)
+                        {
+                            ReportUninferredClassSource(classGenericTest.TypeArgs!, source);
+                            continue;
+                        }
                         TryAddInstantiation(CloseOverClass(classGenericTest.TypeArgs!, concreteMethodTypes), source,
                             reportMethodConstraintViolation: reportsViolation,
                             deferToGenerateGenericTest: !reportsViolation,
@@ -1621,7 +1646,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                         var concreteMethodTypes = policySource == GenericMethodInferencePolicy.Source.MethodDataSource && source is not null
                             ? InferTypesFromMethodDataSource(testMethod, source, classTypes)
                             : methodTypes;
-                        if (concreteMethodTypes is null) continue;
+                        if (concreteMethodTypes is null)
+                        {
+                            ReportUninferredClassSource(classTypes, source, classAttr);
+                            continue;
+                        }
                         if (source is not null)
                         {
                             TryAddCombinedArgumentsInstantiation(classTypes, CloseOverClass(classTypes, concreteMethodTypes), classAttr, source,
@@ -2001,12 +2030,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                violations.Add(new MethodConstraintViolation(
-                    $"Could not infer the type arguments of generic test method '{methodName}' from data source [{DescribeDataSource(attribute)}]. "
-                    + "Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. "
-                    + "Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].",
-                    RowSource: attribute,
-                    AllMethodDataSources: false));
+                violations.Add(CreateUninferredTypeArgumentFailure(methodName, attribute));
             }
         }
 
@@ -2029,17 +2053,24 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             MethodName = methodName,
             MethodConstraintViolations = violations,
         });
+    }
 
-        static string DescribeDataSource(AttributeData attribute)
+    private static MethodConstraintViolation CreateUninferredTypeArgumentFailure(string methodName, AttributeData attribute) => new(
+        $"Could not infer the type arguments of generic test method '{methodName}' from data source [{DescribeDataSource(attribute)}]. "
+        + "Source-generated mode infers type arguments at compile time from the data source's declared type, not from the run-time type of its values, and that declared type does not determine them. "
+        + "Declare the data source with a type that does (for example IEnumerable<Func<int>> rather than IEnumerable<object>), or list the type arguments with [GenerateGenericTest].",
+        RowSource: attribute,
+        AllMethodDataSources: false);
+
+    private static string DescribeDataSource(AttributeData attribute)
+    {
+        if (attribute.ApplicationSyntaxReference?.GetSyntax() is { } syntax)
         {
-            if (attribute.ApplicationSyntaxReference?.GetSyntax() is { } syntax)
-            {
-                return syntax.ToString();
-            }
-
-            var name = attribute.AttributeClass?.Name ?? "DataSource";
-            return name.EndsWith("Attribute", StringComparison.Ordinal) ? name.Substring(0, name.Length - "Attribute".Length) : name;
+            return syntax.ToString();
         }
+
+        var name = attribute.AttributeClass?.Name ?? "DataSource";
+        return name.EndsWith("Attribute", StringComparison.Ordinal) ? name.Substring(0, name.Length - "Attribute".Length) : name;
     }
 
     /// <summary>
@@ -7260,11 +7291,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (!CodeGenerationHelpers.ContainsTypeParameter(parameter))
         {
             var conversion = compilation.ClassifyCommonConversion(row, parameter);
-            // CastHelper supports narrowing numeric conversions when reconstructing elements.
+            // CastHelper supports numeric and user-defined conversions when reconstructing elements.
             // Whole-row binding still requires identity; it cannot rebuild the tuple.
             if (conversion.Exists
-                && (conversion.IsIdentity || reconstructTupleElements && !conversion.IsUserDefined
-                    && (conversion.IsImplicit || conversion.IsNumeric)))
+                && (conversion.IsIdentity || reconstructTupleElements
+                    && (conversion.IsImplicit || conversion.IsNumeric || conversion.IsUserDefined)))
             {
                 return true;
             }

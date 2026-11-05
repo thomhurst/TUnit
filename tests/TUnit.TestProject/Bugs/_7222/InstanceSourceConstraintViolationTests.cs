@@ -20,3 +20,26 @@ public class InstanceSourceConstraintViolationTests(int value)
     {
     }
 }
+
+// The int class closes T? successfully; the string class must report its rows rather than disappear.
+[GenerateGenericTest(typeof(int))]
+[GenerateGenericTest(typeof(string))]
+public class ClosedClassUninferredInstanceSourceTests<TClass>
+{
+    public IEnumerable<Tuple<TClass, string>> Rows() => [Tuple.Create(default(TClass)!, "row")];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(Rows))]
+    public void NullableElement<T>(Tuple<T?, string> row) where T : struct { }
+}
+
+[Arguments(1)]
+[Arguments("value")]
+public class ClosedClassRowUninferredInstanceSourceTests<TClass>(TClass value)
+{
+    public IEnumerable<Tuple<TClass, string>> Rows() => [Tuple.Create(value, "row")];
+
+    [Test]
+    [InstanceMethodDataSource(nameof(Rows))]
+    public void NullableElement<T>(Tuple<T?, string> row) where T : struct { }
+}

@@ -15,7 +15,11 @@ internal class InstanceMethodTypeInferenceTests : TestsBase
         async files =>
         {
             var source = string.Join("\n", files);
-            await Assert.That(source).DoesNotContain("Could not infer the type arguments");
+            await Assert.That(source).Contains("Could not infer the type arguments of generic test method 'NullableElement'");
+            await Assert.That(string.Join("\n", files.Where(file =>
+                !file.Contains("ClosedClassUninferredInstanceSourceTests")
+                && !file.Contains("ClosedClassRowUninferredInstanceSourceTests"))))
+                .DoesNotContain("Could not infer the type arguments");
             await Assert.That(source).Contains("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'");
             await Assert.That(source).Contains("GenericInstanceSourceTests<int>");
             await Assert.That(source).Contains("NonGenericInstanceSourceTests");
@@ -40,6 +44,8 @@ internal class InstanceMethodTypeInferenceTests : TestsBase
             await Assert.That(source).Contains("CrossFamily<int>");
             await Assert.That(source).Contains("NullableElement<int>");
             await Assert.That(source).Contains("NumericElement<int>");
+            await Assert.That(source).Contains("OperatorElement<int>");
+            await Assert.That(source).Contains("OperatorReferenceElement<int>");
             await Assert.That(source).Contains("NarrowNumericElement<int>");
             await Assert.That(source).Contains("NarrowNumericReferenceElement<int>");
             await Assert.That(source).Contains("OpenNullableElement<int>");

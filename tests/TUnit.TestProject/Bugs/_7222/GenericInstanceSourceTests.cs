@@ -320,6 +320,32 @@ public class SingleTupleElementConversionTests
             throw new InvalidOperationException("Expected narrowing numeric reference element conversion");
     }
 
+    public class Source
+    {
+        public int Value { get; init; }
+        public static implicit operator Destination(Source source) => new() { Value = source.Value };
+    }
+
+    public class Destination { public int Value { get; init; } }
+    public static IEnumerable<(int, Source)> OperatorRows() => [(1, new Source { Value = 9 })];
+    public IEnumerable<Tuple<int, Source>> OperatorReferenceRows() => [Tuple.Create(2, new Source { Value = 10 })];
+
+    [Test]
+    [MethodDataSource(nameof(OperatorRows))]
+    public void OperatorElement<T>((T, Destination) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2.Value != 9)
+            throw new InvalidOperationException("Expected user-defined element conversion");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(OperatorReferenceRows))]
+    public void OperatorReferenceElement<T>(Tuple<T, Destination> row)
+    {
+        if (typeof(T) != typeof(int) || row.Item2.Value != 10)
+            throw new InvalidOperationException("Expected user-defined reference element conversion");
+    }
+
     public class Base<T> { }
     public class Derived : Base<int> { }
 
