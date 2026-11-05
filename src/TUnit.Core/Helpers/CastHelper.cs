@@ -513,6 +513,41 @@ public static class CastHelper
         return false;
     }
 
+    // Share the binder's cached operator discovery without executing user code.
+    internal static bool HasReflectionConversion(Type sourceType, Type targetType)
+        => !IsAotMode() && GetConversionMethodCached(sourceType, targetType) is not null;
+
+    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Type, StructuralConversion[]> StructuralConversionMethods = new();
+
+    private sealed record StructuralConversion(Type ReturnType, Type InputType);
+
+    // Structural targets cannot be closed with MakeGenericType in AOT-safe metadata code.
+    // Match source-declared closed return types and substitute target-declared operator
+    // signatures structurally before accepting their inputs. Never invoke user code.
+    internal static bool HasStructuralReflectionConversion<TState>(Type sourceType, Type targetDefinition,
+        TState state, Func<Type, TState, bool> matchesTarget, Func<Type, Type, TState, bool> matchesOpenOperator)
+    {
+        if (IsAotMode()) return false;
+        foreach (var method in GetStructuralConversionMethods(sourceType))
+        {
+            if (matchesTarget(method.ReturnType, state) && HasReflectionConversion(sourceType, method.ReturnType))
+                return true;
+        }
+        foreach (var method in GetStructuralConversionMethods(targetDefinition))
+        {
+            if (matchesOpenOperator(method.ReturnType, method.InputType, state))
+                return true;
+        }
+        return false;
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Operator discovery is disabled in Native AOT, like the binder's reflection conversion path.")]
+    private static StructuralConversion[] GetStructuralConversionMethods(Type type)
+        => StructuralConversionMethods.GetValue(type, static candidate => candidate.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Where(method => method.Name is "op_Implicit" or "op_Explicit")
+            .Where(method => method.GetParameters().Length == 1)
+            .Select(method => new StructuralConversion(method.ReturnType, method.GetParameters()[0].ParameterType)).ToArray());
+
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.")]
     private static MethodInfo? GetConversionMethodCached(Type sourceType, Type targetType)
     {
