@@ -164,23 +164,27 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             // ConcurrentDictionary invokes this factory outside its locks, so looking up
             // the generic definition in the same cache is safe.
             var definitionMethods = t.IsConstructedGenericType ? GetAllTestMethods(t.GetGenericTypeDefinition()) : null;
+            var nearerDeclarations = definitionMethods == null ? new List<MethodInfo>(20) : null;
             var currentType = t;
 
             while (currentType != null && currentType != typeof(object))
             {
-                foreach (var method in currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+                var declarations = currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                foreach (var method in declarations)
                 {
                     // Walk from nearest to furthest declarations: overrides at every level
                     // suppress base tests even without [Test]; hiding requires [Test].
                     if (definitionMethods != null
                         ? !ContainsMethodDefinition(definitionMethods, method)
-                        : currentType != t && IsSuppressedByDeclaredMethod(method, methods))
+                        : currentType != t && IsSuppressedByDeclaredMethod(method, nearerDeclarations!))
                     {
                         continue;
                     }
 
                     methods.Add(method);
                 }
+                // Suppressed tests still hide older declarations further up the hierarchy.
+                nearerDeclarations?.AddRange(declarations);
                 currentType = currentType.BaseType;
             }
 

@@ -203,3 +203,30 @@ public class TransitiveUndecoratedOverride<T> : IntermediateUndecoratedOverride<
     [Test]
     public void DeclaredTest() { }
 }
+
+public abstract class HiddenVirtualTestBase<T>
+{
+    [Test]
+    public virtual void Example() => throw new InvalidOperationException("The oldest hidden test must not execute.");
+}
+
+public abstract class IntermediateHiddenVirtualTest<T> : HiddenVirtualTestBase<T>
+{
+    [Test]
+    public new virtual void Example() => throw new InvalidOperationException("The hidden intermediate test must not execute.");
+}
+
+[InheritsTests]
+[GenerateGenericTest(typeof(int))]
+public class OverridesHiddenIntermediateTest<T> : IntermediateHiddenVirtualTest<T>
+{
+    [Test]
+    public override void Example() { }
+}
+
+[InheritsTests]
+public class NonGenericOverridesHiddenIntermediateTest : IntermediateHiddenVirtualTest<int>
+{
+    [Test]
+    public override void Example() { }
+}
