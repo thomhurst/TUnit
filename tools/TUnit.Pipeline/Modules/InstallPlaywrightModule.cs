@@ -1,5 +1,6 @@
 using ModularPipelines.Configuration;
 using ModularPipelines.Context;
+using ModularPipelines.Git.Extensions;
 using ModularPipelines.Models;
 using ModularPipelines.Modules;
 using ModularPipelines.Options;
@@ -35,8 +36,15 @@ public class InstallPlaywrightModule : Module<CommandResult>
         // Only Chromium is used by the Playwright tests. Installing every browser
         // pulls in the WebKit/Firefox GStreamer apt dependencies, which can take
         // longer than the per-attempt timeout on its own.
+        // Use the installer shipped by the resolved Microsoft.Playwright package,
+        // rather than npm latest, so downloaded browsers match the test driver.
+        var script = Path.Combine(context.Git().RootDirectory.Path,
+            "src", "TUnit.Templates", "content", "TUnit.Playwright", "bin", "Release", "net10.0", "playwright.ps1");
+        // Bash also runs on Windows; forward slashes and shell quoting preserve paths
+        // containing spaces or apostrophes on every runner.
+        var quotedScript = "'" + script.Replace('\\', '/').Replace("'", "'\"'\"'") + "'";
         return await context.Shell.Bash.Command(
-            new BashCommandOptions("npx playwright install --with-deps chromium"),
+            new BashCommandOptions($"pwsh -NoProfile -File {quotedScript} install --with-deps chromium"),
             attemptCts.Token);
     }
 }
