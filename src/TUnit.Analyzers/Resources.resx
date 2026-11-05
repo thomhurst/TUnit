@@ -552,4 +552,13 @@
     <data name="TUnit0076Title" xml:space="preserve">
         <value>Data source Arguments fit more than one overload equally well</value>
     </data>
+    <data name="TUnit0077Title" xml:space="preserve">
+        <value>Span params parameters are not supported on tests</value>
+    </data>
+    <data name="TUnit0077MessageFormat" xml:space="preserve">
+        <value>Test parameter '{0}' uses span params, which TUnit cannot invoke consistently in source-generated and reflection modes. Use a params array instead</value>
+    </data>
+    <data name="TUnit0077Description" xml:space="preserve">
+        <value>Span&lt;T&gt; and ReadOnlySpan&lt;T&gt; cannot be boxed for reflection invocation. Use params T[] for test parameters so typed data rows can be packed and invoked in both execution modes.</value>
+    </data>
 </root>

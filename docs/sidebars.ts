@@ -250,6 +250,7 @@ const sidebars: SidebarsConfig = {
         'reference/test-configuration',
         'reference/tunit0075',
         'reference/tunit0076',
+        'reference/tunit0077',
         {
           type: 'doc',
           id: 'guides/best-practices',
