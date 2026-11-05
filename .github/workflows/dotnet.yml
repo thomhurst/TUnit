@@ -236,13 +236,13 @@ jobs:
         run: |
           set -euo pipefail
           cert="$RUNNER_TEMP/tunit-crash-dump-recipient.pem"
-          printf '%s\n' "$CRASH_DUMP_ENCRYPTION_CERT" > "$cert"
           trap 'rm -f "$cert" "$RUNNER_TEMP"/tunit-crash-dumps/*.dmp' EXIT
+          printf '%s\n' "$CRASH_DUMP_ENCRYPTION_CERT" > "$cert"
           mkdir -p "$RUNNER_TEMP/tunit-crash-dumps-encrypted"
           shopt -s nullglob
           for dump in "$RUNNER_TEMP"/tunit-crash-dumps/*.dmp; do
             encrypted="$RUNNER_TEMP/tunit-crash-dumps-encrypted/$(basename "$dump").cms"
-            openssl cms -encrypt -binary -aes-256-cbc -in "$dump" -outform DER -out "$encrypted.tmp" "$cert"
+            openssl cms -encrypt -stream -binary -aes-256-cbc -in "$dump" -outform DER -out "$encrypted.tmp" "$cert"
             mv "$encrypted.tmp" "$encrypted"
           done
 
