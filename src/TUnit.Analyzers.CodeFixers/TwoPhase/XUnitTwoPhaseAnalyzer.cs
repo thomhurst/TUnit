@@ -752,13 +752,10 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         if (args.Count < 2) return (AssertionConversionKind.Contains, null, false, null);
 
         // xUnit: Assert.ProperSubset(expectedSuperset, actual)
-        // actual should be a proper subset of expectedSuperset
-        // TUnit: Assert.That(first_arg).IsSubsetOf(second_arg) with TODO comment
-        var first = args[0].Expression.ToString();
-        var second = args[1].Expression.ToString();
+        var expectedSuperset = args[0].Expression.ToString();
+        var actual = args[1].Expression.ToString();
 
-        var todoComment = "// TODO: TUnit migration - ProperSubset requires strict subset (not equal). Add additional assertion if needed.";
-        return (AssertionConversionKind.Contains, $"await Assert.That({first}).IsSubsetOf({second})", true, todoComment);
+        return (AssertionConversionKind.Contains, $"await Assert.That({actual}).IsProperSubsetOf({expectedSuperset})", true, null);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertProperSuperset(SeparatedSyntaxList<ArgumentSyntax> args)
@@ -766,13 +763,10 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
         if (args.Count < 2) return (AssertionConversionKind.Contains, null, false, null);
 
         // xUnit: Assert.ProperSuperset(expectedSubset, actual)
-        // actual should be a proper superset of expectedSubset
-        // TUnit: Assert.That(first_arg).IsSupersetOf(second_arg) with TODO comment
-        var first = args[0].Expression.ToString();
-        var second = args[1].Expression.ToString();
+        var expectedSubset = args[0].Expression.ToString();
+        var actual = args[1].Expression.ToString();
 
-        var todoComment = "// TODO: TUnit migration - ProperSuperset requires strict superset (not equal). Add additional assertion if needed.";
-        return (AssertionConversionKind.Contains, $"await Assert.That({first}).IsSupersetOf({second})", true, todoComment);
+        return (AssertionConversionKind.Contains, $"await Assert.That({actual}).IsProperSupersetOf({expectedSubset})", true, null);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertDistinct(SeparatedSyntaxList<ArgumentSyntax> args)

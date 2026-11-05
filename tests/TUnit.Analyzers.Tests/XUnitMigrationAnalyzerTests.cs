@@ -1483,7 +1483,7 @@ public class XUnitMigrationAnalyzerTests
     }
 
     [Test]
-    public async Task Assert_ProperSubset_Adds_Todo_Comment()
+    public async Task Assert_ProperSubset_Preserves_Operands_And_Strictness()
     {
         await CodeFixer
             .VerifyCodeFixAsync(
@@ -1516,8 +1516,7 @@ public class XUnitMigrationAnalyzerTests
                     {
                         var subset = new HashSet<int> { 1, 2 };
                         var superset = new HashSet<int> { 1, 2, 3 };
-                        // TODO: TUnit migration - ProperSubset requires strict subset (not equal). Add additional assertion if needed.
-                        await Assert.That(superset).IsSubsetOf(subset);
+                        await Assert.That(subset).IsProperSubsetOf(superset);
                     }
                 }
                 """,
@@ -1526,7 +1525,7 @@ public class XUnitMigrationAnalyzerTests
     }
 
     [Test]
-    public async Task Assert_ProperSuperset_Adds_Todo_Comment()
+    public async Task Assert_ProperSuperset_Preserves_Operands_And_Strictness()
     {
         await CodeFixer
             .VerifyCodeFixAsync(
@@ -1559,8 +1558,7 @@ public class XUnitMigrationAnalyzerTests
                     {
                         var subset = new HashSet<int> { 1, 2 };
                         var superset = new HashSet<int> { 1, 2, 3 };
-                        // TODO: TUnit migration - ProperSuperset requires strict superset (not equal). Add additional assertion if needed.
-                        await Assert.That(subset).IsSupersetOf(superset);
+                        await Assert.That(superset).IsProperSupersetOf(subset);
                     }
                 }
                 """,
