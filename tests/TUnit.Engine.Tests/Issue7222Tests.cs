@@ -145,7 +145,6 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     {
         // Each row of the instance data source fails on its own. Without the class data sources, source-generated
         // mode could not build the instance that the rows come from and reported one constructor error instead.
-        // The message differs by mode: source-generated mode cannot infer the type from [InstanceMethodDataSource].
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7222/InstanceSourceConstraintViolationTests/*",
             [
@@ -154,7 +153,33 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.Results.ShouldAllBe(x => x.Output != null
                     && x.Output.ErrorInfo != null
                     && x.Output.ErrorInfo.Message != null
-                    && !x.Output.ErrorInfo.Message.Contains("Index was outside the bounds of the array"))
+                    && x.Output.ErrorInfo.Message.Contains("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'"))
+            ]);
+    }
+
+    [Test]
+    public async Task NonGeneric_Class_Instance_Source_Infers_Method_Types()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/NonGenericInstanceSourceTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2)
+            ]);
+    }
+
+    [Test]
+    public async Task Generic_Class_Instance_Source_Infers_Method_Types()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/GenericInstanceSourceTests*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(2),
+                result => result.Results.Where(x => x.Output?.ErrorInfo?.Message != null)
+                    .ShouldAllBe(x => x.Output!.ErrorInfo!.Message!.Contains(
+                        "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'"))
             ]);
     }
 

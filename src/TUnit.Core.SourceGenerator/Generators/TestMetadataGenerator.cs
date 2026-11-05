@@ -995,7 +995,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // type could satisfy: explain where the type argument came from (#7116).
                 if (violationSource is null
                     && specificAttr?.AttributeClass is { } dataSourceClass
-                    && (dataSourceClass.Name == "MethodDataSourceAttribute" || DataSourceAttributeHelper.IsTypedDataSourceAttribute(dataSourceClass))
+                    && (dataSourceClass.Name is "MethodDataSourceAttribute" or "InstanceMethodDataSourceAttribute" || DataSourceAttributeHelper.IsTypedDataSourceAttribute(dataSourceClass))
                     && TryFindConstraintViolation(testMethod.MethodSymbol.TypeParameters, methodTypeArgs, testMethod.CompilationContext.Compilation,
                         out _, out var violatingIndex, testMethod.TypeSymbol, classTypeArgs)
                     && violatingIndex >= 0
@@ -1241,6 +1241,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     (methodArgumentsBucket ??= []).Add(attribute);
                     break;
                 case "MethodDataSourceAttribute":
+                case "InstanceMethodDataSourceAttribute":
                     (methodDataSourceBucket ??= []).Add(attribute);
                     break;
             }
@@ -1974,7 +1975,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             foreach (var attribute in uncovered)
             {
-                if (attribute.AttributeClass?.Name == "MethodDataSourceAttribute"
+                if (attribute.AttributeClass?.Name is "MethodDataSourceAttribute" or "InstanceMethodDataSourceAttribute"
                     && InferTypesFromMethodDataSourceRowType(testMethod, attribute) is { } rowTypes
                     && FindInaccessibleType(rowTypes, testMethod.CompilationContext.Compilation) is { } inaccessibleType)
                 {
@@ -7051,6 +7052,15 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     /// </summary>
     private static ITypeSymbol[]? InferTypesFromMethodDataSource(TestMethodMetadata testMethod, AttributeData mdsAttr)
     {
+        // Reflection mode runs instance sources on the explicit method types when supplied, without
+        // adding declared-row instantiations. Preserve conversions enabled by those explicit types.
+        if (mdsAttr.AttributeClass?.Name == "InstanceMethodDataSourceAttribute"
+            && testMethod.MethodAttributes.Any(attribute =>
+                attribute.AttributeClass?.IsOrInherits("global::TUnit.Core.GenerateGenericTestAttribute") is true))
+        {
+            return null;
+        }
+
         var inferredTypes = InferTypesFromMethodDataSourceRowType(testMethod, mdsAttr);
         return inferredTypes != null && FindInaccessibleType(inferredTypes, testMethod.CompilationContext.Compilation) == null
             ? inferredTypes
