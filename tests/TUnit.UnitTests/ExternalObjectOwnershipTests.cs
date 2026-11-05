@@ -1,0 +1,171 @@
+using System.Runtime.CompilerServices;
+using TUnit.Core.Discovery;
+using TUnit.Core.Interfaces;
+
+namespace TUnit.UnitTests;
+
+public class ExternalObjectOwnershipTests
+{
+    [Test]
+    public async Task Ownership_Ends_When_The_Last_Owner_Handle_Is_Collected()
+    {
+        var service = new Service();
+        var reference = RegisterTemporaryOwner(service);
+        CollectOwner(reference);
+
+        await Assert.That(ExternalObjectOwnership.IsOwned(service)).IsFalse();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsFalse();
+        GC.KeepAlive(service);
+    }
+
+    [Test]
+    public async Task Shared_Identity_Remains_Owned_When_One_Of_Its_Owners_Is_Collected()
+    {
+        var service = new Service();
+        var scopes = new DataRowScopeCollection();
+        scopes.RegisterObject(scopes.Register(new Scope()), service);
+        scopes.CaptureOwnership();
+        var temporary = RegisterTemporaryOwner(service);
+        CollectOwner(temporary);
+
+        await Assert.That(ExternalObjectOwnership.IsOwned(service)).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
+        GC.KeepAlive(scopes);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference<DataRowScopeCollection.ScopeOwner> RegisterTemporaryOwner(Service service)
+    {
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new Scope());
+        scopes.RegisterObject(owner, service);
+        scopes.CaptureOwnership();
+        if (!ExternalObjectOwnership.IsOwned(service.Child))
+            throw new InvalidOperationException("The owner's nested graph was not registered");
+        return new(owner);
+    }
+
+    private static void CollectOwner(WeakReference<DataRowScopeCollection.ScopeOwner> reference)
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        if (reference.TryGetTarget(out _))
+            throw new InvalidOperationException("The owner is retained by the ownership registry");
+    }
+
+    [Test]
+    public async Task Cloned_Row_Retains_The_Owner_After_Scope_Disposal()
+    {
+        var service = new Service();
+        var scope = new Scope();
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(scope);
+        scopes.RegisterObject(owner, service);
+        scopes.CaptureOwnership();
+        var clone = scopes.Clone();
+
+        await scopes.CompleteAsync();
+        await clone.CompleteAsync();
+        await Assert.That(scope.DisposeCount).IsEqualTo(1);
+        // Scope disposal happens before tracker references are released. Owner handles must still
+        // suppress tracker disposal, including nested initializers and cloned rows.
+        await Assert.That(ExternalObjectOwnership.IsOwned(service)).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
+        GC.KeepAlive(clone);
+    }
+
+    [Test]
+    public async Task Pure_Discovery_Does_Not_Transfer_Ownership()
+    {
+        var service = new Service();
+        var graph = new ObjectGraphDiscoverer().DiscoverStaticPropertyTrackableObjects(service, default);
+        await Assert.That(graph.Values.Any(values => values.Contains(service.Child))).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsFalse();
+    }
+
+    [Test]
+    public async Task Snapshot_Excludes_An_Injected_Alias_Discovered_Through_Another_Branch()
+    {
+        var injected = new Initializer();
+        var service = new AliasedService
+        {
+            First = new AliasHolder { Alias = injected },
+            Second = new InjectedHolder { Injected = injected }
+        };
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new Scope());
+        scopes.RegisterObject(owner, service);
+        scopes.CaptureOwnership();
+
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.First)).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Second)).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(injected)).IsFalse();
+        GC.KeepAlive(scopes);
+    }
+
+    [Test]
+    public async Task Later_Snapshots_Keep_Previously_Registered_Dependencies_With_Their_Owner()
+    {
+        var service = new Service();
+        var previous = service.Child;
+        var scopes = new DataRowScopeCollection();
+        scopes.RegisterObject(scopes.Register(new Scope()), service);
+        scopes.CaptureOwnership();
+        service.Child = new Initializer();
+        scopes.CaptureOwnership();
+
+        await Assert.That(ExternalObjectOwnership.IsOwned(previous)).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
+        GC.KeepAlive(scopes);
+    }
+
+    [Test]
+    public async Task Non_Disposable_Scope_Does_Not_Own_Its_Objects()
+    {
+        var service = new Service();
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new object());
+        scopes.RegisterObject(owner, service);
+        scopes.CaptureOwnership();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service)).IsFalse();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsFalse();
+        GC.KeepAlive(scopes);
+    }
+
+    public sealed class Scope : IDisposable
+    {
+        public int DisposeCount { get; private set; }
+        public void Dispose() => DisposeCount++;
+    }
+
+    public sealed class Service : IDisposable
+    {
+        public Initializer Child { get; set; } = new();
+        public void Dispose() { }
+    }
+
+    public class Initializer : IAsyncInitializer, IDisposable
+    {
+        public int DisposeCount { get; private set; }
+        public Task InitializeAsync() => Task.CompletedTask;
+        public void Dispose() => DisposeCount++;
+    }
+
+    public sealed class AliasedService
+    {
+        public required AliasHolder First { get; init; }
+        public required InjectedHolder Second { get; init; }
+    }
+
+    public sealed class AliasHolder : Initializer
+    {
+        public required Initializer Alias { get; init; }
+    }
+
+    public sealed class InjectedHolder : Initializer
+    {
+        [ClassDataSource<Initializer>]
+        public required Initializer Injected { get; init; }
+    }
+}

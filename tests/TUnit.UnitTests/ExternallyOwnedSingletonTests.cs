@@ -7,10 +7,9 @@ using TUnit.Core.Tracking;
 namespace TUnit.UnitTests;
 
 /// <summary>
-/// A root singleton can reach tests both through a dependency injection scope, which marks what it returns
-/// as externally owned, and through a data source that does not own it. These tests pin what the object
-/// tracker does with such an object in each order, including when the scope's mark races with another
-/// source's count (#7205).
+/// A root singleton can reach tests both through a dependency injection scope, which registers what it
+/// owns, and through a data source that does not own it. These tests pin reference balancing in each
+/// order and ensure owner handles survive overlapping consumers without permanent object marks (#7205).
 /// </summary>
 public class ExternallyOwnedSingletonTests
 {
@@ -22,7 +21,7 @@ public class ExternallyOwnedSingletonTests
         var singleton = new TrackedDisposable();
         var first = CreateContext(singleton);
         tracker.TrackObjects(first);
-        ObjectTracker.MarkExternallyOwned(singleton);
+        using var owner = new OwnershipRegistration(singleton);
 
         var laterConsumers = Enumerable.Range(0, 16).Select(_ => CreateContext(singleton)).ToArray();
         foreach (var context in laterConsumers)
@@ -33,7 +32,7 @@ public class ExternallyOwnedSingletonTests
         await Assert.That(ObjectTracker.IsShared(singleton)).IsTrue();
         var errors = await Task.WhenAll(laterConsumers.Select(context => Task.Run(async () => await tracker.UntrackObjects(context))));
         await Assert.That(errors.All(x => x is null)).IsTrue();
-        // Later consumers must leave the reference taken before the ownership mark intact.
+        // Later consumers must leave the reference taken before owner registration intact.
         await Assert.That(IsCounted(singleton)).IsTrue();
         await Assert.That(ObjectTracker.IsShared(singleton)).IsFalse();
 
@@ -54,18 +53,18 @@ public class ExternallyOwnedSingletonTests
     }
 
     [Test]
-    public async Task Marked_Before_Another_Source_Supplies_It_Is_Never_Disposed_By_The_Tracker()
+    public async Task Registered_Before_Another_Source_Supplies_It_Is_Not_Disposed_By_The_Tracker()
     {
         var tracker = CreateTracker();
         var singleton = new TrackedDisposable();
 
-        ObjectTracker.MarkExternallyOwned(singleton);
+        using var owner = new OwnershipRegistration(singleton);
 
         var nonOwningTest = CreateContext(singleton);
         tracker.TrackObjects(nonOwningTest);
         await tracker.UntrackObjects(nonOwningTest);
 
-        await Assert.That(ObjectTracker.IsExternallyOwned(singleton)).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(singleton)).IsTrue();
         await Assert.That(singleton.DisposeCount).IsEqualTo(0);
     }
 
@@ -79,8 +78,8 @@ public class ExternallyOwnedSingletonTests
         tracker.TrackObjects(nonOwningTest);
 
         // A non-owning source can supply a container singleton before its owning source does.
-        ObjectTracker.MarkExternallyOwned(singleton);
-        await Assert.That(ObjectTracker.IsExternallyOwned(singleton)).IsTrue();
+        using var owner = new OwnershipRegistration(singleton);
+        await Assert.That(ExternalObjectOwnership.IsOwned(singleton)).IsTrue();
 
         await tracker.UntrackObjects(nonOwningTest);
 
@@ -89,7 +88,7 @@ public class ExternallyOwnedSingletonTests
     }
 
     [Test]
-    public async Task Counted_Between_The_Check_And_The_Mark_Is_Released_Without_Being_Disposed()
+    public async Task Registering_An_Owner_After_Counting_Protects_Current_And_Later_Consumers()
     {
         var tracker = CreateTracker();
         var singleton = new TrackedDisposable();
@@ -97,8 +96,8 @@ public class ExternallyOwnedSingletonTests
         var nonOwningTest = CreateContext(singleton);
         tracker.TrackObjects(nonOwningTest);
 
-        // MarkExternallyOwned found no count, then another source counted the object before the mark landed.
-        MarkBypassingTheCountCheck(singleton);
+        // Registration does not check the reference count: it publishes the owner independently.
+        using var owner = new OwnershipRegistration(singleton);
 
         await tracker.UntrackObjects(nonOwningTest);
 
@@ -121,13 +120,13 @@ public class ExternallyOwnedSingletonTests
     }
 
     [Test]
-    public async Task Consumers_After_Ownership_Mark_Hold_Their_Own_References()
+    public async Task Consumers_After_Owner_Registration_Hold_Their_Own_References()
     {
         var tracker = CreateTracker();
         var singleton = new TrackedDisposable();
         var earlierTest = CreateContext(singleton);
         tracker.TrackObjects(earlierTest);
-        ObjectTracker.MarkExternallyOwned(singleton);
+        using var owner = new OwnershipRegistration(singleton);
         var laterTest = CreateContext(singleton);
         tracker.TrackObjects(laterTest);
 
@@ -141,12 +140,70 @@ public class ExternallyOwnedSingletonTests
         await Assert.That(singleton.DisposeCount).IsEqualTo(0);
     }
 
-    private static void MarkBypassingTheCountCheck(object obj)
+    [Test]
+    public async Task An_Existing_Consumer_Retains_The_Owner_Until_Its_Last_Reference_Ends()
     {
-        const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Static;
-        var table = (ConditionalWeakTable<object, object>) typeof(ObjectTracker).GetField("s_externallyOwned", flags)!.GetValue(null)!;
-        table.Add(obj, new object());
-        typeof(ObjectTracker).GetField("s_hasExternallyOwned", flags)!.SetValue(null, true);
+        var tracker = CreateTracker();
+        var singleton = new TrackedDisposable();
+        var context = CreateContext(singleton);
+        tracker.TrackObjects(context);
+
+        var owner = RegisterTemporaryOwnership(singleton);
+        Collect();
+        await Assert.That(OwnerIsAlive(owner)).IsTrue();
+        await tracker.UntrackObjects(context);
+        await Assert.That(singleton.DisposeCount).IsEqualTo(0);
+
+        Collect();
+        await Assert.That(OwnerIsAlive(owner)).IsFalse();
+        // TUnit can own a later use of the same object without a permanent process-wide mark.
+        var nextContext = CreateContext(singleton);
+        tracker.TrackObjects(nextContext);
+        await tracker.UntrackObjects(nextContext);
+        await Assert.That(singleton.DisposeCount).IsEqualTo(1);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference<DataRowScopeCollection.ScopeOwner> RegisterTemporaryOwnership(object instance)
+    {
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new EmptyScope());
+        scopes.RegisterObject(owner, instance);
+        return new(owner);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static bool OwnerIsAlive(WeakReference<DataRowScopeCollection.ScopeOwner> reference)
+        => reference.TryGetTarget(out _);
+
+    private static void Collect()
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+    }
+
+    private sealed class EmptyScope : IDisposable
+    {
+        public void Dispose() { }
+    }
+
+    private sealed class OwnershipRegistration : IDisposable
+    {
+        private readonly DataRowScopeCollection _scopes = new();
+
+        public OwnershipRegistration(object instance)
+        {
+            var owner = _scopes.Register(new Scope());
+            _scopes.RegisterObject(owner, instance);
+        }
+
+        public void Dispose() => GC.KeepAlive(_scopes);
+
+        private sealed class Scope : IDisposable
+        {
+            public void Dispose() { }
+        }
     }
 
     private static bool IsCounted(object obj)
@@ -163,7 +220,10 @@ public class ExternallyOwnedSingletonTests
     {
         var currentContext = TestContext.Current!;
         var context = new TestContext(nameof(ExternallyOwnedSingletonTests), currentContext.ServiceProvider, currentContext.ClassContext,
-            new TestBuilderContext { TestMetadata = currentContext.TestDetails.MethodMetadata }, CancellationToken.None);
+            new TestBuilderContext { TestMetadata = currentContext.TestDetails.MethodMetadata }, CancellationToken.None)
+        {
+            TestDetails = currentContext.TestDetails
+        };
         Roots.Add(context, root);
         _contexts.Add(context);
         return context;

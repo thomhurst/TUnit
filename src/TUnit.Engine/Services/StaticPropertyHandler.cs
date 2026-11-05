@@ -67,9 +67,10 @@ internal sealed class StaticPropertyHandler
                         _trackedObjects.Add(value);
                         await handler._propertyInjector.Value.InjectPropertiesAsync(value, handler._sessionObjectBag,
                             methodMetadata: null, _context.Events).ConfigureAwait(false);
-                        // Use execution's ownership-aware traversal: DI-owned children stay with
-                        // their scope, while TUnit-injected fixtures retain independent ownership.
-                        var graph = new ObjectGraphDiscoverer().DiscoverTrackableObjectGraph(value, cancellationToken);
+                        _context.EventsIfCreated?.DataRowScopes?.CaptureOwnership();
+                        // Discovery is independent of disposal ownership. Capture the scope's graph
+                        // after injection so injected fixtures retain independent ownership.
+                        var graph = new ObjectGraphDiscoverer().DiscoverStaticPropertyTrackableObjects(value, cancellationToken);
                         foreach (var level in graph)
                         {
                             foreach (var obj in level.Value)

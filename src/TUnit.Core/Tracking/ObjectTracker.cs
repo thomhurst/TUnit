@@ -19,6 +19,10 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
     private static readonly ConcurrentDictionary<object, Counter> s_trackedObjects =
         new(Helpers.ReferenceEqualityComparer.Instance);
 
+    // Keep owner handles alive until every session reference has been released. Other sessions can
+    // still find those owners through the weak registry, without permanent marks on their objects.
+    private readonly HashSet<DataRowScopeCollection.ScopeOwner> _externalOwners = [];
+
     private readonly Dictionary<object, int> _sessionReferences = new(Helpers.ReferenceEqualityComparer.Instance);
 
     // Keeps session ownership and global counts atomic with retirement and shared-instance holds.
@@ -60,6 +64,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             }
         }
 
+        lock (s_sharedInstanceLock) _externalOwners.Clear();
         s_asyncCallbackErrors.Clear();
 
         return exceptions;
@@ -80,7 +85,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             lock (s_sharedInstanceLock)
             {
                 if (!s_trackedObjects.TryGetValue(obj, out var counter) || counter.CurrentCount > 0
-                    || !RemoveCounter(obj, counter) || IsExternallyOwned(obj)) return;
+                    || !RemoveCounter(obj, counter) || ExternalObjectOwnership.IsOwned(obj)) return;
             }
         }
         await disposer.DisposeAsync(obj).ConfigureAwait(false);
@@ -142,12 +147,37 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     public void TrackObjects(TestContext testContext)
     {
+        var owners = RetainExternalOwners(testContext.InternalEventsIfCreated?.DataRowScopes);
         var alreadyTrackedSnapshot = SnapshotTrackedObjects(testContext.TrackedObjectsIfCreated);
 
         SortedList<int, HashSet<object>> trackableDict;
         try
         {
+            foreach (var owner in owners)
+                owner.CaptureOwnership(testContext.TestDetails.TestClassInjectedPropertyArguments.Values);
+            HashSet<object>? refreshed = null;
+            void RefreshOwner(object? instance)
+            {
+                if (instance is not null
+                    && ExternalObjectOwnership.FindOwner(instance) is { } owner
+                    && !owners.Contains(owner)
+                    && (refreshed ??= new(Helpers.ReferenceEqualityComparer.Instance)).Add(instance))
+                {
+                    owner.CaptureOwnershipFor(instance, testContext.TestDetails.TestClassInjectedPropertyArguments.Values);
+                }
+            }
+
+            // Include non-disposable roots: they may expose disposable initializer dependencies.
+            foreach (var root in testContext.TestDetails.TestClassArguments ?? []) RefreshOwner(root);
+            foreach (var root in testContext.TestDetails.TestMethodArguments ?? []) RefreshOwner(root);
+            foreach (var root in testContext.TestDetails.TestClassInjectedPropertyArguments.Values) RefreshOwner(root);
+
             trackableDict = trackableObjectGraphProvider.GetTrackableObjects(testContext);
+            // Also cover shared services discovered through another root.
+            foreach (var bucket in trackableDict.Values)
+            {
+                foreach (var instance in bucket) RefreshOwner(instance);
+            }
         }
         catch
         {
@@ -388,6 +418,18 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         }
     }
 
+    private DataRowScopeCollection.ScopeOwner[] RetainExternalOwners(DataRowScopeCollection? scopes)
+    {
+        if (scopes is null) return [];
+        var owners = scopes.GetOwners();
+        if (owners.Length > 0)
+        {
+            lock (s_sharedInstanceLock)
+                foreach (var owner in owners) _externalOwners.Add(owner);
+        }
+        return owners;
+    }
+
     /// <summary>
     /// Tracks a single object for a test context.
     /// For backward compatibility - adds to existing tracked objects for the context.
@@ -409,6 +451,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             }
             GetOrCreateCounter(obj).Increment();
         }
+        ExternalObjectOwnership.FindOwner(obj)?.RetainWhileCounted(obj);
     }
 
     /// <summary>
@@ -453,6 +496,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             return;
         }
 
+        // A count callback may release the last strong owner handle during Decrement. Keep the
+        // handle through the disposal decision, including after its originating session ended.
+        var externalOwner = ExternalObjectOwnership.FindOwner(obj);
         var shouldDispose = false;
 
         lock (s_sharedInstanceLock)
@@ -483,7 +529,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
             }
         }
 
-        if (shouldDispose && !IsExternallyOwned(obj))
+        if (shouldDispose && externalOwner is null && !ExternalObjectOwnership.IsOwned(obj))
         {
 #if NET
             if (TryGetSharedDisposeScope(obj, out var sharedType))
@@ -494,6 +540,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 #endif
             await disposer.DisposeAsync(obj).ConfigureAwait(false);
         }
+        GC.KeepAlive(externalOwner);
     }
 
 #if NET
@@ -767,63 +814,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         return obj is not IDisposable and not IAsyncDisposable;
     }
 
-    /// <summary>
-    /// Whether another owner disposes <paramref name="obj"/> itself.
-    /// </summary>
-    internal static bool IsExternallyOwned(object obj)
-        => HasExternallyOwnedGraph(obj)
-           || (s_hasRowOwnedScopes && s_rowOwnedScopes.TryGetValue(obj, out _));
-
-    internal static bool HasExternallyOwnedGraph(object obj)
-        => s_hasExternallyOwned && s_externallyOwned.TryGetValue(obj, out _);
-
-    private static readonly ConditionalWeakTable<object, object> s_rowOwnedScopes = new();
-    private static volatile bool s_hasRowOwnedScopes;
-
-    // Row cleanup owns only the scope itself. Its initializer graph remains tracker-owned.
-    internal static void MarkRowOwnedScope(object obj)
-    {
-        s_rowOwnedScopes.GetValue(obj, static _ => s_externallyOwnedMarker);
-        s_hasRowOwnedScopes = true;
-    }
-
-    // Objects whose lifetime another owner controls (a dependency injection scope, for example).
-    // The tracker balances references but never disposes them; their owner controls disposal.
-    private static readonly ConditionalWeakTable<object, object> s_externallyOwned = new();
-    private static readonly object s_externallyOwnedMarker = new();
-
-    // Ownership cannot live only on a row or counted entry: a container singleton can be
-    // supplied by another source before or after its DI row, including after its count reaches zero.
-    // A weak identity mark preserves that ownership without retaining the singleton.
-    // The flag deliberately stays set: live marks can outlast any individual row or test session.
-    // Skips the table lookup for every tracked object until something is marked.
-    private static volatile bool s_hasExternallyOwned;
-
-    /// <summary>
-    /// Marks <paramref name="obj"/> as disposed by another owner, so the tracker never disposes it.
-    /// Dependency injection data sources mark the services they resolve, because the scope that created
-    /// them disposes them when the test ends (#7205). Existing tracker references are released
-    /// without disposing the object, regardless of which data source supplied it first.
-    /// </summary>
-    /// <remarks>
-    /// The mark lasts for the object's lifetime and applies to every data source that later supplies the
-    /// object, because the object still belongs to the container that resolved it: a root singleton is
-    /// disposed by its root container, not by a test. A non-owning source may already
-    /// have counted the object, or count it concurrently with the mark.
-    /// That count is still released, and the tracker leaves the object to its owner rather than disposing it
-    /// when the count reaches zero or at session end.
-    /// </remarks>
-    internal static void MarkExternallyOwned(object? obj)
-    {
-        // A non-disposable object is marked too: the initializer objects it holds belong to the same owner.
-        if (obj is null)
-        {
-            return;
-        }
-
-        s_externallyOwned.GetValue(obj, static _ => s_externallyOwnedMarker);
-        s_hasExternallyOwned = true;
-    }
+    internal static bool IsExternallyOwned(object obj) => ExternalObjectOwnership.IsOwned(obj);
 
     /// <summary>
     /// Registers a callback to be invoked when the object is disposed (ref count reaches 0).
