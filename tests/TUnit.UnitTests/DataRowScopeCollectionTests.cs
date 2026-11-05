@@ -226,6 +226,35 @@ public class DataRowScopeCollectionTests
     }
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task FailedRowRefreshesExternalOwnershipBeforeCleanup(bool throwingGetter)
+    {
+        var root = new ChangingInitializerRoot();
+        var external = new DataRowScopeCollection();
+        var owner = external.Register(new Scope());
+        external.RegisterObject(owner, root);
+        external.CaptureOwnership();
+        root.Nested = new NestedInitializer();
+        root.Throw = throwingGetter;
+        var context = new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
+        await Assert.That(() => new FailingSource(false, root).Resolve(context))
+            .Throws<InvalidOperationException>().WithMessage("Resolution failed");
+        await context.Events.DataRowScopes!.CompleteAsync();
+        await Assert.That(root.Nested.DisposeCount).IsEqualTo(0);
+        await Assert.That(ExternalObjectOwnership.IsOwned(root.Nested)).IsTrue();
+        await external.CompleteAsync();
+        GC.KeepAlive(external);
+    }
+
+    private sealed class ChangingInitializerRoot
+    {
+        public bool Throw;
+        public NestedInitializer Broken => Throw ? throw new InvalidOperationException("Getter failed") : Nested;
+        public NestedInitializer Nested { get; set; } = new();
+    }
+
+    [Test]
     public async Task FailedRowKeepsResolutionErrorAndRootCleanupWhenAnInitializerGetterThrows()
     {
         var root = new ThrowingInitializerRoot();

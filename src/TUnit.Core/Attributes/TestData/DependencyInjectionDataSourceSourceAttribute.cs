@@ -49,17 +49,25 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                     // initializer graph, including beneath non-disposable roots, without initializing it.
                     var discoverer = new ObjectGraphDiscoverer();
                     var objectsByDepth = new SortedList<int, HashSet<object>>();
+                    var refreshed = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+                    void RefreshOwner(object instance)
+                    {
+                        if (refreshed.Add(instance))
+                            ExternalObjectOwnership.FindOwner(instance)?.CaptureOwnershipFor(instance, [], retainPartialGraphOnError: true);
+                    }
                     for (var i = 0; i < resolvedCount; i++)
                     {
                         if (values[i] is not { } root)
                             continue;
 
+                        RefreshOwner(root);
                         var graph = discoverer.DiscoverTrackableObjectGraph(root, CancellationToken.None, retainPartialGraphOnError: true);
                         foreach (var pair in graph)
                         {
                             if (!objectsByDepth.TryGetValue(pair.Key, out var bucket))
                                 objectsByDepth.Add(pair.Key, bucket = new(Helpers.ReferenceEqualityComparer.Instance));
                             bucket.UnionWith(pair.Value);
+                            foreach (var instance in pair.Value) RefreshOwner(instance);
                         }
                     }
 

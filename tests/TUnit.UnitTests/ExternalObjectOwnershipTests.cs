@@ -7,6 +7,29 @@ namespace TUnit.UnitTests;
 public class ExternalObjectOwnershipTests
 {
     [Test]
+    public async Task Never_Tracked_Dependency_Is_Not_Pinned_By_Live_Owner()
+    {
+        var service = new Service();
+        var scopes = new DataRowScopeCollection();
+        scopes.RegisterObject(scopes.Register(new Scope()), service);
+        var previous = CaptureAndDetach(scopes, service);
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        await Assert.That(previous.IsAlive).IsFalse();
+        GC.KeepAlive(scopes);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference CaptureAndDetach(DataRowScopeCollection scopes, Service service)
+    {
+        scopes.CaptureOwnership();
+        var previous = new WeakReference(service.Child);
+        service.Child = new Initializer();
+        return previous;
+    }
+
+    [Test]
     public async Task Later_Injected_Identity_Revokes_Previous_Dependency_Ownership()
     {
         var service = new Service();

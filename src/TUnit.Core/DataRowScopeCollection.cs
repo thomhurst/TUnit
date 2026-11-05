@@ -68,12 +68,18 @@ internal sealed class DataRowScopeCollection
             objects = scopes._objects.Select(pair =>
                 new KeyValuePair<object, ScopeOwner[]>(pair.Key, pair.Value.ToArray())).ToArray();
         }
+        // Owners already registered these roots in the source; copying lookup entries must not
+        // re-enter the tracker while holding the destination collection lock.
         lock (_lock)
         {
             _owners.AddRange(owners);
             foreach (var pair in objects)
+            {
+                if (!_objects.TryGetValue(pair.Key, out var registered))
+                    _objects.Add(pair.Key, registered = []);
                 foreach (var owner in pair.Value)
-                    RegisterObject(owner, pair.Key);
+                    if (!registered.Contains(owner)) registered.Add(owner);
+            }
         }
     }
 
@@ -117,6 +123,7 @@ internal sealed class DataRowScopeCollection
         internal bool OwnsCreatedObjects { get; set; }
         // Keep exclusions from wider graphs when a foreign row refreshes only an owned child.
         private readonly ConditionalWeakTable<object, object> _injectedObjects = new();
+        private readonly List<WeakReference<object>> _injectedIdentities = [];
         private readonly object _ownershipLock = new();
         private readonly HashSet<object> _roots = new(Helpers.ReferenceEqualityComparer.Instance);
         private readonly HashSet<object> _pinnedObjects = new(Helpers.ReferenceEqualityComparer.Instance);
@@ -161,24 +168,28 @@ internal sealed class DataRowScopeCollection
         }
 
         // A foreign row consumes only this graph; other roots may already be disposed.
-        internal void CaptureOwnershipFor(object root, IEnumerable<object?> injectedRoots)
-            => CaptureOwnership([root], injectedRoots);
+        internal void CaptureOwnershipFor(object root, IEnumerable<object?> injectedRoots, bool retainPartialGraphOnError = false)
+            => CaptureOwnership([root], injectedRoots, retainPartialGraphOnError);
 
-        private void CaptureOwnership(object[] roots, IEnumerable<object?> injectedRoots)
+        private void CaptureOwnership(object[] roots, IEnumerable<object?> injectedRoots, bool retainPartialGraphOnError = false)
         {
             if (!OwnsCreatedObjects || roots.Length == 0) return;
             // Discover outside the ownership lock: user getters can enter tracker code.
-            // Publish identities only after discovery succeeds, preserving concurrent exclusions.
+            // Publish after discovery (or best-effort failed-factory traversal), preserving concurrent exclusions.
             var injected = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
             lock (_ownershipLock)
-                foreach (var pair in _injectedObjects) injected.Add(pair.Key);
-            var owned = ObjectGraphDiscoverer.DiscoverOwnedObjects(roots, injectedRoots, injected);
+                CollectInjectedIdentities(injected);
+            var owned = ObjectGraphDiscoverer.DiscoverOwnedObjects(roots, injectedRoots, injected, retainPartialGraphOnError);
             lock (_ownershipLock)
             {
-                foreach (var pair in _injectedObjects) injected.Add(pair.Key);
+                CollectInjectedIdentities(injected);
                 foreach (var instance in injected)
                 {
-                    _injectedObjects.GetValue(instance, static _ => Membership);
+                    if (!_injectedObjects.TryGetValue(instance, out _))
+                    {
+                        _injectedObjects.Add(instance, Membership);
+                        _injectedIdentities.Add(new WeakReference<object>(instance));
+                    }
                     // Explicit scope and resolved roots always remain container-owned.
                     if (ReferenceEquals(instance, _scope) || _roots.Contains(instance)) continue;
                     if (_ownedObjects.Remove(instance))
@@ -195,6 +206,16 @@ internal sealed class DataRowScopeCollection
             // Lock order is tracker counter -> ownership -> registry OwnerSet. Never enter
             // a tracker counter while holding the ownership lock: callbacks can re-enter it.
             foreach (var instance in owned) RetainWhileCounted(instance);
+        }
+
+        // Called under the ownership lock. Compact dead identities without retaining their targets.
+        private void CollectInjectedIdentities(HashSet<object> injected)
+        {
+            for (var i = _injectedIdentities.Count - 1; i >= 0; i--)
+            {
+                if (_injectedIdentities[i].TryGetTarget(out var instance)) injected.Add(instance);
+                else _injectedIdentities.RemoveAt(i);
+            }
         }
 
         // An unrelated source may already hold this service in another session. Its existing

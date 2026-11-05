@@ -361,7 +361,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
     /// Injected values anywhere in the graph remain TUnit-owned, including aliases reached first
     /// through an ordinary initializer property.
     /// </summary>
-    internal static HashSet<object> DiscoverOwnedObjects(object[] roots, IEnumerable<object?> injectedRoots, HashSet<object>? knownInjected = null)
+    internal static HashSet<object> DiscoverOwnedObjects(object[] roots, IEnumerable<object?> injectedRoots, HashSet<object>? knownInjected = null, bool retainPartialGraphOnError = false)
     {
         var injected = knownInjected ?? new HashSet<object>(ReferenceComparer);
         foreach (var value in injectedRoots)
@@ -377,8 +377,8 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         void FindInjected(object value, int depth)
         {
             if (!CheckRecursionDepth(value, depth) || !MayHaveNestedObjects(value.GetType())) return;
-            TraverseInjectableProperties(value, AddInjected, FindInjected, depth, default, useSourceRegistrarCheck: true);
-            TraverseInitializerProperties(value, Visit, FindInjected, depth, default);
+            TraverseInjectableProperties(value, AddInjected, FindInjected, depth, default, useSourceRegistrarCheck: true, retainPartialGraphOnError);
+            TraverseInitializerProperties(value, Visit, FindInjected, depth, default, retainPartialGraphOnError);
         }
         foreach (var root in roots)
             if (visited.Add(root)) FindInjected(root, 1);
@@ -388,7 +388,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         void FindOwned(object value, int depth)
         {
             if (!CheckRecursionDepth(value, depth) || !MayHaveNestedObjects(value.GetType())) return;
-            TraverseInitializerProperties(value, AddOwned, FindOwned, depth, default);
+            TraverseInitializerProperties(value, AddOwned, FindOwned, depth, default, retainPartialGraphOnError);
         }
         foreach (var root in roots) FindOwned(root, 1);
         return owned;
