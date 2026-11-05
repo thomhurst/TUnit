@@ -227,6 +227,79 @@ public class MutableTupleWithOptionalParameterTests
         await Assert.That(extra).IsEqualTo(5);
     }
 
+    public static IEnumerable<object[]> ErasedNestedRows()
+    {
+        yield return [((CreateFixture(), 26), 27)];
+    }
+
+    [Test, MethodDataSource(nameof(ErasedNestedRows))]
+    public async Task Nested_Mutable_Tuple_Object_Target((object, int) pair)
+    {
+        var inner = ((Fixture, int))pair.Item1;
+        await Check(inner.Item1, inner.Item2);
+        await Assert.That(pair.Item2).IsEqualTo(27);
+    }
+
+    public static IEnumerable<object[]> ErasedReferenceRows()
+    {
+        yield return [(Tuple.Create(CreateFixture(), 26), 27)];
+    }
+
+    [Test, MethodDataSource(nameof(ErasedReferenceRows))]
+    public async Task Nested_Mutable_Reference_Object_Target((object, int) pair)
+    {
+        var inner = (Tuple<Fixture, int>)pair.Item1;
+        await Check(inner.Item1, inner.Item2);
+        await Assert.That(pair.Item2).IsEqualTo(27);
+    }
+
+    [Test, MethodDataSource(nameof(ErasedNestedRows))]
+    public async Task Nested_Mutable_Tuple_Interface_Target((System.Runtime.CompilerServices.ITuple, int) pair)
+    {
+        await Check((Fixture)pair.Item1[0]!, (int)pair.Item1[1]!);
+        await Assert.That(pair.Item1.GetType()).IsEqualTo(typeof((Fixture, int)));
+    }
+
+    public static IEnumerable<object[]> HiddenRows()
+    {
+        yield return [((new HiddenFixture(), 26), 27)];
+        yield return [(Tuple.Create(new HiddenFixture(), 26), 27)];
+    }
+
+    [Test, MethodDataSource(nameof(HiddenRows))]
+    public async Task Private_Mutable_Tuple_Object_Target((object, int) pair)
+    {
+        var inner = (System.Runtime.CompilerServices.ITuple)pair.Item1;
+        var fixture = (HiddenFixture)inner[0]!;
+        await Assert.That(fixture.Initialized).IsTrue();
+        await Assert.That(fixture.Started).IsTrue();
+        await Assert.That((int)inner[1]!).IsEqualTo(26);
+        await Assert.That(pair.Item2).IsEqualTo(27);
+    }
+
+    public static IEnumerable<object[]> LongErasedRows()
+    {
+        yield return [((CreateFixture(), 2, 3, 4, 5, 6, 7, 8, 9), 27)];
+    }
+
+    [Test, MethodDataSource(nameof(LongErasedRows))]
+    public async Task Long_Mutable_Tuple_Object_Target((object, int) pair)
+    {
+        var inner = ((Fixture, int, int, int, int, int, int, int, int))pair.Item1;
+        await Check(inner.Item1, 26);
+        await Assert.That(inner.Item9).IsEqualTo(9);
+        await Assert.That(pair.Item2).IsEqualTo(27);
+    }
+
+    private struct HiddenFixture : IAsyncInitializer, ITestStartEventReceiver
+    {
+        public bool Initialized;
+        public bool Started;
+        public int Order => 0;
+        public Task InitializeAsync() { Initialized = true; return Task.CompletedTask; }
+        public ValueTask OnTestStart(TestContext context) { Started = true; return default; }
+    }
+
     private static async Task Check(Fixture fixture, int number)
     {
         await Assert.That(fixture.Initialized).IsTrue();
@@ -265,7 +338,12 @@ public class MutableTupleWithOptionalParameterTests
 [EngineTest(ExpectedResult.Pass)]
 public class ConvertedAndGenericTupleOptionalTests
 {
-    public static IEnumerable<object[]> ConvertedRows() => [[new ConvertibleList()]];
+    public static IEnumerable<object[]> ConvertedRows()
+    {
+        // Erased sources cannot expose conversion operators to the AOT generator.
+        TUnit.Core.Converters.AotConverterRegistry.Register<ConvertibleList, (int, int)>(value => value);
+        yield return [new ConvertibleList()];
+    }
     public static IEnumerable<object[]> GenericRows() => [[(25, 26)]];
 
     [Test, MethodDataSource(nameof(ConvertedRows))]

@@ -8,8 +8,8 @@ internal sealed record TupleConversionCase(string Name, string Source, string Ta
 
 internal static class TupleConversionMatrix
 {
-    // Reflection can reconstruct nested tuples and its invocation binder widens char to float.
-    // The analyzer remains conservative because generated binding cannot execute those cases.
+    // Both invokers reconstruct nested tuples; reflection additionally widens char to float.
+    // Analyzer acceptance remains conservative for these structural conversions.
     public static readonly TupleConversionCase[] Cases =
     [
         new("Identity", "int", "int", "42", "42"),
@@ -32,9 +32,9 @@ internal static class TupleConversionMatrix
         new("Incompatible", "object", "int", "new object()", "42", false, false, false),
         new("NestedValue", "(int, int)", "(long, long)", "(1, 2)", "(1L, 2L)"),
         new("NullableValueIdentity", "(int, int)", "(int, int)?", "(1, 2)", "((int, int)?)(1, 2)"),
-        new("NullableValueWiden", "(int, int)", "(long, long)?", "(1, 2)", "((long, long)?)(1L, 2L)", false, false, false, BindsReflection: true),
+        new("NullableValueWiden", "(int, int)", "(long, long)?", "(1, 2)", "((long, long)?)(1L, 2L)", false, true, true, BindsReflection: true),
         new("NestedReferenceIdentity", "Tuple<int>", "Tuple<int>", "Tuple.Create(42)", "Tuple.Create(42)"),
-        new("NestedReferenceWiden", "Tuple<int>", "Tuple<long>", "Tuple.Create(42)", "Tuple.Create(42L)", false, false, false, BindsReflection: true),
+        new("NestedReferenceWiden", "Tuple<int>", "Tuple<long>", "Tuple.Create(42)", "Tuple.Create(42L)", false, true, true, BindsReflection: true),
         // AOT binds source-only operators through converters discovered from the method data
         // source's return type (#7511), so these rows bind in every mode.
         new("ExactOperator", "ImplicitSource", "Converted", "new ImplicitSource()", "new Converted(42)"),

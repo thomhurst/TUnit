@@ -8,6 +8,19 @@ namespace TUnit.Core.SourceGenerator.Tests;
 internal class GenericTypeResolverTests : TestsBase<Generators.TestMetadataGenerator>
 {
     [Test]
+    public Task Runtime_Inferred_Nested_Tuple_Metadata()
+        => RunTestWithInlineSource("""
+            using System.Collections.Generic;
+            using TUnit.Core;
+            public class TupleTests
+            {
+                public static IEnumerable<object[]> Rows() => new[] { new object[] { ((1, 2), 3) } };
+                [Test, MethodDataSource(nameof(Rows))]
+                public void Test<T>(((int, T), int) value) { }
+            }
+            """);
+
+    [Test]
     public async Task Test_GenericTestClass_WithExplicitInstantiation()
     {
         var source = """

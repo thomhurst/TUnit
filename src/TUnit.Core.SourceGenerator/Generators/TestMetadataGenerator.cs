@@ -2493,6 +2493,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
 
         if (TryGetClosedParametersForSharedBinder(testMethod, entry) is { } closedParameters
+            && closedParameters.All(parameter => !CodeGenerationHelpers.ContainsTypeParameter(parameter.Type))
             && closedParameters.Any(parameter => parameter.Type is INamedTypeSymbol tuple
                 && (tuple.IsTupleType || IsReferenceTuple(tuple))))
         {

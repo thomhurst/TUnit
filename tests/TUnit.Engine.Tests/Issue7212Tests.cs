@@ -15,8 +15,24 @@ public class Issue7212Tests(TestMode testMode) : InvokableTestBase(testMode)
             "/*/TUnit.TestProject.Bugs._7212/*/*",
             [
                 result => result.ResultSummary.Outcome.ShouldBe("Completed"),
-                result => result.ResultSummary.Counters.Total.ShouldBe(38),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(38),
+                result => result.ResultSummary.Counters.Total.ShouldBe(44),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(44),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+    [Test]
+    public async Task Retained_Nested_Tuple_Runtime_Inference()
+    {
+        if (testMode != TestMode.Reflection)
+        {
+            return;
+        }
+
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7212Runtime/*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }

@@ -79,6 +79,8 @@ internal class DataUnwrapper
                 continue;
             }
 
+            // Keep scanning after the tuple: only a required later data parameter prevents
+            // the wrapped row from binding whole (injected tokens do not consume row values).
             if (dataType is not null)
             {
                 if (!parameter.IsOptional && !parameter.IsParams)

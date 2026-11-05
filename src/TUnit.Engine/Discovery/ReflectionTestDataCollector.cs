@@ -3135,7 +3135,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// private RuntimeType instance, but the attribute argument is typed <see cref="Type"/>, which is what the
     /// source generator infers.
     /// </summary>
-    internal static Type GetArgumentInferenceType(object value) => value is Type ? typeof(Type) : value.GetType();
+    internal static Type GetArgumentInferenceType(object value) => value is Type ? typeof(Type) : value is TupleArgument tuple ? tuple.TupleType : value.GetType();
 
     private sealed class TypeArrayComparer : IEqualityComparer<Type[]>
     {
@@ -3721,6 +3721,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     // tuples; compatible rows must retain their original identity.
     private static object? CastInvocationArgument(Type parameterType, object? value)
     {
+        // Materialize erased tuple values before object/interface assignability can expose the wrapper.
+        if (value is TupleArgument retained && !TupleHelper.IsTupleType(parameterType))
+        {
+            value = retained.Materialize();
+        }
+
         var targetType = Nullable.GetUnderlyingType(parameterType) ?? parameterType;
         if (value == null || targetType.IsInstanceOfType(value))
         {
@@ -3837,7 +3843,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         if (arg != null && arg != Type.Missing)
                         {
                             var paramType = flattenedTupleTypes?[j] ?? methodParams[j].ParameterType;
-                            var argType = arg.GetType();
+                            var argType = GetArgumentInferenceType(arg);
                             InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true);
                         }
                     }
