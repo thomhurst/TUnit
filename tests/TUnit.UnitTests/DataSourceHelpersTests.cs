@@ -8,6 +8,85 @@ namespace TUnit.UnitTests;
 /// </summary>
 public class DataSourceHelpersTests
 {
+    private sealed record DerivedTupleRow : TestDataRow<(int, string)>
+    {
+        public DerivedTupleRow() : base((1, "tuple")) { }
+    }
+
+    [Test]
+    public async Task RowTypeLookup_UnwrapsOneLayerIncludingDerivedRecords()
+    {
+        await Assert.That(TestDataRowUnwrapper.GetInnerDataType(typeof(DerivedTupleRow)))
+            .IsEqualTo(typeof((int, string)));
+        await Assert.That(TestDataRowUnwrapper.GetInnerDataType(typeof(TestDataRow<TestDataRow<(int, string)>>)))
+            .IsEqualTo(typeof(TestDataRow<(int, string)>));
+    }
+
+    private static void OpenTuple<T>(Tuple<T, string> row) { }
+
+    private static void ObjectTuple<T>(Tuple<T, object> row) { }
+
+    [Test]
+    public async Task NullRow_DoesNotMatchOpenTupleWithTrailingParameter()
+    {
+        var parameter = typeof(DataSourceHelpersTests).GetMethod(nameof(OpenTuple),
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)!.GetParameters()[0].ParameterType;
+        object?[] values = [null];
+        var result = TUnit.Engine.Helpers.DataUnwrapper.UnwrapWithTypes(values,
+            [new ParameterMetadata(parameter) { Name = "row", TypeInfo = new ConcreteType(parameter) },
+                new ParameterMetadata(typeof(int)) { Name = "extra", TypeInfo = new ConcreteType(typeof(int)), CachedIsOptional = true }]);
+
+        await Assert.That(result.Length).IsEqualTo(1);
+        await Assert.That(result[0]).IsNull();
+    }
+
+    [Test]
+    public async Task OpenTupleBinding_RequiresOuterAssignability()
+    {
+        var parameter = typeof(DataSourceHelpersTests).GetMethod(nameof(ObjectTuple),
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)!.GetParameters()[0].ParameterType;
+        var whole = Tuple.Create(1, new object());
+        var nested = Tuple.Create(whole, "extra");
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, whole.GetType())).IsTrue();
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, Tuple.Create(1, "string").GetType())).IsFalse();
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, nested.GetType())).IsFalse();
+        await Assert.That(nested.ToObjectArrayWithTypes([parameter, typeof(string)]).Length).IsEqualTo(2);
+    }
+
+    private static void RepeatedTuple<T>(Tuple<T, T> row) { }
+
+    [Test]
+    public async Task OpenTupleBinding_RequiresConsistentRepeatedParameters()
+    {
+        var parameter = typeof(DataSourceHelpersTests).GetMethod(nameof(RepeatedTuple),
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)!.GetParameters()[0].ParameterType;
+        var whole = Tuple.Create(1, 2);
+        var nested = Tuple.Create(whole, Tuple.Create(7, "extra"));
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, whole.GetType())).IsTrue();
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, nested.GetType())).IsFalse();
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, Tuple.Create(1, 2L).GetType())).IsFalse();
+        await Assert.That(nested.ToObjectArrayWithTypes([parameter, typeof(Tuple<int, string>)]).Length).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task OpenTupleBinding_DistinguishesWholeAndNestedRows()
+    {
+        var parameter = typeof(DataSourceHelpersTests).GetMethod(nameof(OpenTuple),
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)!.GetParameters()[0].ParameterType;
+        var whole = Tuple.Create(1, "tuple");
+        var nested = Tuple.Create(whole, 7);
+        var mismatched = Tuple.Create(1, 2);
+
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, whole.GetType())).IsTrue();
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, nested.GetType())).IsFalse();
+        await Assert.That(TupleHelper.MatchesOpenTuple(parameter, mismatched.GetType())).IsFalse();
+        await Assert.That(whole.ToObjectArrayWithTypes([parameter, typeof(int)]).Length).IsEqualTo(1);
+        var columns = nested.ToObjectArrayWithTypes([parameter, typeof(int)]);
+        await Assert.That(columns.Length).IsEqualTo(2);
+        await Assert.That(columns[0]).IsEqualTo((object)whole);
+        await Assert.That(columns[1]).IsEqualTo((object)7);
+    }
+
     [Test]
     [Arguments(null, false)]
     [Arguments("text", true)]

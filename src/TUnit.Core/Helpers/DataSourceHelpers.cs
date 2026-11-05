@@ -535,7 +535,9 @@ public static class DataSourceHelpers
                 // Keep a matching first tuple parameter whole, including when later parameters
                 // are omitted. A nested row of a different type still spreads into columns.
                 if (TupleHelper.IsTupleType(expectedTypes[0])
-                    && (expectedTypes.Length == 1 || expectedTypes[0].IsInstanceOfType(item)))
+                    && (expectedTypes.Length == 1 || expectedTypes[0].ContainsGenericParameters
+                        && TupleHelper.MatchesOpenTuple(expectedTypes[0], item.GetType())
+                        || expectedTypes[0].IsInstanceOfType(item)))
                 {
                     if (RequiresFlattenedTupleBinding(item))
                     {

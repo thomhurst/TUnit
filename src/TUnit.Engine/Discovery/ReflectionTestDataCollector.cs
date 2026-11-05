@@ -2917,13 +2917,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Mirrors the generator's <c>InferTypesFromMethodDataSource</c>. It only reads attributes whose first
     /// constructor argument is the member name (<c>[MethodDataSource("Rows")]</c> and
-    /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), looks for a static parameterless method of that name
-    /// declared on the test class (or on <c>T</c>), and requires its declared return type to be
-    /// <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched against the data parameter
+    /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), resolves the member using the same lookup as source invocation
+    /// on the test class (or on <c>T</c>), and requires its declared type to be
+    /// a supported row source, including asynchronous wrappers. Each tuple element is matched against the data parameter
     /// at the same position, including type arguments nested in generic parameter types. The caller passes
     /// the parameters without any CancellationToken, as the generator's <c>GetDataParameters</c> does.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source methods")]
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     private static Type[]? InferTypesFromMethodDataSource(
         Type testClass,
         MethodDataSourceAttribute methodDataSource,
@@ -2941,26 +2941,42 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // [MethodDataSource<T>("Rows")] reads Rows from T, not from the test class
         var providerType = methodDataSource.ClassProvidingDataSource ?? testClass;
-        var dataMethod = providerType.GetMethod(
-            methodDataSource.MethodNameProvidingDataSource,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly,
-            binder: null,
-            Type.EmptyTypes,
-            modifiers: null);
+        Type? memberType;
+        try
+        {
+            memberType = methodDataSource.GetDeclaredMemberType(providerType);
+        }
+        catch (AmbiguousMatchException)
+        {
+            // Invocation reports the invalid source later; inference must not abort assembly discovery.
+            return null;
+        }
 
-        if (dataMethod?.ReturnType is not { IsGenericType: true } returnType
-            || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>)
-            || returnType.GetGenericArguments()[0] is not { IsGenericType: true } funcType
-            || funcType.GetGenericTypeDefinition() != typeof(Func<>)
-            || GetValueTupleElementTypes(funcType.GetGenericArguments()[0]) is not { } tupleElements)
+        // Normalize the same asynchronous and sequence wrappers as runtime row reading before
+        // supplementing explicit method types. Retain the bounded outer/inner Func unwrapping.
+        if (memberType is null || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType
+            || GetTupleElementTypes(rowType) is not { } tupleElements)
         {
             return null;
         }
 
         var typeArguments = new Type?[genericParameterCount];
-        for (var i = 0; i < parameters.Length && i < tupleElements.Length; i++)
+        var receivesWholeTuple = parameters.Length > 0
+            && ((GetTupleElementTypes(parameters[0].ParameterType) is not null
+                    && parameters.Skip(1).All(parameter => parameter.IsOptional
+                        || parameter.IsDefined(typeof(ParamArrayAttribute), false)
+                        || IsParamCollection(parameter)
+                        || (parameter == parameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
+                    && (parameters.Length == 1 || TupleHelper.MatchesOpenTuple(parameters[0].ParameterType, rowType)))
+                || (parameters.Length == 1 && parameters[0].ParameterType.IsGenericParameter && !rowType.IsValueType));
+        if (receivesWholeTuple)
         {
-            MapGenericParameters(parameters[i].ParameterType, tupleElements[i], typeArguments);
+            MapGenericParameters(parameters[0].ParameterType, rowType, typeArguments);
+        }
+        else
+        {
+            for (var i = 0; i < parameters.Length && i < tupleElements.Length; i++)
+                MapGenericParameters(parameters[i].ParameterType, tupleElements[i], typeArguments);
         }
 
         foreach (var typeArgument in typeArguments)
@@ -3001,8 +3017,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor)
     {
         constructor = null;
-        if (methodDataSource.GetDeclaredMemberType(genericTypeDefinition) is not { } memberType
-            || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType)
+        Type? memberType;
+        try
+        {
+            memberType = methodDataSource.GetDeclaredMemberType(genericTypeDefinition);
+        }
+        catch (AmbiguousMatchException)
+        {
+            // Leave the invalid source to invocation instead of failing discovery for the assembly.
+            return null;
+        }
+
+        if (memberType is null || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType)
         {
             return null;
         }
@@ -3125,6 +3151,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 typeArguments[parameterType.GenericParameterPosition] = actualType;
             }
 
+            return;
+        }
+
+        // Ordinary spread columns retain last-column inference through nullable values and arrays.
+        if (Nullable.GetUnderlyingType(parameterType) is { } nullableParameter
+            && actualType.IsValueType && Nullable.GetUnderlyingType(actualType) is null)
+        {
+            MapGenericParameters(nullableParameter, actualType, typeArguments);
+            return;
+        }
+        if (parameterType.IsArray && actualType.IsArray && parameterType.GetArrayRank() == actualType.GetArrayRank())
+        {
+            MapGenericParameters(parameterType.GetElementType()!, actualType.GetElementType()!, typeArguments);
             return;
         }
 

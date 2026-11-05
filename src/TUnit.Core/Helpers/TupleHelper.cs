@@ -11,6 +11,52 @@ namespace TUnit.Core.Helpers;
 public static class TupleHelper
 {
 
+    // Process-lifetime cache: one entry per distinct parameter/source type pair.
+    private static readonly ConcurrentDictionary<(Type Parameter, Type Row), bool> OpenTupleMatches = new();
+
+    // Open tuple types cannot use IsInstanceOfType. Match their complete shape so a nested
+    // row with separate columns is not mistaken for the first tuple argument.
+    internal static bool MatchesOpenTuple(Type parameter, Type row) =>
+        OpenTupleMatches.GetOrAdd((parameter, row), static pair => MatchesType(pair.Parameter, pair.Row, new Dictionary<Type, Type>()));
+
+    private static bool MatchesType(Type parameter, Type row, Dictionary<Type, Type> bindings)
+    {
+        if (parameter.IsGenericParameter)
+        {
+            if (bindings.TryGetValue(parameter, out var bound)) return bound == row;
+            bindings.Add(parameter, row);
+            return true;
+        }
+
+        if (!parameter.ContainsGenericParameters)
+        {
+            // Tuple type arguments are invariant. Element assignability alone does not make
+            // the constructed outer tuple assignable. Mirrors generator MatchesOpenRowType.
+            return parameter == row;
+        }
+
+        if (parameter.IsArray)
+        {
+            return row.IsArray && parameter.GetArrayRank() == row.GetArrayRank()
+                && MatchesType(parameter.GetElementType()!, row.GetElementType()!, bindings);
+        }
+
+        if (!parameter.IsGenericType || !row.IsGenericType
+            || parameter.GetGenericTypeDefinition() != row.GetGenericTypeDefinition())
+        {
+            return false;
+        }
+
+        var parameters = parameter.GetGenericArguments();
+        var arguments = row.GetGenericArguments();
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            if (!MatchesType(parameters[i], arguments[i], bindings)) return false;
+        }
+
+        return true;
+    }
+
 #if NET
     /// <summary>
     /// Checks if a type is a tuple type (ValueTuple or Tuple)
