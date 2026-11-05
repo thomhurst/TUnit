@@ -310,16 +310,15 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         );
 
         var attr = staticProperty.DataSourceAttribute;
-        var attributeClassName = attr.AttributeClass?.Name;
 
         DataSourceAttribute sourceAttribute;
 
         // Generate data source logic based on attribute type
-        if (attr.AttributeClass?.IsOrInherits("global::TUnit.Core.ArgumentsAttribute") == true)
+        if (DataSourceAttributeHelper.IsArguments(attr.AttributeClass))
         {
-            sourceAttribute = ParseArgumentsDataSourceWithAssignment(attr);;
+            sourceAttribute = ParseArgumentsDataSourceWithAssignment(attr);
         }
-        else if (attributeClassName == "MethodDataSourceAttribute")
+        else if (DataSourceAttributeHelper.IsBuiltIn(attr.AttributeClass, "MethodDataSourceAttribute"))
         {
             sourceAttribute = ParseMethodDataSourceWithAssignment(attr, staticProperty.Property.ContainingType);
         }

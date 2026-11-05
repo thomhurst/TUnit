@@ -6,6 +6,21 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 
 internal static class DataSourceAttributeHelper
 {
+    // Compare symbol components rather than allocating display strings in row-classification loops.
+    // Arguments and method-source attributes also have generic forms with the same identity.
+    public static bool IsBuiltIn(INamedTypeSymbol? symbol, string name)
+        => symbol is { ContainingType: null } && symbol.Name == name &&
+           symbol.ContainingNamespace is
+           {
+               Name: "Core",
+               ContainingNamespace: { Name: "TUnit", ContainingNamespace.IsGlobalNamespace: true }
+           };
+
+    public static bool IsArguments(INamedTypeSymbol? symbol) => IsBuiltIn(symbol, "ArgumentsAttribute");
+
+    public static bool IsMethodSource(INamedTypeSymbol? symbol)
+        => IsBuiltIn(symbol, "MethodDataSourceAttribute") || IsBuiltIn(symbol, "InstanceMethodDataSourceAttribute");
+
     public static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {
         if (attributeClass == null)
