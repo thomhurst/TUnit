@@ -184,10 +184,18 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         // No nested traversal: reading the roots' properties is what failed.
         => TrackObjectsCore(testContext, discoverNested: false, CancellationToken.None);
 
-    internal SortedList<int, HashSet<object>> DiscoverStaticPropertyTrackableObjects(object root, CancellationToken cancellationToken)
+    internal SortedList<int, HashSet<object>> DiscoverTrackableObjectGraph(object root, CancellationToken cancellationToken, bool retainPartialGraphOnError = false)
     {
         var objects = new SortedList<int, HashSet<object>> { [0] = new(ReferenceComparer) { root } };
-        DiscoverNestedObjectsForTracking(root, objects, 1, heldByExternalOwner: false, injectedValues: null, cancellationToken);
+        try
+        {
+            DiscoverNestedObjectsForTracking(root, objects, 1, heldByExternalOwner: false, injectedValues: null, cancellationToken);
+        }
+        catch when (retainPartialGraphOnError)
+        {
+            // A failed factory already has an error to report. Retain the root and anything
+            // discovered before a getter failed without replacing that original error.
+        }
         return objects;
     }
 
@@ -209,6 +217,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         HashSet<object>? injectedValues = null;
         void DiscoverRoot(object obj)
         {
+            // Scope-only ownership must not propagate to the services held by a scope.
             if (ObjectTracker.HasExternallyOwnedGraph(obj) && injectedValues is null)
             {
                 injectedValues = new HashSet<object>(ReferenceComparer);
@@ -368,6 +377,7 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             return;
         }
 
+        // Only graph ownership propagates to initializer properties; row-owned scopes do not.
         var externallyOwned = heldByExternalOwner || ObjectTracker.HasExternallyOwnedGraph(obj);
         if (externallyOwned)
         {

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using TUnit.Core.Discovery;
 using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
@@ -42,7 +42,7 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                         // The scope owns the resolved value and its initializer graph.
                         ObjectTracker.MarkExternallyOwned(created);
                     }
-                    else if (ReferenceEquals(created, scope) && created is IDisposable or IAsyncDisposable)
+                    else if (ReferenceEquals(created, scope) && created is (IDisposable or IAsyncDisposable))
                     {
                         ObjectTracker.MarkRowOwnedScope(created);
                     }
@@ -54,19 +54,34 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
             {
                 if (!scopeOwnsCreatedObjects)
                 {
-                    // No row reaches the tracker after a factory failure. Retain its resolved
-                    // services for asynchronous cleanup, without replacing the resolution error.
-                    // A service returned for several members needs only one reference per failed row.
-                    var retained = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+                    // No row reaches normal tracking after a factory failure. Discover the same
+                    // initializer graph, including beneath non-disposable roots, without initializing it.
+                    var discoverer = new ObjectGraphDiscoverer();
+                    var objectsByDepth = new SortedList<int, HashSet<object>>();
                     for (var i = 0; i < resolvedCount; i++)
                     {
-                        if (values[i] is { } value && !ReferenceEquals(value, scope)
+                        if (values[i] is not { } root)
+                            continue;
+
+                        var graph = discoverer.DiscoverTrackableObjectGraph(root, CancellationToken.None, retainPartialGraphOnError: true);
+                        foreach (var pair in graph)
+                        {
+                            if (!objectsByDepth.TryGetValue(pair.Key, out var bucket))
+                                objectsByDepth.Add(pair.Key, bucket = new(Helpers.ReferenceEqualityComparer.Instance));
+                            bucket.UnionWith(pair.Value);
+                        }
+                    }
+
+                    // As in normal tracking, release roots before their nested dependencies.
+                    var retained = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+                    foreach (var bucket in objectsByDepth.Values)
+                    foreach (var value in bucket)
+                    {
+                        // Shared roots and nested aliases need only one reference per failed row.
+                        if (value is (IDisposable or IAsyncDisposable) && !ReferenceEquals(value, scope)
                             && !ObjectTracker.IsExternallyOwned(value) && retained.Add(value))
                         {
-                            if (value is IDisposable or IAsyncDisposable)
-                            {
-                                cleanup.Register(ObjectTracker.RetainForRowCleanup(value));
-                            }
+                            cleanup.Register(ObjectTracker.RetainForRowCleanup(value));
                         }
                     }
                 }

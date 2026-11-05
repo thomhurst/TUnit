@@ -197,6 +197,70 @@ public class DataRowScopeCollectionTests
         await Assert.That(service.DisposeCount).IsEqualTo(1);
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task FailedRowsRetainNestedInitializersAcrossSharedNonDisposableRoots(bool disposableRoot)
+    {
+        var nested = new NestedInitializer();
+        object root = disposableRoot ? new DisposableRoot(nested) : new InitializerRoot(nested);
+        var tracker = new TUnit.Core.Tracking.ObjectTracker(new(), GlobalContext.Current.Disposer);
+        tracker.TrackStaticLeaseObject(nested);
+        var contexts = Enumerable.Range(0, 2).Select(_ => new TestBuilderContext
+        {
+            TestMetadata = TestContext.Current!.TestDetails.MethodMetadata
+        }).ToArray();
+        foreach (var context in contexts)
+            await Assert.That(() => new FailingSource(false, root).Resolve(context)).Throws<InvalidOperationException>();
+
+        await contexts[0].Events.DataRowScopes!.CompleteAsync();
+        await tracker.ReleaseStaticLeaseObjectAsync(nested);
+        await Assert.That(nested.DisposeCount).IsEqualTo(0);
+        await contexts[1].Events.DataRowScopes!.CompleteAsync();
+        await contexts[1].Events.DataRowScopes!.Clone().CompleteAsync();
+        await Assert.That(nested.DisposeCount).IsEqualTo(1);
+        await Assert.That(nested.InitializeCount).IsEqualTo(0);
+        if (root is DisposableRoot disposable)
+            await Assert.That(disposable.DisposeCount).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task FailedRowKeepsResolutionErrorAndRootCleanupWhenAnInitializerGetterThrows()
+    {
+        var root = new ThrowingInitializerRoot();
+        var context = new TestBuilderContext { TestMetadata = TestContext.Current!.TestDetails.MethodMetadata };
+        await Assert.That(() => new FailingSource(false, root).Resolve(context))
+            .Throws<InvalidOperationException>().WithMessage("Resolution failed");
+        await context.Events.DataRowScopes!.CompleteAsync();
+        await Assert.That(root.DisposeCount).IsEqualTo(1);
+    }
+
+    private sealed class ThrowingInitializerRoot : IDisposable
+    {
+        public NestedInitializer Nested => throw new InvalidOperationException("Getter failed");
+        public int DisposeCount;
+        public void Dispose() => DisposeCount++;
+    }
+
+    private class InitializerRoot(NestedInitializer nested)
+    {
+        public NestedInitializer Nested { get; } = nested;
+    }
+
+    private sealed class DisposableRoot(NestedInitializer nested) : InitializerRoot(nested), IDisposable
+    {
+        public int DisposeCount;
+        public void Dispose() => DisposeCount++;
+    }
+
+    private sealed class NestedInitializer : TUnit.Core.Interfaces.IAsyncInitializer, IAsyncDisposable
+    {
+        public int DisposeCount;
+        public int InitializeCount;
+        public Task InitializeAsync() { InitializeCount++; return Task.CompletedTask; }
+        public ValueTask DisposeAsync() { DisposeCount++; return default; }
+    }
+
     private sealed class AsyncService : IAsyncDisposable
     {
         internal int DisposeCount;
@@ -207,10 +271,11 @@ public class DataRowScopeCollectionTests
         }
     }
 
-    private sealed class FailingSource(bool ownsServices, AsyncService? shared = null) : DependencyInjectionDataSourceAttribute<Scope>
+    private sealed class FailingSource(bool ownsServices, object? shared = null) : DependencyInjectionDataSourceAttribute<Scope>
     {
         internal Scope Scope { get; } = new();
-        internal AsyncService Service { get; } = shared ?? new();
+        internal AsyncService Service { get; } = new();
+        private object ResolvedService => shared ?? Service;
         private int _calls;
 
         internal void Resolve(TestBuilderContext context)
@@ -231,7 +296,7 @@ public class DataRowScopeCollectionTests
         public override Scope CreateScope(DataGeneratorMetadata metadata) => Scope;
         protected override bool ScopeOwnsCreatedObjects(Scope scope) => ownsServices;
         public override object Create(Scope scope, Type type)
-            => ++_calls < 3 ? Service : throw new InvalidOperationException("Resolution failed");
+            => ++_calls < 3 ? ResolvedService : throw new InvalidOperationException("Resolution failed");
     }
 
     private sealed class ConcurrentSource : DependencyInjectionDataSourceAttribute<Scope>

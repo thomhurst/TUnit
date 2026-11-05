@@ -17,8 +17,17 @@ public sealed class UntrackingScope : IDisposable
     public void Dispose() => DisposeCount++;
 }
 
+public sealed class NestedInitializer : IDisposable, TUnit.Core.Interfaces.IAsyncInitializer
+{
+    public int DisposeCount { get; private set; }
+    public int InitializeCount { get; private set; }
+    public void Dispose() => DisposeCount++;
+    public Task InitializeAsync() { InitializeCount++; return Task.CompletedTask; }
+}
+
 public sealed class UntrackedService : IDisposable, TUnit.Core.Interfaces.IAsyncInitializer
 {
+    public NestedInitializer Nested { get; } = new();
     public int DisposeCount { get; private set; }
     public void Dispose() => DisposeCount++;
     public Task InitializeAsync() => Task.CompletedTask;
@@ -88,6 +97,8 @@ public class PartiallyFailedResolutionObserverTests
         var scope = PartiallyFailingScopeAttribute.Created.Single();
         await Assert.That(scope.DisposeCount).IsEqualTo(1);
         await Assert.That(scope.Service.DisposeCount).IsEqualTo(1);
+        await Assert.That(scope.Service.Nested.DisposeCount).IsEqualTo(1);
+        await Assert.That(scope.Service.Nested.InitializeCount).IsEqualTo(0);
     }
 }
 
