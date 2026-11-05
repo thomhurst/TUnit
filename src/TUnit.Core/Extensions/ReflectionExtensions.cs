@@ -177,16 +177,15 @@ public static class ReflectionExtensions
             }
         }
 
-        if (inherit && provider is Type type)
+        if (inherit && provider is MemberInfo member)
         {
             var seen = new HashSet<Type>(attributes.Select(attribute => attribute.GetType()));
-            var baseType = type.BaseType;
-            while (baseType != null && baseType != typeof(object))
+            foreach (var baseMember in GetInheritedAttributeMembers(member))
             {
                 // Inspect usage on the concrete attribute type, as Type.GetCustomAttributes does.
                 // A base attribute class's usage does not supply the runtime defaults.
                 var declaredTypes = new HashSet<Type>();
-                foreach (var data in CustomAttributeData.GetCustomAttributes(baseType))
+                foreach (var data in CustomAttributeData.GetCustomAttributes(baseMember))
                 {
                     var concreteType = data.AttributeType;
                     if (!attributeType.IsAssignableFrom(concreteType))
@@ -224,11 +223,46 @@ public static class ReflectionExtensions
                     declaredTypes.Add(concreteType);
                 }
                 seen.UnionWith(declaredTypes);
-                baseType = baseType.BaseType;
             }
         }
 
         return attributes.ToArray();
+    }
+
+    #if NET8_0_OR_GREATER
+    [RequiresUnreferencedCode("Base method attribute discovery uses reflection for .NET Framework compatibility")]
+    #endif
+    private static IEnumerable<MemberInfo> GetInheritedAttributeMembers(MemberInfo member)
+    {
+        if (member is Type type)
+        {
+            for (var baseType = type.BaseType; baseType != null && baseType != typeof(object); baseType = baseType.BaseType)
+            {
+                yield return baseType;
+            }
+        }
+        else if (member is MethodInfo { IsVirtual: true } method)
+        {
+            var definition = method.GetBaseDefinition();
+            if (definition == method)
+            {
+                yield break;
+            }
+
+            for (var baseType = method.DeclaringType?.BaseType; baseType != null; baseType = baseType.BaseType)
+            {
+                foreach (var candidate in baseType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+                {
+                    // Slot identity also works for constructed generic bases and excludes overloads/new slots.
+                    var candidateDefinition = candidate.GetBaseDefinition();
+                    if (candidateDefinition.Module == definition.Module && candidateDefinition.MetadataToken == definition.MetadataToken)
+                    {
+                        yield return candidate;
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     #if NET8_0_OR_GREATER

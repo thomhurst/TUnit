@@ -162,6 +162,7 @@ internal sealed class GenericConstraintViolationEntrySource : ITestEntrySource
         {
             if (_entries is not null)
             {
+                // Late registration must publish a complete replacement while other factories are excluded.
                 _entries = [.. _entries, .. factory()];
                 return;
             }
@@ -209,6 +210,7 @@ internal sealed class GenericConstraintViolationEntrySource : ITestEntrySource
         {
             MethodName = entry.MethodName,
             ClassName = ClassName,
+            // The early filter uses names only; category/property filters run after Materialize.
             Categories = [],
             Properties = [],
             DependsOn = [],
