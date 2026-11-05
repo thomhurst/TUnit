@@ -2,6 +2,8 @@ namespace TUnit.TestProject.Bugs._7212Runtime;
 
 // Erased sources require runtime inference, which is supported in reflection mode only.
 // The engine regression selects this separately from the dual-mode _7212 cases.
+// Deliberately omit EngineTest(Pass): generated discovery reports an uninferable
+// generic row, so this fixture must not join the generated passing-suite filter.
 public class RuntimeGenericTupleTests
 {
     public static IEnumerable<object[]> Rows()
