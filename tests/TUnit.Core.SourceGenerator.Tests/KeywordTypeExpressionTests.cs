@@ -112,6 +112,28 @@ public class KeywordTypeExpressionTests
         await Assert.That(driver.GetRunResult().Results.Single().GeneratedSources.Count(s => s.HintName.EndsWith("__TestSource.g.cs"))).IsEqualTo(2);
     }
 
+    [Test]
+    public async Task PropertyInjectionInKeywordNamespaceCompiles()
+    {
+        var compilation = CreateCompilation("""
+            namespace @event
+            {
+                public class @class
+                {
+                    [TUnit.Core.Arguments("value")]
+                    public string Value { get; set; }
+                }
+            }
+            """);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new PropertyInjectionSourceGenerator().AsSourceGenerator()], parseOptions: new CSharpParseOptions(LanguageVersion.Preview));
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+        await Assert.That(driver.GetRunResult().Results.Select(r => r.Exception).FirstOrDefault(e => e is not null)).IsNull();
+        await Assert.That(driver.GetRunResult().Results.Single().GeneratedSources).IsNotEmpty();
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+    }
+
     private static CSharpCompilation CreateCompilation(string source) => CSharpCompilation.Create(
         "KeywordExpressions",
         [CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview))],

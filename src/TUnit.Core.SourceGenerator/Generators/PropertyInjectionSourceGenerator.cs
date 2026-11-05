@@ -1151,7 +1151,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static string GetSafeClassName(INamedTypeSymbol classSymbol)
     {
-        var fullyQualified = classSymbol.GloballyQualified();
+        // Identifier fragments need raw names; keyword escapes belong only in type expressions.
+        var fullyQualified = classSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return fullyQualified
             .Replace("global::", "")
             .Replace(".", "_")
