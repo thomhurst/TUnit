@@ -191,6 +191,7 @@ jobs:
           user: ${{ secrets.NUGET_USER }}
 
       # Capture native runtime faults (including exit 139 before MTP reports tests).
+      # The pipeline and all dotnet children (including build tools) inherit these settings.
       # Use an absolute path because the pipeline launches tests from several directories.
       - name: Enable macOS crash dumps
         if: runner.os == 'macOS' && vars.CRASH_DUMP_ENCRYPTION_CERT != ''
