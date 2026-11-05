@@ -429,17 +429,17 @@ public static class GenericClassRowPartition
     // retain candidates for registered conversions and built-in scalar CastHelper paths.
     private static bool MayConvertConstructorValue(TypeInfo description, object value, Type[] classTypeArguments)
     {
+        // CastHelper checks conversions against the non-nullable target. Normalize the
+        // description too, because the underlying type can remain structurally generic.
+        if (description is ConstructedGeneric { GenericDefinition: var definition, TypeArguments: [var underlying] }
+            && definition == typeof(Nullable<>))
+        {
+            description = underlying;
+        }
         var target = description switch
         {
             GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
             ConcreteType concrete => concrete.Type,
-            ConstructedGeneric { GenericDefinition: var definition, TypeArguments: [var underlying] }
-                when definition == typeof(Nullable<>) => underlying switch
-                {
-                    GenericParameter { IsMethodParameter: false } generic => classTypeArguments[generic.Position],
-                    ConcreteType concrete => concrete.Type,
-                    _ => null
-                },
             _ => null
         };
 

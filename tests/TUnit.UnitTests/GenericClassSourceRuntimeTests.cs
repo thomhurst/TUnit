@@ -69,6 +69,50 @@ public class GenericClassSourceRuntimeTests
         }
     }
 
+    private readonly record struct NullableBox<T>(T Value);
+    private sealed class NullableBoxRow(bool throws)
+    {
+        public bool Throws { get; } = throws;
+    }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Partition_Preserves_Registered_Structural_Nullable_Conversions(bool generated)
+    {
+        TUnit.Core.Converters.AotConverterRegistry.Register<NullableBoxRow, NullableBox<int>>(
+            value => value.Throws ? throw new InvalidOperationException("Partitioning must not invoke converters") : new(42));
+        TypeInfo description = generated
+            ? new ConstructedGeneric(typeof(Nullable<>), [new ConstructedGeneric(typeof(NullableBox<>), [new GenericParameter(0, false)])])
+            : new ConcreteType(typeof(NullableBox<int>?));
+        IMemberMetadata[] parameters =
+        [
+            new ParameterMetadata(typeof(NullableBox<int>?)) { Name = "first", TypeInfo = description, CachedIsOptional = false },
+            new ParameterMetadata(typeof(string)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true }
+        ];
+        object?[][] original = [[new NullableBox<int>(1)], [new NullableBoxRow(false)], [new NullableBoxRow(true)], [null]];
+        var source = new MethodDataSourceAttribute("Rows") { Factory = _ => Rows() };
+        var partition = GenericClassRowPartition.Create([typeof(int), typeof(string)], GenericClassRowFallback.AllRows, [source], 0);
+        var metadata = new DataGeneratorMetadata
+        {
+            TestBuilderContext = null!, MembersToGenerate = parameters, TestInformation = null,
+            Type = DataGeneratorType.ClassParameters, TestSessionId = string.Empty,
+            TestClassInstance = null, ClassInstanceArguments = null
+        };
+        var rows = new List<object?[]?>();
+        await foreach (var factory in partition[0].GetDataRowsAsync(metadata)) rows.Add(await factory());
+        await Assert.That(rows.Count).IsEqualTo(original.Length);
+        for (var i = 0; i < rows.Count; i++) await Assert.That(ReferenceEquals(rows[i], original[i])).IsTrue();
+        await Assert.That(TUnit.Core.Helpers.CastHelper.Cast<NullableBox<int>?>(original[1][0])).IsEqualTo(new NullableBox<int>(42));
+        await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new object()], parameters, [typeof(int), typeof(string)])).IsFalse();
+
+        async IAsyncEnumerable<Func<Task<object?[]?>>> Rows()
+        {
+            foreach (var row in original) yield return () => Task.FromResult<object?[]?>(row);
+            await Task.CompletedTask;
+        }
+    }
+
     private sealed class TargetBoxRow;
     private sealed class Wrapper<T>;
     private sealed class Box<T>
