@@ -412,7 +412,7 @@ internal sealed class TestGenericTypeResolver
         // Try the original approach for cases with typed parameters
         var typeMapping = new Dictionary<Type, Type>();
         
-        // A trailing params T[] (or plain T[]) collects loose values, which do not match the array type itself.
+        // A trailing params array (or plain T[]) collects loose values, which do not match the array type itself.
         // They are left out of inference: the reflection invoker re-infers type arguments from the
         // declared parameter types, so inferring T from them here would not reach the invocation.
         // T must come from another argument, or from a lone array value passed as the array.
@@ -440,8 +440,8 @@ internal sealed class TestGenericTypeResolver
             lastDataParameterIndex = tupleElementTypes.Length - 1;
         }
 
-        var hasGenericParamsArray = tupleElementTypes is null
-            && HasGenericParamsArray(methodMetadata, parameterTypes, lastDataParameterIndex);
+        var hasTrailingArray = tupleElementTypes is null
+            && HasTrailingArray(methodMetadata, parameterTypes, lastDataParameterIndex);
 
         // Method type parameters that only received null values, if any
         List<Type>? nullArgumentParameters = null;
@@ -458,12 +458,13 @@ internal sealed class TestGenericTypeResolver
             var paramType = parameterTypes[parameterIndex];
             var argValue = methodArguments[i];
 
-            if (hasGenericParamsArray && parameterIndex == lastDataParameterIndex)
+            if (hasTrailingArray && parameterIndex == lastDataParameterIndex)
             {
                 // A lone array value may be the array itself (normal form) or one element of it
                 // (expanded form, e.g. T = int[] from a leading argument). Use it for inference only
                 // when the normal form agrees with what the other arguments inferred.
-                if (methodArguments.Length == dataParameterCount
+                if (paramType.ContainsGenericParameters
+                    && methodArguments.Length == dataParameterCount
                     && argValue?.GetType() is { IsArray: true } lastArgType)
                 {
                     var normalFormMapping = new Dictionary<Type, Type>(typeMapping);
@@ -548,11 +549,6 @@ internal sealed class TestGenericTypeResolver
     }
 
     /// <summary>
-    /// Whether the method's last data parameter collects trailing values and involves a generic
-    /// parameter: a <c>params T[]</c>, or a plain single-dimensional <c>T[]</c>, which the
-    /// reflection invoker also fills from loose values.
-    /// </summary>
-    /// <summary>
     /// Whether a type inferred for a method type parameter cannot hold a null passed to the same type parameter:
     /// a value type other than <see cref="Nullable{T}"/>. Such a type parameter infers object instead (#7155).
     /// Shared by every reflection-mode inference path, so they cannot drift apart; the source generator applies
@@ -561,7 +557,11 @@ internal sealed class TestGenericTypeResolver
     internal static bool CannotHoldNull(Type inferredType)
         => inferredType.IsValueType && Nullable.GetUnderlyingType(inferredType) is null;
 
-    private static bool HasGenericParamsArray(MethodMetadata methodMetadata, Type[] parameterTypes, int lastDataParameterIndex)
+    /// <summary>
+    /// Whether the last data parameter collects trailing values: a params array of any element
+    /// type, or a plain single-dimensional generic array that the reflection invoker also fills.
+    /// </summary>
+    private static bool HasTrailingArray(MethodMetadata methodMetadata, Type[] parameterTypes, int lastDataParameterIndex)
     {
         var parameters = methodMetadata.Parameters;
         if (lastDataParameterIndex < 0 || parameters.Length != parameterTypes.Length)
@@ -571,8 +571,8 @@ internal sealed class TestGenericTypeResolver
 
         var lastType = parameterTypes[lastDataParameterIndex];
         return lastType.IsArray
-            && lastType.ContainsGenericParameters
-            && (parameters[lastDataParameterIndex].IsParams || lastType.GetArrayRank() == 1);
+            && (parameters[lastDataParameterIndex].IsParams
+                || lastType.ContainsGenericParameters && lastType.GetArrayRank() == 1);
     }
 
     #if NET8_0_OR_GREATER
