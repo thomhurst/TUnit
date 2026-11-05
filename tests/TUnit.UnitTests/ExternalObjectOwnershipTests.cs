@@ -7,6 +7,111 @@ namespace TUnit.UnitTests;
 public class ExternalObjectOwnershipTests
 {
     [Test]
+    public async Task Concurrent_Capture_Registration_And_Counter_Release_Preserve_Owner_Lifetime()
+    {
+        var tracker = new TUnit.Core.Tracking.ObjectTracker(new(), GlobalContext.Current.Disposer);
+        var service = new Service();
+        var owner = await ExerciseConcurrentOwnership(tracker, service).WaitAsync(TimeSpan.FromSeconds(30));
+        // Unwind the helper's completing continuation before testing weak reachability.
+        await Task.Yield();
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        await Assert.That(IsOwnerAlive(owner)).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
+
+        await tracker.ReleaseStaticLeaseObjectAsync(service.Child);
+        await Task.Yield();
+        CollectOwner(owner);
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsFalse();
+        await Assert.That(service.Child.DisposeCount).IsEqualTo(0);
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static async Task<WeakReference<DataRowScopeCollection.ScopeOwner>> ExerciseConcurrentOwnership(
+        TUnit.Core.Tracking.ObjectTracker tracker, Service service)
+    {
+        var scopes = new DataRowScopeCollection();
+        var scope = new Scope();
+        var owner = scopes.Register(scope);
+        scopes.RegisterObject(owner, service);
+        scopes.CaptureOwnership();
+        var start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var capture = Task.Run(async () =>
+        {
+            await start.Task;
+            for (var i = 0; i < 128; i++)
+            {
+                scopes.CaptureOwnership();
+                await Task.Yield();
+            }
+        });
+        var register = Task.Run(async () =>
+        {
+            await start.Task;
+            for (var i = 0; i < 128; i++)
+            {
+                // Add a fresh root to enter pin publication, and refresh the shared registry entry.
+                scopes.RegisterObject(owner, new Initializer());
+                ExternalObjectOwnership.Register(service.Child, owner);
+                await Task.Yield();
+            }
+        });
+        var release = Task.Run(async () =>
+        {
+            await start.Task;
+            for (var i = 0; i < 128; i++)
+            {
+                tracker.TrackStaticLeaseObject(service.Child);
+                TUnit.Core.Tracking.ObjectTracker.OnDisposed(service.Child,
+                    () => tracker.TrackStaticLeaseObject(service.Child));
+                // Reaching zero invokes the pin callback and retires the counter while other
+                // workers publish ownership. The reentrant consumer then releases its own lease.
+                await tracker.ReleaseStaticLeaseObjectAsync(service.Child);
+                await tracker.ReleaseStaticLeaseObjectAsync(service.Child);
+                await Task.Yield();
+            }
+        });
+        var acquire = Task.Run(async () =>
+        {
+            await start.Task;
+            for (var i = 0; i < 128; i++)
+            {
+                // Contend with the callback's lease acquisition on an independent owned root.
+                tracker.TrackStaticLeaseObject(service);
+                await tracker.ReleaseStaticLeaseObjectAsync(service);
+                await Task.Yield();
+            }
+        });
+        var collect = Task.Run(async () =>
+        {
+            await start.Task;
+            for (var i = 0; i < 8; i++)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                await Task.Yield();
+            }
+        });
+
+        start.SetResult();
+        await Task.WhenAll(capture, register, release, acquire, collect);
+        await Assert.That(service.Child.DisposeCount).IsEqualTo(0);
+        // Leave only a counted consumer retaining the completed row's owner after this helper returns.
+        tracker.TrackStaticLeaseObject(service.Child);
+        await scopes.CompleteAsync();
+        await Assert.That(scope.DisposeCount).IsEqualTo(1);
+        var reference = new WeakReference<DataRowScopeCollection.ScopeOwner>(owner);
+        // Completed worker tasks may retain their shared closure in Debug builds. Remove its
+        // strong row references so the caller measures the counter pin, not the test harness.
+        scopes = null!;
+        owner = null!;
+        return reference;
+    }
+
+    [Test]
     public async Task Reentrant_Consumer_Keeps_Owner_Pinned_After_Zero_Count_Callback()
     {
         var tracker = new TUnit.Core.Tracking.ObjectTracker(new(), GlobalContext.Current.Disposer);

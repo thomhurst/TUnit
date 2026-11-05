@@ -77,20 +77,17 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     internal async ValueTask DisposeUnleasedTrackedObjectAsync(object obj)
     {
-        lock (s_staticLeaseLock)
+        lock (s_sharedInstanceLock)
         {
             // Static leases can outlive this session. Retiring a counter and acquiring a
             // lease must be atomic so a sweep cannot remove a newly protected counter.
             if (s_staticLeaseObjects.TryGetValue(obj, out var leases) && leases.Count > 0) return;
-            lock (s_sharedInstanceLock)
-            {
-                // Counted consumers pin their owner via RetainWhileCounted until zero;
-                // contexts also retain their own row handles until untracking finishes.
-                // Thus a live ownership entry is backed by a deterministic strong link,
-                // including across sessions, rather than depending on GC timing.
-                if (!s_trackedObjects.TryGetValue(obj, out var counter) || counter.CurrentCount > 0
-                    || !RemoveCounter(obj, counter) || ExternalObjectOwnership.IsOwned(obj)) return;
-            }
+            // Counted consumers pin their owner via RetainWhileCounted until zero;
+            // contexts also retain their own row handles until untracking finishes.
+            // Thus a live ownership entry is backed by a deterministic strong link,
+            // including across sessions, rather than depending on GC timing.
+            if (!s_trackedObjects.TryGetValue(obj, out var counter) || counter.CurrentCount > 0
+                || !RemoveCounter(obj, counter) || ExternalObjectOwnership.IsOwned(obj)) return;
         }
         await disposer.DisposeAsync(obj).ConfigureAwait(false);
     }
@@ -362,8 +359,9 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         return cleanupExceptions;
     }
 
+    // Lease state and counters share one lock: zero-count callbacks can acquire a lease
+    // reentrantly, so a separate lease lock would invert the counter/lease lock order.
     private static readonly ConditionalWeakTable<object, StaticLease> s_staticLeaseObjects = new();
-    private static readonly object s_staticLeaseLock = new();
 
     private sealed class StaticLease
     {
@@ -373,7 +371,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
 
     internal void TrackStaticLeaseObject(object obj)
     {
-        lock (s_staticLeaseLock)
+        lock (s_sharedInstanceLock)
         {
             s_staticLeaseObjects.GetValue(obj, static _ => new()).Count++;
             // The final static-property owner releases this lease, which may outlive this session.
@@ -395,7 +393,7 @@ internal class ObjectTracker(TrackableObjectGraphProvider trackableObjectGraphPr
         }
 
         List<Func<ValueTask>>? callbacks = null;
-        lock (s_staticLeaseLock)
+        lock (s_sharedInstanceLock)
         {
             if (!s_staticLeaseObjects.TryGetValue(obj, out var lease) || lease.Count <= 0)
             {
