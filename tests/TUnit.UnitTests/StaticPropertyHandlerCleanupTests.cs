@@ -9,6 +9,65 @@ namespace TUnit.UnitTests;
 public class StaticPropertyHandlerCleanupTests
 {
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Static_Lease_Refreshes_Existing_Ownership(bool nested)
+    {
+        var service = new ChangingOwnedService();
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new OwnershipScope());
+        scopes.RegisterObject(owner, service);
+        scopes.CaptureOwnership();
+        var secondScopes = new DataRowScopeCollection();
+        var secondOwner = secondScopes.Register(new OwnershipScope());
+        secondScopes.RegisterObject(secondOwner, service);
+        secondScopes.CaptureOwnership();
+        var previous = service.Child;
+        service.Child = new NestedLeaseFixture();
+        object root = nested ? new SharedServiceFixture { Service = service } : service;
+        var metadata = new StaticPropertyMetadata
+        {
+            DeclaringType = typeof(ChangingOwnedService), PropertyName = "SharedChangingService" + nested,
+            PropertyType = root.GetType(), InitializerAsync = () => Task.FromResult<object?>(root)
+        };
+        var tracker = new ObjectTracker(new(), GlobalContext.Current.Disposer);
+        var handler = CreateInitializingHandler(CreateSession(), tracker);
+        try
+        {
+            await InitializeWithoutAmbientTestAsync(handler, metadata);
+            await Assert.That(owner.Owns(service.Child)).IsTrue();
+            await Assert.That(secondOwner.Owns(service.Child)).IsTrue();
+            await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
+            await Assert.That(ExternalObjectOwnership.IsOwned(previous)).IsTrue();
+            await handler.DisposeStaticPropertiesAsync([], []);
+            await Assert.That(service.DisposeCount).IsEqualTo(0);
+            await Assert.That(service.Child.DisposeCount).IsEqualTo(0);
+            service.Dispose(); // The container remains responsible for its changed graph.
+            await Assert.That(service.Child.DisposeCount).IsEqualTo(1);
+        }
+        finally
+        {
+            await handler.ReleaseSessionCallbacksAfterFailedInitializationAsync();
+            await tracker.DisposeAndClearStaticTrackingAsync();
+            GC.KeepAlive(scopes);
+            GC.KeepAlive(secondScopes);
+        }
+    }
+
+    private sealed class ChangingOwnedService : IDisposable, IAsyncInitializer
+    {
+        public NestedLeaseFixture Child { get; set; } = new();
+        public int DisposeCount;
+        public Task InitializeAsync() => Task.CompletedTask;
+        public void Dispose() { DisposeCount++; Child.Dispose(); }
+    }
+
+    private sealed class SharedServiceFixture
+    {
+        public required ChangingOwnedService Service { get; init; }
+    }
+
+    [Test]
     public async Task Static_Callbacks_Belong_To_Their_Session_Including_Failed_Initialization()
     {
         var first = CreateSession();
@@ -47,7 +106,10 @@ public class StaticPropertyHandlerCleanupTests
         var handler = new StaticPropertyHandler(null!, tracker, provider, null!, null!, session);
         var current = TestContext.Current!;
         var context = new TestContext(nameof(StaticPropertyHandlerCleanupTests), current.ServiceProvider, current.ClassContext,
-            new TestBuilderContext { TestMetadata = current.TestDetails.MethodMetadata }, CancellationToken.None);
+            new TestBuilderContext { TestMetadata = current.TestDetails.MethodMetadata }, CancellationToken.None)
+        {
+            TestDetails = current.TestDetails
+        };
         tracker.TrackObjects(context);
         var scopesDisposed = 0;
         session.StaticPropertyContext.Events.OnDispose += (_, _) =>
@@ -299,7 +361,7 @@ public class StaticPropertyHandlerCleanupTests
         var firstHandler = CreateInitializingHandler(first, firstTracker);
         await firstHandler.InitializeStaticPropertiesAsync([metadata], default);
         var resource = value!;
-        await Assert.That(ObjectTracker.IsExternallyOwned(resource)).IsFalse();
+        await Assert.That(ExternalObjectOwnership.IsOwned(resource)).IsFalse();
         var second = CreateSession();
         var secondTracker = new ObjectTracker(new(), GlobalContext.Current.Disposer);
         var secondHandler = CreateInitializingHandler(second, secondTracker);
@@ -313,7 +375,10 @@ public class StaticPropertyHandlerCleanupTests
         var tracker = new ObjectTracker(provider, GlobalContext.Current.Disposer);
         var current = TestContext.Current!;
         var context = new TestContext(nameof(StaticPropertyHandlerCleanupTests), current.ServiceProvider, current.ClassContext,
-            new TestBuilderContext { TestMetadata = current.TestDetails.MethodMetadata }, CancellationToken.None);
+            new TestBuilderContext { TestMetadata = current.TestDetails.MethodMetadata }, CancellationToken.None)
+        {
+            TestDetails = current.TestDetails
+        };
         tracker.TrackObjects(context);
         var earlier = finishFirstSessionFirst ? firstHandler : secondHandler;
         var later = finishFirstSessionFirst ? secondHandler : firstHandler;
@@ -352,13 +417,18 @@ public class StaticPropertyHandlerCleanupTests
     public async Task Generated_Initialization_Failure_And_External_Ownership_Cleanup(bool externallyOwned)
     {
         var resource = new LeaseFixture();
-        if (externallyOwned) ObjectTracker.MarkExternallyOwned(resource);
         var scopeDisposals = 0;
         var metadata = new StaticPropertyMetadata
         {
             DeclaringType = typeof(LeaseFixture), PropertyName = "FailedLease", PropertyType = typeof(LeaseFixture),
             InitializerAsync = () =>
             {
+                if (externallyOwned)
+                {
+                    var scopes = TestSessionContext.GlobalStaticPropertyContext.Events.GetOrCreateDataRowScopes();
+                    var owner = scopes.Register(new OwnershipScope());
+                    scopes.RegisterObject(owner, resource);
+                }
                 TestSessionContext.GlobalStaticPropertyContext.Events.OnDispose += (_, _) =>
                 {
                     scopeDisposals++;
@@ -699,5 +769,9 @@ public class StaticPropertyHandlerCleanupTests
         public SortedList<int, HashSet<object>> TrackRootObjects(TestContext context) => context.TrackedObjects;
         public ObjectGraph DiscoverObjectGraph(TestContext context, CancellationToken cancellationToken = default) => throw new NotSupportedException();
         public ObjectGraph DiscoverNestedObjectGraph(object root, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+    }
+    private sealed class OwnershipScope : IDisposable
+    {
+        public void Dispose() { }
     }
 }

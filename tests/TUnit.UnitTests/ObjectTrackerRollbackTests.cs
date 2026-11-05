@@ -193,6 +193,176 @@ public class ObjectTrackerRollbackTests
         await Assert.That(resource.DisposeCount).IsEqualTo(1);
     }
 
+    [Test]
+    public async Task Non_Owning_Row_Refreshes_Changed_Dependencies_Of_A_Shared_Root()
+    {
+        var service = new ExternalObjectOwnershipTests.Service();
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new ExternalObjectOwnershipTests.Scope());
+        scopes.RegisterObject(owner, service);
+        scopes.CaptureOwnership();
+        var secondScopes = new DataRowScopeCollection();
+        var secondOwner = secondScopes.Register(new ExternalObjectOwnershipTests.Scope());
+        secondScopes.RegisterObject(secondOwner, service);
+        secondScopes.CaptureOwnership();
+        var previous = service.Child;
+        service.Child = new ExternalObjectOwnershipTests.Initializer();
+        var discoverer = new FakeDiscoverer
+        {
+            Discover = context =>
+            {
+                Add(context, service);
+                return Add(context, service.Child, 1);
+            }
+        };
+        var tracker = new ObjectTracker(new TrackableObjectGraphProvider(discoverer), GlobalContext.Current.Disposer);
+        var context = CreateContext();
+
+        tracker.TrackObjects(context);
+        await Assert.That(owner.Owns(service.Child)).IsTrue();
+        await Assert.That(secondOwner.Owns(service.Child)).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(previous)).IsTrue();
+        await tracker.UntrackObjects(context);
+        await tracker.DisposeAndClearStaticTrackingAsync();
+        GC.KeepAlive(scopes);
+        GC.KeepAlive(secondScopes);
+    }
+
+    [Test]
+    public async Task Non_Owning_Row_Refreshes_Only_Consumed_Graphs_From_A_Previous_Scope()
+    {
+        var first = new ExternalObjectOwnershipTests.Service();
+        var second = new ExternalObjectOwnershipTests.Service();
+        var retired = new RetiredService();
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new ExternalObjectOwnershipTests.Scope());
+        scopes.RegisterObject(owner, first);
+        scopes.RegisterObject(owner, second);
+        scopes.RegisterObject(owner, retired);
+        scopes.CaptureOwnership();
+        var previous = first.Child;
+        retired.Dispose();
+        await scopes.CompleteAsync();
+        first.Child = new ExternalObjectOwnershipTests.Initializer();
+        second.Child = new ExternalObjectOwnershipTests.Initializer();
+        var discoverer = new FakeDiscoverer
+        {
+            Discover = context =>
+            {
+                Add(context, first);
+                Add(context, second);
+                Add(context, first.Child, 1);
+                return Add(context, second.Child, 1);
+            }
+        };
+        var tracker = new ObjectTracker(new TrackableObjectGraphProvider(discoverer), GlobalContext.Current.Disposer);
+        var context = CreateContext();
+        try
+        {
+            tracker.TrackObjects(context);
+            await Assert.That(ExternalObjectOwnership.IsOwned(first.Child)).IsTrue();
+            await Assert.That(ExternalObjectOwnership.IsOwned(second.Child)).IsTrue();
+            await Assert.That(ExternalObjectOwnership.IsOwned(previous)).IsTrue();
+        }
+        finally
+        {
+            await tracker.UntrackObjects(context);
+            await tracker.DisposeAndClearStaticTrackingAsync();
+            context.RemoveFromRegistry();
+            context.Dispose();
+            GC.KeepAlive(scopes);
+        }
+    }
+
+    [Test]
+    public async Task Counted_Consumer_Retains_An_Owner_Across_Collection_After_Row_Completion()
+    {
+        var tracker = new ObjectTracker(new(), GlobalContext.Current.Disposer);
+        var service = new ExternalObjectOwnershipTests.Service();
+        var reference = RegisterCompletedOwner(tracker, service);
+        try
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            await Assert.That(reference.TryGetTarget(out _)).IsTrue();
+            await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
+        }
+        finally
+        {
+            await tracker.ReleaseStaticLeaseObjectAsync(service.Child);
+        }
+        await Assert.That(service.Child.DisposeCount).IsEqualTo(0);
+        GC.KeepAlive(service);
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static WeakReference<DataRowScopeCollection.ScopeOwner> RegisterCompletedOwner(
+        ObjectTracker consumer, ExternalObjectOwnershipTests.Service service)
+    {
+        var scopes = new DataRowScopeCollection();
+        var owner = scopes.Register(new ExternalObjectOwnershipTests.Scope());
+        scopes.RegisterObject(owner, service);
+        scopes.CaptureOwnership();
+        consumer.TrackStaticLeaseObject(service.Child);
+        // This test scope completes synchronously; keep the helper synchronous to prevent an async
+        // state machine from retaining the owner independently of the consumer's count callback.
+        var completion = owner.DisposeAsync();
+        if (!completion.IsCompletedSuccessfully)
+            throw new InvalidOperationException("The test scope must complete synchronously");
+        return new(owner);
+    }
+
+    [Test]
+    public async Task Smaller_Ownership_Refresh_Keeps_Injected_Aliases_Tracker_Owned()
+    {
+        var injected = new ExternalObjectOwnershipTests.Initializer();
+        var service = new ExternalObjectOwnershipTests.AliasedService
+        {
+            First = new ExternalObjectOwnershipTests.AliasHolder { Alias = injected },
+            Second = new ExternalObjectOwnershipTests.InjectedHolder { Injected = injected }
+        };
+        var scopes = new DataRowScopeCollection();
+        scopes.RegisterObject(scopes.Register(new ExternalObjectOwnershipTests.Scope()), service);
+        scopes.CaptureOwnership();
+        var discoverer = new FakeDiscoverer
+        {
+            Discover = context =>
+            {
+                Add(context, service);
+                Add(context, service.First, 1);
+                Add(context, service.Second, 1);
+                return Add(context, injected, 2);
+            }
+        };
+        var tracker = new ObjectTracker(new TrackableObjectGraphProvider(discoverer), GlobalContext.Current.Disposer);
+        var context = CreateContext();
+        try
+        {
+            tracker.TrackObjects(context);
+            await Assert.That(ExternalObjectOwnership.IsOwned(injected)).IsFalse();
+            await tracker.UntrackObjects(context);
+            await Assert.That(injected.DisposeCount).IsEqualTo(1);
+        }
+        finally
+        {
+            await tracker.DisposeAndClearStaticTrackingAsync();
+            context.RemoveFromRegistry();
+            context.Dispose();
+            GC.KeepAlive(scopes);
+        }
+    }
+
+    public sealed class RetiredService : IDisposable
+    {
+        private readonly ExternalObjectOwnershipTests.Initializer _child = new();
+        private bool _disposed;
+        public ExternalObjectOwnershipTests.Initializer Child
+            => _disposed ? throw new ObjectDisposedException(nameof(RetiredService)) : _child;
+        public void Dispose() => _disposed = true;
+    }
+
     private static SortedList<int, HashSet<object>> Add(TestContext context, object obj, int depth = 0)
     {
         var tracked = context.TrackedObjects;
@@ -210,7 +380,10 @@ public class ObjectTrackerRollbackTests
     {
         var currentContext = TestContext.Current!;
         return new TestContext(nameof(ObjectTrackerRollbackTests), currentContext.ServiceProvider, currentContext.ClassContext,
-            new TestBuilderContext { TestMetadata = currentContext.TestDetails.MethodMetadata }, CancellationToken.None);
+            new TestBuilderContext { TestMetadata = currentContext.TestDetails.MethodMetadata }, CancellationToken.None)
+        {
+            TestDetails = currentContext.TestDetails
+        };
     }
 
     private sealed class TrackedDisposable : IDisposable

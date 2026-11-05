@@ -26,7 +26,7 @@ public class StaticPropertyScopeDisposalTests
         }
 
         var service = (Service) created!;
-        await Assert.That(ObjectTracker.IsExternallyOwned(service)).IsTrue();
+        await Assert.That(ExternalObjectOwnership.IsOwned(service)).IsTrue();
         await Assert.That(service.DisposeCount).IsEqualTo(0);
 
         var exceptions = new List<Exception>();

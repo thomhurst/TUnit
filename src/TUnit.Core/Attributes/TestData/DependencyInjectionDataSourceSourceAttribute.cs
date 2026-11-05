@@ -1,4 +1,4 @@
-﻿using TUnit.Core.Discovery;
+using TUnit.Core.Discovery;
 using TUnit.Core.Tracking;
 
 namespace TUnit.Core;
@@ -18,12 +18,7 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
 
             // Custom scopes can leave disposal of their resolved objects to the tracker.
             var scopeOwnsCreatedObjects = ScopeOwnsCreatedObjects(scope);
-            if (!scopeOwnsCreatedObjects && scope is (IDisposable or IAsyncDisposable))
-            {
-                // The scope can enter tracking through an initializer property, even when
-                // Create never returns it directly. Row cleanup owns only the scope itself.
-                ObjectTracker.MarkRowOwnedScope(scope);
-            }
+            owner.OwnsCreatedObjects = scopeOwnsCreatedObjects;
 
             var values = new object?[dataGeneratorMetadata.MembersToGenerate.Length];
             var resolvedCount = 0;
@@ -42,12 +37,6 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                     var created = Create(scope, type);
                     values[resolvedCount++] = created;
                     cleanup.RegisterObject(owner, created);
-
-                    if (scopeOwnsCreatedObjects)
-                    {
-                        // The scope owns the resolved value and its initializer graph.
-                        ObjectTracker.MarkExternallyOwned(created);
-                    }
                 }
 
                 return values;
@@ -60,17 +49,28 @@ public abstract class DependencyInjectionDataSourceAttribute<TScope> : UntypedDa
                     // initializer graph, including beneath non-disposable roots, without initializing it.
                     var discoverer = new ObjectGraphDiscoverer();
                     var objectsByDepth = new SortedList<int, HashSet<object>>();
+                    var refreshed = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+                    void RefreshOwner(object instance)
+                    {
+                        if (refreshed.Add(instance))
+                        {
+                            foreach (var existingOwner in ExternalObjectOwnership.FindOwners(instance))
+                                existingOwner.CaptureOwnershipFor(instance, [], retainPartialGraphOnError: true);
+                        }
+                    }
                     for (var i = 0; i < resolvedCount; i++)
                     {
                         if (values[i] is not { } root)
                             continue;
 
+                        RefreshOwner(root);
                         var graph = discoverer.DiscoverTrackableObjectGraph(root, CancellationToken.None, retainPartialGraphOnError: true);
                         foreach (var pair in graph)
                         {
                             if (!objectsByDepth.TryGetValue(pair.Key, out var bucket))
                                 objectsByDepth.Add(pair.Key, bucket = new(Helpers.ReferenceEqualityComparer.Instance));
                             bucket.UnionWith(pair.Value);
+                            foreach (var instance in pair.Value) RefreshOwner(instance);
                         }
                     }
 
