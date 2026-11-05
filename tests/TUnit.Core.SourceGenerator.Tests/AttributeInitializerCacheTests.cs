@@ -56,6 +56,46 @@ public class AttributeInitializerCacheTests
         await Assert.That(second).Contains("MarkerAttribute<string>");
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task KeywordNamespacesCompileInAttributeInitializers(bool withoutSyntax)
+    {
+        var compilation = CreateCompilation("""
+            namespace @event.@class
+            {
+                public class MarkerAttribute<T> : System.Attribute { }
+                public class @struct { }
+                public class Tests
+                {
+                    [Marker<@struct>] public void Run() { }
+                }
+            }
+            """);
+        var attribute = compilation.GetTypeByMetadataName("event.class.Tests")!
+            .GetMembers("Run").Single().GetAttributes().Single();
+        string initializer;
+        if (withoutSyntax)
+        {
+            var writer = new CodeWriter("", includeHeader: false);
+            AttributeWriter.WriteAttributeWithoutSyntax(writer, attribute);
+            initializer = writer.ToString();
+        }
+        else
+        {
+            initializer = new AttributeWriter(compilation).GetAttributeObjectInitializer(attribute);
+        }
+
+        await Assert.That(initializer).IsEqualTo(
+            "new global::@event.@class.MarkerAttribute<global::@event.@class.@struct>()");
+        var generated = CSharpSyntaxTree.ParseText(
+            $"public class Factory {{ public object Create() => {initializer}; }}",
+            new CSharpParseOptions(LanguageVersion.Preview));
+        var errors = compilation.AddSyntaxTrees(generated).GetDiagnostics()
+            .Where(d => d.Severity == DiagnosticSeverity.Error).ToArray();
+        await Assert.That(errors).IsEmpty();
+    }
+
     private static CSharpCompilation CreateCompilation(string source) => CSharpCompilation.Create(
         "AttributeInitializers",
         [CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview))],

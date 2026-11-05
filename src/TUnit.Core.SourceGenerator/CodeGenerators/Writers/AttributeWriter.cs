@@ -10,6 +10,12 @@ public class AttributeWriter(Compilation compilation)
 {
     private const string TUnitRootNamespace = "TUnit";
 
+    // Attribute constructors are C# expressions; reflection names must retain raw identifiers.
+    private static readonly SymbolDisplayFormat AttributeTypeFormat =
+        DisplayFormats.FullyQualifiedGenericWithGlobalPrefix.WithMiscellaneousOptions(
+            DisplayFormats.FullyQualifiedGenericWithGlobalPrefix.MiscellaneousOptions |
+            SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+
     private readonly Dictionary<AttributeData, string> _attributeObjectInitializerCache = new();
     private readonly Dictionary<INamedTypeSymbol, string> _argumentFreeAttributeInitializerCache = new(SymbolEqualityComparer.Default);
     private readonly Dictionary<INamedTypeSymbol, bool> _tunitRelatedCache = new(SymbolEqualityComparer.Default);
@@ -134,7 +140,7 @@ public class AttributeWriter(Compilation compilation)
 
         var constructorArgs = arguments.Where(x => x.NameEquals == null);
 
-        var attributeName = attributeData.AttributeClass!.GloballyQualified();
+        var attributeName = attributeData.AttributeClass!.ToDisplayString(AttributeTypeFormat);
 
         var formattedConstructorArgs = string.Join(", ", constructorArgs.Select(x => FormatConstructorArgument(x)));
 
@@ -178,7 +184,7 @@ public class AttributeWriter(Compilation compilation)
 
     public static void WriteAttributeWithoutSyntax(ICodeWriter sourceCodeWriter, AttributeData attributeData)
     {
-        var attributeName = attributeData.AttributeClass!.GloballyQualified();
+        var attributeName = attributeData.AttributeClass!.ToDisplayString(AttributeTypeFormat);
 
         // Skip if any constructor arguments contain compiler-generated types
         if (attributeData.ConstructorArguments.Any(arg =>
