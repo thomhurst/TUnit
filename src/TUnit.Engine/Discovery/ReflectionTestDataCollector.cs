@@ -2836,8 +2836,22 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         var rowType = UnwrapFunc(returnType.GetGenericArguments()[0]);
-        var rowTypes = GetValueTupleElementTypes(rowType) ?? [rowType];
+        var tupleElements = GetValueTupleElementTypes(rowType);
         var dataParameters = parameters.Where(static p => p.ParameterType != typeof(CancellationToken)).ToArray();
+        if (tupleElements is null)
+        {
+            // Match generated discovery: a scalar row supplies only the first data parameter.
+            // Required trailing parameters cannot be filled by that row; tuples map positionally.
+            for (var i = 1; i < dataParameters.Length; i++)
+            {
+                if (!dataParameters[i].IsOptional)
+                {
+                    return null;
+                }
+            }
+        }
+
+        var rowTypes = tupleElements ?? [rowType];
         var inferred = new Type[classParameters.Length];
         for (var i = 0; i < classParameters.Length; i++)
         {
