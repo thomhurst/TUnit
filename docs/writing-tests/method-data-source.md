@@ -205,6 +205,14 @@ public class MyTestClass
 
 A tuple row whose type matches the first tuple parameter binds to that parameter whole when all remaining parameters are optional or `params`. For example, a typed source returning `IEnumerable<(int, int)>` can supply `(25, 26)` to a test with parameters `((int, int) pair, int extra = 5)`; `pair` receives `(25, 26)` and `extra` receives `5`. An `object[]` row containing only that tuple, such as `new object[] { (25, 26) }`, binds the same way. To supply `extra`, return a nested tuple row such as `((25, 26), 7)` or an `object[]` row containing both values; those rows spread across the parameters.
 
+## Null and Empty Sources[​](#null-and-empty-sources "Direct link to Null and Empty Sources")
+
+A method data source that returns `null` supplies no rows. This includes scalar values, collections, and null results awaited from `Task<T>` or `ValueTask<T>`. The same rule applies to static and instance sources in source-generated and reflection discovery.
+
+An empty source runs the test once with no arguments by default. Set `SkipIfEmpty = true` on the data-source attribute to skip it instead. A test with required parameters cannot run without arguments and will fail argument binding.
+
+**Migration note:** A nullable scalar source returning `null` previously supplied one null argument. It now follows the empty-source rule. To supply one null argument, return a non-null collection containing one null element, such as `IEnumerable<string?>` returning `new string?[] { null }`. Null elements inside a collection remain test rows.
+
 ## Async Data Sources (AOT-Compatible)[​](#async-data-sources-aot-compatible "Direct link to Async Data Sources (AOT-Compatible)")
 
 TUnit's AOT mode supports async data sources with `IAsyncEnumerable<T>` for scenarios requiring asynchronous data loading:
