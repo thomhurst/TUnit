@@ -11,6 +11,12 @@ internal class LookalikeDataSourceTests : TestsBase
     public Task Static_properties() => new TestsBase<StaticPropertyInitializationGenerator>()
         .RunTest(Fixture, _ => Task.CompletedTask);
 
+    // Verify row scoping independently of the runtime's custom-attribute reflection fallback.
+    [Test]
+    public Task Derived_class_method_sources() => TestMetadataGenerator.RunTest(
+        Path.Combine(Git.TestsDirectory.FullName, "TUnit.Core.SourceGenerator.Tests", "LookalikeClassMethodSources.cs.txt"),
+        _ => Task.CompletedTask);
+
     private static string Fixture => Path.Combine(Git.TestsDirectory.FullName,
         "TUnit.TestProject", "LookalikeDataSourceTests.cs");
 }

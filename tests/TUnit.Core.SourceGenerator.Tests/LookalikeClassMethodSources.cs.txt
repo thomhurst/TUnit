@@ -1,0 +1,22 @@
+namespace TUnit.TestProject.DerivedSources
+{
+    public sealed class MethodDataSourceAttribute(string memberName) : TUnit.Core.MethodDataSourceAttribute(memberName);
+}
+
+namespace TUnit.TestProject
+{
+    public class DerivedClassMethodSourceTests<T>
+    {
+        public static IEnumerable<int> IntValues() => [42];
+        public static IEnumerable<string> StringValues() => ["derived row"];
+
+        [Test]
+        [DerivedSources.MethodDataSource(nameof(IntValues))]
+        [DerivedSources.MethodDataSource(nameof(StringValues))]
+        public async Task Sources_stay_on_their_inferred_class(T value)
+        {
+            await Assert.That((object?)value).IsNotNull();
+        }
+    }
+
+}

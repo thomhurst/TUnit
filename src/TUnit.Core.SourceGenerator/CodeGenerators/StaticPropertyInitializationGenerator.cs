@@ -322,8 +322,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         {
             sourceAttribute = ParseMethodDataSourceWithAssignment(attr, staticProperty.Property.ContainingType);
         }
-        else if (attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") == true ||
-                 attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") == true)
+        else if (DataSourceAttributeHelper.IsDataSourceAttribute(attr.AttributeClass))
         {
             sourceAttribute = new DataSourceAttribute.AsyncDataSource(CodeGenerationHelpers.GenerateAttributeInstantiation(attr));
         }

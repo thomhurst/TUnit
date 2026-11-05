@@ -1463,7 +1463,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             // and beside constructor rows that provide values without inferring class types.
             foreach (var source in typedDataSourceBucket ?? Enumerable.Empty<AttributeData>())
             {
-                if (!DataSourceAttributeHelper.IsArguments(source.AttributeClass) && !DataSourceAttributeHelper.IsBuiltIn(source.AttributeClass, "MethodDataSourceAttribute")
+                // Instance sources keep their existing fallback behavior even though they inherit MethodDataSourceAttribute.
+                if (!DataSourceAttributeHelper.IsArguments(source.AttributeClass)
+                    && (!DataSourceAttributeHelper.IsOrInheritsBuiltIn(source.AttributeClass, "MethodDataSourceAttribute")
+                        || DataSourceAttributeHelper.IsOrInheritsBuiltIn(source.AttributeClass, "InstanceMethodDataSourceAttribute"))
                     && (uninferredMethodDataSources is null || !uninferredMethodDataSources.Contains(source)))
                 {
                     (uninferredMethodDataSources ??= []).Add(source);

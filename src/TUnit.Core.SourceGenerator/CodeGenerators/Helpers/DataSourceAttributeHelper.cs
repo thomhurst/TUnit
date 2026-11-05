@@ -18,8 +18,21 @@ internal static class DataSourceAttributeHelper
 
     public static bool IsArguments(INamedTypeSymbol? symbol) => IsBuiltIn(symbol, "ArgumentsAttribute");
 
+    public static bool IsOrInheritsBuiltIn(INamedTypeSymbol? symbol, string name)
+    {
+        for (; symbol is not null; symbol = symbol.BaseType)
+        {
+            if (IsBuiltIn(symbol, name))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static bool IsMethodSource(INamedTypeSymbol? symbol)
-        => IsBuiltIn(symbol, "MethodDataSourceAttribute") || IsBuiltIn(symbol, "InstanceMethodDataSourceAttribute");
+        => IsOrInheritsBuiltIn(symbol, "MethodDataSourceAttribute") || IsOrInheritsBuiltIn(symbol, "InstanceMethodDataSourceAttribute");
 
     public static bool IsDataSourceAttribute(INamedTypeSymbol? attributeClass)
     {

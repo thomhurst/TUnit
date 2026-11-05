@@ -17,6 +17,11 @@ namespace TUnit.TestProject.Lookalikes
     }
 }
 
+namespace TUnit.TestProject.DerivedSources
+{
+    public sealed class MethodDataSourceAttribute(string memberName) : TUnit.Core.MethodDataSourceAttribute(memberName);
+}
+
 namespace TUnit.TestProject.PropertyLookalikes
 {
     public sealed class ArgumentsAttribute : DataSourceGeneratorAttribute<string>
@@ -51,9 +56,23 @@ namespace TUnit.TestProject
         [PropertyLookalikes.Arguments]
         public static string? OtherValue { get; set; }
 
+        [DerivedSources.MethodDataSource(nameof(DerivedValue))]
+        public static string? DerivedProperty { get; set; }
+
+        public static string DerivedValue() => "derived method source";
+
+        [Test]
+        [DerivedSources.MethodDataSource(nameof(DerivedValue))]
+        public async Task Derived_method_source_is_inferred<T>(T value)
+        {
+            await Assert.That(typeof(T)).IsEqualTo(typeof(string));
+            await Assert.That((object?)value).IsEqualTo("derived method source");
+        }
+
         [Test]
         public async Task Custom_property_source_is_used()
         {
+            await Assert.That(DerivedProperty).IsEqualTo("derived method source");
             await Assert.That(Value).IsEqualTo("custom method source");
             await Assert.That(OtherValue).IsEqualTo("custom arguments source");
         }
