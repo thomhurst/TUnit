@@ -66,7 +66,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "extra", new glo
             methodName: "OptionalScalar",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.OptionalScalar",
             filePath: "",
-            lineNumber: 18,
+            lineNumber: 16,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -146,7 +146,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Value",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.Value",
             filePath: "",
-            lineNumber: 27,
+            lineNumber: 25,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -228,7 +228,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "MultipleSources",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.MultipleSources",
             filePath: "",
-            lineNumber: 35,
+            lineNumber: 33,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -280,7 +280,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "MultipleSources",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<double>.MultipleSources",
             filePath: "",
-            lineNumber: 35,
+            lineNumber: 33,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -364,7 +364,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "NullableValue",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.NullableValue",
             filePath: "",
-            lineNumber: 45,
+            lineNumber: 43,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -444,7 +444,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "Factory",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.Factory",
             filePath: "",
-            lineNumber: 53,
+            lineNumber: 51,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -525,7 +525,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "second", new
             methodName: "Tuple",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableClassMethodRows<int>.Tuple",
             filePath: "",
-            lineNumber: 61,
+            lineNumber: 59,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -609,7 +609,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "RetainsAllSources",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ExplicitNullableClassMethodRows<int>.RetainsAllSources",
             filePath: "",
-            lineNumber: 78,
+            lineNumber: 76,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -733,7 +733,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             methodName: "DirectArray",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ArrayClassMethodRows<int>.DirectArray",
             filePath: "",
-            lineNumber: 101,
+            lineNumber: 99,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -845,7 +845,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             methodName: "FactoryArray",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ArrayClassMethodRows<int>.FactoryArray",
             filePath: "",
-            lineNumber: 109,
+            lineNumber: 107,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -926,7 +926,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "OpenRow",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.OpenClassMethodRows<int>.OpenRow",
             filePath: "",
-            lineNumber: 125,
+            lineNumber: 123,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1039,7 +1039,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             methodName: "OpenArray",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.OpenClassMethodRows<int>.OpenArray",
             filePath: "",
-            lineNumber: 129,
+            lineNumber: 127,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1123,7 +1123,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "ConstructorType",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ConstructorNullableClassRows<double>.ConstructorType",
             filePath: "",
-            lineNumber: 140,
+            lineNumber: 138,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1243,7 +1243,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             methodName: "NestedConstructorType",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ConstructorNestedNullableClassRows<double>.NestedConstructorType",
             filePath: "",
-            lineNumber: 156,
+            lineNumber: 154,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1329,7 +1329,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "SelectedOverload",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ArgumentOverloadClassRows<double>.SelectedOverload",
             filePath: "",
-            lineNumber: 173,
+            lineNumber: 171,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1420,7 +1420,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "PartitionsBesideConstructor",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.TypeFreeConstructorNullableRows<int>.PartitionsBesideConstructor",
             filePath: "",
-            lineNumber: 190,
+            lineNumber: 188,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1477,7 +1477,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "PartitionsBesideConstructor",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.TypeFreeConstructorNullableRows<double>.PartitionsBesideConstructor",
             filePath: "",
-            lineNumber: 190,
+            lineNumber: 188,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1569,7 +1569,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "InfersBesideConstructor",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.TypeFreeConstructorNullableRows<int>.InfersBesideConstructor",
             filePath: "",
-            lineNumber: 200,
+            lineNumber: 198,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1654,7 +1654,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "UsesExternalProvider",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.GenericProviderNullableRows<double>.UsesExternalProvider",
             filePath: "",
-            lineNumber: 216,
+            lineNumber: 214,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1739,7 +1739,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "RetainsInstanceBesideConstructor",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.TypeFreeConstructorUninferredRows<int>.RetainsInstanceBesideConstructor",
             filePath: "",
-            lineNumber: 237,
+            lineNumber: 235,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1829,7 +1829,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "RetainsUntypedSource",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ExplicitUntypedClassRows<int>.RetainsUntypedSource",
             filePath: "",
-            lineNumber: 254,
+            lineNumber: 252,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1912,7 +1912,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "PartitionsBesideLiteral",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.LiteralAndMethodClassRows<int>.PartitionsBesideLiteral",
             filePath: "",
-            lineNumber: 277,
+            lineNumber: 275,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -1961,7 +1961,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             methodName: "PartitionsBesideLiteral",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.LiteralAndMethodClassRows<double>.PartitionsBesideLiteral",
             filePath: "",
-            lineNumber: 277,
+            lineNumber: 275,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2050,7 +2050,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "label", new 
             methodName: "PartialConstructorTypes",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.PartialConstructorNullableClassRows<int,string>.PartialConstructorTypes",
             filePath: "",
-            lineNumber: 300,
+            lineNumber: 298,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2135,7 +2135,7 @@ internal static class TUnit_TestProject_Bugs__7573_PartialConstructorValueFallba
             methodName: "RetainsConstructorValueFallback",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.PartialConstructorValueFallback<string,int>.RetainsConstructorValueFallback",
             filePath: "",
-            lineNumber: 316,
+            lineNumber: 314,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2213,7 +2213,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "second", new
             methodName: "LastOccurrenceInfersClassType",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.RepeatedNullableClassParameter<long>.LastOccurrenceInfersClassType",
             filePath: "",
-            lineNumber: 331,
+            lineNumber: 329,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2325,7 +2325,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             methodName: "InfersThroughNullableConstructedStruct",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.NullableConstructedStructArrayRows<string>.InfersThroughNullableConstructedStruct",
             filePath: "",
-            lineNumber: 346,
+            lineNumber: 344,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2411,7 +2411,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "label", new 
             methodName: "IgnoresConstraintInvalidConstructorFallback",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.PartialConstructorInvalidFallback<int,string>.IgnoresConstraintInvalidConstructorFallback",
             filePath: "",
-            lineNumber: 361,
+            lineNumber: 359,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2531,7 +2531,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new
             methodName: "ConstructedConstructorType",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ConstructorConstructedNullableClassRows<double>.ConstructedConstructorType",
             filePath: "",
-            lineNumber: 380,
+            lineNumber: 378,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -2632,7 +2632,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "extra", new glo
             methodName: "RetainsConstructorOptionalScalar",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7573.ConstructorOptionalScalarRows<int>.RetainsConstructorOptionalScalar",
             filePath: "",
-            lineNumber: 401,
+            lineNumber: 399,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
