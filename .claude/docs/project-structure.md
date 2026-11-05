@@ -19,7 +19,7 @@ Generators, analyzers, code fixers and build tasks run inside consumers' compile
 
 ## Tuple method-type inference
 
-The generator uses Roslyn symbols and cannot share the runtime matcher. Keep these policies aligned; `Issue7629Tests` runs the shared `_7629/TupleInferenceTests.cs` fixtures in generated, reflection, and AOT modes in CI. `TupleInferenceTests` also snapshots generated metadata and invocation.
+The generator uses Roslyn symbols and cannot share the runtime matcher. Keep these policies aligned; `Issue7629Tests` runs the shared `_7629/TupleInferenceTests.cs` fixtures in reflection and Native AOT (source-generated) modes in CI. `TupleInferenceTests` also snapshots generated metadata and invocation.
 
 | Rule | Generator | Runtime |
 | --- | --- | --- |
