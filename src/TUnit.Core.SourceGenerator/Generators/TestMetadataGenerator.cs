@@ -1579,8 +1579,8 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     // rather than a method source to pair once more with every class source.
                     // Method data sources can require concrete class arguments before inference
                     // succeeds (for example TClass feeding T?). Retain them for the closed-class retry.
-                    if (types is not null && types.Length == methodTypeArgCount
-                        || types is null && source is not null && rule.Source == GenericMethodInferencePolicy.Source.MethodDataSource)
+                    if ((types is not null && types.Length == methodTypeArgCount)
+                        || (types is null && source is not null && rule.Source == GenericMethodInferencePolicy.Source.MethodDataSource))
                     {
                         methodSources.Add((types, rule.ScopesRows ? source : null, rule.Source));
                     }
@@ -7314,10 +7314,9 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
         // Reconstructed tuple elements may bind a concrete collection to an open interface.
         // Keep candidate bindings isolated so a rejected interface cannot affect another match.
-        if (reconstructTupleElements && parameter is INamedTypeSymbol { IsGenericType: true, TypeKind: TypeKind.Interface } interfaceParameter
-            && row is INamedTypeSymbol interfaceRow)
+        if (reconstructTupleElements && parameter is INamedTypeSymbol { IsGenericType: true, TypeKind: TypeKind.Interface } interfaceParameter)
         {
-            foreach (var implementedInterface in interfaceRow.AllInterfaces)
+            foreach (var implementedInterface in row.AllInterfaces)
             {
                 if (!SymbolEqualityComparer.Default.Equals(interfaceParameter.OriginalDefinition, implementedInterface.OriginalDefinition)) continue;
                 var candidateBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(bindings, SymbolEqualityComparer.Default);

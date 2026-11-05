@@ -302,7 +302,7 @@ public class SingleTupleElementConversionTests
 {
     public static IEnumerable<(int, int)> Rows() => [(1, 2)];
 
-    public static IEnumerable<(List<int>, int)> InterfaceRows() => [(new List<int> { 5 }, 5)];
+    public static IEnumerable<(int[], int)> InterfaceRows() => [(new[] { 5 }, 5)];
     public IEnumerable<Tuple<List<int>, int>> InterfaceReferenceRows() => [Tuple.Create(new List<int> { 6 }, 6)];
 
     [Test]
