@@ -794,6 +794,35 @@ public class OpenTupleRuntimeCastTests
         if (typeof(T) != typeof(int) || !Equals(row.Item1.Single(), 7) || !Equals(row.Item2, 1))
             throw new InvalidOperationException("Expected inference from a later element after a runtime cast");
     }
+
+    public static IEnumerable<(int, IEnumerable<int>)> InterfaceRows() => [(1, new List<int> { 7 })];
+    public static IEnumerable<Tuple<int, IEnumerable<int>>> ReferenceInterfaceRows() =>
+        [Tuple.Create(1, (IEnumerable<int>)new List<int> { 7 })];
+    public static IEnumerable<(IEnumerable<int>, int)> ReversedInterfaceRows() => [(new List<int> { 7 }, 1)];
+    public class Base { }
+    public sealed class Derived<T> : Base { }
+    public static IEnumerable<(int, Base)> BaseRows() => [(1, new Derived<int>())];
+
+    [Test]
+    [MethodDataSource(nameof(InterfaceRows))]
+    public void Interface<T>((T, List<T>) row) => Value(row);
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceInterfaceRows))]
+    public void ReferenceInterface<T>(Tuple<T, List<T>> row) => Reference(row);
+
+    [Test]
+    [MethodDataSource(nameof(ReversedInterfaceRows))]
+    public void ReversedInterface<T>((List<T>, T) row) => Reversed(row);
+
+    [Test]
+    [MethodDataSource(nameof(BaseRows))]
+    public void BaseCast<T>((T, Derived<T>) row)
+    {
+        if (typeof(T) != typeof(int) || !Equals(row.Item1, 1) || row.Item2 is null)
+            throw new InvalidOperationException("Expected base-typed element runtime cast after inference");
+    }
+
 }
 
 

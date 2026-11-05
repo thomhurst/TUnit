@@ -657,10 +657,6 @@ internal sealed class TestGenericTypeResolver
             return true;
         }
 
-        // Object-typed reconstructed elements defer their cast to invocation and contribute
-        // no bindings. Other tuple elements can infer the missing type arguments.
-        if (tupleElement && overwriteBindings && argumentType == typeof(object)) return true;
-
         // Array types
         if (parameterType.IsArray && argumentType.IsArray)
         {
@@ -795,8 +791,10 @@ internal sealed class TestGenericTypeResolver
             }
         }
 
-        // Non-generic types must match exactly or be assignable
-        return parameterType.IsAssignableFrom(argumentType);
+        // A reconstructed element with no structural match contributes no bindings. Its
+        // interface/base declaration may hide a compatible value, so defer the cast to invocation.
+        // Interface/base candidate validation never overwrites bindings and remains strict.
+        return tupleElement && overwriteBindings || parameterType.IsAssignableFrom(argumentType);
     }
 
     // Open candidate types are only rebuilt during reflection inference. Validate the entire

@@ -7039,6 +7039,392 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_Interface___T__List_T___TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests)),
+        Name = "OpenTupleRuntimeCastTests",
+        Namespace = "TUnit.TestProject.Bugs._7629",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Interface", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests), "Interface", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.List<>), [new global::TUnit.Core.GenericParameter(0, true, "T")])]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single tuple parameter
+            if (args.Length == 2)
+            {
+                // Arguments are unwrapped tuple elements, reconstruct the tuple
+                instance.Interface<int>((global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.List<int>>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+            {
+                // Rare case: tuple is wrapped as a single argument
+                instance.Interface<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, global::System.Collections.Generic.List<int>> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, global::System.Collections.Generic.List<int>>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.List<int>>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, global::System.Collections.Generic.List<int>>>(__tupleFallback0) }));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("InterfaceRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>(
+            methodName: "Interface<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.Interface<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 806,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("InterfaceRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.InterfaceRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<int, global::System.Collections.Generic.List<int>>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<int, global::System.Collections.Generic.List<int>>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_Interface___T__List_T___TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>(static () => TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_Interface___T__List_T___TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_ReferenceInterface__Tuple_T__List_T___TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests)),
+        Name = "OpenTupleRuntimeCastTests",
+        Namespace = "TUnit.TestProject.Bugs._7629",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("ReferenceInterface", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests), "ReferenceInterface", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Tuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.List<>), [new global::TUnit.Core.GenericParameter(0, true, "T")])]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single reference tuple parameter
+            if (args.Length == 2)
+            {
+                instance.ReferenceInterface<int>(new global::System.Tuple<int, global::System.Collections.Generic.List<int>>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.List<int>>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                switch (args.Length)
+                {
+                    case 1:
+                        {
+                            instance.ReferenceInterface<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.Tuple<int, global::System.Collections.Generic.List<int>> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.Tuple<int, global::System.Collections.Generic.List<int>>)new global::System.Tuple<int, global::System.Collections.Generic.List<int>>(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.List<int>>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Tuple<int, global::System.Collections.Generic.List<int>>>(__tupleFallback0) }));
+                            return default(global::System.Threading.Tasks.ValueTask);
+                        }
+                    default:
+                        throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                }
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("ReferenceInterfaceRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>(
+            methodName: "ReferenceInterface<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.ReferenceInterface<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 810,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ReferenceInterfaceRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.ReferenceInterfaceRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.Tuple<int, global::System.Collections.Generic.List<int>>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.Tuple<int, global::System.Collections.Generic.List<int>>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_ReferenceInterface__Tuple_T__List_T___TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>(static () => TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_ReferenceInterface__Tuple_T__List_T___TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_ReversedInterface___List_T___T__TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests)),
+        Name = "OpenTupleRuntimeCastTests",
+        Namespace = "TUnit.TestProject.Bugs._7629",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("ReversedInterface", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests), "ReversedInterface", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.ConstructedGeneric(typeof(global::System.Collections.Generic.List<>), [new global::TUnit.Core.GenericParameter(0, true, "T")]), new global::TUnit.Core.GenericParameter(0, true, "T")]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single tuple parameter
+            if (args.Length == 2)
+            {
+                // Arguments are unwrapped tuple elements, reconstruct the tuple
+                instance.ReversedInterface<int>((global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.List<int>>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+            {
+                // Rare case: tuple is wrapped as a single argument
+                instance.ReversedInterface<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<global::System.Collections.Generic.List<int>, int> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<global::System.Collections.Generic.List<int>, int>)(global::TUnit.Core.Helpers.CastHelper.Cast<global::System.Collections.Generic.List<int>>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<global::System.Collections.Generic.List<int>, int>>(__tupleFallback0) }));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("ReversedInterfaceRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>(
+            methodName: "ReversedInterface<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.ReversedInterface<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 814,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("ReversedInterfaceRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.ReversedInterfaceRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<global::System.Collections.Generic.List<int>, int>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<global::System.Collections.Generic.List<int>, int>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_ReversedInterface___List_T___T__TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>(static () => TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_ReversedInterface___List_T___T__TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_BaseCast___T__Derived_T___TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests),
+        TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests)),
+        Name = "OpenTupleRuntimeCastTests",
+        Namespace = "TUnit.TestProject.Bugs._7629",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::System.Array.Empty<global::TUnit.Core.ParameterMetadata>(),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("BaseCast", __classType, typeof(void), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests), "BaseCast", false, 1, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new global::TUnit.Core.ConstructedGeneric(typeof(global::System.ValueTuple<,>), [new global::TUnit.Core.GenericParameter(0, true, "T"), new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.Derived<>), [new global::TUnit.Core.GenericParameter(0, true, "T")])]), false)
+}));
+    private static global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
+    {
+        return new global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests();
+    }
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Special handling for single tuple parameter
+            if (args.Length == 2)
+            {
+                // Arguments are unwrapped tuple elements, reconstruct the tuple
+                instance.BaseCast<int>((global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.Derived<int>>(args[1])));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else if (args.Length == 1 && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(args[0]))
+            {
+                // Rare case: tuple is wrapped as a single argument
+                instance.BaseCast<int>((args[0] switch { var __tupleValue0 when __tupleValue0 is not global::System.ValueTuple<int, global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.Derived<int>> && global::TUnit.Core.Helpers.DataSourceHelpers.IsTuple(__tupleValue0) && global::TUnit.Core.Helpers.DataSourceHelpers.UnwrapTupleAot(__tupleValue0) is { Length: 2 } __tupleInput0 => (global::System.ValueTuple<int, global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.Derived<int>>)(global::TUnit.Core.Helpers.CastHelper.Cast<int>(__tupleInput0[0]), global::TUnit.Core.Helpers.CastHelper.Cast<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.Derived<int>>(__tupleInput0[1])), var __tupleFallback0 => global::TUnit.Core.Helpers.CastHelper.Cast<global::System.ValueTuple<int, global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.Derived<int>>>(__tupleFallback0) }));
+                return default(global::System.Threading.Tasks.ValueTask);
+            }
+            else
+            {
+                throw new global::System.ArgumentException($"Expected 2 unwrapped elements or 1 wrapped tuple, but got {args.Length} arguments");
+            }
+        }
+        catch (global::System.Exception ex)
+        {
+            return new global::System.Threading.Tasks.ValueTask(global::System.Threading.Tasks.Task.FromException(ex));
+        }
+    }
+    private static global::System.Attribute[] __Attributes_0(int groupIndex)
+    {
+        return new global::System.Attribute[]
+        {
+            new global::TUnit.Core.TestAttribute(),
+            new global::TUnit.Core.MethodDataSourceAttribute("BaseRows")
+        };
+    }
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>[] Entries_0 = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>[]
+    {
+        global::TUnit.Core.TestEntryFactory.Create<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>(
+            methodName: "BaseCast<int>",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.BaseCast<int>",
+            methodTypeArgumentsIdentity: "<int>",
+            filePath: "",
+            lineNumber: 818,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.Core.MethodDataSourceAttribute("BaseRows")
+    {
+        Factory = static dataGeneratorMetadata => global::TUnit.Core.Helpers.DataSourceFactories.FromEnumerable(dataGeneratorMetadata, static () => global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.BaseRows()),
+    },
+},
+            methodMetadata: __mm_0 with { Parameters = new global::TUnit.Core.ParameterMetadata[] { __mm_0.Parameters[0] with { Type = typeof(global::System.ValueTuple<int, global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.Derived<int>>), TypeInfo = new global::TUnit.Core.ConcreteType(typeof(global::System.ValueTuple<int, global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests.Derived<int>>)) } } },
+            createInstance: __CreateInstance_0,
+            invokeBody: __Invoke_0,
+            methodIndex: 0,
+            createAttributes: __Attributes_0,
+            attributeGroupIndex: 0),
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_BaseCast___T__Derived_T___TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7629.OpenTupleRuntimeCastTests>(static () => TUnit_TestProject_Bugs__7629_OpenTupleRuntimeCastTests_BaseCast___T__Derived_T___TestSource.Entries_0);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
 internal static class TUnit_TestProject_Bugs__7629_WrappedNestedSingletonInferenceTests_ReferenceOuter__Tupl_D6D60BEE_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7629.WrappedNestedSingletonInferenceTests", new global::TUnit.Core.ClassMetadata
@@ -7111,7 +7497,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7629.WrappedNestedSingletonInferenceTests.ReferenceOuter<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 829,
+            lineNumber: 858,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -7207,7 +7593,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
             fullyQualifiedName: "TUnit.TestProject.Bugs._7629.WrappedNestedSingletonInferenceTests.ValueOuter<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 837,
+            lineNumber: 866,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -7307,7 +7693,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "extra", new glo
             fullyQualifiedName: "TUnit.TestProject.Bugs._7629.WrappedWholeTupleInferenceTests.ValueOptional<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 851,
+            lineNumber: 880,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -7437,7 +7823,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "extra", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7629.WrappedWholeTupleInferenceTests.ValueParams<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 859,
+            lineNumber: 888,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -7567,7 +7953,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "extra", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7629.WrappedWholeTupleInferenceTests.ValueArray<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 867,
+            lineNumber: 896,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -7667,7 +8053,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "extra", new glo
             fullyQualifiedName: "TUnit.TestProject.Bugs._7629.WrappedWholeTupleInferenceTests.ReferenceOptional<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 875,
+            lineNumber: 904,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -7797,7 +8183,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "extra", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7629.WrappedWholeTupleInferenceTests.ReferenceParams<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 883,
+            lineNumber: 912,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -7927,7 +8313,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int[]), "extra", new g
             fullyQualifiedName: "TUnit.TestProject.Bugs._7629.WrappedWholeTupleInferenceTests.ReferenceArray<int>",
             methodTypeArgumentsIdentity: "<int>",
             filePath: "",
-            lineNumber: 891,
+            lineNumber: 920,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -8064,7 +8450,7 @@ internal static class TUnit_TestProject_Bugs__7629_NestedSingletonBoundaryTests_
             methodName: "ReferenceOuter",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7629.NestedSingletonBoundaryTests.ReferenceOuter",
             filePath: "",
-            lineNumber: 805,
+            lineNumber: 834,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -8087,7 +8473,7 @@ internal static class TUnit_TestProject_Bugs__7629_NestedSingletonBoundaryTests_
             methodName: "ValueOuter",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7629.NestedSingletonBoundaryTests.ValueOuter",
             filePath: "",
-            lineNumber: 813,
+            lineNumber: 842,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

@@ -7330,14 +7330,6 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return (reconstructTupleElements && overwriteBindings) || SymbolEqualityComparer.Default.Equals(parameter, row);
         }
 
-        // An object-typed element supplies no structural type information. Other elements
-        // may still infer every type argument; the reconstructed binder performs its runtime cast.
-        // Keep interface/base candidates strict, since their containers are not reconstructed.
-        if (reconstructTupleElements && overwriteBindings && row.SpecialType == SpecialType.System_Object)
-        {
-            return true;
-        }
-
         // Tuple reconstruction can lift a non-nullable value into an open nullable element,
         // just as ProcessTypeForGenerics and reflection TryInferTypeMapping do during inference.
         if (reconstructTupleElements
@@ -7436,7 +7428,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
         }
 
-        return false;
+        // An unmatched reconstructed element supplies no structural bindings. Its declared
+        // interface/base type may hide a compatible runtime value; let the binder cast it.
+        // Candidate validation remains strict because it never overwrites bindings.
+        return reconstructTupleElements && overwriteBindings;
     }
 
     private static ITypeSymbol[]? InferTypesFromMethodDataSourceRowType(TestMethodMetadata testMethod, AttributeData mdsAttr, ITypeSymbol[]? classTypes = null)
