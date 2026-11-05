@@ -1544,7 +1544,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 // data sources come first, in reflection mode's order, so a type that one of them
                 // infers runs only that source. Any other [GenerateGenericTest] type runs every method
                 // data source. A null source (IInfersType<T>) also runs every method data source.
-                var methodSources = new List<(ITypeSymbol[] Types, AttributeData? Source, GenericMethodInferencePolicy.Source PolicySource)>();
+                var methodSources = new List<(ITypeSymbol[]? Types, AttributeData? Source, GenericMethodInferencePolicy.Source PolicySource)>();
                 foreach (var rule in GenericMethodInferencePolicy.Rules)
                 {
                     switch (rule.Source)
@@ -1577,7 +1577,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     // A source that closes both class and method is already a full instantiation,
                     // rather than a method source to pair once more with every class source.
-                    if (types is not null && types.Length == methodTypeArgCount)
+                    // Method data sources can require concrete class arguments before inference
+                    // succeeds (for example TClass feeding T?). Retain them for the closed-class retry.
+                    if (types is not null && types.Length == methodTypeArgCount
+                        || types is null && source is not null && rule.Source == GenericMethodInferencePolicy.Source.MethodDataSource)
                     {
                         methodSources.Add((types, rule.ScopesRows ? source : null, rule.Source));
                     }

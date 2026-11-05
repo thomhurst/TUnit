@@ -362,6 +362,25 @@ public class ClosedClassTupleInferenceTests<TClass>
 {
     public static IEnumerable<((int, string), int)> Rows() => [((1, "text"), 7)];
 
+    public static IEnumerable<(TClass, string)> NullableClassRows() => [(default!, "class")];
+    public IEnumerable<Tuple<TClass, string>> NullableClassReferenceRows() => [Tuple.Create(default(TClass)!, "class")];
+
+    [Test]
+    [MethodDataSource(nameof(NullableClassRows))]
+    public void NullableClass<T>((T?, string) row) where T : struct
+    {
+        if (typeof(T) != typeof(int) || row.Item1 is not int value || value != 0 || row.Item2 != "class")
+            throw new InvalidOperationException("Expected nullable inference after closing the class");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(NullableClassReferenceRows))]
+    public void NullableReferenceClass<T>(Tuple<T?, string> row) where T : struct
+    {
+        if (typeof(T) != typeof(int) || row.Item1 is not int value || value != 0 || row.Item2 != "class")
+            throw new InvalidOperationException("Expected nullable reference inference after closing the class");
+    }
+
     [Test]
     [MethodDataSource(nameof(Rows))]
     public void ClosedClass<T>((TClass, T) row, int extra = 5)
