@@ -7288,7 +7288,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return namedType.TupleElements.Select(element => element.Type).ToArray();
         }
 
-        if (namedType is not { Name: "Tuple", Arity: >= 1 and <= 8, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } })
+        if (namedType is not { Name: "Tuple" or "ValueTuple", Arity: >= 1 and <= 8, ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } })
         {
             return null;
         }
@@ -7328,6 +7328,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (!CodeGenerationHelpers.ContainsTypeParameter(parameter))
         {
             return (reconstructTupleElements && overwriteBindings) || SymbolEqualityComparer.Default.Equals(parameter, row);
+        }
+
+        // An object-typed element supplies no structural type information. Other elements
+        // may still infer every type argument; the reconstructed binder performs its runtime cast.
+        // Keep interface/base candidates strict, since their containers are not reconstructed.
+        if (reconstructTupleElements && overwriteBindings && row.SpecialType == SpecialType.System_Object)
+        {
+            return true;
         }
 
         // Tuple reconstruction can lift a non-nullable value into an open nullable element,

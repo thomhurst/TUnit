@@ -657,6 +657,10 @@ internal sealed class TestGenericTypeResolver
             return true;
         }
 
+        // Object-typed reconstructed elements defer their cast to invocation and contribute
+        // no bindings. Other tuple elements can infer the missing type arguments.
+        if (tupleElement && overwriteBindings && argumentType == typeof(object)) return true;
+
         // Array types
         if (parameterType.IsArray && argumentType.IsArray)
         {
@@ -716,8 +720,17 @@ internal sealed class TestGenericTypeResolver
                             return false;
                         }
                     }
-                    return !tupleElement || overwriteBindings
-                        || SubstituteCandidateParameters(parameterType, typeMapping).IsAssignableFrom(argumentType);
+                    if (!tupleElement || overwriteBindings) return true;
+                    try
+                    {
+                        return SubstituteCandidateParameters(parameterType, typeMapping).IsAssignableFrom(argumentType);
+                    }
+                    catch (ArgumentException)
+                    {
+                        // Inferred arguments can violate this candidate's generic constraints.
+                        // Reject it without preventing the caller from trying other candidates.
+                        return false;
+                    }
                 }
             }
         }

@@ -702,3 +702,96 @@ public class TupleInvariantBaseCandidateTests
             throw new InvalidOperationException("Expected compatible invariant base candidate");
     }
 }
+
+
+public class TupleConstrainedCandidateTests
+{
+    public interface IFoo { }
+    public sealed class Foo : IFoo { }
+    public interface IPair<A, B> where A : B { }
+    public sealed class Dual : IPair<string, object>, IPair<Foo, IFoo> { }
+    public static IEnumerable<(Dual, int)> ValueRows() => [(new Dual(), 7)];
+    public static IEnumerable<Tuple<Dual, int>> ReferenceRows() => [Tuple.Create(new Dual(), 7)];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void Value<T>((IPair<T, IFoo>, int) row) where T : IFoo
+    {
+        if (typeof(T) != typeof(Foo) || row.Item1 is not Dual || row.Item2 != 7)
+            throw new InvalidOperationException("Expected constraint-invalid candidate to be skipped");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<IPair<T, IFoo>, int> row) where T : IFoo
+    {
+        if (typeof(T) != typeof(Foo) || row.Item1 is not Dual || row.Item2 != 7)
+            throw new InvalidOperationException("Expected reference tuple constraint-invalid candidate to be skipped");
+    }
+}
+
+// Singleton tuple reconstruction has the analyzer false positive tracked by #7622.
+#pragma warning disable TUnit0001
+public class SingletonTupleInferenceTests
+{
+    public static IEnumerable<Tuple<int>> ReferenceRows() => [Tuple.Create(7)];
+    public static IEnumerable<ValueTuple<int>> ValueRows() => [new(7)];
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void ReferenceToValue<T>(ValueTuple<T> row)
+    {
+        if (typeof(T) != typeof(int) || !Equals(row.Item1, 7))
+            throw new InvalidOperationException("Expected singleton reference-to-value tuple reconstruction");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void ValueToReference<T>(Tuple<T> row)
+    {
+        if (typeof(T) != typeof(int) || !Equals(row.Item1, 7))
+            throw new InvalidOperationException("Expected singleton value-to-reference tuple reconstruction");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void ValueToValue<T>(ValueTuple<T> row)
+    {
+        if (typeof(T) != typeof(int) || !Equals(row.Item1, 7))
+            throw new InvalidOperationException("Expected singleton value tuple inference");
+    }
+}
+
+#pragma warning restore TUnit0001
+
+
+public class OpenTupleRuntimeCastTests
+{
+    public static IEnumerable<(int, object)> ValueRows() => [(1, new List<int> { 7 })];
+    public static IEnumerable<Tuple<int, object>> ReferenceRows() => [Tuple.Create(1, (object)new List<int> { 7 })];
+    public static IEnumerable<(object, int)> ReversedRows() => [(new List<int> { 7 }, 1)];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void Value<T>((T, List<T>) row)
+    {
+        if (typeof(T) != typeof(int) || !Equals(row.Item1, 1) || !Equals(row.Item2.Single(), 7))
+            throw new InvalidOperationException("Expected open element runtime cast after inference");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<T, List<T>> row)
+    {
+        if (typeof(T) != typeof(int) || !Equals(row.Item1, 1) || !Equals(row.Item2.Single(), 7))
+            throw new InvalidOperationException("Expected reference tuple open element runtime cast");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReversedRows))]
+    public void Reversed<T>((List<T>, T) row)
+    {
+        if (typeof(T) != typeof(int) || !Equals(row.Item1.Single(), 7) || !Equals(row.Item2, 1))
+            throw new InvalidOperationException("Expected inference from a later element after a runtime cast");
+    }
+}
