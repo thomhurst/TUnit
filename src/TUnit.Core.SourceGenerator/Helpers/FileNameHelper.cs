@@ -136,6 +136,15 @@ internal static class FileNameHelper
             }
         }
 
+        // Escaped namespace identifiers lose information during sanitization. Hash the
+        // original identity so @event.Subject cannot collide with _event.Subject.
+        var identity = typeSymbol.ToDisplayString(DisplayFormats.CSharpType);
+        if (identity.Contains('@'))
+        {
+            sb.Append('_');
+            sb.Append($"{GetStableHashCode(identity):X8}");
+        }
+
         var baseName = sb.ToString();
         var helperSuffix = "__TestSource";
 

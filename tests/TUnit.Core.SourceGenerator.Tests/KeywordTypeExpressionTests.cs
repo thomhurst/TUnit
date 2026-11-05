@@ -90,6 +90,28 @@ public class KeywordTypeExpressionTests
         await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
     }
 
+    [Test]
+    public async Task EscapedAndUnderscoreNamespacesProduceDistinctTestSources()
+    {
+        var compilation = CreateCompilation("""
+            namespace @event
+            {
+                public class Subject { [TUnit.Core.Test] public void Run() { } }
+            }
+            namespace _event
+            {
+                public class Subject { [TUnit.Core.Test] public void Run() { } }
+            }
+            """);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new TestMetadataGenerator().AsSourceGenerator()], parseOptions: new CSharpParseOptions(LanguageVersion.Preview));
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+        await Assert.That(driver.GetRunResult().Results.Select(r => r.Exception).FirstOrDefault(e => e is not null)).IsNull();
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(driver.GetRunResult().Results.Single().GeneratedSources.Count(s => s.HintName.EndsWith("__TestSource.g.cs"))).IsEqualTo(2);
+    }
+
     private static CSharpCompilation CreateCompilation(string source) => CSharpCompilation.Create(
         "KeywordExpressions",
         [CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview))],
