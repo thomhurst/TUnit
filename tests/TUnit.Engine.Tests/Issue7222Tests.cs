@@ -156,6 +156,7 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("ExplicitClassMethodSourceCollisionTests*", 2)]
     [Arguments("ClassRowMethodSourceCollisionTests*", 2)]
     [Arguments("ExplicitMethodInstanceSourceTests", 1)]
+    [Arguments("ExplicitFactoryTupleInstanceCollisionTests", 4)]
     [Arguments("ClosedClassParameterInferredSourceTests*", 1)]
     [Arguments("ExplicitClassParameterInferredSourceTests*", 1)]
     public async Task Explicit_And_Parameter_Inference_Preserve_Instance_Sources(string className, int count)

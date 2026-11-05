@@ -146,3 +146,30 @@ public class ClassRowMethodSourceCollisionTests<TClass>(TClass value)
 }
 
 #pragma warning restore TUnit0001
+
+// Factory tuples exercise the static inference path in reflection discovery too.
+public class ExplicitFactoryTupleInstanceCollisionTests
+{
+    public static IEnumerable<Func<(int, string)>> StaticRows() => [() => (1, "static")];
+    public IEnumerable<Func<(int, string)>> InstanceRows() => [() => (2, "instance")];
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [MethodDataSource(nameof(StaticRows))]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    public void StaticFirst<T>(T item, string label)
+    {
+        if (typeof(T) != typeof(int)) throw new InvalidOperationException("Expected explicit int");
+        if (label != (Equals(item, 1) ? "static" : "instance")) throw new InvalidOperationException("Unexpected row");
+    }
+
+    [Test]
+    [GenerateGenericTest(typeof(int))]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    [MethodDataSource(nameof(StaticRows))]
+    public void InstanceFirst<T>(T item, string label)
+    {
+        if (typeof(T) != typeof(int)) throw new InvalidOperationException("Expected explicit int");
+        if (label != (Equals(item, 1) ? "static" : "instance")) throw new InvalidOperationException("Unexpected row");
+    }
+}
