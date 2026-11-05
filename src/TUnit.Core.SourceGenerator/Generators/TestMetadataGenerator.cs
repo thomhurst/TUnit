@@ -697,8 +697,10 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             }
             first = false;
             var attributeType = attribute.AttributeClass!;
-            occurrences.TryGetValue(attributeType, out var occurrence);
-            occurrences[attributeType] = occurrence + 1;
+            // Reflection matches generic definitions, so count all constructed forms together.
+            var attributeDefinition = attributeType.OriginalDefinition;
+            occurrences.TryGetValue(attributeDefinition, out var occurrence);
+            occurrences[attributeDefinition] = occurrence + 1;
             if (CanConstructConstraintViolationAttribute(attribute, compilation))
             {
                 testMethod.CompilationContext.AttributeWriter.WriteAttribute(writer, attribute);
@@ -716,7 +718,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     metadataName = attributeType.ContainingNamespace.ToDisplayString() + "." + metadataName;
                 }
-                writer.Append($"global::System.Linq.Enumerable.ElementAt(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => attribute.GetType().FullName == {SymbolDisplay.FormatLiteral(metadataName, quote: true)}), {occurrence.ToString(CultureInfo.InvariantCulture)})");
+                writer.Append($"global::System.Linq.Enumerable.ElementAt(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => (attribute.GetType().IsGenericType ? attribute.GetType().GetGenericTypeDefinition() : attribute.GetType()).FullName == {SymbolDisplay.FormatLiteral(metadataName, quote: true)}), {occurrence.ToString(CultureInfo.InvariantCulture)})");
             }
         }
     }
@@ -725,7 +727,26 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         attribute.AttributeClass is { } attributeType
         && compilation.IsSymbolAccessibleWithin(attributeType, compilation.Assembly)
         && attribute.AttributeConstructor is { } constructor
-        && compilation.IsSymbolAccessibleWithin(constructor, compilation.Assembly);
+        && compilation.IsSymbolAccessibleWithin(constructor, compilation.Assembly)
+        && attribute.ConstructorArguments.All(argument => CanAccessAttributeArgument(argument, compilation))
+        && attribute.NamedArguments.All(argument => CanAccessAttributeArgument(argument.Value, compilation));
+
+    private static bool CanAccessAttributeArgument(TypedConstant argument, Compilation compilation)
+    {
+        if (argument.Type is { } argumentType
+            && !compilation.IsSymbolAccessibleWithin(argumentType, compilation.Assembly))
+        {
+            return false;
+        }
+
+        if (argument is { Kind: TypedConstantKind.Type, Value: ITypeSymbol type })
+        {
+            return compilation.IsSymbolAccessibleWithin(type, compilation.Assembly);
+        }
+
+        return argument.Kind != TypedConstantKind.Array || argument.IsNull
+            || argument.Values.All(value => CanAccessAttributeArgument(value, compilation));
+    }
 
     private static bool AttributeRequiresUnsafeContext(AttributeData attribute) =>
         attribute.ConstructorArguments.Any(RequiresUnsafeContext)

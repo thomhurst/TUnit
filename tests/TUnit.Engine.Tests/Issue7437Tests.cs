@@ -39,7 +39,9 @@ public class Issue7437Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    [Arguments("*InvalidPrivateAttributeClass", "Issue7437Private", 1)]
+    [Arguments("*InvalidPrivateAttributeClass", "Issue7437PrivateInt32", 1)]
+    [Arguments("*InvalidPrivateAttributeClass", "Issue7437PrivateString", 1)]
+    [Arguments("*InvalidPrivateAttributeClass", "Issue7437PrivateDouble", 1)]
     [Arguments("InvalidConstructorClass", "Issue7437Constructor", 2)]
     [Arguments("InvalidUnusedSourceClass", "Issue7437UnusedSource", 1)]
     public Task Failure_Attributes_Do_Not_Replace_Constraint_Errors(string className, string category, int count) =>

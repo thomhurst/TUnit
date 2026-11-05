@@ -51,13 +51,16 @@ public static class UntypedSource
 // the private filter attribute, but its actual constructor still supplies the category.
 public class PrivateAttributeContainer
 {
-    private sealed class PrivateCategoryAttribute() : CategoryAttribute("Issue7437Private");
+    private sealed class Hidden;
+    private sealed class PrivateCategoryAttribute<T>() : CategoryAttribute($"Issue7437Private{typeof(T).Name}");
 
-    [PrivateCategory]
-    [GenerateGenericTest(typeof(string))]
+    [PrivateCategory<int>]
+    [PrivateCategory<string>]
+    [GenerateGenericTest(typeof(Hidden))]
     public class InvalidPrivateAttributeClass<T> where T : struct
     {
         [Test]
+        [PrivateCategory<double>]
         public void Run() { }
     }
 }

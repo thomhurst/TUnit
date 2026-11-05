@@ -70,6 +70,35 @@ internal class PointerFailureAttributeCompilationTests
     }
 
     [Test]
+    public async Task Private_type_arguments_on_generic_failure_attributes_compile()
+    {
+        const string source = """
+            using TUnit.Core;
+            public class Container
+            {
+                private sealed class Hidden;
+
+                [GenerateGenericTest(typeof(Hidden))]
+                public class InvalidClass<T> where T : struct
+                {
+                    [Test]
+                    public void Run() { }
+                }
+            }
+            """;
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var compilation = CSharpCompilation.Create("PrivateFailureArgument",
+            [CSharpSyntaxTree.ParseText(source, parseOptions)], ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new TestMetadataGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out _);
+        var errors = output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray();
+        await Assert.That(errors).IsEmpty()
+            .Because(string.Join(Environment.NewLine, errors.Select(error => error.ToString())));
+    }
+
+    [Test]
     public async Task Private_filter_attributes_on_generic_failures_compile()
     {
         const string source = """

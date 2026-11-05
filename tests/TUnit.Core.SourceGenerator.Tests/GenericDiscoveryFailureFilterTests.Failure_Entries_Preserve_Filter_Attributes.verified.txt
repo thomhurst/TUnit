@@ -237,17 +237,19 @@ Parent = null
         {
             MethodName = "Run",
             FilePath = "",
-            LineNumber = 60,
+            LineNumber = 62,
             MethodMetadata = __mm_0,
             AttributeFactory = static () => new global::System.Attribute[]
             {
                 new global::TUnit.Core.TestAttribute(),
-                global::System.Linq.Enumerable.ElementAt(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => attribute.GetType().FullName == "TUnit.TestProject.Bugs._7437.PrivateAttributeContainer+PrivateCategoryAttribute"), 0),
-                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string)),
+                global::System.Linq.Enumerable.ElementAt(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => (attribute.GetType().IsGenericType ? attribute.GetType().GetGenericTypeDefinition() : attribute.GetType()).FullName == "TUnit.TestProject.Bugs._7437.PrivateAttributeContainer+PrivateCategoryAttribute`1"), 0),
+                global::System.Linq.Enumerable.ElementAt(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => (attribute.GetType().IsGenericType ? attribute.GetType().GetGenericTypeDefinition() : attribute.GetType()).FullName == "TUnit.TestProject.Bugs._7437.PrivateAttributeContainer+PrivateCategoryAttribute`1"), 1),
+                global::System.Linq.Enumerable.ElementAt(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => (attribute.GetType().IsGenericType ? attribute.GetType().GetGenericTypeDefinition() : attribute.GetType()).FullName == "TUnit.TestProject.Bugs._7437.PrivateAttributeContainer+PrivateCategoryAttribute`1"), 2),
+                global::System.Linq.Enumerable.ElementAt(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => (attribute.GetType().IsGenericType ? attribute.GetType().GetGenericTypeDefinition() : attribute.GetType()).FullName == "TUnit.Core.GenerateGenericTestAttribute"), 0),
                 new global::TUnit.Core.CategoryAttribute("Issue7437Assembly"),
                 new global::TUnit.Core.PropertyAttribute("Issue7437Scope", "Assembly")
             },
-            Messages = new string[] { "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'" },
+            Messages = new string[] { "Type 'Hidden' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
 }
@@ -287,7 +289,7 @@ internal static class TUnit_TestProject_Bugs__7437_InvalidConstructorClass_T_Run
         {
             MethodName = "Run",
             FilePath = "",
-            LineNumber = 71,
+            LineNumber = 74,
             MethodMetadata = __mm_0,
             AttributeFactory = static () => new global::System.Attribute[]
             {
@@ -339,7 +341,7 @@ internal static class TUnit_TestProject_Bugs__7437_InvalidUnusedSourceClass_T_Ru
         {
             MethodName = "Run",
             FilePath = "",
-            LineNumber = 88,
+            LineNumber = 91,
             MethodMetadata = __mm_0,
             AttributeFactory = static () => new global::System.Attribute[]
             {
