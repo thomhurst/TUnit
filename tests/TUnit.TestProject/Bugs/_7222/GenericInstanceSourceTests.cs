@@ -302,6 +302,25 @@ public class SingleTupleElementConversionTests
 {
     public static IEnumerable<(int, int)> Rows() => [(1, 2)];
 
+    public static IEnumerable<(List<int>, int)> InterfaceRows() => [(new List<int> { 5 }, 5)];
+    public IEnumerable<Tuple<List<int>, int>> InterfaceReferenceRows() => [Tuple.Create(new List<int> { 6 }, 6)];
+
+    [Test]
+    [MethodDataSource(nameof(InterfaceRows))]
+    public void InterfaceElement<T>((IEnumerable<T>, T) row)
+    {
+        if (typeof(T) != typeof(int) || !row.Item1.SequenceEqual(new[] { row.Item2 }))
+            throw new InvalidOperationException("Expected generic interface element conversion");
+    }
+
+    [Test]
+    [InstanceMethodDataSource(nameof(InterfaceReferenceRows))]
+    public void InterfaceReferenceElement<T>(Tuple<IEnumerable<T>, T> row)
+    {
+        if (typeof(T) != typeof(int) || !row.Item1.SequenceEqual(new[] { row.Item2 }))
+            throw new InvalidOperationException("Expected generic interface reference element conversion");
+    }
+
     [Test]
     [MethodDataSource(nameof(Rows))]
     public void NullableElement<T>((T, int?) row)

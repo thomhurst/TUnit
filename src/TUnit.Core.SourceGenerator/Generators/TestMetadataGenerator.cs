@@ -7309,6 +7309,21 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             return true;
         }
 
+        // Reconstructed tuple elements may bind a concrete collection to an open interface.
+        // Keep candidate bindings isolated so a rejected interface cannot affect another match.
+        if (reconstructTupleElements && parameter is INamedTypeSymbol { IsGenericType: true, TypeKind: TypeKind.Interface } interfaceParameter
+            && row is INamedTypeSymbol interfaceRow)
+        {
+            foreach (var implementedInterface in interfaceRow.AllInterfaces)
+            {
+                if (!SymbolEqualityComparer.Default.Equals(interfaceParameter.OriginalDefinition, implementedInterface.OriginalDefinition)) continue;
+                var candidateBindings = new Dictionary<ITypeSymbol, ITypeSymbol>(bindings, SymbolEqualityComparer.Default);
+                if (!MatchesOpenRowType(parameter, implementedInterface, compilation, candidateBindings, true)) continue;
+                foreach (var binding in candidateBindings) bindings[binding.Key] = binding.Value;
+                return true;
+            }
+        }
+
         return false;
     }
 
