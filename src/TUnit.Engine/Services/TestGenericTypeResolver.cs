@@ -489,7 +489,8 @@ internal sealed class TestGenericTypeResolver
                 else
                 {
                     // Try to infer nested generic types
-                    InferTypeMapping(paramType, argType, typeMapping, genericMethodInfo.ParameterPositions, tupleElementTypes is not null);
+                    InferTypeMapping(paramType, argType, typeMapping, genericMethodInfo.ParameterPositions, tupleElementTypes is not null
+                        || dataParameterCount == 1 && TupleHelper.IsTupleType(paramType));
                 }
             }
             else if (paramType is { IsGenericParameter: true, DeclaringMethod: not null })
@@ -620,7 +621,7 @@ internal sealed class TestGenericTypeResolver
 #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
 #endif
-    private static bool TryInferTypeMapping(
+    internal static bool TryInferTypeMapping(
         Type parameterType,
         Type argumentType,
         Dictionary<Type, Type> typeMapping, bool tupleElement = false, bool overwriteBindings = false)
@@ -676,7 +677,7 @@ internal sealed class TestGenericTypeResolver
             // The tuple binder reconstructs a sole tuple argument across reference/value families.
             // Infer the corresponding elements first, as the source generator does.
             if (paramGenericDef == argGenericDef
-                || TupleHelper.IsTupleType(parameterType) && TupleHelper.IsTupleType(argumentType))
+                || tupleElement && TupleHelper.IsTupleType(parameterType) && TupleHelper.IsTupleType(argumentType))
             {
                 var paramGenericArgs = parameterType.GetGenericArguments();
                 var argGenericArgs = argumentType.GetGenericArguments();
@@ -756,7 +757,7 @@ internal sealed class TestGenericTypeResolver
                             var allMapped = true;
                             for (var i = 0; i < paramGenericArgs.Length; i++)
                             {
-                                if (!TryInferTypeMapping(paramGenericArgs[i], implGenericArgs[i], candidateMapping))
+                                if (!TryInferTypeMapping(paramGenericArgs[i], implGenericArgs[i], candidateMapping, tupleElement: tupleElement))
                                 {
                                     allMapped = false;
                                     break;

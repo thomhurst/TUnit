@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
@@ -3683,6 +3684,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// </summary>
     private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping, bool isTopLevel = false, bool tupleElement = false)
     {
+        // Tuple reconstruction uses the same strict candidate selection as discovery. Ordinary
+        // parameters retain the existing nested/params-array inference policy below.
+        if (tupleElement)
+        {
+            if (!TestGenericTypeResolver.TryInferTypeMapping(paramType, argType, typeMapping,
+                    tupleElement: true, overwriteBindings: isTopLevel))
+            {
+                throw new GenericTypeResolutionException(
+                    $"Type mismatch: Cannot use argument of type '{argType.Name}' for parameter of type '{paramType.Name}'");
+            }
+            return;
+        }
+
         // Match discovery inference when a nullable tuple element has been boxed as its value.
         if (Nullable.GetUnderlyingType(paramType) is { } underlyingParameter
             && argType.IsValueType && Nullable.GetUnderlyingType(argType) is null)
@@ -3711,27 +3725,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             return;
         }
 
-        // Mirror discovery's generic base-class inference when constructing the invocation.
-        if (tupleElement && paramType is { IsGenericType: true, IsClass: true })
-        {
-            var parameterDefinition = paramType.GetGenericTypeDefinition();
-            for (var baseType = argType.BaseType; baseType is not null; baseType = baseType.BaseType)
-            {
-                if (!baseType.IsGenericType || baseType.GetGenericTypeDefinition() != parameterDefinition) continue;
-                InferGenericTypeMapping(paramType, baseType, typeMapping, tupleElement: true);
-                return;
-            }
-        }
-
         // Generic types (e.g., IEnumerable<T>, Func<T1,T2>, etc.)
         if (paramType.IsGenericType && argType.IsGenericType)
         {
             var paramGenDef = paramType.GetGenericTypeDefinition();
 
             // Check if argument type directly matches or implements the parameter generic type
-            if (argType.GetGenericTypeDefinition() == paramGenDef
-                || TupleHelper.IsTupleType(paramType) && TupleHelper.IsTupleType(argType)
-                    && paramType.GetGenericArguments().Length == argType.GetGenericArguments().Length)
+            if (argType.GetGenericTypeDefinition() == paramGenDef)
             {
                 var paramGenArgs = paramType.GetGenericArguments();
                 var argGenArgs = argType.GetGenericArguments();
@@ -3794,7 +3794,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Array types
         if (paramType.IsArray && argType.IsArray)
         {
-            InferGenericTypeMapping(paramType.GetElementType()!, argType.GetElementType()!, typeMapping, isTopLevel, tupleElement);
+            InferGenericTypeMapping(paramType.GetElementType()!, argType.GetElementType()!, typeMapping);
         }
     }
 
@@ -4052,6 +4052,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         ? Array.FindIndex(methodParams, static p => p.ParameterType != typeof(CancellationToken))
                         : 0;
                     var inferenceCount = flattenedTupleTypes?.Length ?? methodParams.Length;
+                    var reconstructTuple = flattenedTupleTypes is not null
+                        || GetSingleDataParameter(methodParams) is { ParameterType: var soleType }
+                            && TupleHelper.IsTupleType(soleType);
 
                     // Build type mapping from method parameters (or flattened tuple elements) and actual arguments.
                     for (var j = 0; j < inferenceCount && j + tupleOffset < args.Length; j++)
@@ -4062,7 +4065,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             var paramType = flattenedTupleTypes?[j] ?? methodParams[j].ParameterType;
                             var argType = GetArgumentInferenceType(arg);
                             InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true,
-                                tupleElement: flattenedTupleTypes is not null);
+                                tupleElement: reconstructTuple);
                         }
                     }
 

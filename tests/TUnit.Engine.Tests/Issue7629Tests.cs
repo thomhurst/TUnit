@@ -18,6 +18,8 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("WholeReferenceTupleSourceTests", 1)]
     [Arguments("InferredReferenceTupleSourceTests", 1)]
     [Arguments("TupleInterfaceCandidateIsolationTests", 2)]
+    [Arguments("TupleNestedInterfaceBaseTests", 2)]
+    [Arguments("TupleMultiParameterCandidateTests", 2)]
     [Arguments("WholeTupleWithTrailingParametersTests", 6)]
     public async Task Tuple_Inference_And_Conversion_Agree_In_Both_Modes(string className, int expectedCount)
     {
@@ -31,10 +33,12 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    public async Task Ordinary_Generic_Base_Inference_Remains_Unsupported_In_Both_Modes()
+    [Arguments("OrdinaryGenericBaseInferenceTests")]
+    [Arguments("SpreadCrossFamilyTupleInferenceTests")]
+    public async Task Unsupported_Inference_Remains_Consistent_In_Both_Modes(string className)
     {
         await RunTestsWithFilter(
-            "/*/TUnit.TestProject.Bugs._7629/OrdinaryGenericBaseInferenceTests/*",
+            $"/*/TUnit.TestProject.Bugs._7629/{className}/*",
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(1),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(1)

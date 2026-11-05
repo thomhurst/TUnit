@@ -536,3 +536,63 @@ public class OrdinaryGenericBaseInferenceTests
 #pragma warning restore TUnit0001
     public void Ordinary<T>(Base<T> value) { }
 }
+
+public class TupleNestedInterfaceBaseTests
+{
+    public class Base<T> { }
+    public sealed class Derived : Base<int> { }
+    public static IEnumerable<(List<Derived>, int)> Rows() => [(new() { new Derived() }, 7)];
+    public static IEnumerable<Tuple<List<Derived>, int>> ReferenceRows() => [Tuple.Create(new List<Derived> { new() }, 7)];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void Value<T>((IEnumerable<Base<T>>, int) row)
+    {
+        if (typeof(T) != typeof(int) || row.Item1.Single() is not Derived || row.Item2 != 7)
+            throw new InvalidOperationException("Expected base inference through an interface candidate");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<IEnumerable<Base<T>>, int> row)
+    {
+        if (typeof(T) != typeof(int) || row.Item1.Single() is not Derived || row.Item2 != 7)
+            throw new InvalidOperationException("Expected reference tuple base inference through an interface candidate");
+    }
+}
+
+public class TupleMultiParameterCandidateTests
+{
+    public interface IPair<T, U> { }
+    public sealed class Dual : IPair<int, int>, IPair<long, string> { }
+    public static IEnumerable<(string, Dual)> Rows() => [("value", new())];
+    public static IEnumerable<Tuple<string, Dual>> ReferenceRows() => [Tuple.Create("value", new Dual())];
+
+    [Test]
+    [MethodDataSource(nameof(Rows))]
+    public void Value<T, U>((T, IPair<U, T>) row)
+    {
+        if (typeof(T) != typeof(string) || typeof(U) != typeof(long) || row.Item2 is not Dual)
+            throw new InvalidOperationException("Expected rejected candidates to leave no partial type bindings");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T, U>(Tuple<T, IPair<U, T>> row)
+    {
+        if (typeof(T) != typeof(string) || typeof(U) != typeof(long) || row.Item2 is not Dual)
+            throw new InvalidOperationException("Expected reference tuple candidate isolation during invocation");
+    }
+}
+
+// Cross-family reconstruction applies to whole tuple rows, not ordinary spread columns.
+public class SpreadCrossFamilyTupleInferenceTests
+{
+    public static IEnumerable<(Tuple<int, string>, int)> Rows() => [(Tuple.Create(1, "value"), 7)];
+
+    [Test]
+#pragma warning disable TUnit0001 // Intentionally uninferable spread column.
+    [MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public void Value<T>((T, string) row, int extra) { }
+}

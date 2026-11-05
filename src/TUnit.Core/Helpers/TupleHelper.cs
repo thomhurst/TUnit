@@ -11,6 +11,7 @@ namespace TUnit.Core.Helpers;
 public static class TupleHelper
 {
 
+    // Process-lifetime cache: one entry per distinct parameter/source type pair.
     private static readonly ConcurrentDictionary<(Type Parameter, Type Row), bool> OpenTupleMatches = new();
 
     // Open tuple types cannot use IsInstanceOfType. Match their complete shape so a nested
