@@ -1766,11 +1766,11 @@ internal static class TUnit_TestProject_Bugs__7222_PointerClassTypeArgumentTests
             Messages = new string[] { "Type arguments 'Int32*' do not satisfy the generic constraints of type 'PointerClassTypeArgumentTests`1'" },
         },
     };
-    private static unsafe global::System.Attribute[] __CreateConstraintViolationAttributes() => new global::System.Attribute[]
+    private static unsafe global::System.Attribute[] __CreateConstraintViolationAttributes() => global::System.Array.FindAll(new global::System.Attribute[]
     {
         new global::TUnit.Core.TestAttribute(),
         new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int*))
-    };
+    }, static attribute => attribute is not null);
 }
 internal static partial class TUnit_TestRegistration
 {
@@ -1855,13 +1855,13 @@ internal static class TUnit_TestProject_Bugs__7222_PointerClassTypeArgumentGener
             Messages = new string[] { "Type arguments 'Int32*' do not satisfy the generic constraints of type 'PointerClassTypeArgumentGenericMethodTests`1'" },
         },
     };
-    private static unsafe global::System.Attribute[] __CreateConstraintViolationAttributes() => new global::System.Attribute[]
+    private static unsafe global::System.Attribute[] __CreateConstraintViolationAttributes() => global::System.Array.FindAll(new global::System.Attribute[]
     {
         new global::TUnit.Core.TestAttribute(),
         new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string)),
         new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int*)),
         new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int))
-    };
+    }, static attribute => attribute is not null);
 }
 internal static partial class TUnit_TestRegistration
 {

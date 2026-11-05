@@ -47,10 +47,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "arg", new globa
             FilePath = "",
             LineNumber = 15,
             MethodMetadata = __mm_0,
-            AttributeFactory = static () => new global::System.Attribute[]
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
             {
                 new global::TUnit.Core.TestAttribute()
-            },
+            }, static attribute => attribute is not null),
             Messages = new string[] { "The generic test class type arguments cannot be inferred at compile time from its data sources. Source-generated mode requires concrete types to preserve Native AOT compatibility. Use [GenerateGenericTest] to specify the class type arguments." },
         },
     };
@@ -302,10 +302,10 @@ internal static class TUnit_TestProject_Bugs__7355_InheritedUntypedClassSource_T
             FilePath = "",
             LineNumber = 53,
             MethodMetadata = __mm_0,
-            AttributeFactory = static () => new global::System.Attribute[]
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
             {
                 new global::TUnit.Core.TestAttribute()
-            },
+            }, static attribute => attribute is not null),
             Messages = new string[] { "The generic test class type arguments cannot be inferred at compile time from its data sources. Source-generated mode requires concrete types to preserve Native AOT compatibility. Use [GenerateGenericTest] to specify the class type arguments." },
         },
     };
@@ -364,10 +364,10 @@ internal static class TUnit_TestProject_Bugs__7355_UninferredMethodWithInferredC
             FilePath = "",
             LineNumber = 72,
             MethodMetadata = __mm_0,
-            AttributeFactory = static () => new global::System.Attribute[]
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
             {
                 new global::TUnit.Core.TestAttribute()
-            },
+            }, static attribute => attribute is not null),
             Messages = new string[] { "The type arguments of generic test method 'Test' cannot be inferred at compile time from its data sources. Use [GenerateGenericTest] on the method to specify its type arguments." },
         },
     };
@@ -410,11 +410,11 @@ internal static class TUnit_TestProject_Bugs__7355_UninferredMethodWithExplicitC
             FilePath = "",
             LineNumber = 79,
             MethodMetadata = __mm_0,
-            AttributeFactory = static () => new global::System.Attribute[]
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
             {
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int))
-            },
+            }, static attribute => attribute is not null),
             Messages = new string[] { "The type arguments of generic test method 'Test' cannot be inferred at compile time from its data sources. Use [GenerateGenericTest] on the method to specify its type arguments." },
         },
     };
@@ -473,10 +473,10 @@ internal static class TUnit_TestProject_Bugs__7355_UninferredMethodAndClass_T_Te
             FilePath = "",
             LineNumber = 88,
             MethodMetadata = __mm_0,
-            AttributeFactory = static () => new global::System.Attribute[]
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
             {
                 new global::TUnit.Core.TestAttribute()
-            },
+            }, static attribute => attribute is not null),
             Messages = new string[] { "The generic test class type arguments cannot be inferred at compile time from its data sources. Source-generated mode requires concrete types to preserve Native AOT compatibility. Use [GenerateGenericTest] to specify the class type arguments." },
         },
     };

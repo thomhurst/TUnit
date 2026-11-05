@@ -681,17 +681,27 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     private static IEnumerable<AttributeData> GetConstraintViolationAttributes(TestMethodMetadata testMethod) =>
-        testMethod.MethodSymbol.GetAttributes()
-            .Concat(GetConstraintViolationClassAttributes(testMethod.TypeSymbol))
+        GetConstraintViolationInheritedAttributes(GetOverrideChain(testMethod.MethodSymbol))
+            .Concat(GetConstraintViolationInheritedAttributes(testMethod.TypeSymbol.GetSelfAndBaseTypes()))
             .Concat(testMethod.TypeSymbol.ContainingAssembly.GetAttributes())
             .Where(attribute => !DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass));
 
-    private static IEnumerable<AttributeData> GetConstraintViolationClassAttributes(INamedTypeSymbol type)
+    private static IEnumerable<IMethodSymbol> GetOverrideChain(IMethodSymbol method)
     {
-        // Match Type.GetCustomAttributes(inherit: true), used by both reflection discovery
+        for (IMethodSymbol? current = method; current is not null; current = current.OverriddenMethod)
+        {
+            yield return current;
+        }
+    }
+
+    private static IEnumerable<AttributeData> GetConstraintViolationInheritedAttributes(IEnumerable<ISymbol> scopes)
+    {
+        // Match GetCustomAttributes(inherit: true) for both types and overridden methods.
+        // This is used by both reflection discovery
         // and the inaccessible-attribute accessor. Occurrence indices must see the same list.
         var seen = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-        foreach (var current in type.GetSelfAndBaseTypes())
+        var isDeclaredScope = true;
+        foreach (var current in scopes)
         {
             var declared = current.GetAttributes();
             foreach (var attribute in declared)
@@ -714,7 +724,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     }
                 }
 
-                if (SymbolEqualityComparer.Default.Equals(current, type)
+                if (isDeclaredScope
                     || (inherited && (allowMultiple || !seen.Contains(attributeType))))
                 {
                     yield return attribute;
@@ -725,6 +735,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 if (attribute.AttributeClass is { } attributeType) seen.Add(attributeType);
             }
+            isDeclaredScope = false;
         }
     }
 
@@ -762,7 +773,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 {
                     metadataName = attributeType.ContainingNamespace.ToDisplayString() + "." + metadataName;
                 }
-                writer.Append($"global::System.Linq.Enumerable.ElementAt(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => (attribute.GetType().IsGenericType ? attribute.GetType().GetGenericTypeDefinition() : attribute.GetType()).FullName == {SymbolDisplay.FormatLiteral(metadataName, quote: true)}), {occurrence.ToString(CultureInfo.InvariantCulture)})");
+                writer.Append($"global::System.Linq.Enumerable.ElementAtOrDefault(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => (attribute.GetType().IsGenericType ? attribute.GetType().GetGenericTypeDefinition() : attribute.GetType()).FullName == {SymbolDisplay.FormatLiteral(metadataName, quote: true)}), {occurrence.ToString(CultureInfo.InvariantCulture)})!");
             }
         }
     }
@@ -838,12 +849,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         }
         else
         {
-            writer.AppendLine("AttributeFactory = static () => new global::System.Attribute[]");
+            writer.AppendLine("AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]");
             writer.AppendLine("{");
             writer.Indent();
             WriteConstraintViolationAttributes(writer, testMethod, attributes);
             writer.Unindent();
-            writer.AppendLine("},");
+            writer.AppendLine("}, static attribute => attribute is not null),");
         }
         writer.AppendLine($"Messages = new string[] {{ {string.Join(", ", messages.Select(m => $"\"{EscapeString(m)}\""))} }},");
         writer.Unindent();
@@ -854,12 +865,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (requiresUnsafe)
         {
             // Limit the unsafe context to attribute construction: mixed valid entries can contain awaits.
-            writer.AppendLine("private static unsafe global::System.Attribute[] __CreateConstraintViolationAttributes() => new global::System.Attribute[]");
+            writer.AppendLine("private static unsafe global::System.Attribute[] __CreateConstraintViolationAttributes() => global::System.Array.FindAll(new global::System.Attribute[]");
             writer.AppendLine("{");
             writer.Indent();
             WriteConstraintViolationAttributes(writer, testMethod, attributes);
             writer.Unindent();
-            writer.AppendLine("};");
+            writer.AppendLine("}, static attribute => attribute is not null);");
         }
     }
 

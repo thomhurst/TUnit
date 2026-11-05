@@ -67,12 +67,12 @@ internal static class TUnit_TestProject_ConstrainedGenericTestClass_T_TestMethod
             FilePath = "",
             LineNumber = 10,
             MethodMetadata = __mm_0,
-            AttributeFactory = static () => new global::System.Attribute[]
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
             {
                 new global::TUnit.Core.TestAttribute(),
                 new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string)),
                 new global::TUnit.Core.GenerateGenericTestAttribute(typeof(object))
-            },
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type arguments 'String' do not satisfy the generic constraints of type 'ConstrainedGenericTestClass`1'" },
         },
     };

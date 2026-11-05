@@ -152,6 +152,23 @@ public class InheritedPrivateAttributeContainer
         public void Run() { }
     }
 
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = true, AllowMultiple = true)]
+    private sealed class RepeatedCategoryAttribute(string category) : CategoryAttribute(category);
+
+    public abstract class MethodBase
+    {
+        [RepeatedCategory("Issue7437InheritedMethod")]
+        public virtual void Run() { }
+    }
+
+    [GenerateGenericTest(typeof(string))]
+    [RepeatedCategory("Issue7437OverrideClass")]
+    public class InvalidOverrideClass<T> : MethodBase where T : struct
+    {
+        [Test]
+        public override void Run() { }
+    }
+
     [NonInheritedCategory]
     [SingleCategory("Issue7437Shadowed")]
     public abstract class Base;

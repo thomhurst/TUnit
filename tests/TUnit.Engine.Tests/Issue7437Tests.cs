@@ -44,6 +44,8 @@ public class Issue7437Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("*InvalidPrivateAttributeClass", "Issue7437PrivateDouble", 1)]
     [Arguments("*InvalidPrivateArrayClass", "Issue7437PrivateInt32", 1)]
     [Arguments("*InvalidPrivateArrayClass", "Issue7437PrivateDouble", 1)]
+    [Arguments("*InvalidOverrideClass", "Issue7437InheritedMethod", 1)]
+    [Arguments("*InvalidOverrideClass", "Issue7437OverrideClass", 1)]
     [Arguments("*InvalidInheritedClass", "Issue7437Derived", 1)]
     [Arguments("*InvalidImplicitInheritedClass", "Issue7437ImplicitDerived", 1)]
     [Arguments("InvalidConstructorClass", "Issue7437Constructor", 2)]

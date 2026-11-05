@@ -7,7 +7,10 @@ internal class GenericDiscoveryFailureFilterTests : TestsBase
         "TUnit.TestProject", "Bugs", "_7437", "Tests.cs"), async generatedFiles =>
     {
         var failures = generatedFiles.Where(f => f.Contains("GenericConstraintViolation")).ToArray();
-        await Assert.That(failures.Length).IsEqualTo(9);
+        await Assert.That(failures.Length).IsEqualTo(10);
+        var overrideFailure = failures.Single(f => f.Contains("InvalidOverrideClass"));
+        await Assert.That(overrideFailure).Contains("), 0)");
+        await Assert.That(overrideFailure).Contains("), 1)");
         var inheritedFailure = failures.Single(f => f.Contains("InvalidInheritedClass"));
         await Assert.That(inheritedFailure).DoesNotContain("+NonInheritedCategoryAttribute");
         await Assert.That(inheritedFailure).DoesNotContain("), 1)");
