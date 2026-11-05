@@ -106,6 +106,8 @@ public class CancellationTokenTriggeredTests(int value)
     [Test]
     public async Task CancellationTokenIsTriggered(CancellationToken cancellationToken)
     {
+        await Assert.That(value).IsEqualTo(1);
+
         var fired = false;
         cancellationToken.Register(() => fired = true);
 

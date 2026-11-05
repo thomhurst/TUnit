@@ -8,7 +8,7 @@ namespace TUnit.TestProject;
 [EngineTest(ExpectedResult.Pass)]
 public class TransactionTest
 {
-    private TransactionScope _scope;
+    private TransactionScope _scope = null!; // Initialized by the Before(Test) hook.
 
     [Before(Test)]
     public void Setup(TestContext context)

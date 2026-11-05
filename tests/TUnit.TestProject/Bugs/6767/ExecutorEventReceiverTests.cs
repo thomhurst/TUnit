@@ -65,8 +65,6 @@ public class ExecutorEventReceiverTests
 /// </summary>
 internal sealed class SerialExecutor : GenericAbstractExecutor, ITestRegisteredEventReceiver
 {
-    public int Order => 0;
-
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
         context.SetParallelLimiter(new SerialLimit());
@@ -128,8 +126,6 @@ internal sealed class TwoEqualExecutorsAttribute : Attribute, ITestRegisteredEve
 internal sealed class EqualByTypeExecutor : GenericAbstractExecutor, ITestRegisteredEventReceiver
 {
     public bool IsRegistered { get; private set; }
-
-    public int Order => 0;
 
     public ValueTask OnTestRegistered(TestRegisteredContext context)
     {
