@@ -189,11 +189,14 @@ public abstract class InvokableTestBase(TestMode testMode)
 
                                  $@"Mode: {testMode}",
                                  @$"Command Input: {command}",
+                                 @$"Process ID: {commandTask.ProcessId}",
+                                 @$"Exit Code: {commandResult?.ExitCode.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "unavailable"}",
+                                 @$"Expected TRX: {trxPath}",
                                  @$"Error: {commandResult?.StandardError}",
                                  @$"Output: {commandResult?.StandardOutput}"
 
                                  Expression: {assertionExpression}
-                                 """);
+                                 """, e);
         }
 
         return commandTask;
