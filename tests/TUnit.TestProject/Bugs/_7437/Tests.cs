@@ -124,6 +124,20 @@ public class InheritedPrivateAttributeContainer
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
     private sealed class SingleCategoryAttribute(string category) : CategoryAttribute(category);
 
+    // No own AttributeUsage: runtime defaults apply, even though Category allows multiples.
+    private sealed class ImplicitCategoryAttribute(string category) : CategoryAttribute(category);
+
+    [ImplicitCategory("Issue7437ImplicitShadowed")]
+    public abstract class ImplicitBase;
+
+    [GenerateGenericTest(typeof(string))]
+    [ImplicitCategory("Issue7437ImplicitDerived")]
+    public class InvalidImplicitInheritedClass<T> : ImplicitBase where T : struct
+    {
+        [Test]
+        public void Run() { }
+    }
+
     [NonInheritedCategory]
     [SingleCategory("Issue7437Shadowed")]
     public abstract class Base;

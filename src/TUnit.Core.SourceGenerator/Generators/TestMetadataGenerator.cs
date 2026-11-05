@@ -701,8 +701,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     continue;
                 }
 
-                var usage = attributeType.GetSelfAndBaseTypes()
-                    .SelectMany(symbol => symbol.GetAttributes())
+                var usage = attributeType.GetAttributes()
                     .FirstOrDefault(candidate => candidate.AttributeClass?.ToDisplayString() == "System.AttributeUsageAttribute");
                 var inherited = true;
                 var allowMultiple = false;

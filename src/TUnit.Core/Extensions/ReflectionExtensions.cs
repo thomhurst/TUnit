@@ -179,10 +179,51 @@ public static class ReflectionExtensions
 
         if (inherit && provider is Type type)
         {
+            var seen = new HashSet<Type>(attributes.Select(attribute => attribute.GetType()));
             var baseType = type.BaseType;
             while (baseType != null && baseType != typeof(object))
             {
-                attributes.AddRange(GetAttributesViaCustomAttributeData(baseType, attributeType, false));
+                // Inspect usage on the concrete attribute type, as Type.GetCustomAttributes does.
+                // A base attribute class's usage does not supply the runtime defaults.
+                var declaredTypes = new HashSet<Type>();
+                foreach (var data in CustomAttributeData.GetCustomAttributes(baseType))
+                {
+                    var concreteType = data.AttributeType;
+                    if (!attributeType.IsAssignableFrom(concreteType))
+                    {
+                        continue;
+                    }
+
+                    var usage = CustomAttributeData.GetCustomAttributes(concreteType)
+                        .FirstOrDefault(attribute => attribute.AttributeType == typeof(AttributeUsageAttribute));
+                    var inherited = true;
+                    var allowMultiple = false;
+                    if (usage != null)
+                    {
+                        foreach (var argument in usage.NamedArguments)
+                        {
+                            if (argument.MemberName == nameof(AttributeUsageAttribute.Inherited)) inherited = (bool)argument.TypedValue.Value!;
+                            if (argument.MemberName == nameof(AttributeUsageAttribute.AllowMultiple)) allowMultiple = (bool)argument.TypedValue.Value!;
+                        }
+                    }
+
+                    if (inherited && (allowMultiple || !seen.Contains(concreteType)))
+                    {
+                        try
+                        {
+                            if (CreateAttributeInstance(data) is { } attribute)
+                            {
+                                attributes.Add(attribute);
+                            }
+                        }
+                        catch
+                        {
+                            // Preserve the fallback's handling of attributes that cannot be instantiated.
+                        }
+                    }
+                    declaredTypes.Add(concreteType);
+                }
+                seen.UnionWith(declaredTypes);
                 baseType = baseType.BaseType;
             }
         }
