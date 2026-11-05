@@ -852,3 +852,25 @@ public class ExplicitSoleTupleInferenceTests
 }
 
 #pragma warning restore TUnit0001
+
+#pragma warning disable TUnit0001, TUnit0046 // #7622: explicit tuple types; immutable tuples contain null arrays.
+public class ExplicitArrayRankTupleInferenceTests
+{
+    // Null converts to the requested array shape at invocation. Its declared rank must
+    // not overwrite T = long during discovery and create an extra int instantiation.
+    public static IEnumerable<(long, int[,]?)> ValueRows() => [(1L, null)];
+    public static IEnumerable<Tuple<long, int[,]?>> ReferenceRows() => [Tuple.Create<long, int[,]?>(1L, null)];
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(ValueRows))]
+    public void Value<T>((T, T[]?) row) => Verify(row.Item1, row.Item2);
+
+    [Test, GenerateGenericTest(typeof(long)), MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<T, T[]?> row) => Verify(row.Item1, row.Item2);
+
+    private static void Verify<T>(T value, T[]? array)
+    {
+        if (typeof(T) != typeof(long) || !Equals(value, 1L) || array is not null)
+            throw new InvalidOperationException("Expected only the deduplicated long instantiation");
+    }
+}
+#pragma warning restore TUnit0001, TUnit0046

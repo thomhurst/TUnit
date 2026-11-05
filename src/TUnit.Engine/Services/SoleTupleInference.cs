@@ -75,7 +75,8 @@ internal static class SoleTupleInference
         }
 
         // Array types
-        if (parameterType.IsArray && argumentType.IsArray)
+        if (parameterType.IsArray && argumentType.IsArray
+            && parameterType.GetArrayRank() == argumentType.GetArrayRank())
         {
             return TryInfer(
                 parameterType.GetElementType()!,
