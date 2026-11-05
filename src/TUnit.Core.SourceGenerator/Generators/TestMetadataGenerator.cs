@@ -7304,10 +7304,17 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
     }
 
     private static bool MatchesOpenRowType(ITypeSymbol parameter, ITypeSymbol row, Compilation compilation,
-        Dictionary<ITypeSymbol, ITypeSymbol> bindings, bool reconstructTupleElements)
+        Dictionary<ITypeSymbol, ITypeSymbol> bindings, bool reconstructTupleElements, bool overwriteBindings = false)
     {
         if (parameter is ITypeParameterSymbol)
         {
+            // Structural tuple-element inference follows ProcessTypeForGenerics: later
+            // occurrences win. Interface/base candidates deliberately use strict bindings.
+            if (overwriteBindings)
+            {
+                bindings[parameter] = row;
+                return true;
+            }
             if (bindings.TryGetValue(parameter, out var bound))
                 return SymbolEqualityComparer.Default.Equals(bound, row);
             bindings.Add(parameter, row);
@@ -7329,7 +7336,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             && row.IsValueType
             && row is not INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T })
         {
-            return MatchesOpenRowType(nullableParameter.TypeArguments[0], row, compilation, bindings, true);
+            return MatchesOpenRowType(nullableParameter.TypeArguments[0], row, compilation, bindings, true, overwriteBindings);
         }
 
         // A single tuple argument is reconstructed by the generated binder, including across
@@ -7341,7 +7348,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             for (var i = 0; i < parameterElements.Length; i++)
             {
                 // Sole tuple arguments are rebuilt with per-element conversions. Preserve
-                // the existing last-element inference for direct or nullable type parameters;
+                // the existing last-element inference through structurally matching elements;
                 // nested interface/base candidates still require consistent bindings.
                 var parameterElement = parameterElements[i];
                 var rowElement = rowElements[i];
@@ -7359,7 +7366,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     bindings[parameterElement] = rowElement;
                     continue;
                 }
-                if (!MatchesOpenRowType(parameterElements[i], rowElements[i], compilation, bindings, true)) return false;
+                if (!MatchesOpenRowType(parameterElements[i], rowElements[i], compilation, bindings, true, true)) return false;
             }
             return true;
         }
@@ -7367,7 +7374,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         if (parameter is IArrayTypeSymbol array)
         {
             return row is IArrayTypeSymbol rowArray && array.Rank == rowArray.Rank
-                && MatchesOpenRowType(array.ElementType, rowArray.ElementType, compilation, bindings, reconstructTupleElements);
+                && MatchesOpenRowType(array.ElementType, rowArray.ElementType, compilation, bindings, reconstructTupleElements, overwriteBindings);
         }
 
         if (parameter is INamedTypeSymbol { IsGenericType: true } named
@@ -7376,7 +7383,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             for (var i = 0; i < named.TypeArguments.Length; i++)
             {
-                if (!MatchesOpenRowType(named.TypeArguments[i], rowNamed.TypeArguments[i], compilation, bindings, reconstructTupleElements)) return false;
+                if (!MatchesOpenRowType(named.TypeArguments[i], rowNamed.TypeArguments[i], compilation, bindings, reconstructTupleElements, overwriteBindings)) return false;
             }
             return true;
         }

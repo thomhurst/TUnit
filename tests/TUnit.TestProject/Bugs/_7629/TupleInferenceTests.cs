@@ -490,3 +490,49 @@ public class RepeatedNullableTupleTests
             throw new InvalidOperationException("Expected long inference through nullable reference-tuple element");
     }
 }
+
+public class RepeatedNestedGenericTupleTests
+{
+    public static IEnumerable<(int, List<long>)> ValueRows() => [(1, new List<long> { 2 })];
+    public static IEnumerable<Tuple<int, List<long>>> ReferenceRows() => [Tuple.Create(3, new List<long> { 4 })];
+    public static IEnumerable<(int, long[])> ArrayRows() => [(5, new long[] { 6 })];
+
+    [Test]
+    [MethodDataSource(nameof(ValueRows))]
+    public void Value<T>((T, List<T>) row)
+    {
+        if (typeof(T) != typeof(long) || !Equals(row.Item1, 1L) || !Equals(row.Item2[0], 2L))
+            throw new InvalidOperationException("Expected long inference through a nested generic element");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ReferenceRows))]
+    public void Reference<T>(Tuple<T, List<T>> row)
+    {
+        if (typeof(T) != typeof(long) || !Equals(row.Item1, 3L) || !Equals(row.Item2[0], 4L))
+            throw new InvalidOperationException("Expected long inference through a reference tuple generic element");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(ArrayRows))]
+    public void Array<T>((T, T[]) row)
+    {
+        if (typeof(T) != typeof(long) || !Equals(row.Item1, 5L) || !Equals(row.Item2[0], 6L))
+            throw new InvalidOperationException("Expected long inference through an array element");
+    }
+}
+
+// Ordinary parameters retain their existing inference policy; generic-base traversal is tuple-only.
+public class OrdinaryGenericBaseInferenceTests
+{
+    public class Base<T> { }
+    public sealed class Derived : Base<int> { }
+    public static IEnumerable<Derived> Rows() => [new Derived()];
+
+    [Test]
+    // Intentionally exercises uninferable ordinary generic-base parameters.
+#pragma warning disable TUnit0001
+    [MethodDataSource(nameof(Rows))]
+#pragma warning restore TUnit0001
+    public void Ordinary<T>(Base<T> value) { }
+}

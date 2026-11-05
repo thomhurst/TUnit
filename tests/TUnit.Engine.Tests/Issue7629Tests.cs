@@ -11,6 +11,7 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("RepeatedTupleBindingTests", 3)]
     [Arguments("RepeatedConvertibleTupleTests", 2)]
     [Arguments("RepeatedNullableTupleTests", 6)]
+    [Arguments("RepeatedNestedGenericTupleTests", 3)]
     [Arguments("OpenTupleAssignabilityTests", 3)]
     [Arguments("SingleTupleElementConversionTests", 18)]
     [Arguments("BoxedTupleElementConversionTests", 2)]
@@ -26,6 +27,17 @@ public class Issue7629Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Total.ShouldBe(expectedCount),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(expectedCount),
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
+
+    [Test]
+    public async Task Ordinary_Generic_Base_Inference_Remains_Unsupported_In_Both_Modes()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7629/OrdinaryGenericBaseInferenceTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1)
             ]);
     }
 }

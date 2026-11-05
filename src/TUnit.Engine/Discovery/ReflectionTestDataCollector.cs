@@ -3681,13 +3681,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Infers generic type mappings from parameter and argument types
     /// </summary>
-    private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping, bool isTopLevel = false)
+    private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping, bool isTopLevel = false, bool tupleElement = false)
     {
         // Match discovery inference when a nullable tuple element has been boxed as its value.
         if (Nullable.GetUnderlyingType(paramType) is { } underlyingParameter
             && argType.IsValueType && Nullable.GetUnderlyingType(argType) is null)
         {
-            InferGenericTypeMapping(underlyingParameter, argType, typeMapping, isTopLevel);
+            InferGenericTypeMapping(underlyingParameter, argType, typeMapping, isTopLevel, tupleElement);
             return;
         }
 
@@ -3712,13 +3712,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         }
 
         // Mirror discovery's generic base-class inference when constructing the invocation.
-        if (paramType is { IsGenericType: true, IsClass: true })
+        if (tupleElement && paramType is { IsGenericType: true, IsClass: true })
         {
             var parameterDefinition = paramType.GetGenericTypeDefinition();
             for (var baseType = argType.BaseType; baseType is not null; baseType = baseType.BaseType)
             {
                 if (!baseType.IsGenericType || baseType.GetGenericTypeDefinition() != parameterDefinition) continue;
-                InferGenericTypeMapping(paramType, baseType, typeMapping);
+                InferGenericTypeMapping(paramType, baseType, typeMapping, tupleElement: true);
                 return;
             }
         }
@@ -3748,7 +3748,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         argumentElement = Nullable.GetUnderlyingType(argumentElement) ?? argumentElement;
                     }
                     InferGenericTypeMapping(parameterElement, argumentElement, typeMapping,
-                        isTopLevel: TupleHelper.IsTupleType(paramType) && parameterElement.IsGenericParameter);
+                        isTopLevel: (tupleElement && isTopLevel) || TupleHelper.IsTupleType(paramType),
+                        tupleElement: tupleElement || TupleHelper.IsTupleType(paramType));
                 }
             }
             else
@@ -3793,7 +3794,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // Array types
         if (paramType.IsArray && argType.IsArray)
         {
-            InferGenericTypeMapping(paramType.GetElementType()!, argType.GetElementType()!, typeMapping);
+            InferGenericTypeMapping(paramType.GetElementType()!, argType.GetElementType()!, typeMapping, isTopLevel, tupleElement);
         }
     }
 
@@ -4060,7 +4061,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         {
                             var paramType = flattenedTupleTypes?[j] ?? methodParams[j].ParameterType;
                             var argType = GetArgumentInferenceType(arg);
-                            InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true);
+                            InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true,
+                                tupleElement: flattenedTupleTypes is not null);
                         }
                     }
 
