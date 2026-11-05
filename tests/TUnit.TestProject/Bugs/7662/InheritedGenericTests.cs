@@ -160,3 +160,46 @@ public class NonGenericOverridesWithoutTestAttribute : VirtualTestBase<int>
     [Test]
     public void DeclaredTest() { }
 }
+
+public abstract class IntermediateUndecoratedOverride<T> : VirtualTestBase<T>
+{
+    public override Task Example() => throw new InvalidOperationException("An intermediate undecorated override must not execute.");
+}
+
+[InheritsTests]
+[GenerateGenericTest(typeof(int))]
+public class InheritsIntermediateOverride<T> : IntermediateUndecoratedOverride<T>
+{
+    [Test]
+    public void DeclaredTest() { }
+}
+
+[InheritsTests]
+public class NonGenericInheritsIntermediateOverride : IntermediateUndecoratedOverride<int>
+{
+    [Test]
+    public void DeclaredTest() { }
+}
+
+[InheritsTests]
+[GenerateGenericTest(typeof(int))]
+public class TransitiveDecoratedOverride<T> : IntermediateUndecoratedOverride<T>
+{
+    private int _executions;
+
+    [Test]
+    public override async Task Example()
+    {
+        await Assert.That(++_executions).IsEqualTo(1);
+    }
+}
+
+[InheritsTests]
+[GenerateGenericTest(typeof(int))]
+public class TransitiveUndecoratedOverride<T> : IntermediateUndecoratedOverride<T>
+{
+    public override Task Example() => throw new InvalidOperationException("A transitive undecorated override must not execute.");
+
+    [Test]
+    public void DeclaredTest() { }
+}

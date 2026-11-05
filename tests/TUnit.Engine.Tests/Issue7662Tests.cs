@@ -6,6 +6,10 @@ namespace TUnit.Engine.Tests;
 public class Issue7662Tests(TestMode testMode) : InvokableTestBase(testMode)
 {
     [Test]
+    [Arguments("InheritsIntermediateOverride", 1)]
+    [Arguments("NonGenericInheritsIntermediateOverride", 1)]
+    [Arguments("TransitiveDecoratedOverride", 1)]
+    [Arguments("TransitiveUndecoratedOverride", 1)]
     [Arguments("InheritedOnly", 1)]
     [Arguments("InheritedAndDeclared", 2)]
     [Arguments("WithoutInheritance", 1)]

@@ -170,11 +170,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 foreach (var method in currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
                 {
-                    // Match source-generated inheritance: overrides declared on the requested
-                    // class suppress base tests even without [Test]; hiding requires [Test].
+                    // Walk from nearest to furthest declarations: overrides at every level
+                    // suppress base tests even without [Test]; hiding requires [Test].
                     if (definitionMethods != null
                         ? !ContainsMethodDefinition(definitionMethods, method)
-                        : currentType != t && IsSuppressedByDeclaredMethod(method, t, methods))
+                        : currentType != t && IsSuppressedByDeclaredMethod(method, methods))
                     {
                         continue;
                     }
@@ -201,11 +201,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return false;
     }
 
-    private static bool IsSuppressedByDeclaredMethod(MethodInfo baseMethod, Type type, List<MethodInfo> methods)
+    private static bool IsSuppressedByDeclaredMethod(MethodInfo baseMethod, List<MethodInfo> methods)
     {
         foreach (var derived in methods)
         {
-            if (derived.DeclaringType == type
+            if (derived.DeclaringType != baseMethod.DeclaringType
                 && (OverridesBaseMethod(derived, baseMethod)
                     || (derived.IsDefined(typeof(TestAttribute), inherit: false) && HidesBaseMethod(derived, baseMethod))))
             {

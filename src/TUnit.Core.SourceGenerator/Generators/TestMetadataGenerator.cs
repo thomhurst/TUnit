@@ -6191,37 +6191,44 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     private static List<IMethodSymbol> CollectInheritedTestMethods(INamedTypeSymbol derivedClass)
     {
-        var allTestMethods = derivedClass.GetMembersIncludingBase()
+        var allMethods = derivedClass.GetMembersIncludingBase()
             .OfType<IMethodSymbol>()
-            .Where(m => m.GetAttributes().Any(attr => attr.IsTestAttribute()))
             .ToArray();
 
-        // Find methods declared directly on the derived class
-        var derivedClassMethods = allTestMethods
-            .Where(m => SymbolEqualityComparer.Default.Equals(m.ContainingType.OriginalDefinition, derivedClass.OriginalDefinition))
-            .ToArray();
-
-        // Filter out base methods that are hidden by derived class methods or declared directly on derived class
         var result = new List<IMethodSymbol>();
-        foreach (var method in allTestMethods)
+        foreach (var method in allMethods)
         {
-            // Skip methods declared directly on derived class
-            // (they're handled by regular test registration)
-            if (SymbolEqualityComparer.Default.Equals(method.ContainingType.OriginalDefinition, derivedClass.OriginalDefinition))
+            if (!method.GetAttributes().Any(attr => attr.IsTestAttribute())
+                || SymbolEqualityComparer.Default.Equals(method.ContainingType.OriginalDefinition, derivedClass.OriginalDefinition))
             {
                 continue;
             }
 
-            // Check if this base method is hidden by any derived class method
-            var isHidden = derivedClassMethods.Any(derived => IsMethodHiding(derived, method));
+            // Include undecorated overrides and declarations in intermediate bases.
+            // Only non-override hiding requires an explicit [Test] attribute.
+            var isSuppressed = allMethods.Any(derived => OverridesMethod(derived, method)
+                || (derived.GetAttributes().Any(attr => attr.IsTestAttribute()) && IsMethodHiding(derived, method)));
 
-            if (!isHidden)
+            if (!isSuppressed)
             {
                 result.Add(method);
             }
         }
 
         return result;
+    }
+
+    private static bool OverridesMethod(IMethodSymbol candidate, IMethodSymbol baseMethod)
+    {
+        for (var overridden = candidate.OverriddenMethod; overridden != null; overridden = overridden.OverriddenMethod)
+        {
+            if (SymbolEqualityComparer.Default.Equals(overridden, baseMethod))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static IMethodSymbol? FindConcreteMethodImplementation(INamedTypeSymbol derivedClass, IMethodSymbol baseMethod)
@@ -6232,7 +6239,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         foreach (var candidate in candidateMethods)
         {
             // Check if this method is an override or implementation of the base method
-            if (candidate.IsOverride && SymbolEqualityComparer.Default.Equals(candidate.OverriddenMethod, baseMethod))
+            if (OverridesMethod(candidate, baseMethod))
             {
                 return candidate;
             }
