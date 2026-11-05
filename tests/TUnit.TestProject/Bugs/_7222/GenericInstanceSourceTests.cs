@@ -147,3 +147,33 @@ public class MixedExplicitClassSourcesTests<TClass>
     {
     }
 }
+
+// #7622: the analyzer spreads reference tuples instead of binding the whole first parameter.
+#pragma warning disable TUnit0001
+public class WholeTupleWithTrailingParametersTests
+{
+    public static IEnumerable<Tuple<int, string>> StaticRows() => [Tuple.Create(1, "tuple")];
+    public IEnumerable<Tuple<int, string>> InstanceRows() => StaticRows();
+
+    [Test]
+    [MethodDataSource(nameof(StaticRows))]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    public void Optional<T>(Tuple<T, string> row, int extra = 5)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra != 5)
+            throw new InvalidOperationException("Expected whole tuple and default value");
+    }
+
+    [Test]
+    [MethodDataSource(nameof(StaticRows))]
+    [InstanceMethodDataSource(nameof(InstanceRows))]
+    public void Params<T>(Tuple<T, string> row, params int[] extra)
+    {
+        if (typeof(T) != typeof(int) || row.Item2 != "tuple" || extra.Length != 0)
+            throw new InvalidOperationException("Expected whole tuple and empty params");
+    }
+
+
+}
+
+#pragma warning restore TUnit0001

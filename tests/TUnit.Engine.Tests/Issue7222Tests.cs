@@ -180,15 +180,16 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
-    [Arguments("ExplicitClassInstanceSourcesTests*")]
-    [Arguments("InferredReferenceTupleSourceTests")]
-    public async Task Inferred_Instance_Sources_Preserve_All_Rows_And_Unwrap_Tuples(string className)
+    [Arguments("ExplicitClassInstanceSourcesTests*", 2)]
+    [Arguments("InferredReferenceTupleSourceTests", 2)]
+    [Arguments("WholeTupleWithTrailingParametersTests", 4)]
+    public async Task Inferred_Instance_Sources_Preserve_All_Rows_And_Unwrap_Tuples(string className, int expectedCount)
     {
         await RunTestsWithFilter(
             $"/*/TUnit.TestProject.Bugs._7222/{className}/*",
             [
-                result => result.ResultSummary.Counters.Total.ShouldBe(2),
-                result => result.ResultSummary.Counters.Passed.ShouldBe(2)
+                result => result.ResultSummary.Counters.Total.ShouldBe(expectedCount),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(expectedCount)
             ]);
     }
 
@@ -202,8 +203,8 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
             [
                 result => result.ResultSummary.Counters.Total.ShouldBe(4),
                 result => result.ResultSummary.Counters.Passed.ShouldBe(4),
-                result => result.Results.Count(x => x.TestName == "InstanceFirst").ShouldBe(2),
-                result => result.Results.Count(x => x.TestName == "StaticFirst").ShouldBe(2)
+                result => result.Results.Count(x => x.TestName.StartsWith("InstanceFirst<", StringComparison.Ordinal)).ShouldBe(2),
+                result => result.Results.Count(x => x.TestName.StartsWith("StaticFirst<", StringComparison.Ordinal)).ShouldBe(2)
             ]);
     }
 

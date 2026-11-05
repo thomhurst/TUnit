@@ -7274,13 +7274,16 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         var genericParams = testMethod.MethodSymbol.TypeParameters;
         var genericParamMap = new Dictionary<string, ITypeSymbol>();
 
-        // A typed tuple parameter receives the whole row. A bare type parameter normally
+        // A typed tuple parameter receives the whole row when the remaining parameters can be
+        // omitted (optional or a trailing collection). A bare type parameter normally
         // receives the first element, as reflection mode unwraps tuple rows before inference.
         // With explicit method types, preserve whole reference-tuple inference so it deduplicates
         // against GenerateGenericTest<Tuple<...>> instead of adding a first-element instantiation.
-        var receivesWholeTuple = testMethodParams.Length == 1
-            && (GetTupleElementTypes(testMethodParams[0].Type) is not null
-                || (testMethodParams[0].Type is ITypeParameterSymbol
+        var receivesWholeTuple = testMethodParams.Length > 0
+            && ((GetTupleElementTypes(testMethodParams[0].Type) is not null
+                    && testMethodParams.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams))
+                || (testMethodParams.Length == 1
+                    && testMethodParams[0].Type is ITypeParameterSymbol
                     && rowType is INamedTypeSymbol { IsTupleType: false }
                     && HasExplicitGenericTestTypes(testMethod)));
 
