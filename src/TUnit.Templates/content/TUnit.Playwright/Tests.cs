@@ -8,7 +8,21 @@ public class Tests : PageTest
     [Test]
     public async Task Test()
     {
-        await Page.GotoAsync("https://playwright.dev");
+        // Serve sample pages in the browser so this test works without a public website.
+        await Page.RouteAsync("https://tunit-playwright.test/**", route =>
+            route.FulfillAsync(new()
+            {
+                ContentType = "text/html",
+                Body = """
+                    <!doctype html>
+                    <html lang="en">
+                        <head><title>TUnit Playwright</title></head>
+                        <body><a href="/docs/intro">Get Started</a></body>
+                    </html>
+                    """,
+            }));
+
+        await Page.GotoAsync("https://tunit-playwright.test/");
 
         // Expect a title "to contain" a substring.
         await Expect(Page).ToHaveTitleAsync(new Regex("Playwright"));
