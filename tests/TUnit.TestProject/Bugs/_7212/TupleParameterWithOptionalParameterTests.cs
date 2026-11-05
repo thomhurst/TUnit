@@ -240,6 +240,41 @@ public class MutableTupleWithOptionalParameterTests
         await Assert.That(pair.Item2).IsEqualTo(27);
     }
 
+    [Test, MethodDataSource(nameof(ErasedNestedRows))]
+    public async Task Spread_Mutable_Tuple_Object_Target(object nested, int value)
+    {
+        var inner = ((Fixture, int))nested;
+        await Check(inner.Item1, inner.Item2);
+        await Assert.That(value).IsEqualTo(27);
+    }
+
+    [Test, MethodDataSource(nameof(ErasedNestedRows))]
+    public async Task Spread_Mutable_Tuple_Object_Before_Params(object nested, params int[] values)
+    {
+        var inner = ((Fixture, int))nested;
+        await Check(inner.Item1, inner.Item2);
+        await Assert.That(values.Length).IsEqualTo(1);
+        await Assert.That(values[0]).IsEqualTo(27);
+    }
+
+    public static IEnumerable<object[]> ErasedParamsRows()
+    {
+        yield return [(0, ((CreateFixture(), 26), 27))];
+        yield return [(0, ((CreateFixture(), 26), 27), ((CreateFixture(), 26), 27))];
+    }
+
+    [Test, MethodDataSource(nameof(ErasedParamsRows))]
+    public async Task Spread_Mutable_Tuple_Params_Elements(int first, params object[] values)
+    {
+        await Assert.That(first).IsEqualTo(0);
+        foreach (var value in values)
+        {
+            var outer = (((Fixture, int), int))value;
+            await Check(outer.Item1.Item1, outer.Item1.Item2);
+            await Assert.That(outer.Item2).IsEqualTo(27);
+        }
+    }
+
     public static IEnumerable<object[]> ErasedReferenceRows()
     {
         yield return [(Tuple.Create(CreateFixture(), 26), 27)];

@@ -3716,16 +3716,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     private static readonly ConcurrentDictionary<Type, (ConstructorInfo Constructor, Type[] Arguments)> TupleConstructors = new();
 
+    // Retained tuple boxes must survive setup, but must not escape through object/interface
+    // assignability fast paths at invocation. Tuple targets still use the recursive binder.
+    private static object? MaterializeNonTupleArgument(Type parameterType, object? value)
+        => value is TupleArgument retained && !TupleHelper.IsTupleType(parameterType)
+            ? retained.Materialize()
+            : value;
+
     // Generic inference closes (T, object) to (int, object), but a preserved (int, string)
     // row is still boxed as its original invariant ValueTuple type. Rebind only incompatible
     // tuples; compatible rows must retain their original identity.
     private static object? CastInvocationArgument(Type parameterType, object? value)
     {
-        // Materialize erased tuple values before object/interface assignability can expose the wrapper.
-        if (value is TupleArgument retained && !TupleHelper.IsTupleType(parameterType))
-        {
-            value = retained.Materialize();
-        }
+        value = MaterializeNonTupleArgument(parameterType, value);
 
         var targetType = Nullable.GetUnderlyingType(parameterType) ?? parameterType;
         if (value == null || targetType.IsInstanceOfType(value))
@@ -3971,7 +3974,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     for (var i = 0; i < regularParamsCount && i < dataArgumentCount; i++)
                     {
                         var paramType = parameters[i].ParameterType;
-                        var arg = args[i];
+                        var arg = MaterializeNonTupleArgument(paramType, args[i]);
 
                         if (arg == null || arg == Type.Missing)
                         {
@@ -4022,7 +4025,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         // - Otherwise, create array from remaining arguments
                         if (paramsCount == 1)
                         {
-                            var singleArg = args[paramsStartIndex];
+                            var singleArg = MaterializeNonTupleArgument(lastParam.ParameterType, args[paramsStartIndex]);
                             if (singleArg == null)
                             {
                                 // Null should be passed as null, not as array with null element
@@ -4074,7 +4077,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                             var paramsArray = Array.CreateInstance(paramsElementType, paramsCount);
                             for (var i = 0; i < paramsCount; i++)
                             {
-                                var arg = args[paramsStartIndex + i];
+                                var arg = MaterializeNonTupleArgument(paramsElementType, args[paramsStartIndex + i]);
                                 if (arg != null)
                                 {
                                     var argType = arg.GetType();
@@ -4106,7 +4109,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     for (var i = 0; i < parameters.Length && i < args.Length; i++)
                     {
                         var paramType = parameters[i].ParameterType;
-                        var arg = args[i];
+                        var arg = MaterializeNonTupleArgument(paramType, args[i]);
 
                         if (arg == null || arg == Type.Missing)
                         {

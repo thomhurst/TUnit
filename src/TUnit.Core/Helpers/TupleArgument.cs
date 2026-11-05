@@ -50,6 +50,8 @@ internal sealed class TupleArgument(Type tupleType, object?[] elements) : IReadO
         var arguments = new object?[shape.Arguments.Length];
         for (var i = 0; i < arguments.Length; i++)
         {
+            // Only the eighth generic argument is the flattened Rest slot. Tuple-valued
+            // elements in earlier positions remain nested and consume one retained element.
             if (i == 7 && TupleHelper.IsTupleType(shape.Arguments[i]))
             {
                 arguments[i] = Construct(shape.Arguments[i], values, ref index);
