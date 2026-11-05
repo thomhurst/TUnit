@@ -7,8 +7,10 @@ internal class GenericDiscoveryFailureFilterTests : TestsBase
         "TUnit.TestProject", "Bugs", "_7437", "Tests.cs"), async generatedFiles =>
     {
         var failures = generatedFiles.Where(f => f.Contains("GenericConstraintViolation")).ToArray();
-        await Assert.That(failures.Length).IsEqualTo(3);
-        foreach (var failure in failures)
+        await Assert.That(failures.Length).IsEqualTo(6);
+        var scopedFailures = failures.Where(f => f.Contains("Issue7437Method")).ToArray();
+        await Assert.That(scopedFailures.Length).IsEqualTo(3);
+        foreach (var failure in scopedFailures)
         {
             await Assert.That(failure).Contains("Issue7437Method");
             await Assert.That(failure).Contains("Issue7437Class");

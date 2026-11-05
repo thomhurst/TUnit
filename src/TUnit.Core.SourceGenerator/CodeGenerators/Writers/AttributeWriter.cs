@@ -31,6 +31,14 @@ public class AttributeWriter(Compilation compilation)
         return _semanticModelCache.GetOrAdd(syntaxTree, tree => compilation.GetSemanticModel(tree));
     }
 
+    /// <summary>Whether this attribute is retained in generated test metadata.</summary>
+    public bool CanWriteAttribute(AttributeData attributeData) =>
+        attributeData.AttributeClass is { } attributeClass
+        && IsTUnitRelatedAttribute(attributeClass)
+        && !attributeData.ConstructorArguments.Any(arg =>
+            arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol }
+            && typeSymbol.IsCompilerGeneratedType());
+
     public void WriteAttributes(ICodeWriter sourceCodeWriter,
         IEnumerable<AttributeData> attributeDatas)
     {
@@ -39,21 +47,7 @@ public class AttributeWriter(Compilation compilation)
         // Filter out attributes that we can write
         foreach (var attributeData in attributeDatas)
         {
-            if (attributeData.AttributeClass is null)
-            {
-                continue;
-            }
-
-            // Only include attributes that are, inherit from, or implement a TUnit type
-            if (!IsTUnitRelatedAttribute(attributeData.AttributeClass))
-            {
-                continue;
-            }
-
-            // Skip attributes with compiler-generated type arguments
-            if (attributeData.ConstructorArguments.Any(arg =>
-                    arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol } &&
-                    typeSymbol.IsCompilerGeneratedType()))
+            if (!CanWriteAttribute(attributeData))
             {
                 continue;
             }

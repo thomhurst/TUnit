@@ -38,6 +38,19 @@ public class Issue7437Tests(TestMode testMode) : InvokableTestBase(testMode)
             [result => result.ResultSummary.Counters.Total.ShouldBe(0)]);
     }
 
+    [Test]
+    [Arguments("*InvalidPrivateAttributeClass", "Issue7437Private", 1)]
+    [Arguments("InvalidConstructorClass", "Issue7437Constructor", 2)]
+    [Arguments("InvalidUnusedSourceClass", "Issue7437UnusedSource", 1)]
+    public Task Failure_Attributes_Do_Not_Replace_Constraint_Errors(string className, string category, int count) =>
+        RunTestsWithFilter($"/*/TUnit.TestProject.Bugs._7437/{className}*/Run[Category={category}]",
+        [
+            result => result.ResultSummary.Counters.Total.ShouldBe(count),
+            result => result.ResultSummary.Counters.Failed.ShouldBe(count),
+            result => result.Results.Where(x => x.Outcome == "Failed").All(x =>
+                x.Output?.ErrorInfo?.Message?.Contains("constraint", StringComparison.OrdinalIgnoreCase) == true).ShouldBeTrue()
+        ]);
+
     private Task AssertSelected(string filter, int expectedFailed) => RunTestsWithFilter(filter,
     [
         result => result.ResultSummary.Counters.Total.ShouldBe(1),

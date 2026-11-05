@@ -46,3 +46,62 @@ public static class UntypedSource
 {
     public static IEnumerable<object> Rows() => [new object()];
 }
+
+// This class has no executable instantiations: the top-level generated source cannot name
+// the private filter attribute, but its actual constructor still supplies the category.
+public class PrivateAttributeContainer
+{
+    private sealed class PrivateCategoryAttribute() : CategoryAttribute("Issue7437Private");
+
+    [PrivateCategory]
+    [GenerateGenericTest(typeof(string))]
+    public class InvalidPrivateAttributeClass<T> where T : struct
+    {
+        [Test]
+        public void Run() { }
+    }
+}
+
+[ClassConstructor<ThrowingClassConstructor>]
+[GenerateGenericTest(typeof(string))]
+[GenerateGenericTest(typeof(object))]
+[Category("Issue7437Constructor")]
+public class InvalidConstructorClass<T> where T : struct
+{
+    [Test]
+    public void Run() { }
+}
+
+public sealed class ThrowingClassConstructor : TUnit.Core.Interfaces.IClassConstructor
+{
+    public ThrowingClassConstructor() => throw new InvalidOperationException("Unused class constructor initialized");
+
+    public Task<object> Create(
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)] Type type,
+        ClassConstructorMetadata classConstructorMetadata) => throw new InvalidOperationException("Unused class constructor invoked");
+}
+
+[GenerateGenericTest(typeof(string))]
+[Category("Issue7437UnusedSource")]
+public class InvalidUnusedSourceClass<T> where T : struct
+{
+    [Test]
+    [UnusedSource]
+    public void Run() { }
+}
+
+public sealed class UnusedSourceAttribute : Attribute, IDataSourceAttribute
+{
+    [ClassDataSource<ThrowingDependency>]
+    public ThrowingDependency Dependency { get; set; } = null!;
+
+    public bool SkipIfEmpty { get; set; }
+    public bool DeferEnumeration { get; set; }
+    public IAsyncEnumerable<Func<Task<object?[]?>>> GetDataRowsAsync(DataGeneratorMetadata metadata)
+        => throw new InvalidOperationException("Unused data source invoked");
+}
+
+public sealed class ThrowingDependency
+{
+    public ThrowingDependency() => throw new InvalidOperationException("Unused data source property injected");
+}

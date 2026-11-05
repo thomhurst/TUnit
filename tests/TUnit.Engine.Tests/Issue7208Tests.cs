@@ -90,8 +90,17 @@ public class Issue7208Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("OwnClassMethodDataSourceWithTestConstructor")]
     public async Task Rows_Infer_Types_From_The_Constructor_The_Instance_Is_Built_With(string className)
     {
-        // Source-gen never infers a generic class's types from its class-level [MethodDataSource] alone (#7333)
-        Skip.When(testMode != TestMode.Reflection, "Only reflection mode discovers this class");
+        if (testMode != TestMode.Reflection)
+        {
+            await RunTestsWithFilter($"/*/TUnit.TestProject.Bugs._7208/{className}*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+                result => result.Results.Single(x => x.Outcome == "Failed").Output?.ErrorInfo?.Message
+                    .ShouldContain("cannot be inferred at compile time")
+            ]);
+            return;
+        }
 
         await RunTestsWithFilter(
             $"/*/TUnit.TestProject.Bugs._7208/{className}/*",

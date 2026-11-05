@@ -684,6 +684,49 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         GetTestAttributes(testMethod)
             .Where(attribute => !DataSourceAttributeHelper.IsDataSourceAttribute(attribute.AttributeClass));
 
+    private static void WriteConstraintViolationAttributes(CodeWriter writer, TestMethodMetadata testMethod, AttributeData[] attributes)
+    {
+        var compilation = testMethod.CompilationContext.Compilation;
+        var occurrences = new Dictionary<INamedTypeSymbol, int>(SymbolEqualityComparer.Default);
+        var first = true;
+        foreach (var attribute in attributes)
+        {
+            if (!first)
+            {
+                writer.AppendLine(",");
+            }
+            first = false;
+            var attributeType = attribute.AttributeClass!;
+            occurrences.TryGetValue(attributeType, out var occurrence);
+            occurrences[attributeType] = occurrence + 1;
+            if (CanConstructConstraintViolationAttribute(attribute, compilation))
+            {
+                testMethod.CompilationContext.AttributeWriter.WriteAttribute(writer, attribute);
+            }
+            else
+            {
+                // Private custom filter attributes cannot be named by the top-level source. The
+                // existing metadata accessor preserves their actual constructor logic and values.
+                var metadataName = attributeType.MetadataName;
+                for (var containing = attributeType.ContainingType; containing is not null; containing = containing.ContainingType)
+                {
+                    metadataName = containing.MetadataName + "+" + metadataName;
+                }
+                if (!attributeType.ContainingNamespace.IsGlobalNamespace)
+                {
+                    metadataName = attributeType.ContainingNamespace.ToDisplayString() + "." + metadataName;
+                }
+                writer.Append($"global::System.Linq.Enumerable.ElementAt(global::System.Linq.Enumerable.Where(global::TUnit.Core.Extensions.MetadataExtensions.GetCustomAttributes(__mm_0), static attribute => attribute.GetType().FullName == {SymbolDisplay.FormatLiteral(metadataName, quote: true)}), {occurrence.ToString(CultureInfo.InvariantCulture)})");
+            }
+        }
+    }
+
+    private static bool CanConstructConstraintViolationAttribute(AttributeData attribute, Compilation compilation) =>
+        attribute.AttributeClass is { } attributeType
+        && compilation.IsSymbolAccessibleWithin(attributeType, compilation.Assembly)
+        && attribute.AttributeConstructor is { } constructor
+        && compilation.IsSymbolAccessibleWithin(constructor, compilation.Assembly);
+
     private static bool AttributeRequiresUnsafeContext(AttributeData attribute) =>
         attribute.ConstructorArguments.Any(RequiresUnsafeContext)
         || attribute.NamedArguments.Any(argument => RequiresUnsafeContext(argument.Value));
@@ -719,8 +762,11 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         writer.AppendLine($"FilePath = {SymbolDisplay.FormatLiteral(testMethod.FilePath ?? "", quote: true)},");
         writer.AppendLine($"LineNumber = {testMethod.LineNumber.ToString(CultureInfo.InvariantCulture)},");
         writer.AppendLine("MethodMetadata = __mm_0,");
-        var attributes = GetConstraintViolationAttributes(testMethod).ToArray();
-        var requiresUnsafe = attributes.Any(AttributeRequiresUnsafeContext);
+        var attributes = GetConstraintViolationAttributes(testMethod)
+            .Where(testMethod.CompilationContext.AttributeWriter.CanWriteAttribute).ToArray();
+        var requiresUnsafe = attributes.Any(attribute =>
+            CanConstructConstraintViolationAttribute(attribute, testMethod.CompilationContext.Compilation)
+            && AttributeRequiresUnsafeContext(attribute));
         if (requiresUnsafe)
         {
             writer.AppendLine("AttributeFactory = __CreateConstraintViolationAttributes,");
@@ -730,7 +776,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("AttributeFactory = static () => new global::System.Attribute[]");
             writer.AppendLine("{");
             writer.Indent();
-            testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
+            WriteConstraintViolationAttributes(writer, testMethod, attributes);
             writer.Unindent();
             writer.AppendLine("},");
         }
@@ -746,7 +792,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             writer.AppendLine("private static unsafe global::System.Attribute[] __CreateConstraintViolationAttributes() => new global::System.Attribute[]");
             writer.AppendLine("{");
             writer.Indent();
-            testMethod.CompilationContext.AttributeWriter.WriteAttributes(writer, attributes);
+            WriteConstraintViolationAttributes(writer, testMethod, attributes);
             writer.Unindent();
             writer.AppendLine("};");
         }

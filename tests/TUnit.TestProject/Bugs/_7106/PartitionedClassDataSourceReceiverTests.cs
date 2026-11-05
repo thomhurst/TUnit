@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using TUnit.Core.Interfaces;
-using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7106;
 
@@ -8,8 +7,8 @@ namespace TUnit.TestProject.Bugs._7106;
 // type in reflection mode. Its registration callback still runs for every test it produces, on the
 // source with its properties injected (#7106).
 // Source generation cannot infer type arguments from an untyped runtime data source, so these classes
-// are only discovered in reflection mode.
-[EngineTest(ExpectedResult.Pass)]
+// execute only in reflection mode; generated mode reports inference failures. These intentional
+// failures are checked by Issue7106Tests rather than the global passing-suite filter.
 [MixedTypeRowsWithRegistrationReceiver]
 public class PartitionedClassDataSourceReceiver<T>(T value)
 {
@@ -23,7 +22,6 @@ public class PartitionedClassDataSourceReceiver<T>(T value)
 
 // Discovery reads a class data source's rows to infer the type arguments. Tests receive those rows,
 // so the source is not read a second time, here a source that hands out each queued value once.
-[EngineTest(ExpectedResult.Pass)]
 [QueueRowsWithRegistrationReceiver]
 public class SingleTypeClassDataSourceReadOnce<T>(T value)
 {
@@ -37,7 +35,6 @@ public class SingleTypeClassDataSourceReadOnce<T>(T value)
 
 // A deferred class data source keeps its deferral once discovery has read its rows to infer the type
 // arguments: discovery shows one placeholder, and the rows expand at runtime.
-[EngineTest(ExpectedResult.Pass)]
 [DeferredRowsWithRegistrationReceiver(DeferEnumeration = true)]
 public class DeferredClassDataSourceReceiver<T>(T value)
 {

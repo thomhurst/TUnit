@@ -124,7 +124,8 @@ internal sealed class ReflectionGenericConstraintViolations(
                 testAttribute?.Line ?? 0,
                 messages,
                 () => TestBuilder.ScopeRowAttributesToTest(
-                    ReflectionAttributeExtractor.GetAllAttributes(genericTypeDefinition, testMethod),
+                    ReflectionAttributeExtractor.GetAllAttributes(genericTypeDefinition, testMethod)
+                        .Where(attribute => attribute is not IDataSourceAttribute).ToArray(),
                     null, null));
         }
     }

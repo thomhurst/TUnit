@@ -176,7 +176,11 @@ internal sealed class TestBuilder : ITestBuilder
                 InitializedAttributes = attributes  // Store the initialized attributes
             };
 
-            var classConstructorAttribute = attributes.FirstOfType<ClassConstructorAttribute>();
+            // Violation entries only enumerate failing rows; initializing user constructors can
+            // hide those errors and collapse multiple violations into one failure.
+            var classConstructorAttribute = metadata is GenericConstraintViolationTestMetadata
+                ? null
+                : attributes.FirstOfType<ClassConstructorAttribute>();
 
             // Without data sources or a class constructor no user code runs while building, so nothing
             // can observe TestBuilderContext.Current — skip publishing it (each AsyncLocal write
