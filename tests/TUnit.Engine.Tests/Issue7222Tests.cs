@@ -141,11 +141,81 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
     }
 
     [Test]
+    public async Task NonGeneric_Class_Instance_Source_Infers_Method_Types()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/NonGenericInstanceSourceTests/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(2)
+            ]);
+    }
+
+    [Test]
+    [Arguments("ExplicitClassInstanceSourcesTests*", 2)]
+    [Arguments("ExplicitMethodInstanceSourceTests", 1)]
+    [Arguments("ClosedClassParameterInferredSourceTests*", 1)]
+    [Arguments("ExplicitClassParameterInferredSourceTests*", 1)]
+    public async Task Explicit_And_Parameter_Inference_Preserve_Instance_Sources(string className, int count)
+    {
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7222/{className}/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(count),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(count)
+            ]);
+    }
+
+    [Test]
+    [Arguments("MixedClassRowSourcesTests*")]
+    [Arguments("MixedExplicitClassSourcesTests*")]
+    public async Task Mixed_Inferred_Sources_Preserve_Both_Declaration_Orders(string className)
+    {
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7222/{className}/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(4),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(4),
+                result => result.Results.Count(x => x.TestName.StartsWith("InstanceFirst<string>", StringComparison.Ordinal)).ShouldBe(2),
+                result => result.Results.Count(x => x.TestName.StartsWith("StaticFirst<string>", StringComparison.Ordinal)).ShouldBe(2)
+            ]);
+    }
+
+    [Test]
+    [Arguments("ClosedClassUninferredInstanceSourceTests*")]
+    [Arguments("ClosedClassRowUninferredInstanceSourceTests*")]
+    public async Task Closed_Class_Uninferred_Instance_Source_Is_Reported(string className)
+    {
+        await RunTestsWithFilter(
+            $"/*/TUnit.TestProject.Bugs._7222/{className}/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(2),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(1),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(1)
+            ]);
+    }
+
+    [Test]
+    public async Task Generic_Class_Instance_Source_Infers_Method_Types()
+    {
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7222/GenericInstanceSourceTests*/*",
+            [
+                result => result.ResultSummary.Counters.Total.ShouldBe(5),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(3),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(2),
+                result => result.Results.Where(x => x.Outcome == "Failed")
+                    .ShouldAllBe(x => x.Output != null && x.Output.ErrorInfo != null
+                        && x.Output.ErrorInfo.Message != null && x.Output.ErrorInfo.Message.Contains(
+                        "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'"))
+            ]);
+    }
+
+    [Test]
     public async Task Failing_Instance_Source_Rows_Keep_The_Class_Constructor_Arguments()
     {
         // Each row of the instance data source fails on its own. Without the class data sources, source-generated
         // mode could not build the instance that the rows come from and reported one constructor error instead.
-        // The message differs by mode: source-generated mode cannot infer the type from [InstanceMethodDataSource].
         await RunTestsWithFilter(
             "/*/TUnit.TestProject.Bugs._7222/InstanceSourceConstraintViolationTests/*",
             [
@@ -154,7 +224,7 @@ public class Issue7222Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.Results.ShouldAllBe(x => x.Output != null
                     && x.Output.ErrorInfo != null
                     && x.Output.ErrorInfo.Message != null
-                    && !x.Output.ErrorInfo.Message.Contains("Index was outside the bounds of the array"))
+                    && x.Output.ErrorInfo.Message.Contains("Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'"))
             ]);
     }
 
