@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="TUnit" Version="1.7*" />
+	  <PackageReference Include="TUnit" Version="1.8*" />
 <!--#if (enableDotCover) -->
     <PackageReference Include="JetBrains.dotCover.Framework" Version="1.0.2" />
 <!--#endif -->
