@@ -147,16 +147,25 @@ jobs:
           SmokePlatform: iOS
         run: scripts/Run-AppleSimulatorSmoke.sh "$IosDevice" ios
       # One simulator at a time: the runner has 7 GB of memory.
+      # Runners on the same image don't all list the same simulators, so take any tvOS device and
+      # create one if the runner has none.
       - name: Swap the iOS simulator for the tvOS one
+        id: tvos-simulator
         if: ${{ !cancelled() && steps.workloads.outcome == 'success' }}
         run: |
           xcrun simctl shutdown "$IosDevice" || true
-          device=$(xcrun simctl list devices available --json | jq -er '.devices["com.apple.CoreSimulator.SimRuntime.tvOS-27-0"] | map(select(.name == "Apple TV 4K (3rd generation)")) | first | .udid // error("Required preinstalled simulator is missing")')
+          device=$(xcrun simctl list devices available --json | jq -r '[.devices | to_entries[] | select(.key | contains(".SimRuntime.tvOS-")) | .value[]] | first | .udid // empty')
+          if [ -z "$device" ]; then
+            runtime=$(xcrun simctl list runtimes available --json | jq -ec '[.runtimes[] | select(.platform == "tvOS")] | last // error("No tvOS simulator runtime is available")')
+            runtime_id=$(jq -er '.identifier' <<< "$runtime")
+            device_type=$(jq -er '.supportedDeviceTypes[0].identifier' <<< "$runtime")
+            device=$(xcrun simctl create "TUnit tvOS smoke" "$device_type" "$runtime_id")
+          fi
           xcrun simctl boot "$device"
           echo "TvosDevice=$device" >> "$GITHUB_ENV"
       - name: Build the tvOS smoke test
         id: tvos-build
-        if: ${{ !cancelled() && steps.workloads.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.workloads.outcome == 'success' && steps.tvos-simulator.outcome == 'success' }}
         env:
           SmokePlatform: tvOS
         run: dotnet build tests/TUnit.PlatformSmoke -c Debug
