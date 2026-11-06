@@ -97,14 +97,14 @@ public sealed class String_EndsWithMessage_DefaultInterpolatedStringHandler_Asse
 
 public static partial class RefStructParameterAssertions
 {
-    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.RefStructParameterAssertions.ContainsMessage(System.String,System.Runtime.CompilerServices.DefaultInterpolatedStringHandler@)" path="/*[not(self::returns)]"/>
+    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.RefStructParameterAssertions.ContainsMessage(System.String,System.Runtime.CompilerServices.DefaultInterpolatedStringHandler@)" path="/*[not(self::returns) and not(self::param[@name='value'])]"/>
     public static String_ContainsMessage_DefaultInterpolatedStringHandler_Assertion ContainsMessage(this IAssertionSource<string> source, System.Runtime.CompilerServices.DefaultInterpolatedStringHandler message, [CallerArgumentExpression(nameof(message))] string? messageExpression = null)
     {
         source.Context.ExpressionBuilder.Append($".ContainsMessage({messageExpression})");
         return new String_ContainsMessage_DefaultInterpolatedStringHandler_Assertion(source.Context, message.ToStringAndClear());
     }
 
-    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.RefStructParameterAssertions.EndsWithMessage(System.String,System.Runtime.CompilerServices.DefaultInterpolatedStringHandler@)" path="/*[not(self::returns)]"/>
+    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.RefStructParameterAssertions.EndsWithMessage(System.String,System.Runtime.CompilerServices.DefaultInterpolatedStringHandler@)" path="/*[not(self::returns) and not(self::param[@name='value'])]"/>
     public static String_EndsWithMessage_DefaultInterpolatedStringHandler_Assertion EndsWithMessage(this IAssertionSource<string> source, System.Runtime.CompilerServices.DefaultInterpolatedStringHandler suffix, [CallerArgumentExpression(nameof(suffix))] string? suffixExpression = null)
     {
         source.Context.ExpressionBuilder.Append($".EndsWithMessage({suffixExpression})");

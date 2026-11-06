@@ -193,21 +193,21 @@ public sealed class Int_IsPowerOfTwo_Assertion : Assertion<int>
 
 public static partial class DocumentedMethodAssertions
 {
-    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsMultipleOf(System.Int32,System.Int32)" path="/*[not(self::returns)]"/>
+    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsMultipleOf(System.Int32,System.Int32)" path="/*[not(self::returns) and not(self::param[@name='value'])]"/>
     public static Int_IsMultipleOf_Int_Assertion IsMultipleOf(this IAssertionSource<int> source, int factor, [CallerArgumentExpression(nameof(factor))] string? factorExpression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsMultipleOf({factorExpression})");
         return new Int_IsMultipleOf_Int_Assertion(source.Context, factor);
     }
 
-    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsMultipleOf(System.Int64,System.Int64)" path="/*[not(self::returns)]"/>
+    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsMultipleOf(System.Int64,System.Int64)" path="/*[not(self::returns) and not(self::param[@name='value'])]"/>
     public static Long_IsMultipleOf_Long_Assertion IsMultipleOf(this IAssertionSource<long> source, long factor, [CallerArgumentExpression(nameof(factor))] string? factorExpression = null)
     {
         source.Context.ExpressionBuilder.Append($".IsMultipleOf({factorExpression})");
         return new Long_IsMultipleOf_Long_Assertion(source.Context, factor);
     }
 
-    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsSameValueAs``1(``0,``0)" path="/*[not(self::returns)]"/>
+    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsSameValueAs``1(``0,``0)" path="/*[not(self::returns) and not(self::param[@name='value'])]"/>
     [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2091", Justification = "Generic type parameter is only used for property access, not instantiation")]
     public static T_IsSameValueAs_T_Assertion<T> IsSameValueAs<T>(this IAssertionSource<T> source, T other, [CallerArgumentExpression(nameof(other))] string? otherExpression = null)
     {
@@ -283,7 +283,7 @@ public sealed class Int_IsDivisibleByThree_Assertion : Assertion<int>
 
 public static partial class NestedAssertions
 {
-    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.NestedAssertions.IsDivisibleByThree(System.Int32)" path="/*[not(self::returns)]"/>
+    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.NestedAssertions.IsDivisibleByThree(System.Int32)" path="/*[not(self::returns) and not(self::param[@name='value'])]"/>
     public static Int_IsDivisibleByThree_Assertion IsDivisibleByThree(this IAssertionSource<int> source)
     {
         source.Context.ExpressionBuilder.Append(".IsDivisibleByThree()");
@@ -345,7 +345,7 @@ public sealed class String_IsUpperCase_Assertion : Assertion<string>
 
 public static partial class InternalDocumentedAssertions
 {
-    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.InternalDocumentedAssertions.IsUpperCase(System.String)" path="/*[not(self::returns)]"/>
+    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.InternalDocumentedAssertions.IsUpperCase(System.String)" path="/*[not(self::returns) and not(self::param[@name='value'])]"/>
     public static String_IsUpperCase_Assertion IsUpperCase(this IAssertionSource<string> source)
     {
         source.Context.ExpressionBuilder.Append(".IsUpperCase()");
@@ -407,7 +407,7 @@ public sealed class String_IsTrimmed_Assertion : Assertion<string>
 
 public static partial class FileLocalDocumentedAssertions
 {
-    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.FileLocalDocumentedAssertions.IsTrimmed(System.String)" path="/*[not(self::returns)]"/>
+    /// <inheritdoc cref="M:TUnit.Assertions.Tests.TestData.FileLocalDocumentedAssertions.IsTrimmed(System.String)" path="/*[not(self::returns) and not(self::param[@name='text'])]"/>
     public static String_IsTrimmed_Assertion IsTrimmed(this IAssertionSource<string> source)
     {
         source.Context.ExpressionBuilder.Append(".IsTrimmed()");

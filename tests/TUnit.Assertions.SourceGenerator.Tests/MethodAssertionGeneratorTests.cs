@@ -452,11 +452,11 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(generatedFiles).Count().IsEqualTo(4);
 
             var allFiles = string.Join(Environment.NewLine, generatedFiles);
-            const string pathFilter = " path=\"/*[not(self::returns)]\"/>";
+            const string pathFilter = " path=\"/*[not(self::returns) and not(self::param[@name='value'])]\"/>";
 
             // Edge 1: a documented method inherits its documentation through its documentation ID.
             // The path filter drops <returns>, which describes the source method's bool, not the
-            // returned assertion.
+            // returned assertion, and the <param> of the receiver, which the extension renames to source.
             await Assert.That(allFiles).Contains(
                 "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsMultipleOf(System.Int32,System.Int32)\"" + pathFilter);
 
@@ -469,9 +469,10 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
                 "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsSameValueAs``1(``0,``0)\"" + pathFilter);
 
             // Edge 4: a public method resolves from a package whatever its containing type: file-local,
-            // internal or private nested. The file-local type is named as in the XML documentation file.
+            // internal or private nested. The file-local type is named as in the XML documentation file,
+            // and the path names the receiver as the source method does.
             await Assert.That(allFiles).Contains(
-                "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.FileLocalDocumentedAssertions.IsTrimmed(System.String)\"" + pathFilter);
+                "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.FileLocalDocumentedAssertions.IsTrimmed(System.String)\" path=\"/*[not(self::returns) and not(self::param[@name='text'])]\"/>");
             await Assert.That(allFiles).Contains(
                 "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.InternalDocumentedAssertions.IsUpperCase(System.String)\"" + pathFilter);
             await Assert.That(allFiles).Contains(

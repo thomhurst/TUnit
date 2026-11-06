@@ -1071,9 +1071,10 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         if (data.Method.DocumentationId is { } documentationId)
         {
             // The compiler copies a documentation ID cref without binding it, so overloads, generics
-            // and file-local types need no cref syntax. <returns> describes the source method's
-            // result, not the returned assertion.
-            sb.AppendLine($"    /// <inheritdoc cref=\"{documentationId}\" path=\"/*[not(self::returns)]\"/>");
+            // and file-local types need no cref syntax. The path drops <returns>, which describes the
+            // source method's result, and the <param> of the receiver, which the extension renames to
+            // source. A parameter name is an identifier without the verbatim @, so it needs no escaping.
+            sb.AppendLine($"    /// <inheritdoc cref=\"{documentationId}\" path=\"/*[not(self::returns) and not(self::param[@name='{data.Method.FirstParamName}'])]\"/>");
         }
         else
         {

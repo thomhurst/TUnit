@@ -67,6 +67,7 @@ file static class FileLocalDocumentedAssertions
     /// <summary>
     /// Checks that the text has no leading or trailing white space.
     /// </summary>
+    /// <param name="text">The text under test.</param>
     [GenerateAssertion(ExpectationMessage = "to have no leading or trailing white space", InlineMethodBody = true)]
-    public static bool IsTrimmed(this string value) => value.Trim() == value;
+    public static bool IsTrimmed(this string text) => text.Trim() == text;
 }
