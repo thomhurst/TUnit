@@ -6,8 +6,8 @@ namespace TUnit.Assertions.Conditions;
 
 /// <summary>
 /// Asserts that a value is between a minimum and maximum.
-/// Demonstrates custom method for inclusive/exclusive bounds.
 /// </summary>
+// Demonstrates custom method for inclusive/exclusive bounds.
 [AssertionExtension("IsBetween")]
 public class BetweenAssertion<TValue> : Assertion<TValue>
     where TValue : IComparable<TValue>

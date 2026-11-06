@@ -71,7 +71,7 @@ public static IsPositive_Assertion IsPositive(this IAssertionSource<int> source)
 }
 ```
 
-**XML documentation:** if the source method is `public` and documented, the generated extension method inherits its summary, remarks and parameter docs, so they show in IntelliSense on `Assert.That(...).IsPositive()`. The generator emits an `<inheritdoc>` that points at the source method, so the docs reach your library's users through its XML documentation file (`GenerateDocumentationFile`). Undocumented and non-public source methods get a placeholder summary.
+**XML documentation:** if the source method is `public` and documented, the generated extension method inherits its summary, remarks and parameter docs, so they show in IntelliSense on `Assert.That(...).IsPositive()`. The generator emits an `<inheritdoc>` that points at the source method, so the docs reach your library's users through its XML documentation file (`GenerateDocumentationFile`). Undocumented and non-public source methods get a placeholder summary. Extension methods generated for an `[AssertionExtension]` class work the same way: a documented class passes on its summary, remarks and type parameter docs, and the constructor that the method wraps passes on its parameter and exception docs. A method generated through `NegatedMethodName` keeps the placeholder, as the class describes the positive assertion.
 
 ---
 

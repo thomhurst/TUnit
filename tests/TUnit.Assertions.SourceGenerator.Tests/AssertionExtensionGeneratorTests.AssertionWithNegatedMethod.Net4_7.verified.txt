@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class TrueAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for TrueAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.TrueAssertion" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static TrueAssertion IsTrue(this IAssertionSource<bool> source)
     {
         source.Context.ExpressionBuilder.Append(".IsTrue(");        source.Context.ExpressionBuilder.Append(")");

@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class BetweenAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for BetweenAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.BetweenAssertion`1" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static BetweenAssertion<TValue> IsBetween<TValue>(this IAssertionSource<TValue> source, TValue lowerBound, TValue upperBound, [CallerArgumentExpression(nameof(lowerBound))] string? lowerBoundExpression = null, [CallerArgumentExpression(nameof(upperBound))] string? upperBoundExpression = null)
         where TValue : System.IComparable<TValue>
     {

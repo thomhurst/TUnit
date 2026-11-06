@@ -55,7 +55,7 @@ internal class XmlDocsRegressionTests : TestsBase<MethodAssertionGenerator>
             var compilation = CSharpCompilation.Create(
                 "InheritdocCheck",
                 trees,
-                ReferencesWithoutTestAssembly(),
+                ReferencesHelper.WithoutTestAssembly(),
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             var inheritingMethods = new List<string>();
@@ -124,7 +124,7 @@ internal class XmlDocsRegressionTests : TestsBase<MethodAssertionGenerator>
             var library = CSharpCompilation.Create(
                 "DocumentedLibrary",
                 trees,
-                ReferencesWithoutTestAssembly(),
+                ReferencesHelper.WithoutTestAssembly(),
                 new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
             using var image = new MemoryStream();
@@ -136,7 +136,7 @@ internal class XmlDocsRegressionTests : TestsBase<MethodAssertionGenerator>
 
             var consumer = CSharpCompilation.Create(
                 "PackageConsumer",
-                references: ReferencesWithoutTestAssembly().Append(MetadataReference.CreateFromImage(
+                references: ReferencesHelper.WithoutTestAssembly().Append(MetadataReference.CreateFromImage(
                     image.ToArray(),
                     documentation: XmlDocumentationProvider.CreateFromBytes(documentation.ToArray()))),
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
@@ -193,14 +193,6 @@ internal class XmlDocsRegressionTests : TestsBase<MethodAssertionGenerator>
             await Assert.That(DocumentationCommentId.GetFirstSymbolForDeclarationId(internalMethodId, consumer)).IsNull();
         });
     }
-
-    // The test assembly contains the fixture too, and its copy would be found first. It is an .exe on
-    // .NET Framework, so compare the name without its extension.
-    private static IEnumerable<MetadataReference> ReferencesWithoutTestAssembly() =>
-        ReferencesHelper.References.Where(reference => !string.Equals(
-            Path.GetFileNameWithoutExtension(reference.FilePath),
-            "TUnit.Assertions.SourceGenerator.Tests",
-            StringComparison.OrdinalIgnoreCase));
 
     private Task AssertNoCS1591(string testDataFile) => RunTest(
         Path.Combine(Git.TestsDirectory.FullName,

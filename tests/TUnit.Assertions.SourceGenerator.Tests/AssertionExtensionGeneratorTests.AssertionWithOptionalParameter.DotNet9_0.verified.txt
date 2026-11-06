@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class NotEqualsAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for NotEqualsAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.NotEqualsAssertion`1" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static NotEqualsAssertion<TValue> IsNotEqualTo<TValue>(this IAssertionSource<TValue> source, TValue notExpected, System.Collections.Generic.IEqualityComparer<TValue>? comparer = null, [CallerArgumentExpression(nameof(notExpected))] string? notExpectedExpression = null, [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
     {
         source.Context.ExpressionBuilder.Append(".IsNotEqualTo(");

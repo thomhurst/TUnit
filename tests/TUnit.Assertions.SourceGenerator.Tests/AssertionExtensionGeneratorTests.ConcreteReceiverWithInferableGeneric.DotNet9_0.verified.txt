@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class ConcreteReceiverWithInferableGenericAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for ConcreteReceiverWithInferableGenericAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.ConcreteReceiverWithInferableGenericAssertion`1" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static ConcreteReceiverWithInferableGenericAssertion<T> ConcreteReceiverWithInferableGenericTagged<TActual, T>(this IAssertionSource<TActual> source, T tag, [CallerArgumentExpression(nameof(tag))] string? tagExpression = null)
         where TActual : System.Exception
     {

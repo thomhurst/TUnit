@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class DefaultValuesAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for DefaultValuesAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.DefaultValuesAssertion`1" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static DefaultValuesAssertion<TValue> HasDefaultValues<TValue>(this IAssertionSource<TValue> source, bool boolValue = true, int intValue = 0, string stringValue = "default", [CallerArgumentExpression(nameof(boolValue))] string? boolValueExpression = null, [CallerArgumentExpression(nameof(intValue))] string? intValueExpression = null, [CallerArgumentExpression(nameof(stringValue))] string? stringValueExpression = null)
     {
         source.Context.ExpressionBuilder.Append(".HasDefaultValues(");
