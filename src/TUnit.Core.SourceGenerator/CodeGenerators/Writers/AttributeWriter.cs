@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
@@ -15,6 +16,7 @@ public class AttributeWriter(Compilation compilation)
         DisplayFormats.FullyQualifiedGenericWithGlobalPrefix.WithMiscellaneousOptions(
             DisplayFormats.FullyQualifiedGenericWithGlobalPrefix.MiscellaneousOptions |
             SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+    private readonly TypedConstantFormatter _typedConstantFormatter = new(compilation);
 
     private readonly Dictionary<AttributeData, string> _attributeObjectInitializerCache = new();
     private readonly Dictionary<INamedTypeSymbol, string> _argumentFreeAttributeInitializerCache = new(SymbolEqualityComparer.Default);
@@ -176,7 +178,7 @@ public class AttributeWriter(Compilation compilation)
         return $"{attributeArgumentSyntax.NameEquals!.Name} = {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString()}";
     }
 
-    public static void WriteAttributeWithoutSyntax(ICodeWriter sourceCodeWriter, AttributeData attributeData)
+    public void WriteAttributeWithoutSyntax(ICodeWriter sourceCodeWriter, AttributeData attributeData)
     {
         var attributeName = attributeData.AttributeClass!.ToDisplayString(AttributeTypeFormat);
 
@@ -188,10 +190,10 @@ public class AttributeWriter(Compilation compilation)
             return;
         }
 
-        var constructorArgs = attributeData.ConstructorArguments.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg));
+        var constructorArgs = attributeData.ConstructorArguments.Select(arg => _typedConstantFormatter.FormatForCode(arg));
         var formattedConstructorArgs = string.Join(", ", constructorArgs);
 
-        var namedArgs = attributeData.NamedArguments.Select(arg => $"{arg.Key} = {TypedConstantParser.GetRawTypedConstantValue(arg.Value)}");
+        var namedArgs = attributeData.NamedArguments.Select(arg => $"{arg.Key} = {_typedConstantFormatter.FormatForCode(arg.Value)}");
         var formattedNamedArgs = string.Join(", ", namedArgs);
 
         sourceCodeWriter.Append($"new {attributeName}({formattedConstructorArgs})");
