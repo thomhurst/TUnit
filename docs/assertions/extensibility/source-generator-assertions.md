@@ -97,6 +97,8 @@ public static IsPositive_Assertion IsPositive(this IAssertionSource<int> source)
 }
 ```
 
+**XML documentation:** if the source method is `public` and documented, the generated extension method inherits its summary, remarks and parameter docs, so they show in IntelliSense on `Assert.That(...).IsPositive()`. The generator emits an `<inheritdoc>` that points at the source method, so the docs reach your library's users through its XML documentation file (`GenerateDocumentationFile`). Undocumented and non-public source methods get a placeholder summary.
+
 ***
 
 ## Custom Expectation Messages[​](#custom-expectation-messages "Direct link to Custom Expectation Messages")
