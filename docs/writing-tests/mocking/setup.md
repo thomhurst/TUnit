@@ -118,7 +118,7 @@ mock.Log(Any())
     .Throws<NotSupportedException>();
 ```
 
-Void methods are also eagerly registered — calling `mock.Log(Any())` without chaining is sufficient to "allow" the call in strict mode.
+Void methods are also eagerly registered — calling `mock.Log(Any())` without chaining is sufficient to "allow" the call in strict mode. Verification doesn't register anything: `mock.Log(Any()).WasCalled(...)` leaves the mock's setups as they were. To keep a stored call as a setup while also verifying through it before the mock is called, configure it first with `.Returns()`.
 
 ## Property Setup[​](#property-setup "Direct link to Property Setup")
 
