@@ -97,6 +97,7 @@ public abstract class MockMethodCallBase<TSelf, TReturn> : ICallVerification
 /// Shared plumbing for the generated per-method <c>*_MockCall</c> wrappers of void (and
 /// ref-struct-returning) methods. The setup is registered eagerly in the constructor so that
 /// standalone calls like <c>mock.Log(Arg.Any&lt;string&gt;())</c> work in strict mode without chaining.
+/// Verifying through the wrapper withdraws that setup if nothing was configured on it and it was never invoked.
 /// Public for generated code access. Not intended for direct use.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
@@ -156,7 +157,19 @@ public abstract class VoidMockMethodCallBase<TSelf> : ICallVerification
     public TSelf Then() { EnsureSetup().Then(); return (TSelf)this; }
 
     private ICallVerification CreateVerification()
-        => MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments);
+    {
+        // The constructor can't tell setup from verification, so a wrapper used only to verify has
+        // registered a setup nobody asked for. Withdraw it before verifying, so a failed verification
+        // doesn't leave it behind. Clearing the builder lets a later chained call register a new one.
+        if (Volatile.Read(ref _builder) is { } builder
+            && _engine is IBareSetupRemover remover
+            && remover.TryRemoveBareSetup(builder.Setup))
+        {
+            Volatile.Write(ref _builder, null);
+        }
+
+        return MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments);
+    }
 
     /// <inheritdoc />
     public void WasCalled() => CreateVerification().WasCalled();

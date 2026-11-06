@@ -17,6 +17,8 @@ public sealed class VoidMethodSetupBuilder : IVoidMethodSetup, IVoidSetupChain
         _setup = setup;
     }
 
+    internal MethodSetup Setup => _setup;
+
     public IVoidSetupChain Returns()
     {
         _setup.AddBehavior(VoidReturnBehavior.Instance);

@@ -107,7 +107,7 @@ svc.Delete(2);
 mock.VerifyAll(); // passes — both setups were invoked
 ```
 
-If any setup was never called, `VerifyAll` throws listing the uninvoked setups.
+If any setup was never called, `VerifyAll` throws listing the uninvoked setups. `WasCalled` and `WasNeverCalled` don't count as setups, so `VerifyAll` ignores them.
 
 ## VerifyNoOtherCalls
 

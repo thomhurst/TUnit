@@ -10,7 +10,8 @@ namespace TUnit.Mocks;
 /// Unified return type for void mock method calls. Supports both setup and verification.
 /// When <c>eagerRegister</c> is true (the default for extension methods on <c>Mock&lt;T&gt;</c>),
 /// the setup is registered in the constructor so that standalone calls like
-/// <c>mock.Log(Arg.Any&lt;string&gt;())</c> work in strict mode without chaining.
+/// <c>mock.Log(Arg.Any&lt;string&gt;())</c> work in strict mode without chaining. Verifying through
+/// the wrapper withdraws that setup if nothing was configured on it and it was never invoked.
 /// When <c>eagerRegister</c> is false (used by <see cref="PropertyMockCall{TProperty}.Setter"/>),
 /// registration is deferred until a setup method is explicitly called, avoiding unwanted
 /// setup side-effects when the object is used purely for verification.
@@ -127,7 +128,19 @@ public sealed class VoidMockMethodCall : IVoidMethodSetup, IVoidSetupChain, ICal
     // ICallVerification implementation
 
     private ICallVerification CreateVerification()
-        => MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments);
+    {
+        // See VoidMockMethodCallBase.CreateVerification. Clearing the initialized flag lets a later
+        // chained call register a new setup.
+        if (Volatile.Read(ref _builder) is { } builder
+            && _engine is IBareSetupRemover remover
+            && remover.TryRemoveBareSetup(builder.Setup))
+        {
+            Volatile.Write(ref _builderInitialized, false);
+            Volatile.Write(ref _builder, null);
+        }
+
+        return MockCallVerification.Create(_engine, _memberId, _memberName, _matchers, _typeArguments);
+    }
 
     public void WasCalled(Times times)
     {

@@ -23,7 +23,7 @@ internal static class MockCallSequence
 }
 
 [EditorBrowsable(EditorBrowsableState.Never)]
-public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVerificationFactory where T : class
+public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVerificationFactory, IBareSetupRemover where T : class
 {
     // Single lock for both setup and call mutations — reduces allocation by one Lock object.
     // Contention is acceptable since setup and call recording rarely overlap in typical usage.
@@ -289,6 +289,29 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             // Mark stale — snapshot will be rebuilt lazily on next FindMatchingSetup call.
             // This avoids repeated ToArray allocations during the setup phase.
             _hasStaleSetups = true;
+        }
+    }
+
+    /// <inheritdoc />
+    bool IBareSetupRemover.TryRemoveBareSetup(MethodSetup setup)
+    {
+        lock (Lock)
+        {
+            if (setup.InvokeCount > 0 || setup.IsConfigured)
+            {
+                return false;
+            }
+
+            var memberId = setup.MemberId;
+            if (_setupListsByMemberId is not { } lists
+                || (uint)memberId >= (uint)lists.Length
+                || lists[memberId]?.Remove(setup) != true)
+            {
+                return false;
+            }
+
+            _hasStaleSetups = true;
+            return true;
         }
     }
 

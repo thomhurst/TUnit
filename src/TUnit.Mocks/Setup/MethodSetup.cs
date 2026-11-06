@@ -144,6 +144,26 @@ public sealed class MethodSetup
     /// <summary>Resets the invoke count to zero, so the setup counts as unused again.</summary>
     internal void ResetInvokeCount() => Interlocked.Exchange(ref _invokeCount, 0);
 
+    /// <summary>
+    /// True if anything was configured on this setup. <see cref="RequiredState"/> does not count: the
+    /// engine stamps it on every setup registered inside a state scope, not the caller.
+    /// </summary>
+    internal bool IsConfigured
+    {
+        get
+        {
+            if (Volatile.Read(ref _singleBehavior) is not null || Volatile.Read(ref _behaviors) is not null)
+            {
+                return true;
+            }
+
+            return Volatile.Read(ref _rareState) is { } rare
+                && (Volatile.Read(ref rare.EventRaises) is not null
+                    || Volatile.Read(ref rare.OutRefAssignments) is not null
+                    || Volatile.Read(ref rare.TransitionTarget) is not null);
+        }
+    }
+
     public void AddBehavior(IBehavior behavior)
     {
         // Setup mutation is not a hot path; one lock keeps sequential steps and composed
