@@ -1,5 +1,7 @@
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Assertions.SourceGenerator.Generators;
 using TUnit.Tests.Shared;
 
@@ -30,6 +32,73 @@ internal class XmlDocsRegressionTests : TestsBase<MethodAssertionGenerator>
 
     [Test]
     public Task AsyncBoolAssertion_GeneratesValidCSharp() => AssertNoCompilationErrors("AsyncBoolAssertion.cs");
+
+    [Test]
+    public Task DocumentedMethodAssertion_InheritdocCrefsResolveToSourceMethods()
+    {
+        var fixturePath = Path.Combine(Git.TestsDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "DocumentedMethodAssertion.cs");
+
+        return RunTest(fixturePath, async generatedFiles =>
+        {
+            // Compile the fixture with its generated code as a GenerateDocumentationFile build does. The
+            // test assembly is left out: it contains the fixture too, and its copy would be found first.
+            var trees = generatedFiles
+                .Prepend(File.ReadAllText(fixturePath))
+                .Select(source => CSharpSyntaxTree.ParseText(
+                    source,
+                    GeneratorTestInput.ParseOptions.WithDocumentationMode(DocumentationMode.Diagnose)))
+                .ToArray();
+
+            var compilation = CSharpCompilation.Create(
+                "InheritdocCheck",
+                trees,
+                ReferencesHelper.References.Where(reference => !string.Equals(
+                    Path.GetFileName(reference.FilePath),
+                    "TUnit.Assertions.SourceGenerator.Tests.dll",
+                    StringComparison.OrdinalIgnoreCase)),
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+            var inheritingMethods = new List<string>();
+            foreach (var tree in compilation.SyntaxTrees.Skip(1))
+            {
+                var semanticModel = compilation.GetSemanticModel(tree);
+                foreach (var declaration in tree.GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>())
+                {
+                    var extensionMethod = semanticModel.GetDeclaredSymbol(declaration)!;
+                    if (!extensionMethod.IsExtensionMethod)
+                    {
+                        continue;
+                    }
+
+                    // This is the member's entry in the XML documentation file. A cref the compiler could
+                    // not copy verbatim would read "!:...", and malformed XML would not parse.
+                    var inheritdoc = XElement.Parse(extensionMethod.GetDocumentationCommentXml()!).Element("inheritdoc");
+                    if (inheritdoc is null)
+                    {
+                        continue;
+                    }
+
+                    var cref = inheritdoc.Attribute("cref")!.Value;
+                    var sourceMethod = DocumentationCommentId.GetFirstSymbolForDeclarationId(cref, compilation);
+
+                    await Assert.That(sourceMethod).IsNotNull();
+                    await Assert.That(sourceMethod!.Name).IsEqualTo(extensionMethod.Name);
+                    await Assert.That(sourceMethod.GetDocumentationCommentId()).IsEqualTo(cref);
+                    await Assert.That(sourceMethod.GetDocumentationCommentXml()).Contains("<summary>");
+                    await Assert.That(inheritdoc.Attribute("path")!.Value).IsEqualTo("/*[not(self::returns)]");
+
+                    inheritingMethods.Add(extensionMethod.Name);
+                }
+            }
+
+            await Assert.That(inheritingMethods.OrderBy(name => name, StringComparer.Ordinal)).IsEquivalentTo(
+                new[] { "IsDivisibleByThree", "IsMultipleOf", "IsMultipleOf", "IsSameValueAs", "IsTrimmed", "IsUpperCase" },
+                TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        });
+    }
 
     private Task AssertNoCS1591(string testDataFile) => RunTest(
         Path.Combine(Git.TestsDirectory.FullName,
