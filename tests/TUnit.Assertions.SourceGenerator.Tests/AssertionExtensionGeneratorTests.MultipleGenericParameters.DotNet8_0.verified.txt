@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class IsAssignableToAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for IsAssignableToAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.IsAssignableToAssertion`2" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static IsAssignableToAssertion<TValue, TTarget> IsAssignableTo<TValue, TTarget>(this IAssertionSource<TValue> source)
     {
         source.Context.ExpressionBuilder.Append(".IsAssignableTo(");        source.Context.ExpressionBuilder.Append(")");

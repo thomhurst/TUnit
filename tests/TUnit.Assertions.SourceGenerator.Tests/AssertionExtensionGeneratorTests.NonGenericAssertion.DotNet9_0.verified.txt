@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class StringIsEmptyAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for StringIsEmptyAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.StringIsEmptyAssertion" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static StringIsEmptyAssertion IsEmpty(this IAssertionSource<string> source)
     {
         source.Context.ExpressionBuilder.Append(".IsEmpty(");        source.Context.ExpressionBuilder.Append(")");

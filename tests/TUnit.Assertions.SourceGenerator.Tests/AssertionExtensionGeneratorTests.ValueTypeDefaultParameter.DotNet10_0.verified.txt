@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class StringRespectsTokenAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for StringRespectsTokenAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.StringRespectsTokenAssertion" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static StringRespectsTokenAssertion RespectsToken(this IAssertionSource<string> source, System.Threading.CancellationToken token = default, [CallerArgumentExpression(nameof(token))] string? tokenExpression = null)
     {
         source.Context.ExpressionBuilder.Append(".RespectsToken(");

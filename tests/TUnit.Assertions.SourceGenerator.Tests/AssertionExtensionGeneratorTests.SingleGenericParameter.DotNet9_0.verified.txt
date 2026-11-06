@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class NullAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for NullAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.NullAssertion`1" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static NullAssertion<TValue> IsNull<TValue>(this IAssertionSource<TValue> source)
     {
         source.Context.ExpressionBuilder.Append(".IsNull(");        source.Context.ExpressionBuilder.Append(")");

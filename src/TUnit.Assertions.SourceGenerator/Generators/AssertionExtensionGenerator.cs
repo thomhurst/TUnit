@@ -163,6 +163,9 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         var receiverIsCovariantCandidate = receiverIsCovariantType && hasOwnGenerics;
         var ownTypeParameters = classSymbol.TypeParameters;
 
+        // The class's docs describe the assertion, so only a documented class shares docs at all.
+        var classDocumentationId = GetDocumentationId(classSymbol, cancellationToken);
+
         var constructorData = new List<ConstructorData>();
         foreach (var constructor in constructors)
         {
@@ -182,7 +185,9 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
                     p.Type.ToDisplayString(),
                     p.HasExplicitDefaultValue ? DefaultValueFormatter.FormatDefaultValue(p.ExplicitDefaultValue, p.Type) : null)).ToImmutableEquatableArray(),
                 GetRequiresUnreferencedCodeMessage(constructor, RequiresUnreferencedCodeMessage),
-                emitPinned));
+                emitPinned,
+                classDocumentationId is null ? null : GetDocumentationId(constructor, cancellationToken),
+                constructor.Parameters[0].Name));
         }
 
         return new AssertionExtensionData(
@@ -195,8 +200,28 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
             genericParams.ToImmutableEquatableArray(),
             typeConstraints.ToImmutableEquatableArray(),
             receiver,
-            constructorData.ToImmutableEquatableArray()
+            constructorData.ToImmutableEquatableArray(),
+            classDocumentationId
         );
+    }
+
+    /// <summary>
+    /// The symbol's documentation ID as the XML documentation file names it, or null if it is undocumented.
+    /// </summary>
+    private static string? GetDocumentationId(ISymbol symbol, CancellationToken cancellationToken)
+    {
+        // Unlike for [GenerateAssertion] source methods, no accessibility check is needed: only public
+        // constructors get an extension, and a package exposes types whatever their accessibility, so
+        // both crefs resolve from a package, as pinned by
+        // AssertionExtensionXmlDocsTests.DocumentedAssertionExtension_InheritdocCrefsResolveFromPackage.
+        if (string.IsNullOrWhiteSpace(symbol.GetDocumentationCommentXml(cancellationToken: cancellationToken)))
+        {
+            return null;
+        }
+
+        // The member name exactly as the XML documentation file writes it, which is what an IDE looks up.
+        var documentationId = symbol.GetDocumentationCommentId();
+        return string.IsNullOrEmpty(documentationId) ? null : documentationId;
     }
 
     private static void AddTypeConstraint(ITypeParameterSymbol typeParameter, List<string> typeConstraints)
@@ -385,9 +410,26 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
 
         // Build method signature
         sourceBuilder.AppendLine();
-        sourceBuilder.AppendLine("    /// <summary>");
-        sourceBuilder.AppendLine($"    /// Extension method for {data.ClassName}.");
-        sourceBuilder.AppendLine("    /// </summary>");
+        if (!negated && data.ClassDocumentationId is { } classDocumentationId)
+        {
+            // The class lends its summary, remarks and type parameters (the method declares the class's
+            // own), the wrapped constructor its exceptions and its parameters except the context, whose
+            // name is an identifier and so needs no escaping in the XPath. Rider expands only the first
+            // inheritdoc, so the class comes first. A negated method keeps the placeholder, as the class
+            // describes the positive assertion. Documentation ID crefs are copied without binding, so
+            // generic classes need no cref syntax.
+            sourceBuilder.AppendLine($"    /// <inheritdoc cref=\"{classDocumentationId}\" path=\"/*[self::summary or self::remarks or self::typeparam]\"/>");
+            if (constructor.DocumentationId is { } constructorDocumentationId)
+            {
+                sourceBuilder.AppendLine($"    /// <inheritdoc cref=\"{constructorDocumentationId}\" path=\"/*[(self::param and not(@name='{constructor.ContextParameterName}')) or self::exception]\"/>");
+            }
+        }
+        else
+        {
+            sourceBuilder.AppendLine("    /// <summary>");
+            sourceBuilder.AppendLine($"    /// Extension method for {data.ClassName}.");
+            sourceBuilder.AppendLine("    /// </summary>");
+        }
 
         // Add RequiresUnreferencedCode attribute if present (from constructor or class level)
         if (!string.IsNullOrEmpty(requiresUnreferencedCodeMessage))
@@ -579,7 +621,8 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         ImmutableEquatableArray<string> GenericParams,
         ImmutableEquatableArray<string> TypeConstraints,
         ReceiverTypeData ReceiverType,
-        ImmutableEquatableArray<ConstructorData> Constructors
+        ImmutableEquatableArray<ConstructorData> Constructors,
+        string? ClassDocumentationId
     );
 
     /// <summary>
@@ -598,7 +641,9 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
     private sealed record ConstructorData(
         ImmutableEquatableArray<ParameterData> Parameters,
         string? RequiresUnreferencedCodeMessage,
-        bool EmitPinned
+        bool EmitPinned,
+        string? DocumentationId,
+        string ContextParameterName
     );
 
     private sealed record ParameterData(

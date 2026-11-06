@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class EqualsAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for EqualsAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.EqualsAssertion`1" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static EqualsAssertion<TValue> IsEqualTo<TValue>(this IAssertionSource<TValue> source, TValue expected, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
     {
         source.Context.ExpressionBuilder.Append(".IsEqualTo(");
@@ -28,9 +26,7 @@ public static partial class EqualsAssertionExtensions
         return new EqualsAssertion<TValue>(source.Context, expected);
     }
 
-    /// <summary>
-    /// Extension method for EqualsAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.EqualsAssertion`1" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static EqualsAssertion<TValue> IsEqualTo<TValue>(this IAssertionSource<TValue> source, TValue expected, System.Collections.Generic.IEqualityComparer<TValue> comparer, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null, [CallerArgumentExpression(nameof(comparer))] string? comparerExpression = null)
     {
         source.Context.ExpressionBuilder.Append(".IsEqualTo(");

@@ -11,8 +11,8 @@ namespace TUnit.Assertions.Conditions;
 
 /// <summary>
 /// Asserts that a value is equal to an expected value.
-/// Generic implementation that works for all types.
 /// </summary>
+// Generic implementation that works for all types.
 [AssertionExtension("IsEqualTo")]
 public class EqualsAssertion<TValue> : Assertion<TValue>
 {
