@@ -28,7 +28,7 @@ Report `RESULT: triaged: <summary>`, for example `triaged: closed #12 #15, updat
 
 The driver runs a discovery unit when nothing is actionable and every item was audited recently. Find real work and file it as issues a unit can claim now. Look, in order, at: failed or flaky jobs in recent CI runs on `main` and on PRs; open milestone issues whose acceptance criteria are not yet split into claimable work; analyzer and build warnings; `TODO`/`FIXME` comments that describe a defect; documentation that contradicts the code; public behavior without tests.
 
-File at most five issues, written as AGENTS.md [Writing issues](../../../../AGENTS.md#writing-issues) describes. Search open and closed issues first. Each issue states the evidence (file and line, run, or log line), the expected behavior, and acceptance criteria, and fits one PR. Apply the repository's filing bar; never file style preferences or speculative features. Report `RESULT: triaged: filed #A #B` or `triaged: no changes`.
+File at most five issues. Search open and closed issues first. Each issue states the evidence (file and line, run, or log line), the expected behavior, and acceptance criteria, and fits one PR. Apply the repository's filing bar; never file style preferences or speculative features. Report `RESULT: triaged: filed #A #B` or `triaged: no changes`.
 
 ## Red main
 

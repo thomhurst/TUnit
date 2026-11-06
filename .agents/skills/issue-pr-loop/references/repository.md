@@ -6,7 +6,8 @@ Read [AGENTS.md](../../../../AGENTS.md) first; it is canon for validation, snaps
 |---|---|
 | One PR's review cycle: fetch every surface, verify findings, fix, one push, reply, resolve and unresolve threads | `AGENTS.md` § Git workflow |
 | Merge protocol | [Merge gate](#merge-gate) below |
-| Out-of-scope filing bar and procedure | `AGENTS.md` § Autonomous self-improvement |
+| Out-of-scope filing bar and procedure, and how to write any issue the loop files | `AGENTS.md` § Autonomous self-improvement and § Writing issues |
+| PR review lifecycle | [Draft review lifecycle](#draft-review-lifecycle) below |
 | Native sub-issue and `blocked_by` writes | [Issue relationships](#issue-relationships) below |
 | Worktree location, lock registration, evidence directory, cleanup | `AGENTS.md` § Local worktree lifecycle and [WorktreeLifecycle.md](../../../../scripts/WorktreeLifecycle.md) |
 | Validation, snapshots, `TUnit.TestProject` filters | `AGENTS.md` § Validation |
@@ -19,7 +20,7 @@ TUnit ships public NuGet packages. Defer as `[human]` with `needs-human`: a brea
 
 ## Draft review lifecycle
 
-`AGENTS.md` opens PRs ready for review by default. Inside the loop, the skill's draft review lifecycle applies to every PR the loop opens. Outside the loop, follow `AGENTS.md`.
+`AGENTS.md` opens PRs ready for review by default. Inside the loop, [draft-review.md](draft-review.md) applies to every PR the loop opens. Outside the loop, follow `AGENTS.md`.
 
 Required reviewers are Claude Code Review and Codex. CodeRabbit and Greptile are not approvers, but their findings are review surfaces like any other.
 
