@@ -114,6 +114,68 @@ public class MethodAssertionGeneratorIncrementalTests
     }
 
     [Test]
+    public async Task AddDocumentationShouldRegenerate()
+    {
+        var syntaxTree = CSharpSyntaxTree.ParseText(DefaultAssertion, CSharpParseOptions.Default);
+        var compilation1 = Fixture.CreateLibrary(syntaxTree);
+
+        var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+
+        var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "IsPositive",
+            """
+            /// <summary>Checks that the value is greater than zero.</summary>
+            [GenerateAssertion(ExpectationMessage = "to be positive")]
+            public static bool IsPositive(this int value)
+            {
+                return value > 0;
+            }
+            """
+            );
+        var driver2 = driver1.RunGenerators(compilation2);
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Modified);
+    }
+
+    [Test]
+    public async Task ModifyDocumentationTextShouldNotRegenerate()
+    {
+        var compilation1 = Fixture.CreateLibrary(CSharpSyntaxTree.ParseText(
+            """
+            using TUnit.Assertions.Attributes;
+
+            public static partial class IntAssertionExtensions
+            {
+                /// <summary>Checks that the value is greater than zero.</summary>
+                [GenerateAssertion(ExpectationMessage = "to be positive")]
+                public static bool IsPositive(this int value)
+                {
+                    return value > 0;
+                }
+            }
+            """,
+            CSharpParseOptions.Default));
+
+        var driver1 = TestHelper.GenerateTracked<MethodAssertionGenerator>(compilation1);
+        await AssertRunReasons(driver1, IncrementalGeneratorRunReasons.New);
+
+        var compilation2 = TestHelper.ReplaceMethodDeclaration(compilation1, "IsPositive",
+            """
+            /// <summary>Checks that the value is strictly greater than zero.</summary>
+            [GenerateAssertion(ExpectationMessage = "to be positive")]
+            public static bool IsPositive(this int value)
+            {
+                return value > 0;
+            }
+            """
+            );
+        var driver2 = driver1.RunGenerators(compilation2);
+
+        // The generated method references the documentation by ID, so its text is not part of the output.
+        await AssertRunReasons(driver2, IncrementalGeneratorRunReasons.Cached);
+        await TestHelper.AssertSourceOutputsCached(driver2.GetRunResult().Results[0]);
+    }
+
+    [Test]
     public async Task ModifyOneContainingTypeShouldOnlyRegenerateThatType()
     {
         var compilation1 = Fixture.CreateLibrary(

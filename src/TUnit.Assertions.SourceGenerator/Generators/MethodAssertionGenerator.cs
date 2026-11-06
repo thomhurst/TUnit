@@ -368,6 +368,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
             GenericConstraints = CollectGenericConstraints(methodSymbol),
             MethodCallExpression = BuildMethodCallExpression(methodSymbol, additionalParameters),
             ContainingType = containingTypeData,
+            DocumentationId = GetDocumentationId(methodSymbol, cancellationToken),
         };
 
         var isCovariantCandidate = CovarianceHelper.IsCovariantCandidate(targetType);
@@ -401,6 +402,28 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     private static bool IsExtensionMethod(IMethodSymbol methodSymbol) =>
         methodSymbol.IsExtensionMethod ||
         (methodSymbol.Parameters.Length > 0 && methodSymbol.Parameters[0].IsThis);
+
+    /// <summary>
+    /// The source method's documentation ID as the XML documentation file names it, or null if it has none to share.
+    /// </summary>
+    private static string? GetDocumentationId(IMethodSymbol methodSymbol, CancellationToken cancellationToken)
+    {
+        // A package reference does not expose non-public methods, so the cref of a non-public source
+        // method would not resolve and the hover would be empty; keep the placeholder. Only the method's
+        // own accessibility matters: a public method in an internal, file-local or private nested type
+        // still resolves from a package, as pinned by
+        // XmlDocsRegressionTests.DocumentedMethodAssertion_InheritdocCrefsResolveFromPackage.
+        // The check also runs first, so only public methods pay for reading their documentation.
+        if (methodSymbol.DeclaredAccessibility != Accessibility.Public
+            || string.IsNullOrWhiteSpace(methodSymbol.GetDocumentationCommentXml(cancellationToken: cancellationToken)))
+        {
+            return null;
+        }
+
+        // The member name exactly as the XML documentation file writes it, which is what an IDE looks up.
+        var documentationId = methodSymbol.GetDocumentationCommentId();
+        return string.IsNullOrEmpty(documentationId) ? null : documentationId;
+    }
 
     private static string FormatObsoleteAttribute(AttributeData attr)
         => TUnit.SourceGen.Shared.AttributeForwardingFormatters.FormatObsolete(attr);
@@ -1049,9 +1072,20 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         var genericConstraints = data.Method.GenericConstraints;
 
         // XML documentation
-        sb.AppendLine("    /// <summary>");
-        sb.AppendLine($"    /// Generated extension method for {methodName}");
-        sb.AppendLine("    /// </summary>");
+        if (data.Method.DocumentationId is { } documentationId)
+        {
+            // The compiler copies a documentation ID cref without binding it, so overloads, generics
+            // and file-local types need no cref syntax. The path drops <returns>, which describes the
+            // source method's result, and the <param> of the receiver, which the extension renames to
+            // source. A parameter name is an identifier without the verbatim @, so it needs no escaping.
+            sb.AppendLine($"    /// <inheritdoc cref=\"{documentationId}\" path=\"/*[not(self::returns) and not(self::param[@name='{data.Method.FirstParamName}'])]\"/>");
+        }
+        else
+        {
+            sb.AppendLine("    /// <summary>");
+            sb.AppendLine($"    /// Generated extension method for {methodName}");
+            sb.AppendLine("    /// </summary>");
+        }
 
         // Add suppression for generic types to avoid trimming warnings
         if (isCovariant || genericParams.Count > 0)
@@ -1398,7 +1432,8 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         string FirstParamName,
         string MethodCallExpression,
         ImmutableEquatableArray<string> GenericConstraints,
-        ImmutableEquatableArray<string> GenericTypeParameters
+        ImmutableEquatableArray<string> GenericTypeParameters,
+        string? DocumentationId
     );
 
     private record struct ParameterData(
