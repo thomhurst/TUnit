@@ -409,7 +409,11 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     private static string? GetDocumentationId(IMethodSymbol methodSymbol, CancellationToken cancellationToken)
     {
         // A package reference does not expose non-public methods, so the cref of a non-public source
-        // method would not resolve and the hover would be empty; keep the placeholder.
+        // method would not resolve and the hover would be empty; keep the placeholder. Only the method's
+        // own accessibility matters: a public method in an internal, file-local or private nested type
+        // still resolves from a package, as pinned by
+        // XmlDocsRegressionTests.DocumentedMethodAssertion_InheritdocCrefsResolveFromPackage.
+        // The check also runs first, so only public methods pay for reading their documentation.
         if (methodSymbol.DeclaredAccessibility != Accessibility.Public
             || string.IsNullOrWhiteSpace(methodSymbol.GetDocumentationCommentXml(cancellationToken: cancellationToken)))
         {
