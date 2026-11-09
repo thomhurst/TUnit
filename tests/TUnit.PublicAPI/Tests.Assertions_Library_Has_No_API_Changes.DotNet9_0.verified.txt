@@ -185,7 +185,7 @@ namespace
         public static .<.RaisedEvent<T>> RaisesAsync<T>(<<T>> attach, <<T>> detach, <.> action)
             where T :  { }
         public static . That( action, [.("action")] string? expression = null) { }
-        public static .<object?> That(.IEnumerable value, [.("value")] string? expression = null) { }
+        public static .<object?> That(.IEnumerable? value, [.("value")] string? expression = null) { }
         public static . That(<.> action, [.("action")] string? expression = null) { }
         public static . That(. task, [.("task")] string? expression = null) { }
         [.(1)]
