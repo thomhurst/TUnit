@@ -241,9 +241,16 @@ public static class Assert
     /// Example: await Assert.That(nonGenericCollection).Contains("item");
     /// </summary>
     public static CollectionAssertion<object?> That(
-        IEnumerable value,
+        IEnumerable? value,
         [CallerArgumentExpression(nameof(value))] string? expression = null)
     {
+        // A null source must reach the assertion chain so IsNull() can pass and other
+        // assertions fail normally; Cast<>() would throw ArgumentNullException here.
+        if (value is null)
+        {
+            return new CollectionAssertion<object?>(null!, expression);
+        }
+
         // Cast to IEnumerable<object?> directly without calling Cast<>() to preserve reference identity
         // This allows IsSameReferenceAs to work correctly on non-generic IEnumerables
         if (value is IEnumerable<object?> genericEnumerable)
