@@ -60,16 +60,16 @@ at Assert.That(actualEmployee).IsEqualTo(expectedEmployee)
 Source generation shifts work from run time to build time: you pay a little up front at build, and every test run after that starts faster — dramatically so under Native AOT. The same test suites, run on every framework:
 
 <!-- benchmarks:start -->
-| Scenario | TUnit (AOT) | TUnit | xUnit v3 | NUnit | MSTest |
-|----------|---|---|---|---|---|
-| Data-driven tests | 18.28 ms | 327.27 ms | 681.76 ms | 667.98 ms | 565.09 ms |
-| Async-heavy tests | 116.8 ms | 390.6 ms | 745.7 ms | 726.7 ms | 696.6 ms |
-| Matrix combinations | 163.8 ms | 483.3 ms | 943.6 ms | 1,649.7 ms | 1,588.0 ms |
-| Large suites (scale) | 14.14 ms | 350.66 ms | 697.29 ms | 683.12 ms | 577.51 ms |
-| Massive parallelism | 361.6 ms | 645.1 ms | 1,285.1 ms | 1,224.6 ms | 2,983.1 ms |
-| Setup/teardown lifecycle | 96.81 ms | 448.61 ms | 838.25 ms | 1,310.99 ms | 1,225.75 ms |
+| Scenario | TUnit (AOT) | xUnit v3 (AOT) | TUnit | xUnit v3 | NUnit | MSTest |
+|----------|---|---|---|---|---|---|
+| Data-driven tests | 18.28 ms | 20.54 ms | 327.27 ms | 681.76 ms | 667.98 ms | 565.09 ms |
+| Async-heavy tests | 116.8 ms | 120.6 ms | 390.6 ms | 745.7 ms | 726.7 ms | 696.6 ms |
+| Matrix combinations | 163.8 ms | 271.4 ms | 483.3 ms | 943.6 ms | 1,649.7 ms | 1,588.0 ms |
+| Large suites (scale) | 14.14 ms | 21.91 ms | 350.66 ms | 697.29 ms | 683.12 ms | 577.51 ms |
+| Massive parallelism | 361.6 ms | 670.2 ms | 645.1 ms | 1,285.1 ms | 1,224.6 ms | 2,983.1 ms |
+| Setup/teardown lifecycle | 96.81 ms | 178.42 ms | 448.61 ms | 838.25 ms | 1,310.99 ms | 1,225.75 ms |
 
-<sub>Mean wall-clock time to run the same test suite. TUnit (AOT) 1.81.10 · TUnit 1.81.10 · xUnit v3 4.0.2 · NUnit 5.0.0 · MSTest 4.5.2. .NET SDK 10.0.403, .NET 10.0.14 (10.0.14, 10.0.1426.52326), X64 RyuJIT x86-64-v4. Updated 2026-11-08 — regenerated weekly by the [Speed Comparison workflow](https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml). Full results and methodology: [tunit.dev/docs/benchmarks](https://tunit.dev/docs/benchmarks/).</sub>
+<sub>Mean wall-clock time to run the same test suite. TUnit (AOT) 1.81.10 · xUnit v3 (AOT) 4.0.2 · TUnit 1.81.10 · xUnit v3 4.0.2 · NUnit 5.0.0 · MSTest 4.5.2. .NET SDK 10.0.403, .NET 10.0.14 (10.0.14, 10.0.1426.52326), X64 RyuJIT x86-64-v4. Updated 2026-11-08 — regenerated weekly by the [Speed Comparison workflow](https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml). Full results and methodology: [tunit.dev/docs/benchmarks](https://tunit.dev/docs/benchmarks/).</sub>
 <!-- benchmarks:end -->
 
 ## Getting Started
