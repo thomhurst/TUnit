@@ -14,7 +14,6 @@
     <PackageReference Include="NUnit" GeneratePathProperty="true" />
     <PackageReference Include="xunit.v3.extensibility.core" />
     <PackageReference Include="xunit.v3.assert" />
-    <PackageReference Include="System.Text.Json" Condition="'$(TargetFramework)' == 'net8.0'" GeneratePathProperty="true" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\TUnit.Analyzers.CodeFixers\TUnit.Analyzers.CodeFixers.csproj" />
@@ -56,11 +55,6 @@
           Link="TUnit.TestProject.Library.netstandard2.0.dll"
           CopyToOutputDirectory="PreserveNewest"
           Visible="false" />
-    <None Include="$(PkgSystem_Text_Json)\lib\net8.0\System.Text.Json.dll"
-          Condition="'$(TargetFramework)' == 'net8.0'"
-          Link="System.Text.Json.9.0.dll"
-          CopyToOutputDirectory="PreserveNewest"
-          Visible="false" />
     <!-- NUnit 5 ships a net10.0 build that references System.Runtime 10.0; referencing it from
          the Net90 analyzer-test compilation raises CS1705. Use NUnit's net8.0 build instead. -->
     <None Include="$(PkgNUnit)\lib\net8.0\nunit.framework.dll"
@@ -92,19 +86,7 @@
     <Reference Include="$(PkgMicrosoft_VisualStudio_Threading_Analyzers)\analyzers\cs\Microsoft.VisualStudio.Threading.Analyzers.dll" Analyzer="false" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" VersionOverride="9.0.0" PrivateAssets="all" GeneratePathProperty="true" />
-    <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.dll" Analyzer="false" />
-    <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" Analyzer="false" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" VersionOverride="9.0.0" PrivateAssets="all" GeneratePathProperty="true" />
-    <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.dll" Analyzer="false" />
-    <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" Analyzer="false" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" VersionOverride="9.0.0" PrivateAssets="all" GeneratePathProperty="true" />
     <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.NetAnalyzers.dll" Analyzer="false" />
     <Reference Include="$(PkgMicrosoft_CodeAnalysis_NetAnalyzers)\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll" Analyzer="false" />

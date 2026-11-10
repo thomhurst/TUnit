@@ -103,8 +103,7 @@ public class XUnitMigrationAnalyzerTests
             {
                 ConfigureXUnitTest(test);
                 test.CompilerDiagnostics = CompilerDiagnostics.Errors;
-                test.ReferenceAssemblies = new ReferenceAssemblies("net10.0",
-                    new PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"), "ref/net10.0");
+                test.ReferenceAssemblies = TUnit.Tests.Shared.AnalyzerTestCompatibility.RuntimeReferenceAssemblies;
                 test.TestState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
                 test.TestState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
                 test.FixedState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
@@ -154,8 +153,7 @@ public class XUnitMigrationAnalyzerTests
                 ConfigureXUnitTest(test);
                 // The shared verifier promotes all nullable warnings to errors.
                 test.CompilerDiagnostics = CompilerDiagnostics.Errors;
-                test.ReferenceAssemblies = new ReferenceAssemblies("net10.0",
-                    new PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"), "ref/net10.0");
+                test.ReferenceAssemblies = TUnit.Tests.Shared.AnalyzerTestCompatibility.RuntimeReferenceAssemblies;
                 test.TestState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
                 test.TestState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
                 test.FixedState.Sources.Add(("GlobalUsings.cs", "global using TUnit.Core; global using TUnit.Assertions; global using TUnit.Assertions.Extensions;"));
@@ -1819,8 +1817,7 @@ public class XUnitMigrationAnalyzerTests
             {
                 ConfigureXUnitTest(test);
                 test.CompilerDiagnostics = CompilerDiagnostics.Errors;
-                test.ReferenceAssemblies = new ReferenceAssemblies("net10.0",
-                    new PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"), "ref/net10.0");
+                test.ReferenceAssemblies = TUnit.Tests.Shared.AnalyzerTestCompatibility.RuntimeReferenceAssemblies;
                 test.TestState.AdditionalReferences.Add(typeof(TUnit.Assertions.Assert).Assembly);
                 test.TestState.Sources.Add(("CustomSet.cs", customSet));
                 test.FixedState.Sources.Add(("CustomSet.cs", customSet));

@@ -35,9 +35,6 @@ public static class AnalyzerTestHelpers
                     MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
                     MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly)),
                     MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly)),
-#if NET8_0
-                    MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetSystemTextJson9DllPath()),
-#endif
                 ]
             );
 
@@ -146,9 +143,6 @@ public static class AnalyzerTestHelpers
                 MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly)),
                 MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly)),
                 MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly)),
-#if NET8_0
-                MetadataReference.CreateFromFile(TUnit.Tests.Shared.AnalyzerTestCompatibility.GetSystemTextJson9DllPath()),
-#endif
             ]);
 
         return test;
@@ -158,8 +152,6 @@ public static class AnalyzerTestHelpers
     {
 #if NET472
         return ReferenceAssemblies.NetFramework.Net472.Default;
-#elif NET8_0
-        return ReferenceAssemblies.Net.Net80;
 #elif NET9_0_OR_GREATER
         return ReferenceAssemblies.Net.Net90;
 #else

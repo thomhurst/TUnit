@@ -1,4 +1,4 @@
-[assembly: .(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
+[assembly: .(".NETCoreApp,Version=v11.0", FrameworkDisplayName=".NET 11.0")]
 namespace .Abstractions
 {
     public interface ICollectionAdapter<out TItem> : ., .<TItem>
@@ -188,28 +188,46 @@ namespace
         public static .<object?> That(.IEnumerable? value, [.("value")] string? expression = null) { }
         public static . That(<.> action, [.("action")] string? expression = null) { }
         public static . That(. task, [.("task")] string? expression = null) { }
+        [.(1)]
         public static . That(? value, [.("value")] string? expression = null) { }
+        [.(2)]
         public static .<string> That(.StringValue value, [.("value")] string? expression = null) { }
+        [.(3)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        [.(1)]
         public static .<TItem> That<TItem>(.<TItem> value, [.("value")] string? expression = null) { }
+        [.(3)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        [.(1)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        [.(4)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        [.(2)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        [.(3)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        [.(2)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        [.(3)]
         public static .<TItem> That<TItem>(.<TItem>? value, [.("value")] string? expression = null) { }
+        [.(1)]
         public static .<TItem> That<TItem>(<.<TItem>?> func, [.("func")] string? expression = null) { }
+        [.(1)]
         public static .<TItem> That<TItem>(<.<.<TItem>?>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<.<TValue?>> func, [.("func")] string? expression = null) { }
         public static .<TValue> That<TValue>(<TValue?> func, [.("func")] string? expression = null) { }
+        [.(1)]
         public static .<TItem> That<TItem>(<TItem> value, [.("value")] string? expression = null) { }
+        [.(1)]
         public static .<TItem> That<TItem>(<TItem> value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(.<TValue> task, [.("task")] string? expression = null) { }
+        [.(5)]
         public static .<TItem> That<TItem>(TItem[]? value, [.("value")] string? expression = null) { }
         public static .<TValue> That<TValue>(TValue? value, [.("value")] string? expression = null) { }
+        [.(3)]
         public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue>? value, [.("value")] string? expression = null)
             where TKey :  notnull { }
+        [.(2)]
         public static .<TKey, TValue> That<TKey, TValue>(.<TKey, TValue>? value, [.("value")] string? expression = null)
             where TKey :  notnull { }
         public static  Throws( exceptionType,  action) { }
@@ -2356,6 +2374,10 @@ namespace .
         public static bool IsArray(this . value) { }
         [.(ExpectationMessage="to be a JSON boolean", InlineMethodBody=true)]
         public static bool IsBoolean(this . value) { }
+        [.(ExpectationMessage="to be deeply equal to {expected}")]
+        public static . IsDeepEqualTo(this . value, . expected) { }
+        [.(ExpectationMessage="to not be deeply equal to {expected}", InlineMethodBody=true)]
+        public static bool IsNotDeepEqualTo(this . value, . expected) { }
         [.(ExpectationMessage="to not be JSON null", InlineMethodBody=true)]
         public static bool IsNotNull(this . value) { }
         [.(ExpectationMessage="to be JSON null", InlineMethodBody=true)]
@@ -2760,18 +2782,24 @@ namespace .Extensions
             where TValue :  struct, <TValue> { }
         public static . Length(this .<string> source) { }
         public static . Length(this .<string> source, <.<int>, .<int>?> lengthAssertion, [.("lengthAssertion")] string? expression = null) { }
+        [.(3)]
         public static .<TObject> Member<TObject>(this .<TObject> source, .<<TObject, string?>> memberSelector, <.<string>, .<string>> assertions) { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TTransformed> overload with strongly-typed assertions.")]
+        [.(3)]
         public static .<TObject> Member<TObject>(this .<TObject> source, .<<TObject, string?>> memberSelector, <.<string>, object> assertions) { }
+        [.(1)]
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<.<TItem>>> assertions) { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TItem, TTransformed> overload with strongly-typed assertions.")]
+        [.(1)]
         public static .<TObject> Member<TObject, TItem>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, object> assertions) { }
+        [.(1)]
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TMember, TTransformed> overload with strongly-typed assertions.")]
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, object> assertions) { }
+        [.(1)]
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TMember>> assertions) { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TMember, TTransformed> overload with strongly-typed assertions.")]
@@ -2780,17 +2808,25 @@ namespace .Extensions
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TMember, TTransformed> overload with strongly-typed assertions.")]
         public static .<TObject> Member<TObject, TMember>(this .<TObject> source, .<<TObject, TMember?>> memberSelector, <.<TMember>, object> assertions) { }
+        [.(3)]
         public static .<TObject> Member<TObject, TTransformed>(this .<TObject> source, .<<TObject, string?>> memberSelector, <.<string>, .<TTransformed>> assertions) { }
+        [.(2)]
         public static .<TObject> Member<TObject, TItem, TTransformed>(this .<TObject> source, .<<TObject, .<TItem>>> memberSelector, <.<.<TItem>, TItem>, .<TTransformed>> assertions) { }
+        [.(2)]
         public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<.<TKey, TValue>>> assertions)
             where TKey :  notnull { }
         [.("Uses reflection for legacy compatibility. For AOT compatibility, use the Member<T" +
             "Object, TKey, TValue, TTransformed> overload with strongly-typed assertions.")]
+        [.(2)]
         public static .<TObject> Member<TObject, TKey, TValue>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, object> assertions)
             where TKey :  notnull { }
+        [.(2)]
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
+        [.(2)]
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, .<TMember>>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
+        [.(1)]
         public static .<TObject> Member<TObject, TMember, TTransformed>(this .<TObject> source, .<<TObject, TMember?>> memberSelector, <.<TMember>, .<TTransformed>> assertions) { }
+        [.(3)]
         public static .<TObject> Member<TObject, TKey, TValue, TTransformed>(this .<TObject> source, .<<TObject, .<TKey, TValue>>> memberSelector, <.<.<TKey, TValue>, TKey, TValue>, .<TTransformed>> assertions)
             where TKey :  notnull { }
         public static .<TValue> Satisfies<TValue>(this .<TValue> source, <TValue?, bool> predicate, [.("predicate")] string? expression = null) { }
@@ -3269,6 +3305,7 @@ namespace .Extensions
     }
     public static class DateOnlyEqualsAssertionExtensions
     {
+        [.(2)]
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
     public sealed class DateOnly_IsFirstDayOfMonth_Assertion : .<>
@@ -3350,6 +3387,7 @@ namespace .Extensions
     }
     public static class DateTimeEqualsAssertionExtensions
     {
+        [.(2)]
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
     public static class DateTimeEqualsExactAssertionExtensions
@@ -3379,6 +3417,7 @@ namespace .Extensions
     }
     public static class DateTimeOffsetEqualsAssertionExtensions
     {
+        [.(2)]
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
     public sealed class DateTimeOffset_IsInFutureUtc_Assertion : .<>
@@ -3563,14 +3602,17 @@ namespace .Extensions
     }
     public static class DecimalEqualsAssertionExtensions
     {
+        [.(2)]
         public static . IsEqualTo(this .<decimal> source, decimal expected, [.("expected")] string? expectedExpression = null) { }
     }
     public static class DecimalIsCloseToAssertionExtensions
     {
+        [.(2)]
         public static . IsCloseTo(this .<decimal> source, decimal expected, decimal tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
     }
     public static class DecimalIsWithinPercentOfAssertionExtensions
     {
+        [.(2)]
         public static . IsWithinPercentOf(this .<decimal> source, decimal expected, decimal percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
     }
     public sealed class Decimal_IsNotZero_Assertion : .<decimal>
@@ -3742,20 +3784,28 @@ namespace .Extensions
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source) { }
         public static .<TItem[], TItem> Count<TItem>(this .<TItem[]> source) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<TItem[], TItem> Count<TItem>(this .<TItem[]> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<TItem[], TItem> Count<TItem>(this .<TItem[]> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TKey, TValue>, TKey, TValue> Count<TKey, TValue>(this .<.<TKey, TValue>> source)
             where TKey :  notnull { }
@@ -3765,14 +3815,17 @@ namespace .Extensions
             where TKey :  notnull { }
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<.<TKey, TValue>>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TKey :  notnull { }
+        [.(-1)]
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null)
             where TKey :  notnull { }
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<.<TKey, TValue>>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TKey :  notnull { }
+        [.(-1)]
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null)
             where TKey :  notnull { }
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<.<TKey, TValue>>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TKey :  notnull { }
+        [.(-1)]
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null)
             where TKey :  notnull { }
         public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
@@ -4159,10 +4212,12 @@ namespace .Extensions
     }
     public static class DoubleEqualsAssertionExtensions
     {
+        [.(2)]
         public static . IsEqualTo(this .<double> source, double expected, [.("expected")] string? expectedExpression = null) { }
     }
     public static class DoubleIsCloseToAssertionExtensions
     {
+        [.(2)]
         public static . IsCloseTo(this .<double> source, double expected, double tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
     }
     public class DoubleIsFiniteWithDoubleAssertion : .<double>
@@ -4209,6 +4264,7 @@ namespace .Extensions
     }
     public static class DoubleIsWithinPercentOfAssertionExtensions
     {
+        [.(2)]
         public static . IsWithinPercentOf(this .<double> source, double expected, double percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
     }
     public sealed class Double_IsNotZero_Assertion : .<double>
@@ -4315,6 +4371,7 @@ namespace .Extensions
         public static .<TValue> IsEqualTo<TValue>(this .<TValue> source, TValue? expected, .<TValue> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         [.("Looks up implicit conversion operators via reflection. Trimming may remove user-d" +
             "efined operators.")]
+        [.(-1)]
         public static .<TOther> IsEqualTo<TValue, TOther>(this .<TValue> source, TOther? expected, [.("expected")] string? expectedExpression = null, params .[] _) { }
     }
     public static class EquatableAssertionExtensions
@@ -4529,10 +4586,12 @@ namespace .Extensions
     }
     public static class FloatEqualsAssertionExtensions
     {
+        [.(2)]
         public static . IsEqualTo(this .<float> source, float expected, [.("expected")] string? expectedExpression = null) { }
     }
     public static class FloatIsCloseToAssertionExtensions
     {
+        [.(2)]
         public static . IsCloseTo(this .<float> source, float expected, float tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
     }
     public class FloatIsFiniteWithFloatAssertion : .<float>
@@ -4579,6 +4638,7 @@ namespace .Extensions
     }
     public static class FloatIsWithinPercentOfAssertionExtensions
     {
+        [.(2)]
         public static . IsWithinPercentOf(this .<float> source, float expected, float percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
     }
     public sealed class Float_IsNotZero_Assertion : .<float>
@@ -4930,14 +4990,17 @@ namespace .Extensions
     }
     public static class IntEqualsAssertionExtensions
     {
+        [.(2)]
         public static . IsEqualTo(this .<int> source, int expected, [.("expected")] string? expectedExpression = null) { }
     }
     public static class IntIsCloseToAssertionExtensions
     {
+        [.(2)]
         public static . IsCloseTo(this .<int> source, int expected, int tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
     }
     public static class IntIsWithinPercentOfAssertionExtensions
     {
+        [.(2)]
         public static . IsWithinPercentOf(this .<int> source, int expected, double percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
     }
     public sealed class Int_IsEven_Assertion : .<int>
@@ -5013,6 +5076,8 @@ namespace .Extensions
         public static ._HasProperty_String_Assertion HasProperty(this .<.> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
         public static ._IsArray_Assertion IsArray(this .<.> source) { }
         public static ._IsBoolean_Assertion IsBoolean(this .<.> source) { }
+        public static ._IsDeepEqualTo_JsonElement_Assertion IsDeepEqualTo(this .<.> source, . expected, [.("expected")] string? expectedExpression = null) { }
+        public static ._IsNotDeepEqualTo_JsonElement_Assertion IsNotDeepEqualTo(this .<.> source, . expected, [.("expected")] string? expectedExpression = null) { }
         public static ._IsNotNull_Assertion IsNotNull(this .<.> source) { }
         public static ._IsNull_Assertion IsNull(this .<.> source) { }
         public static ._IsNumber_Assertion IsNumber(this .<.> source) { }
@@ -5040,6 +5105,18 @@ namespace .Extensions
     public sealed class JsonElement_IsBoolean_Assertion : .<.>
     {
         public JsonElement_IsBoolean_Assertion(.<.> context) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonElement_IsDeepEqualTo_JsonElement_Assertion : .<.>
+    {
+        public JsonElement_IsDeepEqualTo_JsonElement_Assertion(.<.> context, . expected) { }
+        protected override .<.> CheckAsync(.<.> metadata) { }
+        protected override string GetExpectation() { }
+    }
+    public sealed class JsonElement_IsNotDeepEqualTo_JsonElement_Assertion : .<.>
+    {
+        public JsonElement_IsNotDeepEqualTo_JsonElement_Assertion(.<.> context, . expected) { }
         protected override .<.> CheckAsync(.<.> metadata) { }
         protected override string GetExpectation() { }
     }
@@ -5205,14 +5282,17 @@ namespace .Extensions
     }
     public static class LongEqualsAssertionExtensions
     {
+        [.(2)]
         public static . IsEqualTo(this .<long> source, long expected, [.("expected")] string? expectedExpression = null) { }
     }
     public static class LongIsCloseToAssertionExtensions
     {
+        [.(2)]
         public static . IsCloseTo(this .<long> source, long expected, long tolerance, [.("expected")] string? expectedExpression = null, [.("tolerance")] string? toleranceExpression = null) { }
     }
     public static class LongIsWithinPercentOfAssertionExtensions
     {
+        [.(2)]
         public static . IsWithinPercentOf(this .<long> source, long expected, double percent, [.("expected")] string? expectedExpression = null, [.("percent")] string? percentExpression = null) { }
     }
     public sealed class Long_IsEven_Assertion : .<long>
@@ -5244,6 +5324,7 @@ namespace .Extensions
         public static .<TValue> IsNotEqualTo<TValue>(this .<TValue> source, TValue notExpected, .<TValue>? comparer = null, [.("notExpected")] string? notExpectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
         [.("Looks up implicit conversion operators via reflection. Trimming may remove user-d" +
             "efined operators.")]
+        [.(-1)]
         public static .<TOther> IsNotEqualTo<TValue, TOther>(this .<TValue> source, TOther? notExpected, [.("notExpected")] string? notExpectedExpression = null, params .[] _) { }
     }
     public static class NotEquivalentToAssertionExtensions
@@ -5698,20 +5779,28 @@ namespace .Extensions
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source) { }
         public static .<TItem[], TItem> Count<TItem>(this .<TItem[]> source) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<.<TItem>, TItem> Count<TItem>(this .<.<TItem>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<TItem[], TItem> Count<TItem>(this .<TItem[]> source, <.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public static .<TItem[], TItem> Count<TItem>(this .<TItem[]> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public static .<.<TKey, TValue>, TKey, TValue> Count<TKey, TValue>(this .<.<TKey, TValue>> source)
             where TKey :  notnull { }
@@ -5721,14 +5810,17 @@ namespace .Extensions
             where TKey :  notnull { }
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<.<TKey, TValue>>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TKey :  notnull { }
+        [.(-1)]
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null)
             where TKey :  notnull { }
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<.<TKey, TValue>>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TKey :  notnull { }
+        [.(-1)]
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null)
             where TKey :  notnull { }
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<.<TKey, TValue>>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TKey :  notnull { }
+        [.(-1)]
         public static .<.<TKey, TValue>, .<TKey, TValue>> Count<TKey, TValue>(this .<.<TKey, TValue>> source, <.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null)
             where TKey :  notnull { }
         public static .<.<TItem>, TItem> DoesNotContain<TItem>(this .<.<TItem>> source, <TItem, bool> predicate, [.("predicate")] string? expression = null) { }
@@ -6490,6 +6582,7 @@ namespace .Extensions
     }
     public static class TimeOnlyEqualsAssertionExtensions
     {
+        [.(2)]
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
     public sealed class TimeOnly_IsAM_Assertion : .<>
@@ -6545,6 +6638,7 @@ namespace .Extensions
     }
     public static class TimeSpanEqualsAssertionExtensions
     {
+        [.(2)]
         public static . IsEqualTo(this .<> source,  expected, [.("expected")] string? expectedExpression = null) { }
     }
     public sealed class TimeSpan_IsNegative_Assertion : .<>
@@ -7156,6 +7250,7 @@ namespace .Sources
         public .<TCollection, TItem> ContainsOnly(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Count() { }
         public .<TCollection, TItem> Count(<.<TItem>, .?> itemAssertion, [.("itemAssertion")] string? expression = null) { }
+        [.(-1)]
         public .<TCollection, TItem> Count(<.<int>, .<int>?> countAssertion, [.("countAssertion")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }

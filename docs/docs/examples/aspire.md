@@ -24,7 +24,7 @@ dotnet add package TUnit.Aspire.Core
 
 - An Aspire AppHost project in your solution
 - Docker running (Aspire uses containers for infrastructure resources)
-- .NET 8.0 or later
+- .NET 9.0 or later
   :::
 
 ## Quick Start

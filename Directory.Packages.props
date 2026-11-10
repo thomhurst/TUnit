@@ -2,22 +2,23 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
-  <!-- Per-TFM versions: match these packages to the consumer's runtime. Some 10.x packages do not support
-       net8.0/net9.0 consumers at all, and the rest would lift Microsoft.Extensions.* to 10.x on net8.0/net9.0.
-       Any project (single- or multi-targeted) that builds for net8.0/net9.0 resolves the matching 8.x/9.x version.
+  <!-- Per-TFM versions: match these packages to the consumer's runtime. Some newer packages do not support
+       older consumers at all, and the rest would lift Microsoft.Extensions.* above the consumer's runtime.
+       Any project (single- or multi-targeted) that builds for net9.0/net11.0 resolves the matching 9.x/11.x
+       version; every other target framework gets 10.x.
        Versions are literal (not MSBuild properties) so Renovate can update them; renovate.json keeps each
        group on its major version. -->
-  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0' and '$(TargetFramework)' != 'net9.0'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net9.0' and '$(TargetFramework)' != 'net11.0'">
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.33" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0'">
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.22" />

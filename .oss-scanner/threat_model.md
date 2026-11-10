@@ -114,7 +114,7 @@ The boundaries are:
 
 - The image is built in Debug from `TUnit.CI.slnx`, plus `src/TUnit.Reporting.Tool`.
 - Test projects are TUnit apps. Run them with
-  `cd tests/<Project> && dotnet run -c Debug --no-restore --framework net10.0`. net8.0 and net9.0 runtimes are
+  `cd tests/<Project> && dotnet run -c Debug --no-restore --framework net10.0`. net9.0 and net11.0 runtimes are
   also installed.
 - `tunit-oss-test` runs the offline-safe suites for the areas above.
 - Relevant suites:

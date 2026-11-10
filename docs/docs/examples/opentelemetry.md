@@ -4,7 +4,7 @@
 TUnit emits `System.Diagnostics.Activity` trace spans at every level of the test lifecycle. When you configure an OpenTelemetry exporter (or any `ActivityListener`), you get distributed tracing for your test runs automatically. When no listener is attached, the cost is zero.
 
 :::note
-Activity tracing requires .NET 8 or later. It is not available on .NET Framework or .NET Standard targets.
+Activity tracing requires .NET 9 or later. It is not available on .NET Framework or .NET Standard targets.
 :::
 
 ## Setup

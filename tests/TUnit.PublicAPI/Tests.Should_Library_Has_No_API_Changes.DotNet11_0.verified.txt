@@ -1,4 +1,4 @@
-[assembly: .(".NETCoreApp,Version=v8.0", FrameworkDisplayName=".NET 8.0")]
+[assembly: .(".NETCoreApp,Version=v11.0", FrameworkDisplayName=".NET 11.0")]
 namespace .
 {
     [(.Class, AllowMultiple=false)]
@@ -724,11 +724,13 @@ namespace .
     {
         public static ..ShouldAssertion<.> BeArray(this ..IShouldSource<.> source) { }
         public static ..ShouldAssertion<.> BeBoolean(this ..IShouldSource<.> source) { }
+        public static ..ShouldAssertion<.> BeDeepEqualTo(this ..IShouldSource<.> source, . expected, [.("expected")] string? expectedExpression = null) { }
         public static ..ShouldAssertion<.> BeNull(this ..IShouldSource<.> source) { }
         public static ..ShouldAssertion<.> BeNumber(this ..IShouldSource<.> source) { }
         public static ..ShouldAssertion<.> BeObject(this ..IShouldSource<.> source) { }
         public static ..ShouldAssertion<.> BeString(this ..IShouldSource<.> source) { }
         public static ..ShouldAssertion<.> HaveProperty(this ..IShouldSource<.> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
+        public static ..ShouldAssertion<.> NotBeDeepEqualTo(this ..IShouldSource<.> source, . expected, [.("expected")] string? expectedExpression = null) { }
         public static ..ShouldAssertion<.> NotBeNull(this ..IShouldSource<.> source) { }
         public static ..ShouldAssertion<.> NotHaveProperty(this ..IShouldSource<.> source, string propertyName, [.("propertyName")] string? propertyNameExpression = null) { }
     }
@@ -947,26 +949,43 @@ namespace .Should
     {
         public static ..ShouldDelegateSource<object?> Should(this  action, [.("action")] string? expression = null) { }
         public static ..ShouldDelegateSource<object?> Should(this <.> action, [.("action")] string? expression = null) { }
+        [.(2)]
         public static ..ShouldSource<string> Should(this string? value, [.("value")] string? expression = null) { }
+        [.(3)]
         public static ..ShouldHashSetSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        [.(1)]
         public static ..ShouldSource<.<TItem>> Should<TItem>(this .<TItem> value, string? expression = null) { }
+        [.(3)]
         public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        [.(1)]
         public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        [.(4)]
         public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        [.(2)]
         public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        [.(3)]
         public static ..ShouldCollectionSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        [.(2)]
         public static ..ShouldReadOnlySetSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        [.(1)]
         public static ..ShouldSetSource<T> Should<T>(this .<T>? value, [.("value")] string? expression = null) { }
+        [.(1)]
         public static ..ShouldDelegateCollectionSource<T> Should<T>(this <.<T>?> func, [.("func")] string? expression = null) { }
+        [.(1)]
         public static ..ShouldDelegateCollectionSource<T> Should<T>(this <.<.<T>?>> func, [.("func")] string? expression = null) { }
         public static ..ShouldDelegateSource<T> Should<T>(this <.<T?>> func, [.("func")] string? expression = null) { }
         public static ..ShouldDelegateSource<T> Should<T>(this <T?> func, [.("func")] string? expression = null) { }
+        [.(1)]
         public static ..ShouldSource<<TItem>> Should<TItem>(this <TItem> value, string? expression = null) { }
+        [.(1)]
         public static ..ShouldSource<<TItem>> Should<TItem>(this <TItem> value, string? expression = null) { }
         public static ..ShouldSource<T> Should<T>(this T? value, [.("value")] string? expression = null) { }
+        [.(5)]
         public static ..ShouldCollectionSource<T> Should<T>(this T[]? value, [.("value")] string? expression = null) { }
+        [.(3)]
         public static ..ShouldMutableDictionarySource<TKey, TValue> Should<TKey, TValue>(this .<TKey, TValue>? value, [.("value")] string? expression = null)
             where TKey :  notnull { }
+        [.(2)]
         public static ..ShouldDictionarySource<TKey, TValue> Should<TKey, TValue>(this .<TKey, TValue>? value, [.("value")] string? expression = null)
             where TKey :  notnull { }
     }

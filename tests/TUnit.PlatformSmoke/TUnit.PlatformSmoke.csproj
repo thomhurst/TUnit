@@ -34,7 +34,6 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser' or '$(SmokePlatform)' == 'WASI'">
-    <RuntimeFrameworkVersion>11.0.0-rc.1.26425.128</RuntimeFrameworkVersion>
     <UseMonoRuntime>true</UseMonoRuntime>
     <SelfContained>true</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>

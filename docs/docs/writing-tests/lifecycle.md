@@ -299,7 +299,7 @@ sequenceDiagram
 
 ### Early vs Late Stage
 
-For `ITestStartEventReceiver` and `ITestEndEventReceiver` on .NET 8 and later. On older target frameworks (`netstandard2.0`, for example .NET Framework), `Stage` is ignored and every receiver runs at the late stage:
+For `ITestStartEventReceiver` and `ITestEndEventReceiver` on .NET 9 and later. On older target frameworks (`netstandard2.0`, for example .NET Framework), `Stage` is ignored and every receiver runs at the late stage:
 
 ```mermaid
 flowchart LR

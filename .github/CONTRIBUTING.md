@@ -113,11 +113,11 @@ TUnit builds and tests on Windows, Linux and macOS.
 ### Prerequisites
 
 - **.NET SDK** matching [`global.json`](../global.json).
-- **.NET 8, 9 and 10 runtimes.** The test projects target all three, and a target framework whose
+- **.NET 9, 10 and 11 runtimes.** The test projects target all three, and a target framework whose
   runtime is missing fails with "You must install or update .NET". Either run a single framework
   (`--framework net10.0`, see below) or install the others, including the ASP.NET Core runtime, with
   [dotnet-install](https://learn.microsoft.com/dotnet/core/tools/dotnet-install-script)
-  (`--channel 8.0 --runtime dotnet`, `--channel 8.0 --runtime aspnetcore`, and so on). Homebrew's
+  (`--channel 9.0 --runtime dotnet`, `--channel 9.0 --runtime aspnetcore`, and so on). Homebrew's
   `dotnet` formula ships one runtime only.
 - **PowerShell 7** (`pwsh`) for the scripts in `scripts/`. On Linux and macOS they run directly, e.g.
   `./scripts/run-reflection-tests.ps1`, or as `pwsh scripts/run-reflection-tests.ps1`.

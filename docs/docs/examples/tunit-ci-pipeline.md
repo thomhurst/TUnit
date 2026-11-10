@@ -29,7 +29,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        dotnet-version: ['8.0.x', '9.0.x']
+        dotnet-version: ['9.0.x', '10.0.x']
       fail-fast: false  # Continue running other jobs if one fails
 
     steps:
@@ -248,15 +248,15 @@ stages:
 ```yaml
 strategy:
   matrix:
-    linux_net8:
+    linux_net10:
       vmImage: 'ubuntu-latest'
-      dotnetVersion: '8.0.x'
+      dotnetVersion: '10.0.x'
     linux_net9:
       vmImage: 'ubuntu-latest'
       dotnetVersion: '9.0.x'
-    windows_net8:
+    windows_net10:
       vmImage: 'windows-latest'
-      dotnetVersion: '8.0.x'
+      dotnetVersion: '10.0.x'
     windows_net9:
       vmImage: 'windows-latest'
       dotnetVersion: '9.0.x'
@@ -365,9 +365,9 @@ coverage-report:
   script:
     - dotnet test --configuration Release -- --report-trx
 
-test:net8:
+test:net10:
   extends: .test-template
-  image: mcr.microsoft.com/dotnet/sdk:8.0
+  image: mcr.microsoft.com/dotnet/sdk:10.0
 
 test:net9:
   extends: .test-template
@@ -457,8 +457,8 @@ workflows:
           requires:
             - build
       - test-matrix:
-          name: test-net8
-          dotnet-version: "8.0"
+          name: test-net10
+          dotnet-version: "10.0"
       - test-matrix:
           name: test-net9
           dotnet-version: "9.0"

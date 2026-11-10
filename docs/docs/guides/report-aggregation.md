@@ -172,7 +172,7 @@ tunit-report merge --directory <dir> [options]
 
 - Aggregation is driven by the HTML reporter's data pipeline — if you set `TUNIT_DISABLE_HTML_REPORTER` or `context.Settings.Reporting.HtmlReportEnabled = false`, no sidecars are produced and there is nothing to merge.
 - With cooperative mode (the default) across *multiple steps in the same job*, each step appends its own progressively-larger block (earlier steps' blocks can't be rewritten). Use `defer` + the tool for that layout, or `off` to restore per-suite blocks.
-- Suites are identified per assembly + OS + TFM, so multi-targeted projects appear as separate rows (e.g. `MyTests (.NET 8.0.x)` / `MyTests (.NET 9.0.x)`).
+- Suites are identified per assembly + OS + TFM, so multi-targeted projects appear as separate rows (e.g. `MyTests (.NET 9.0.x)` / `MyTests (.NET 10.0.x)`).
 - The GitHub step summary is capped at 1 MB by GitHub; the aggregated block replaces N per-suite blocks, so it usually *reduces* summary size.
 
 ## See Also
