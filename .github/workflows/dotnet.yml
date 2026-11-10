@@ -81,6 +81,9 @@ jobs:
       # then spent up to 3 minutes saving an entry that was evicted within the hour.
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
@@ -307,6 +310,9 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
 
       # TUnit.Mocks.Aot.Tests sets TreatWarningsAsErrors, so any trim/AOT warning ILC reports
       # for everyday mock usage fails its publish (#7027). Every framework still runs after an
@@ -364,6 +370,9 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
 
       - name: Enable Long Paths
         run: |
@@ -440,6 +449,9 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
 
       # Packing reads the Roslyn analyzer/generator variants from their own bin folders, so build
       # every library project, not just the packed ones.
