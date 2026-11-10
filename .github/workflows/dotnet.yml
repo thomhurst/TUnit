@@ -315,7 +315,7 @@ jobs:
         shell: bash
         run: |
           failed=()
-          for framework in net9.0 net10.0 net11.0; do
+          for framework in net10.0 net11.0; do
             for project in TUnit.Mocks.Tests TUnit.Mocks.Aot.Tests; do
               echo "::group::$project ($framework)"
               if dotnet publish "tests/$project/$project.csproj" -c Release --use-current-runtime \

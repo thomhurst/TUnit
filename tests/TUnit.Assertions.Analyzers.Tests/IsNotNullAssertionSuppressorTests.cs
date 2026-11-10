@@ -119,11 +119,7 @@ public class IsNotNullAssertionSuppressorTests
         var test = new AnalyzerTestHelpers.CSharpSuppressorTest<IsNotNullAssertionSuppressor, DefaultVerifier>
         {
             TestCode = code,
-#if NET10_0_OR_GREATER
             ReferenceAssemblies = TUnit.Tests.Shared.AnalyzerTestCompatibility.RuntimeReferenceAssemblies,
-#else
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90,
-#endif
         };
         test.TestState.AdditionalReferences.AddRange([
             MetadataReference.CreateFromFile(typeof(TUnitAttribute).Assembly.Location),

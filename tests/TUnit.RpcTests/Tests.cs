@@ -7,8 +7,8 @@ public class Tests
 {
     public static IEnumerable<Func<string>> Frameworks()
     {
-        yield return () => "net9.0";
         yield return () => "net10.0";
+        yield return () => "net11.0";
     }
 
     [Test]

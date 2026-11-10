@@ -24,7 +24,6 @@
         "choices": [
           { "choice": "net11.0", "description": "Target .NET 11.0" },
           { "choice": "net10.0", "description": "Target .NET 10.0" },
-          { "choice": "net9.0", "description": "Target .NET 9.0" },
           { "choice": "net481", "description": "Target .NET Framework 4.8.1" },
           { "choice": "net48", "description": "Target .NET Framework 4.8" },
           { "choice": "net472", "description": "Target .NET Framework 4.7.2" },

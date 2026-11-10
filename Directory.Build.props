@@ -8,7 +8,15 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == ''">
-    <TargetFrameworks>net9.0;net10.0;net11.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <!-- Runtime Async (a preview feature in .NET 11) compiles async methods for the runtime's own
+       suspension machinery instead of compiler-generated state machines. net10.0 must stay off:
+       its runtime-async APIs are experimental there and fail the build (CA2252, SYSLIB5007).
+       Mono cannot run runtime-async methods (dotnet/runtime#109632). -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net11.0' and '$(MSBuildProjectExtension)' == '.csproj'">
+    <Features>$(Features);runtime-async=on</Features>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(MSBuildProjectName)' == 'TUnit.Pipeline'">

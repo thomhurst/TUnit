@@ -225,7 +225,7 @@ Notes and limits:
   calls keep returning default values.
 - The `netstandard2.0` asset (used by .NET Framework test projects) does not include the
   runtime emitter — unconfigured calls return default values there too. Runtime stubs require
-  the `net9.0`+ assets.
+  the `net10.0`+ assets.
 - Opt out globally with `settings.Mocks.RuntimeAutoStubs = false;` in a
   `[Before(HookType.TestDiscovery)]` hook.
 

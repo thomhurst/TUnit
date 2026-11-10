@@ -207,7 +207,7 @@ public async Task DateTimeOffset_Comparison()
 }
 ```
 
-## DateOnly (.NET 9+)
+## DateOnly (.NET 10+)
 
 DateOnly represents just a date without time:
 
@@ -249,7 +249,7 @@ public async Task DateOnly_Comparison()
 }
 ```
 
-## TimeOnly (.NET 9+)
+## TimeOnly (.NET 10+)
 
 TimeOnly represents just time without a date:
 

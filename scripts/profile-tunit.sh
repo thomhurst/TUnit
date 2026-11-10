@@ -32,7 +32,7 @@
 #   ./scripts/profile-tunit.sh --dump --top 50
 #
 #   # Use a specific framework
-#   ./scripts/profile-tunit.sh --framework net9.0
+#   ./scripts/profile-tunit.sh --framework net10.0
 
 set -euo pipefail
 
@@ -40,7 +40,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PROJECT="benchmarks/TUnit.Profile"
-FRAMEWORK="net10.0"
+FRAMEWORK="net11.0"
 CONFIGURATION="Release"
 FILTER=""
 OUTPUT_DIR=""
@@ -60,7 +60,7 @@ Usage: profile-tunit.sh [options] [-- extra-test-args...]
 
 Options:
   --project <name>         Test project to profile (default: TUnit.Profile)
-  --framework <tfm>        Target framework (default: net10.0)
+  --framework <tfm>        Target framework (default: net11.0)
   --configuration <cfg>    Build configuration (default: Release)
   --filter <treenode>      Test treenode filter (e.g. "/*/*/BasicTests/*")
   --output <dir>           Output directory (default: .profile/<project>-<timestamp>)

@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <!-- ASP.NET Core MVC Testing only supports .NET 8.0+ -->
-    <TargetFrameworks>net9.0;net10.0;net11.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

@@ -13,7 +13,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework>net11.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
@@ -25,6 +25,9 @@
         <EnableNUnitRunner>true</EnableNUnitRunner>
         <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <OutputType>Exe</OutputType>
+        <!-- Runtime Async (preview in .NET 11) for the test code of every framework. tools/ does not
+             import the root Directory.Build.targets, so it is set here. -->
+        <Features>$(Features);runtime-async=on</Features>
     </PropertyGroup>
 
     <!--Custom output paths based on TestFramework -->

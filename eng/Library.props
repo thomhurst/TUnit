@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net9.0;net10.0;net11.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;net10.0;net11.0</TargetFrameworks>
 
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
@@ -13,11 +13,6 @@
 
         <TrimmerSingleWarn>false</TrimmerSingleWarn>
 
-        <!-- Suppress AD0001 analyzer crash in .NET 9 ILLink DynamicallyAccessedMembersAnalyzer.
-             This is a known .NET 9 SDK analyzer bug, not a code issue.
-             See: https://github.com/dotnet/runtime/issues/109352
-                  https://github.com/dotnet/runtime/issues/120728 -->
-        <NoWarn Condition="'$(TargetFramework)' == 'net9.0'">$(NoWarn);AD0001</NoWarn>
 
         <IsAotCompatible
             Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>

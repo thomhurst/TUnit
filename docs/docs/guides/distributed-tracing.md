@@ -8,7 +8,7 @@ sidebar_position: 20
 This page is for users wiring TUnit up to a tracing backend like Seq, Jaeger, Tempo, or the Aspire dashboard. If you just want a working setup, start with [OpenTelemetry Tracing](/docs/examples/opentelemetry). If you're hitting problems, jump straight to its [Troubleshooting](/docs/examples/opentelemetry#troubleshooting) section.
 
 :::note
-Distributed tracing requires .NET 9 or later.
+Distributed tracing requires .NET 10 or later.
 :::
 
 ## What TUnit emits

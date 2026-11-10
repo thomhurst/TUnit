@@ -8,7 +8,7 @@ Runs the TUnit performance benchmarks with various configurations
 Filter to apply to benchmark selection (e.g., "*Discovery*", "*Execution*", "*DataSource*")
 
 .PARAMETER Job
-Specify which runtime to benchmark ("Net10_0", "NativeAot10_0", or "All")
+Specify which runtime to benchmark ("Net11_0", "NativeAot11_0", or "All")
 
 .PARAMETER Quick
 Run quick benchmarks with reduced iterations
@@ -16,7 +16,7 @@ Run quick benchmarks with reduced iterations
 .EXAMPLE
 ./run-benchmarks.ps1
 ./run-benchmarks.ps1 -Filter "*Discovery*"
-./run-benchmarks.ps1 -Job NativeAot10_0
+./run-benchmarks.ps1 -Job NativeAot11_0
 ./run-benchmarks.ps1 -Quick
 #>
 
@@ -41,12 +41,12 @@ if ($Filter -ne "*") {
     $args += $Filter
 }
 
-if ($Job -eq "Net10_0") {
+if ($Job -eq "Net11_0") {
     $args += "--job"
-    $args += "Net10_0"
-} elseif ($Job -eq "NativeAot10_0") {
+    $args += "Net11_0"
+} elseif ($Job -eq "NativeAot11_0") {
     $args += "--job"
-    $args += "NativeAot10_0"
+    $args += "NativeAot11_0"
 }
 
 if ($Quick) {

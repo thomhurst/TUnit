@@ -24,7 +24,7 @@ dotnet add package TUnit.Aspire.Core
 
 - An Aspire AppHost project in your solution
 - Docker running (Aspire uses containers for infrastructure resources)
-- .NET 9.0 or later
+- .NET 10.0 or later
   :::
 
 ## Quick Start
@@ -617,7 +617,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
 
       - run: dotnet build MyApp.Tests -c Release
       - run: dotnet run --project MyApp.Tests -c Release --no-build

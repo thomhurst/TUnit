@@ -44,21 +44,4 @@
     <Error Condition="'@(_TUnitBuildTimePackageReference)' != ''"
            Text="$(MSBuildProjectName) references @(_TUnitBuildTimePackageReference) but is not checked by the repo-internal culture analyzers. Set TUnitBuildTimeProject=true if its code runs inside the compiler or MSBuild, or TUnitSkipInternalAnalyzers=true if it does not (see Directory.Build.targets)." />
   </Target>
-
-  <!-- Runtime Async (a preview feature in .NET 11) compiles async methods for the runtime's own
-       suspension machinery instead of compiler-generated state machines. It is on for every
-       net11.0 C# project outside src/: tests, tools and benchmarks, which only run on CoreCLR or
-       Native AOT. The packaged libraries under src/ stay on state machines because their net11.0
-       assets also run on Mono (browser, WASI, mobile), which cannot load runtime-async methods
-       (dotnet/runtime#109632). Set TUnitRuntimeAsync=true or false to override either default. -->
-  <PropertyGroup Condition="'$(TUnitRuntimeAsync)' == ''">
-    <TUnitRuntimeAsync Condition="'$(MSBuildProjectExtension)' == '.csproj'
-                                  and '$(UseMonoRuntime)' != 'true'
-                                  and !$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)').StartsWith('$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', 'src'))'))">true</TUnitRuntimeAsync>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TUnitRuntimeAsync)' == 'true'
-                            and '$(TargetFramework)' != ''
-                            and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net11.0'))">
-    <Features>$(Features);runtime-async=on</Features>
-  </PropertyGroup>
 </Project>
