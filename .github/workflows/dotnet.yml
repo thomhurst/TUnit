@@ -14,6 +14,10 @@ on:
         description: Publish packages?
         type: boolean
         required: true
+      modular-pipelines-version:
+        description: Optional ModularPipelines version for non-publishing branch validation
+        type: string
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || (github.event_name == 'push' && github.ref) || github.run_id }}
@@ -33,8 +37,22 @@ jobs:
       actions: read
       contents: write
       id-token: write
+    env:
+      # Empty on normal CI: Directory.Packages.props keeps the release default.
+      ModularPipelinesVersion: ${{ inputs.modular-pipelines-version }}
 
     steps:
+      - name: Validate pipeline package override
+        if: inputs.modular-pipelines-version != ''
+        shell: bash
+        env:
+          PUBLISH_PACKAGES: ${{ inputs.publish-packages }}
+        run: |
+          if [[ "$GITHUB_REF" == refs/heads/main || "$PUBLISH_PACKAGES" == true ]]; then
+            echo "A ModularPipelines version override requires a non-publishing branch run."
+            exit 1
+          fi
+
       - name: Free Disk Space (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         uses: jlumbroso/free-disk-space@main
