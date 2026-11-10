@@ -22,6 +22,8 @@ builder.AddModule<GetPackageProjectsModule>()
 builder.ConfigureOptions(options => options with
 {
     FailureMode = FailureMode.ContinueOnFailure,
+    // Keep independent work queued until the highest-priority failure is recorded.
+    Concurrency = options.Concurrency with { MaxParallelism = 1 },
     ThrowOnPipelineFailure = false,
     Console = options.Console with { ShowProgress = false, PrintLogo = false },
 });
@@ -34,6 +36,7 @@ Require(summary.GetResult<FailureProbe, string>().Status == ModuleStatus.Failed,
 Require(summary.GetResult<FailureDependentProbe, string>().Status == ModuleStatus.DependencyFailed, "Failed dependencies must not execute.");
 Require(summary.GetResult<SkippedProbe, string>().Status == ModuleStatus.Skipped, "Skip status changed.");
 Require(summary.GetResult<SkipDependentProbe, string>().Status == ModuleStatus.Skipped, "Skipped dependencies must propagate.");
+Require(summary.GetResult<FailureProbe, string>().EndTime <= summary.GetResult<IndependentProbe, string>().StartTime, "Independent work must start after the intentional failure.");
 Require(summary.GetResult<IndependentProbe, string>().ValueOrDefault == "completed", "ContinueOnFailure must finish independent modules.");
 Require(summary.GetResult<GitProbe, string>().ValueOrDefault is not null, "Git information failed.");
 Require(summary.GetResult<DotNetProbe, CommandResult>().ValueOrDefault?.ExitCode == 0, "Generated DotNet command failed.");
@@ -89,6 +92,7 @@ public class SkipDependentProbe : SyncModule<string>
 
 public class FailureProbe : SyncModule<string>
 {
+    protected override void Configure(ModuleConfigurationBuilder module) => module.WithPriority(ModulePriority.Critical);
     protected override string Execute(IModuleContext context, CancellationToken cancellationToken) => throw new InvalidOperationException("Intentional migration failure probe");
 }
 
@@ -100,6 +104,8 @@ public class FailureDependentProbe : SyncModule<string>
 
 public class IndependentProbe : SyncModule<string>
 {
+    protected override void Configure(ModuleConfigurationBuilder module) => module.WithPriority(ModulePriority.Low);
+
     protected override string Execute(IModuleContext context, CancellationToken cancellationToken)
     {
         context.Logger.LogInformation("Independent module completes in ContinueOnFailure mode.");
