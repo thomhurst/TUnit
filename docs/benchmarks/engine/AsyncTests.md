@@ -12,12 +12,12 @@ This benchmark was automatically generated on **2026-11-10** from the latest CI 
 
 | Framework       | Version | Mean     | Median   | StdDev   |
 | --------------- | ------- | -------- | -------- | -------- |
-| **TUnit**       | 1.81.16 | 403.5 ms | 401.4 ms | 15.59 ms |
-| NUnit           | 5.0.0   | 800.5 ms | 799.9 ms | 32.52 ms |
-| MSTest          | 4.5.2   | 746.2 ms | 738.2 ms | 40.83 ms |
-| xUnit3          | 4.0.3   | 786.0 ms | 788.2 ms | 33.64 ms |
-| **TUnit (AOT)** | 1.81.16 | 115.3 ms | 115.4 ms | 0.51 ms  |
-| xUnit3\_AOT     | 4.0.3   | 119.0 ms | 118.9 ms | 0.31 ms  |
+| **TUnit**       | 1.81.16 | 468.5 ms | 463.8 ms | 37.66 ms |
+| NUnit           | 5.0.0   | 575.4 ms | 568.9 ms | 49.56 ms |
+| MSTest          | 4.5.2   | 521.6 ms | 521.8 ms | 31.53 ms |
+| xUnit3          | 4.0.3   | 647.3 ms | 638.2 ms | 59.47 ms |
+| **TUnit (AOT)** | 1.81.16 | 117.6 ms | 117.5 ms | 1.57 ms  |
+| xUnit3\_AOT     | 4.0.3   | 122.0 ms | 122.1 ms | 1.30 ms  |
 
 ## 📈 Visual Comparison[​](#-visual-comparison "Direct link to 📈 Visual Comparison")
 
@@ -33,4 +33,4 @@ Methodology
 
 View the [benchmarks overview](/docs/benchmarks/.md) for methodology details and environment information.
 
-*Last generated: 2026-11-10T19:30:56.051Z*
+*Last generated: 2026-11-10T20:21:13.646Z*
