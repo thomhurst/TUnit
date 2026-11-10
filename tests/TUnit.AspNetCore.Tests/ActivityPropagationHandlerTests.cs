@@ -139,7 +139,9 @@ public class ActivityPropagationHandlerTests
         await Assert.That(parts[1].All(static c => Uri.IsHexDigit(c))).IsTrue();
         await Assert.That(parts[2].Length).IsEqualTo(16);
         await Assert.That(parts[2].All(static c => Uri.IsHexDigit(c))).IsTrue();
-        await Assert.That(parts[3] is "00" or "01").IsTrue();
+        // .NET 11 also sets the W3C random-trace-id flag, so a sampled trace ends in "03".
+        await Assert.That(parts[3].Length).IsEqualTo(2);
+        await Assert.That(parts[3].All(static c => Uri.IsHexDigit(c))).IsTrue();
     }
 
     private sealed class CaptureHandler(
