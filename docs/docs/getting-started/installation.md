@@ -95,7 +95,7 @@ Your `.csproj` should be as simple as something like:
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
@@ -113,6 +113,13 @@ If you're used to other testing frameworks, you're probably used to the package 
 This should NOT be used with TUnit. It'll stop test discovery from working properly.
 
 :::
+
+## Mono and WebAssembly on .NET 11
+TUnit's `net11.0` assemblies are compiled with Runtime Async, which the Mono runtime cannot run. A `net11.0` test project that runs on Mono fails at startup.
+
+- **Browser:** set `<UseMonoRuntime>false</UseMonoRuntime>` to run on the CoreCLR browser runtime that ships with .NET 11, or target `net10.0`.
+- **Android, iOS, tvOS and Mac Catalyst:** .NET 11 uses CoreCLR by default. If you opt back into Mono, target `net10.0`.
+- **WASI:** not supported. It needs .NET 11 and only runs on Mono.
 
 ## .NET Framework
 If you are still targeting .NET Framework, TUnit's generated code needs `ModuleInitializerAttribute`, which isn't in the base class library. When nothing in your project provides it, TUnit's source generator declares it for you as an internal type, so no extra package is required.

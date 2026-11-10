@@ -3,7 +3,7 @@
   <Import Project="..\..\eng\Library.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <Description>Auto-wires an OpenTelemetry TracerProvider for TUnit test processes. Install to get distributed tracing with zero configuration.</Description>
   </PropertyGroup>
 

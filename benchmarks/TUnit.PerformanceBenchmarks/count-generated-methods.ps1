@@ -15,7 +15,7 @@ $ErrorActionPreference = "Stop"
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 if (-not $AssemblyPath) {
-    $AssemblyPath = Join-Path $scriptDir "bin" $Configuration "net9.0" "TUnit.PerformanceBenchmarks.dll"
+    $AssemblyPath = Join-Path $scriptDir "bin" $Configuration "net11.0" "TUnit.PerformanceBenchmarks.dll"
 }
 
 if (-not (Test-Path $AssemblyPath)) {

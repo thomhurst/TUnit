@@ -45,10 +45,10 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
         {
             yield return "net10.0";
 
-            // See ModernFrameworks: only Linux covers net8.0.
+            // See ModernFrameworks: only Linux covers net11.0.
             if (IsLinux)
             {
-                yield return "net8.0";
+                yield return "net11.0";
             }
 
             if (IsWindows)

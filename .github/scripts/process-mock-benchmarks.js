@@ -310,7 +310,7 @@ sidebar_position: ${index + 2}
 :::info Last Updated
 This benchmark was automatically generated on **${timestamp}** from the latest CI run.
 
-**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}
+**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 11'}
 :::
 
 ## 📊 Results
@@ -370,7 +370,7 @@ sidebar_position: 4
 :::info Last Updated
 These benchmarks were automatically generated on **${timestamp}** from the latest CI run.
 
-**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}
+**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 11'}
 :::
 
 ## 🚀 Overview
@@ -401,7 +401,7 @@ ${Object.entries(categoryDescriptions).map(([cat, desc]) =>
 
 - **Tool**: ${environmentInfo.benchmarkDotNetVersion || 'BenchmarkDotNet'}
 - **OS**: ${environmentInfo.os || 'Ubuntu Latest (GitHub Actions)'}
-- **Runtime**: ${environmentInfo.host || '.NET 10'}
+- **Runtime**: ${environmentInfo.host || '.NET 11'}
 - **Statistical Rigor**: Multiple iterations with warm-up and outlier detection
 - **Memory**: Allocation tracking enabled via \`[MemoryDiagnoser]\`
 
@@ -454,7 +454,7 @@ console.log(`  ✓ Created ${STATIC_DIR}/latest.json`);
 const summary = {
   categories: Object.keys(categories),
   timestamp,
-  environment: `${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}`,
+  environment: `${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 11'}`,
   libraries: discoveredLibraries
 };
 

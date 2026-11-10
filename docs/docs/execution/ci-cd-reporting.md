@@ -120,7 +120,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
     
     - name: Run Tests with Collapsible Reporter
       run: dotnet test -- --output Detailed

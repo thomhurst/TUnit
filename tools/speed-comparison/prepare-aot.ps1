@@ -1,6 +1,6 @@
 # Script to prepare AOT builds for benchmarking
 param(
-    [string]$Framework = "net8.0"
+    [string]$Framework = "net11.0"
 )
 
 Write-Host "Building TUnit AOT version for $Framework..."

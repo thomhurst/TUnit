@@ -38,7 +38,7 @@ public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
             .AssertExists();
 
         // Test AOT publishing
-        foreach (var framework in new[] { "net8.0", "net9.0", "net10.0" })
+        foreach (var framework in new[] { "net10.0", "net11.0" })
         {
             var result = await context.SubModule<CommandResult>($"AOT-{framework}", async () =>
             {

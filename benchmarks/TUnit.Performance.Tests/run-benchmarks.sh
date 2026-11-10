@@ -4,7 +4,7 @@
 # Usage: ./run-benchmarks.sh [options]
 # Options:
 #   -f, --filter <pattern>    Filter benchmarks (e.g., "*Discovery*")
-#   -j, --job <job>          Specify runtime (Net80, NativeAot80, or All)
+#   -j, --job <job>          Specify runtime (Net11_0, NativeAot11_0, or All)
 #   -q, --quick              Run quick benchmarks with reduced iterations
 #   -h, --help               Show help
 
@@ -34,7 +34,7 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [options]"
             echo "Options:"
             echo "  -f, --filter <pattern>    Filter benchmarks (e.g., '*Discovery*')"
-            echo "  -j, --job <job>          Specify runtime (Net80, NativeAot80, or All)"
+            echo "  -j, --job <job>          Specify runtime (Net11_0, NativeAot11_0, or All)"
             echo "  -q, --quick              Run quick benchmarks with reduced iterations"
             echo "  -h, --help               Show this help message"
             exit 0
@@ -60,10 +60,10 @@ if [ "$FILTER" != "*" ]; then
     ARGS+=("--filter" "$FILTER")
 fi
 
-if [ "$JOB" = "Net80" ]; then
-    ARGS+=("--job" "Net80")
-elif [ "$JOB" = "NativeAot80" ]; then
-    ARGS+=("--job" "NativeAot80")
+if [ "$JOB" = "Net11_0" ]; then
+    ARGS+=("--job" "Net11_0")
+elif [ "$JOB" = "NativeAot11_0" ]; then
+    ARGS+=("--job" "NativeAot11_0")
 fi
 
 if [ "$QUICK" = true ]; then

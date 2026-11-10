@@ -5,7 +5,7 @@
     <!-- Single lowest-supported TFM + roll-forward: one tool payload runs on any newer runtime.
          TargetFrameworks (plural) because Directory.Build.props pre-sets the multi-target default
          before this file is evaluated; plural wins, so override the same property. -->
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <RollForward>LatestMajor</RollForward>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 

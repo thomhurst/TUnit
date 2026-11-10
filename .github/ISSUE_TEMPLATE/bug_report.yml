@@ -82,7 +82,7 @@ body:
     attributes:
       label: .NET Version
       description: What .NET version are you targeting?
-      placeholder: "e.g., .NET 8.0, .NET 9.0"
+      placeholder: "e.g., .NET 10.0, .NET 11.0"
     validations:
       required: true
 
