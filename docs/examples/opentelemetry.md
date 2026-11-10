@@ -4,7 +4,7 @@ TUnit emits `System.Diagnostics.Activity` trace spans at every level of the test
 
 note
 
-Activity tracing requires .NET 8 or later. It is not available on .NET Framework or .NET Standard targets.
+Activity tracing requires .NET 10 or later. It is not available on .NET Framework or .NET Standard targets.
 
 ## Setup[​](#setup "Direct link to Setup")
 

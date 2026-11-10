@@ -45,7 +45,7 @@ jobs:
 
         os: [ubuntu-latest, windows-latest, macos-latest]
 
-        dotnet-version: ['8.0.x', '9.0.x']
+        dotnet-version: ['10.0.x', '11.0.x']
 
       fail-fast: false  # Continue running other jobs if one fails
 
@@ -183,7 +183,7 @@ jobs:
 
       with:
 
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
 
 
 
@@ -201,7 +201,7 @@ jobs:
 
     - name: Run AOT tests
 
-      run: ./bin/Release/net9.0/linux-x64/publish/YourTestProject
+      run: ./bin/Release/net10.0/linux-x64/publish/YourTestProject
 ```
 
 ### PR Comment with Test Results[​](#pr-comment-with-test-results "Direct link to PR Comment with Test Results")
@@ -245,7 +245,7 @@ jobs:
 
       with:
 
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
 
 
 
@@ -305,7 +305,7 @@ variables:
 
   buildConfiguration: 'Release'
 
-  dotnetSdkVersion: '9.0.x'
+  dotnetSdkVersion: '10.0.x'
 
 
 
@@ -453,35 +453,35 @@ strategy:
 
   matrix:
 
-    linux_net8:
+    linux_net11:
 
       vmImage: 'ubuntu-latest'
 
-      dotnetVersion: '8.0.x'
+      dotnetVersion: '11.0.x'
 
-    linux_net9:
+    linux_net10:
 
       vmImage: 'ubuntu-latest'
 
-      dotnetVersion: '9.0.x'
+      dotnetVersion: '10.0.x'
 
-    windows_net8:
-
-      vmImage: 'windows-latest'
-
-      dotnetVersion: '8.0.x'
-
-    windows_net9:
+    windows_net11:
 
       vmImage: 'windows-latest'
 
-      dotnetVersion: '9.0.x'
+      dotnetVersion: '11.0.x'
 
-    macos_net9:
+    windows_net10:
+
+      vmImage: 'windows-latest'
+
+      dotnetVersion: '10.0.x'
+
+    macos_net10:
 
       vmImage: 'macos-latest'
 
-      dotnetVersion: '9.0.x'
+      dotnetVersion: '10.0.x'
 
 
 
@@ -511,7 +511,7 @@ steps:
 ### Complete Pipeline with Stages[​](#complete-pipeline-with-stages-1 "Direct link to Complete Pipeline with Stages")
 
 ```
-image: mcr.microsoft.com/dotnet/sdk:9.0
+image: mcr.microsoft.com/dotnet/sdk:10.0
 
 
 
@@ -673,19 +673,19 @@ coverage-report:
 
 
 
-test:net8:
+test:net11:
 
   extends: .test-template
 
-  image: mcr.microsoft.com/dotnet/sdk:8.0
+  image: mcr.microsoft.com/dotnet/sdk:11.0
 
 
 
-test:net9:
+test:net10:
 
   extends: .test-template
 
-  image: mcr.microsoft.com/dotnet/sdk:9.0
+  image: mcr.microsoft.com/dotnet/sdk:10.0
 ```
 
 ## CircleCI[​](#circleci "Direct link to CircleCI")
@@ -709,7 +709,7 @@ executors:
 
     docker:
 
-      - image: mcr.microsoft.com/dotnet/sdk:9.0
+      - image: mcr.microsoft.com/dotnet/sdk:10.0
 
 
 
@@ -849,15 +849,15 @@ workflows:
 
       - test-matrix:
 
-          name: test-net8
+          name: test-net11
 
-          dotnet-version: "8.0"
+          dotnet-version: "11.0"
 
       - test-matrix:
 
-          name: test-net9
+          name: test-net10
 
-          dotnet-version: "9.0"
+          dotnet-version: "10.0"
 ```
 
 ## Docker[​](#docker "Direct link to Docker")
@@ -865,7 +865,7 @@ workflows:
 ### Dockerfile for Running Tests[​](#dockerfile-for-running-tests "Direct link to Dockerfile for Running Tests")
 
 ```
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /src
 

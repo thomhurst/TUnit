@@ -320,7 +320,7 @@ public async Task DateTimeOffset_Comparison()
 }
 ```
 
-## DateOnly (.NET 8+)[​](#dateonly-net-8 "Direct link to DateOnly (.NET 8+)")
+## DateOnly (.NET 10+)[​](#dateonly-net-10 "Direct link to DateOnly (.NET 10+)")
 
 DateOnly represents just a date without time:
 
@@ -384,7 +384,7 @@ public async Task DateOnly_Comparison()
 }
 ```
 
-## TimeOnly (.NET 8+)[​](#timeonly-net-8 "Direct link to TimeOnly (.NET 8+)")
+## TimeOnly (.NET 10+)[​](#timeonly-net-10 "Direct link to TimeOnly (.NET 10+)")
 
 TimeOnly represents just time without a date:
 

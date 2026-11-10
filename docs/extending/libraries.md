@@ -18,7 +18,7 @@ When building a reusable library that defines shared hooks, custom attributes, b
 
   <PropertyGroup>
 
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
 
   </PropertyGroup>
 
@@ -90,7 +90,7 @@ In a test project, reference both `TUnit` (for the runner) and the library proje
 
   <PropertyGroup>
 
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
 

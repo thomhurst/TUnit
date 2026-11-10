@@ -20,7 +20,7 @@ Prerequisites
 
 * An Aspire AppHost project in your solution
 * Docker running (Aspire uses containers for infrastructure resources)
-* .NET 8.0 or later
+* .NET 10.0 or later
 
 ## Quick Start[​](#quick-start "Direct link to Quick Start")
 
@@ -887,7 +887,7 @@ jobs:
 
         with:
 
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
 
 
 

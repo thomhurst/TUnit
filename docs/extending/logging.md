@@ -152,7 +152,7 @@ public async Task<IResult> HandleProcess()
 
 note
 
-This requires .NET 8+ and an active OpenTelemetry `TracerProvider` (or `ActivityListener`) subscribed to the `"TUnit"` source **on the test runner side**. The baggage is only set when the test runner's ActivitySource has listeners — without this, no Activity is created and the baggage cannot propagate. See [OpenTelemetry Tracing](/docs/examples/opentelemetry.md) for setup instructions.
+This requires .NET 10+ and an active OpenTelemetry `TracerProvider` (or `ActivityListener`) subscribed to the `"TUnit"` source **on the test runner side**. The baggage is only set when the test runner's ActivitySource has listeners — without this, no Activity is created and the baggage cannot propagate. See [OpenTelemetry Tracing](/docs/examples/opentelemetry.md) for setup instructions.
 
 For applications **without** Activity propagation, use the manual `MakeCurrent()` approach described below.
 

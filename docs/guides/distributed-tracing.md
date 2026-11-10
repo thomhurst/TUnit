@@ -4,7 +4,7 @@ This page is for users wiring TUnit up to a tracing backend like Seq, Jaeger, Te
 
 note
 
-Distributed tracing requires .NET 8 or later.
+Distributed tracing requires .NET 10 or later.
 
 ## What TUnit emits[​](#what-tunit-emits "Direct link to What TUnit emits")
 

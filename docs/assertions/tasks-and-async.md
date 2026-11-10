@@ -142,7 +142,7 @@ public async Task Task_Not_Faulted()
 }
 ```
 
-### IsCompletedSuccessfully / IsNotCompletedSuccessfully (.NET 8+)[​](#iscompletedsuccessfully--isnotcompletedsuccessfully-net-8 "Direct link to IsCompletedSuccessfully / IsNotCompletedSuccessfully (.NET 8+)")
+### IsCompletedSuccessfully / IsNotCompletedSuccessfully (.NET 10+)[​](#iscompletedsuccessfully--isnotcompletedsuccessfully-net-10 "Direct link to IsCompletedSuccessfully / IsNotCompletedSuccessfully (.NET 10+)")
 
 Tests whether a task completed successfully (not faulted or canceled):
 

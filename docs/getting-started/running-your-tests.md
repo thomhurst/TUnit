@@ -39,7 +39,7 @@ dotnet test -c Release -- --report-trx --coverage
 If your test project has already been built, you can use `dotnet exec` or just `dotnet` with the `.dll` path
 
 ```
-cd path/to/YourTestProject/bin/Release/net8.0
+cd path/to/YourTestProject/bin/Release/net10.0
 
 dotnet exec YourTestProject.dll
 
@@ -51,7 +51,7 @@ dotnet exec YourTestProject.dll --report-trx --coverage
 or
 
 ```
-cd path/to/YourTestProject/bin/Release/net8.0
+cd path/to/YourTestProject/bin/Release/net10.0
 
 dotnet YourTestProject.dll
 
@@ -69,7 +69,7 @@ This can be invoked directly and passed any flags.
 The publish folder sits under the runtime identifier you published for, such as `win-x64`, `linux-x64` or `osx-arm64`. Replace `linux-x64` below with yours.
 
 ```
-cd path/to/YourTestProject/bin/Release/net8.0/linux-x64/publish
+cd path/to/YourTestProject/bin/Release/net10.0/linux-x64/publish
 
 ./YourTestProject
 
@@ -81,7 +81,7 @@ cd path/to/YourTestProject/bin/Release/net8.0/linux-x64/publish
 On Windows, from the `win-x64` publish folder:
 
 ```
-cd path/to/YourTestProject/bin/Release/net8.0/win-x64/publish
+cd path/to/YourTestProject/bin/Release/net10.0/win-x64/publish
 
 .\YourTestProject.exe --report-trx --coverage
 ```

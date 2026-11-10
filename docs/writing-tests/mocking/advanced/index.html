@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.a95f87d4.css">
-<script src="/assets/js/runtime~main.4a9df8f1.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.da93facd.js" defer="defer"></script>
 <script src="/assets/js/main.dd0a29ec.js" defer="defer"></script>
 </head>
 <body>
@@ -66,7 +66,7 @@ in test code. Nameable interfaces still get real, configurable mocks.</li>
 calls keep returning default values.</li>
 <li class="">The <code>netstandard2.0</code> asset (used by .NET Framework test projects) does not include the
 runtime emitter — unconfigured calls return default values there too. Runtime stubs require
-the <code>net8.0</code>+ assets.</li>
+the <code>net10.0</code>+ assets.</li>
 <li class="">Opt out globally with <code>settings.Mocks.RuntimeAutoStubs = false;</code> in a
 <code>[Before(HookType.TestDiscovery)]</code> hook.</li>
 </ul>
