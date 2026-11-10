@@ -73,8 +73,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
         with:
-          global-json-file: global.json
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
@@ -185,8 +186,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
         with:
-          global-json-file: global.json
-          dotnet-version: 10.0.x
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'

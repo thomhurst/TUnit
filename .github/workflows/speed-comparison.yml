@@ -18,7 +18,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
         with:
-          global-json-file: global.json
+          dotnet-version: 11.0.x
 
       - name: Build All Frameworks
         run: |
@@ -61,7 +61,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
         with:
-          global-json-file: global.json
+          dotnet-version: 11.0.x
 
       - name: Download Build Artifacts
         uses: actions/download-artifact@v8
@@ -105,7 +105,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
         with:
-          global-json-file: global.json
+          dotnet-version: 11.0.x
 
       - name: Prepare builds
         run: |

@@ -26,7 +26,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
         with:
-          global-json-file: global.json
+          dotnet-version: 11.0.x
 
       - name: Run Benchmark
         run: dotnet run -c Release -f net11.0 -- --filter "*${{ matrix.benchmark }}*" --exporters json github
