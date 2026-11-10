@@ -232,7 +232,7 @@ jobs:
     steps:
       - uses: actions/setup-dotnet@v6.1.0
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '11.0.x'
 
       # download-artifact filters out earlier attempts, even when given an exact ID.
       - name: Download exact captured Windows engine dump
