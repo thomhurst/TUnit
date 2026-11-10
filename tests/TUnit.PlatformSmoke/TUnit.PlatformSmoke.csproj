@@ -29,6 +29,9 @@
 
   <PropertyGroup Condition="'$(SmokePlatform)' == 'Android'">
     <AndroidUseInstrumentation>true</AndroidUseInstrumentation>
+    <!-- Matches the [Instrumentation] name in AndroidInstrumentation.cs. `dotnet test` fails with
+         "--instrument is required" when the SDK does not resolve it from the manifest. -->
+    <AndroidInstrumentation>net.dot.TUnitSmoke.TestInstrumentation</AndroidInstrumentation>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
