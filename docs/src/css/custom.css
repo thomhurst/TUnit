@@ -1,53 +1,65 @@
 @import url('./benchmark-charts.css');
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap');
 
 /*
- * TUnit's identity is the red/green bar every unit-testing tool has shown since JUnit.
- * Greens are muted emerald and sage so long reading stays calm; red appears only for failures.
+ * TUnit's identity is the score: a test run drawn as coloured bars on a row per worker.
+ * The five note colours belong to that drawing and to small marks that echo it. Text and controls stay
+ * charcoal with one teal accent, and green and red keep their usual meaning of passed and failed.
  */
 :root {
-  --tunit-ink: #142019;
-  --tunit-body: #36423b;
-  --tunit-muted: #5f6b64;
-  --tunit-paper: #f6f7f4;
-  --tunit-surface: #edf0eb;
-  --tunit-border: #dce1da;
-  --tunit-accent: #1d7348;
-  --tunit-accent-surface: #e1efe5;
-  --tunit-code: #eef1ec;
-  --tunit-on-primary: #f6f7f4;
-  --tunit-pass: #1d7348;
-  --tunit-pass-fill: #2e9a63;
-  --tunit-pass-light: #a6d5b8;
-  --tunit-pass-mid: #62b98a;
-  --tunit-fail: #c0442f;
-  --tunit-cell: #e2e6df;
+  --tunit-ink: #17171c;
+  --tunit-body: #3a3a44;
+  --tunit-muted: #6b6b78;
+  --tunit-paper: #fbfaf8;
+  --tunit-surface: #f2f1ee;
+  --tunit-border: #e2e0db;
+  --tunit-accent: #0b7567;
+  --tunit-accent-surface: #dcf3ee;
+  --tunit-code: #f4f3f0;
+  --tunit-on-primary: #fbfaf8;
+  --tunit-pass: #0b7567;
+  --tunit-pass-fill: #19a88f;
+  --tunit-pass-light: #bfe9df;
+  --tunit-pass-mid: #6fcdb9;
+  --tunit-fail: #cf3e36;
+  --tunit-cell: #e8e6e1;
   --tunit-warning: #6b4a00;
   --tunit-warning-surface: #f7efd6;
-  --tunit-danger: #9a3322;
-  --tunit-danger-surface: #f8e6e1;
+  --tunit-danger: #9c2a23;
+  --tunit-danger-surface: #fae5e3;
   /* Bar labels sit on these colours, so each keeps at least 4.5:1 contrast with --tunit-chart-label. */
-  --tunit-chart-primary: #1d7348;
-  --tunit-chart-secondary: #142019;
-  --tunit-chart-comparison: #5f6b64;
-  --tunit-chart-label: #f6f7f4;
+  --tunit-chart-primary: #0b7567;
+  --tunit-chart-secondary: #17171c;
+  --tunit-chart-comparison: #6b6b78;
+  --tunit-chart-label: #fbfaf8;
 
-  --ifm-color-primary: #1d7348;
-  --ifm-color-primary-dark: #1a6841;
-  --ifm-color-primary-darker: #19623d;
-  --ifm-color-primary-darkest: #145132;
-  --ifm-color-primary-light: #207e4f;
-  --ifm-color-primary-lighter: #218453;
-  --ifm-color-primary-lightest: #26965e;
-  --ifm-color-emphasis-100: #eef1ec;
-  --ifm-color-emphasis-200: #e4e8e2;
-  --ifm-color-emphasis-300: #dce1da;
-  --ifm-color-emphasis-400: #b7bfb9;
-  --ifm-color-emphasis-500: #8e9891;
-  --ifm-color-emphasis-600: #5f6b64;
-  --ifm-color-emphasis-700: #36423b;
-  --ifm-color-emphasis-800: #24302a;
-  --ifm-color-emphasis-900: #142019;
+  /* The homepage score. The stage is dark in both themes so the note colours keep their strength. */
+  --tunit-stage: #17171c;
+  --tunit-stage-line: #2a2a33;
+  --tunit-stage-ink: #f0eff4;
+  --tunit-stage-muted: #9d9cab;
+  --tunit-note-1: #ff6b5e;
+  --tunit-note-2: #ffbe3d;
+  --tunit-note-3: #2fd0a5;
+  --tunit-note-4: #4aa8ff;
+  --tunit-note-5: #c58cff;
+
+  --ifm-color-primary: #0b7567;
+  --ifm-color-primary-dark: #0a695d;
+  --ifm-color-primary-darker: #096357;
+  --ifm-color-primary-darkest: #085248;
+  --ifm-color-primary-light: #0c8171;
+  --ifm-color-primary-lighter: #0d8777;
+  --ifm-color-primary-lightest: #0f9e8b;
+  --ifm-color-emphasis-100: #f4f3f0;
+  --ifm-color-emphasis-200: #eae8e4;
+  --ifm-color-emphasis-300: #e2e0db;
+  --ifm-color-emphasis-400: #bdbbb8;
+  --ifm-color-emphasis-500: #93929a;
+  --ifm-color-emphasis-600: #6b6b78;
+  --ifm-color-emphasis-700: #3a3a44;
+  --ifm-color-emphasis-800: #26262d;
+  --ifm-color-emphasis-900: #17171c;
   --syntax-keyword: #3a5ea8;
   --syntax-string: #9a5528;
   --syntax-function: #7b4a8f;
@@ -57,47 +69,50 @@
 }
 
 html[data-theme='dark'] {
-  --tunit-ink: #e5ece7;
-  --tunit-body: #c2ccc5;
-  --tunit-muted: #919d95;
-  --tunit-paper: #121815;
-  --tunit-surface: #18201b;
-  --tunit-border: #263029;
-  --tunit-accent: #7fcf9f;
-  --tunit-accent-surface: #1b2c22;
-  --tunit-code: #161e19;
-  --tunit-on-primary: #121815;
-  --tunit-pass: #7fcf9f;
-  --tunit-pass-fill: #4fb47c;
-  --tunit-pass-light: #2b5a40;
-  --tunit-pass-mid: #3b8a5f;
-  --tunit-fail: #f08a76;
-  --tunit-cell: #1f2923;
+  --tunit-ink: #f0eff4;
+  --tunit-body: #c8c7d0;
+  --tunit-muted: #9291a0;
+  --tunit-paper: #121216;
+  --tunit-surface: #1a1a20;
+  --tunit-border: #2b2b34;
+  --tunit-accent: #4fdcbb;
+  --tunit-accent-surface: #143029;
+  --tunit-code: #18181e;
+  --tunit-on-primary: #121216;
+  --tunit-pass: #4fdcbb;
+  --tunit-pass-fill: #2fd0a5;
+  --tunit-pass-light: #1c5a4c;
+  --tunit-pass-mid: #228f78;
+  --tunit-fail: #ff8d85;
+  --tunit-cell: #24242c;
   --tunit-warning: #ead39a;
   --tunit-warning-surface: #2a2719;
-  --tunit-danger: #f4b2a5;
-  --tunit-danger-surface: #34201b;
-  --tunit-chart-primary: #4fb47c;
-  --tunit-chart-secondary: #e5ece7;
-  --tunit-chart-comparison: #8f9c94;
-  --tunit-chart-label: #121815;
+  --tunit-danger: #ffb5af;
+  --tunit-danger-surface: #351917;
+  --tunit-chart-primary: #2fd0a5;
+  --tunit-chart-secondary: #f0eff4;
+  --tunit-chart-comparison: #9291a0;
+  --tunit-chart-label: #121216;
 
-  --ifm-color-primary: #7fcf9f;
-  --ifm-color-primary-dark: #69c68e;
-  --ifm-color-primary-darker: #5ec285;
-  --ifm-color-primary-darkest: #42ab6c;
-  --ifm-color-primary-light: #95d8b0;
-  --ifm-color-primary-lighter: #a0dcb8;
-  --ifm-color-primary-lightest: #c1e8d0;
-  --ifm-color-emphasis-100: #18201b;
-  --ifm-color-emphasis-200: #1e2721;
-  --ifm-color-emphasis-300: #263029;
-  --ifm-color-emphasis-400: #3a463e;
-  --ifm-color-emphasis-500: #5c6a61;
-  --ifm-color-emphasis-600: #919d95;
-  --ifm-color-emphasis-700: #c2ccc5;
-  --ifm-color-emphasis-800: #d6ded8;
-  --ifm-color-emphasis-900: #e5ece7;
+  --tunit-stage: #1b1b22;
+  --tunit-stage-line: #2e2e38;
+
+  --ifm-color-primary: #4fdcbb;
+  --ifm-color-primary-dark: #35d7b1;
+  --ifm-color-primary-darker: #29d4ac;
+  --ifm-color-primary-darkest: #22b592;
+  --ifm-color-primary-light: #69e1c5;
+  --ifm-color-primary-lighter: #75e4ca;
+  --ifm-color-primary-lightest: #9fedda;
+  --ifm-color-emphasis-100: #1a1a20;
+  --ifm-color-emphasis-200: #202027;
+  --ifm-color-emphasis-300: #2b2b34;
+  --ifm-color-emphasis-400: #3d3d49;
+  --ifm-color-emphasis-500: #62616f;
+  --ifm-color-emphasis-600: #9291a0;
+  --ifm-color-emphasis-700: #c8c7d0;
+  --ifm-color-emphasis-800: #dddce4;
+  --ifm-color-emphasis-900: #f0eff4;
   --syntax-keyword: #9db8ec;
   --syntax-string: #e2b48c;
   --syntax-function: #d3b0e3;
@@ -109,11 +124,12 @@ html[data-theme='dark'] {
 /* Define aliases in both themes so inherited values resolve against that theme. */
 :root, html[data-theme='dark'] {
   --tunit-mono: 'Martian Mono', 'Cascadia Code', Consolas, monospace;
+  --tunit-display: 'Bricolage Grotesque', 'Hanken Grotesk', sans-serif;
   --ifm-font-family-base: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --ifm-font-family-monospace: 'Martian Mono', 'Cascadia Code', Consolas, monospace;
   --ifm-line-height-base: 1.7;
-  --ifm-heading-font-family: var(--ifm-font-family-base);
-  --ifm-heading-font-weight: 650;
+  --ifm-heading-font-family: var(--tunit-display);
+  --ifm-heading-font-weight: 700;
   --ifm-font-color-base: var(--tunit-body);
   --ifm-heading-color: var(--tunit-ink);
   --ifm-background-color: var(--tunit-paper);
@@ -166,8 +182,8 @@ a { text-underline-offset: 3px; }
   box-shadow: none;
 }
 .navbar__brand { gap: 0.6rem; }
-.navbar__title { color: var(--tunit-ink); font-size: 1.2rem; font-weight: 750; letter-spacing: -0.03em; }
-.navbar__link { font-size: 0.95rem; font-weight: 550; }
+.navbar__title { color: var(--tunit-ink); font-family: var(--tunit-display); font-size: 1.3rem; font-weight: 750; letter-spacing: -0.03em; }
+.navbar__link { font-size: 0.95rem; font-weight: 600; }
 .navbar__link--active { color: var(--tunit-accent); }
 .navbar__logo { height: 1.7rem; }
 .navbar__toggle, .navbar-sidebar__close { color: var(--tunit-ink); }
@@ -207,7 +223,7 @@ html[data-theme] {
   --docsearch-primary-color: var(--tunit-accent);
   --docsearch-text-color: var(--tunit-ink);
   --docsearch-muted-color: var(--tunit-muted);
-  --docsearch-container-background: rgb(20 32 25 / 55%);
+  --docsearch-container-background: rgb(18 18 22 / 60%);
   --docsearch-modal-background: var(--tunit-paper);
   --docsearch-searchbox-background: var(--tunit-code);
   --docsearch-searchbox-focus-background: var(--tunit-paper);
@@ -223,7 +239,7 @@ html[data-theme] {
   --docsearch-footer-shadow: 0 -1px 0 var(--tunit-border);
   --docsearch-logo-color: var(--tunit-muted);
 }
-.DocSearch-Button { background: var(--tunit-surface); border: 1px solid var(--tunit-border); color: var(--tunit-muted); border-radius: 6px; }
+.DocSearch-Button { background: var(--tunit-surface); border: 1px solid var(--tunit-border); color: var(--tunit-muted); border-radius: 999px; }
 .DocSearch-Button:hover { background: var(--tunit-code); color: var(--tunit-ink); box-shadow: inset 0 0 0 1px var(--tunit-accent); }
 .DocSearch-Button-Key { background: var(--tunit-paper); border: 1px solid var(--tunit-border); color: var(--tunit-muted); box-shadow: none; }
 .DocSearch-Hit[aria-selected='true'] a { background: var(--tunit-accent-surface); }
@@ -265,9 +281,9 @@ html[data-theme] {
 .table-of-contents__link--active { color: var(--tunit-accent); font-weight: 600; }
 .table-of-contents__link:hover { color: var(--tunit-accent); }
 .theme-doc-markdown { --ifm-h1-font-size: 2.4rem; --ifm-h2-font-size: 1.55rem; --ifm-h3-font-size: 1.2rem; }
-.theme-doc-markdown h1 { font-weight: 700; letter-spacing: -0.035em; line-height: 1.1; }
-.theme-doc-markdown h2 { font-weight: 650; letter-spacing: -0.025em; margin-top: 3rem; }
-.theme-doc-markdown h3 { font-weight: 650; letter-spacing: -0.015em; margin-top: 2rem; }
+.theme-doc-markdown h1 { font-weight: 750; letter-spacing: -0.035em; line-height: 1.05; }
+.theme-doc-markdown h2 { font-weight: 700; letter-spacing: -0.025em; margin-top: 3rem; }
+.theme-doc-markdown h3 { font-weight: 700; letter-spacing: -0.015em; margin-top: 2rem; }
 .theme-doc-markdown :is(h2, h3) { scroll-margin-top: calc(var(--ifm-navbar-height) + 1rem); }
 .theme-doc-markdown > p, .theme-doc-markdown > ul, .theme-doc-markdown > ol { max-width: 72ch; }
 .theme-doc-markdown { font-size: 1.04rem; }
@@ -278,7 +294,7 @@ html[data-theme] {
 .pagination-nav__sublabel { color: var(--tunit-muted); }
 
 :not(pre) > code { color: var(--tunit-ink); background: var(--tunit-code); border: 0; padding: 0.12em 0.4em; border-radius: 3px; }
-.theme-code-block { --prism-background-color: var(--tunit-code); background: var(--tunit-code); border: 1px solid var(--tunit-border); border-radius: 6px; box-shadow: none; }
+.theme-code-block { --prism-background-color: var(--tunit-code); background: var(--tunit-code); border: 1px solid var(--tunit-border); border-radius: 10px; box-shadow: none; }
 .theme-code-block pre { background: var(--tunit-code) !important; color: var(--tunit-ink) !important; font-size: 0.8rem; line-height: 1.75; }
 .theme-code-block pre code { background: transparent; color: inherit; border: 0; padding-block: 0; }
 /* Titled code blocks look like an editor tab, since the title is almost always a file name. */
