@@ -60,7 +60,11 @@ rootCommand.SetAction(async parseResult =>
     builder.Configuration.AddEnvironmentVariables();
     builder.Services.Configure<NuGetOptions>(builder.Configuration.GetSection("NuGet"));
     builder.AddModulesFromAssembly(typeof(Program).Assembly);
-    builder.ConfigureOptions(options => options with { FailureMode = FailureMode.ContinueOnFailure });
+    builder.ConfigureOptions(options => options with
+    {
+        FailureMode = FailureMode.ContinueOnFailure,
+        ThrowOnPipelineFailure = true,
+    });
 
     if (categories.Length > 0)
     {

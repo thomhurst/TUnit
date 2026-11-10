@@ -36,6 +36,7 @@ inputs:
 runs:
   using: "composite"
   steps:
+    # Callers install SDK 10 first for product commands launched from the stable root scope.
     - name: Setup pipeline SDK
       uses: actions/setup-dotnet@v6.1.0
       with:

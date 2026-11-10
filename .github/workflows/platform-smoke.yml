@@ -39,25 +39,29 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-dotnet@v6.1.0
         with:
-          dotnet-version: 11.0.100-rc.3.26522.148
+          global-json-file: tests/TUnit.PlatformSmoke/global.json
       - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
-          key: platform-smoke-${{ runner.os }}-${{ runner.arch }}-${{ matrix.platform }}-${{ hashFiles('global.json', 'Directory.Packages.props', 'tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj') }}
+          key: platform-smoke-${{ runner.os }}-${{ runner.arch }}-${{ matrix.platform }}-${{ hashFiles('tests/TUnit.PlatformSmoke/global.json', 'Directory.Packages.props', 'tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj') }}
           restore-keys: platform-smoke-${{ runner.os }}-${{ runner.arch }}-${{ matrix.platform }}-
       - run: dotnet workload install ${{ matrix.workload }}
+        working-directory: tests/TUnit.PlatformSmoke
       - name: Install XHarness
         if: matrix.platform == 'Browser'
         run: >-
           dotnet tool install Microsoft.DotNet.XHarness.CLI --global
           --version 10.0.0-prerelease.26471.3
           --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
+        working-directory: tests/TUnit.PlatformSmoke
       - name: Publish the browser smoke test
         if: matrix.platform == 'Browser'
-        run: dotnet publish tests/TUnit.PlatformSmoke -c Debug
+        run: dotnet publish -c Debug
+        working-directory: tests/TUnit.PlatformSmoke
       - name: Build the smoke test
         if: matrix.platform != 'Browser'
-        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
+        run: dotnet build -c Debug
+        working-directory: tests/TUnit.PlatformSmoke
       - name: Execute the TUnit smoke test in Chrome
         if: matrix.platform == 'Browser'
         run: >-
@@ -78,7 +82,8 @@ jobs:
           disable-animations: true
           script: |
             mkdir -p artifacts/platform-smoke/Android
-            bash -o pipefail -c 'dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build 2>&1 | tee artifacts/platform-smoke/Android/test.log'
+            cd tests/TUnit.PlatformSmoke
+            bash -o pipefail -c 'dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build 2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/Android/test.log"'
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
         if: matrix.platform == 'WASI'
         with:
@@ -112,11 +117,11 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-dotnet@v6.1.0
         with:
-          dotnet-version: 11.0.100-rc.3.26522.148
+          global-json-file: tests/TUnit.PlatformSmoke/global.json
       - uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
-          key: platform-smoke-${{ runner.os }}-${{ runner.arch }}-Apple-${{ hashFiles('global.json', 'Directory.Packages.props', 'tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj') }}
+          key: platform-smoke-${{ runner.os }}-${{ runner.arch }}-Apple-${{ hashFiles('tests/TUnit.PlatformSmoke/global.json', 'Directory.Packages.props', 'tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj') }}
           restore-keys: platform-smoke-${{ runner.os }}-${{ runner.arch }}-Apple-
       - name: Select the installed Xcode
         run: sudo xcode-select --switch /Applications/Xcode_27.0.app
@@ -132,13 +137,15 @@ jobs:
         id: workloads
         if: ${{ !cancelled() }}
         run: dotnet workload install ios tvos maccatalyst
+        working-directory: tests/TUnit.PlatformSmoke
 
       - name: Build the iOS smoke test
         id: ios-build
         if: ${{ !cancelled() && steps.workloads.outcome == 'success' && steps.ios-simulator.outcome == 'success' }}
         env:
           SmokePlatform: iOS
-        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
+        run: dotnet build -c Debug
+        working-directory: tests/TUnit.PlatformSmoke
       - name: Execute the TUnit smoke test in the iOS simulator
         if: ${{ !cancelled() && steps.ios-build.outcome == 'success' }}
         timeout-minutes: 15
@@ -168,7 +175,8 @@ jobs:
         if: ${{ !cancelled() && steps.workloads.outcome == 'success' && steps.tvos-simulator.outcome == 'success' }}
         env:
           SmokePlatform: tvOS
-        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
+        run: dotnet build -c Debug
+        working-directory: tests/TUnit.PlatformSmoke
       - name: Execute the TUnit smoke test in the tvOS simulator
         if: ${{ !cancelled() && steps.tvos-build.outcome == 'success' }}
         timeout-minutes: 15
@@ -182,7 +190,8 @@ jobs:
         if: ${{ !cancelled() && steps.workloads.outcome == 'success' }}
         env:
           SmokePlatform: MacCatalyst
-        run: dotnet build tests/TUnit.PlatformSmoke -c Debug
+        run: dotnet build -c Debug
+        working-directory: tests/TUnit.PlatformSmoke
       - name: Execute the TUnit smoke test on Mac Catalyst
         if: ${{ !cancelled() && steps.maccatalyst-build.outcome == 'success' }}
         working-directory: tests/TUnit.PlatformSmoke
