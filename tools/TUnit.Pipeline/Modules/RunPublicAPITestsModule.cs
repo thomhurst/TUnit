@@ -1,8 +1,7 @@
-﻿using ModularPipelines.Attributes;
+﻿using ModularPipelines;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
+using ModularPipelines.FileSystem;
 using ModularPipelines.Options;
 using TUnit.Pipeline.Modules.Abstract;
 
@@ -16,11 +15,11 @@ public class RunPublicAPITestsModule : TestBaseModule
     // <TargetFrameworks> in TUnit.PublicAPI.csproj.
     protected override IEnumerable<string> TestableFrameworks => ModernAndNetFrameworks;
 
-    protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
+    protected override async Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
-        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.PublicAPI.csproj").AssertExists();
+        var project = (await context.Tools.Git.Information.GetRequiredInfoAsync(cancellationToken)).Root.FindFile(x => x.Name == "TUnit.PublicAPI.csproj").AssertExists();
 
-        return Task.FromResult<(DotNetRunOptions, CommandExecutionOptions?)>((
+        return (
             new DotNetRunOptions
             {
                 NoBuild = true,
@@ -36,6 +35,6 @@ public class RunPublicAPITestsModule : TestBaseModule
                     ["GITHUB_ACTIONS"] = "false",
                 }
             }
-        ));
+        );
     }
 }

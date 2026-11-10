@@ -1,10 +1,7 @@
-﻿using ModularPipelines.Attributes;
-using ModularPipelines.Configuration;
+﻿using ModularPipelines;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
-using ModularPipelines.Models;
+using ModularPipelines.FileSystem;
 using ModularPipelines.Options;
 using TUnit.Pipeline.Modules.Abstract;
 
@@ -35,9 +32,8 @@ public class TestVBNugetPackageModule : AbstractTestNugetPackageModule
 [DependsOn<CopyToLocalNuGetModule>]
 public abstract class AbstractTestNugetPackageModule : TestBaseModule
 {
-    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
-        .WithRetryCount(3)
-        .Build();
+    protected override void Configure(ModuleConfigurationBuilder module) => module
+        .WithRetry(3);
 
     protected override IEnumerable<string> TestableFrameworks
     {
@@ -66,8 +62,7 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
     {
         var version = await context.GetModule<GenerateVersionModule>();
 
-        var project = context.Git()
-            .RootDirectory
+        var project = (await context.Tools.Git.Information.GetRequiredInfoAsync(cancellationToken)).Root
             .AssertExists()
             .FindFile(x => x.Name == ProjectName)
             .AssertExists();

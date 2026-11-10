@@ -1,10 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
+using ModularPipelines;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Models;
-using ModularPipelines.Modules;
 using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules.Abstract;
@@ -39,7 +37,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
     /// <summary>True on Linux, the only OS where <see cref="ModernFrameworks"/> includes net8.0 and net9.0.</summary>
     protected static bool IsLinux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-    protected sealed override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
+    protected sealed override async Task<IReadOnlyList<CommandResult>> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var results = new List<CommandResult>();
 
@@ -65,12 +63,12 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
                 continue;
             }
 
-            var testResult = await context.SubModule<CommandResult>(framework, async () =>
+            var testResult = await context.RunSubModuleAsync<CommandResult>(framework, async token =>
             {
                 var finalExecutionOptions = SetDefaults(testOptions, executionOptions ?? new CommandExecutionOptions(), framework);
 
-                return await context.DotNet().Run(testOptions, finalExecutionOptions, cancellationToken);
-            });
+                return await context.Tools.DotNet.RunAsync(testOptions, finalExecutionOptions, token);
+            }, cancellationToken);
 
             results.Add(testResult);
         }
@@ -119,7 +117,7 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         return executionOptions with
         {
             EnvironmentVariables = envVars,
-            LogSettings = new CommandLoggingOptions
+            Logging = new CommandLoggingOptions
             {
                 ShowCommandArguments = true,
                 ShowStandardError = true,

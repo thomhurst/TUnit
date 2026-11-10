@@ -1,12 +1,9 @@
 ﻿using System.Globalization;
 using System.Runtime.InteropServices;
+using ModularPipelines;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
-using ModularPipelines.Models;
-using ModularPipelines.Modules;
+using ModularPipelines.FileSystem;
 using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules.Abstract;
@@ -19,11 +16,11 @@ public abstract class EngineTestsModuleBase : Module<CommandResult>
 
     protected virtual IEnumerable<string> AdditionalArguments => [];
 
-    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
+    protected override async Task<CommandResult> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
-        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Engine.Tests.csproj").AssertExists();
+        var project = (await context.Tools.Git.Information.GetRequiredInfoAsync(cancellationToken)).Root.FindFile(x => x.Name == "TUnit.Engine.Tests.csproj").AssertExists();
 
-        return await context.DotNet().Run(new DotNetRunOptions
+        return await context.Tools.DotNet.RunAsync(new DotNetRunOptions
         {
             Project = project.Name,
             NoBuild = true,
@@ -51,7 +48,7 @@ public abstract class EngineTestsModuleBase : Module<CommandResult>
                 ["TUNIT_AGGREGATE_REPORTS"] = "off",
                 ["TUNIT_ENGINE_TEST_MODE"] = TestMode,
             },
-            LogSettings = new CommandLoggingOptions
+            Logging = new CommandLoggingOptions
             {
                 ShowCommandArguments = true,
                 ShowStandardError = true,

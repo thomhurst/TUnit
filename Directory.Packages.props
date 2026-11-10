@@ -1,5 +1,8 @@
 <Project>
   <PropertyGroup>
+    <ModularPipelinesVersion Condition="'$(ModularPipelinesVersion)' == ''">4.0.0</ModularPipelinesVersion>
+  </PropertyGroup>
+  <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <!-- Per-TFM versions: match these packages to the consumer's runtime. Some 10.x packages do not support
@@ -84,9 +87,9 @@
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Moq" Version="4.21.0" />
     <PackageVersion Include="System.Threading.Channels" Version="9.0.0" />
-    <PackageVersion Include="ModularPipelines.DotNet" Version="3.2.8" />
-    <PackageVersion Include="ModularPipelines.Git" Version="3.2.8" />
-    <PackageVersion Include="ModularPipelines.GitHub" Version="3.2.8" />
+    <PackageVersion Include="ModularPipelines.DotNet" Version="$(ModularPipelinesVersion)" />
+    <PackageVersion Include="ModularPipelines.Git" Version="$(ModularPipelinesVersion)" />
+    <PackageVersion Include="ModularPipelines.GitHub" Version="$(ModularPipelinesVersion)" />
     <PackageVersion Include="MSTest" Version="4.5.2" />
     <PackageVersion Include="MSTest.TestAdapter" Version="4.5.2" />
     <PackageVersion Include="MSTest.TestFramework" Version="4.5.2" />

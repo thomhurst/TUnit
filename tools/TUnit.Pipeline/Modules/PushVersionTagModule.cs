@@ -1,39 +1,34 @@
-﻿using ModularPipelines.Attributes;
-using ModularPipelines.Configuration;
+﻿using ModularPipelines;
 using ModularPipelines.Context;
-using ModularPipelines.Git.Attributes;
-using ModularPipelines.Git.Extensions;
+using ModularPipelines.Git;
 using ModularPipelines.Git.Options;
-using ModularPipelines.Models;
-using ModularPipelines.Modules;
 
 namespace TUnit.Pipeline.Modules;
 
 [RunOnlyOnBranch("main")]
-[RunOnLinuxOnly]
+[RunIf<OnLinux>]
 [DependsOn<GenerateVersionModule>]
 public class PushVersionTagModule : Module<CommandResult>
 {
-    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
-        .WithIgnoreFailuresWhen(async (ctx, ex) =>
+    protected override void Configure(ModuleConfigurationBuilder module) => module
+        .WithIgnoreFailuresWhen(async (ctx, ex, cancellationToken) =>
         {
             var versionInformation = await ctx.GetModule<GenerateVersionModule>();
             return ex.Message.Contains($"tag 'v{versionInformation.ValueOrDefault!.SemVer}' already exists");
-        })
-        .Build();
+        });
 
-    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
+    protected override async Task<CommandResult> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var versionInformation = await context.GetModule<GenerateVersionModule>();
 
-        await context.Git().Commands.Tag(new GitTagOptions
+        await context.Tools.Git.Commands.Branches.TagAsync(new GitTagOptions
         {
             TagName = $"v{versionInformation.ValueOrDefault!.SemVer}",
-        }, token: cancellationToken);
+        }, cancellationToken: cancellationToken);
 
-        return await context.Git().Commands.Push(new GitPushOptions
+        return await context.Tools.Git.Commands.Remotes.PushAsync(new GitPushOptions
         {
             Tags = true
-        }, token: cancellationToken);
+        }, cancellationToken: cancellationToken);
     }
 }
