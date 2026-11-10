@@ -36,6 +36,15 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Setup pipeline SDK
+      uses: actions/setup-dotnet@v6.1.0
+      with:
+        global-json-file: tools/TUnit.Pipeline/global.json
+
+    - name: Build Pipeline
+      shell: bash
+      run: dotnet build -c Release
+      working-directory: tools/TUnit.Pipeline
     - name: Run Pipeline
       shell: bash
       run: |
@@ -48,8 +57,8 @@ runs:
         if [ "$PIPELINE_OS_SPECIFIC_ONLY" = "true" ]; then
           args+=(--os-specific-only)
         fi
-        dotnet run -c Release --no-build "${args[@]}"
-      working-directory: "tools/TUnit.Pipeline"
+        dotnet tools/TUnit.Pipeline/bin/Release/net11.0/TUnit.Pipeline.dll "${args[@]}"
+      working-directory: ${{ github.workspace }}
       env:
         PIPELINE_CATEGORIES: ${{ inputs.categories }}
         PIPELINE_IGNORE_CATEGORIES: ${{ inputs.ignore-categories }}

@@ -403,7 +403,7 @@ jobs:
             exit 1
           fi
           dotnet build libraries.slnf -c Release
-          dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
+
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline

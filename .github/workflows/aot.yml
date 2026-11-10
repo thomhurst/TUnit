@@ -127,7 +127,7 @@ jobs:
           fi
           dotnet build libraries.slnf -c Release
           dotnet build tests/TUnit.Engine.Tests/TUnit.Engine.Tests.csproj -c Release
-          dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
+
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
@@ -192,7 +192,7 @@ jobs:
         shell: bash
         run: |
           dotnet build tests/TUnit.Engine.Tests/TUnit.Engine.Tests.csproj -c Release
-          dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
+
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
