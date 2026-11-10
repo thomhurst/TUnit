@@ -80,9 +80,9 @@ jobs:
           arch: x86_64
           target: google_apis
           disable-animations: true
+          working-directory: tests/TUnit.PlatformSmoke
           script: |
-            mkdir -p artifacts/platform-smoke/Android
-            cd tests/TUnit.PlatformSmoke
+            mkdir -p "$GITHUB_WORKSPACE/artifacts/platform-smoke/Android"
             bash -o pipefail -c 'dotnet test --project "$GITHUB_WORKSPACE/tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj" --no-build 2>&1 | tee "$GITHUB_WORKSPACE/artifacts/platform-smoke/Android/test.log"'
       - uses: bytecodealliance/actions/wasmtime/setup@v1.1.3
         if: matrix.platform == 'WASI'
