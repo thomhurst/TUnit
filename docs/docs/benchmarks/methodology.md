@@ -212,7 +212,7 @@ Example: "4x faster with AOT" means Native AOT is 4 times faster than JIT.
 ## Benchmark Automation
 
 ### Daily Execution
-Benchmarks run automatically every 24 hours via [GitHub Actions](https://github.com/thomhurst/TUnit/blob/main/.github/workflows/speed-comparison.yml).
+Benchmarks run automatically every week via [GitHub Actions](https://github.com/thomhurst/TUnit/blob/main/.github/workflows/speed-comparison.yml).
 
 ### Process
 1. **Build**: Compile all framework versions

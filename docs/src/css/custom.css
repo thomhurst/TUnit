@@ -1,66 +1,65 @@
 @import url('./benchmark-charts.css');
-@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&family=Martian+Mono:wdth,wght@75..112.5,300..700&display=swap');
 
 /*
- * TUnit's identity is the red/green bar every unit-testing tool has shown since JUnit.
- * One vivid green marks what passed, on near-black ink and warm paper; red appears only for failures.
- * Archivo carries both voices: expanded and heavy for headings, normal width for reading.
+ * TUnit's identity is the score: a test run drawn as coloured bars on a row per worker.
+ * The five note colours belong to that drawing and to small marks that echo it. Text and controls stay
+ * charcoal with one teal accent, and green and red keep their usual meaning of passed and failed.
  */
 :root {
-  --tunit-ink: #0b1410;
-  --tunit-body: #2c3832;
-  --tunit-muted: #5a665f;
-  --tunit-paper: #f8f7f2;
-  --tunit-surface: #efeee6;
-  --tunit-border: #dbdacf;
-  --tunit-accent: #0a7a3f;
-  --tunit-accent-surface: #dff3e6;
-  --tunit-code: #f0efe8;
-  --tunit-on-primary: #f8f7f2;
-  --tunit-pass: #0a7a3f;
-  --tunit-pass-fill: #17b866;
-  --tunit-pass-light: #bfe8cf;
-  --tunit-pass-mid: #6fd39c;
-  --tunit-fail: #c93a22;
-  --tunit-cell: #e4e3d8;
+  --tunit-ink: #17171c;
+  --tunit-body: #3a3a44;
+  --tunit-muted: #6b6b78;
+  --tunit-paper: #fbfaf8;
+  --tunit-surface: #f2f1ee;
+  --tunit-border: #e2e0db;
+  --tunit-accent: #0b7567;
+  --tunit-accent-surface: #dcf3ee;
+  --tunit-code: #f4f3f0;
+  --tunit-on-primary: #fbfaf8;
+  --tunit-pass: #0b7567;
+  --tunit-pass-fill: #19a88f;
+  --tunit-pass-light: #bfe9df;
+  --tunit-pass-mid: #6fcdb9;
+  --tunit-fail: #cf3e36;
+  --tunit-cell: #e8e6e1;
   --tunit-warning: #6b4a00;
   --tunit-warning-surface: #f7efd6;
-  --tunit-danger: #9a2c18;
-  --tunit-danger-surface: #f9e4de;
+  --tunit-danger: #9c2a23;
+  --tunit-danger-surface: #fae5e3;
   /* Bar labels sit on these colours, so each keeps at least 4.5:1 contrast with --tunit-chart-label. */
-  --tunit-chart-primary: #0a7a3f;
-  --tunit-chart-secondary: #0b1410;
-  --tunit-chart-comparison: #5a665f;
-  --tunit-chart-label: #f8f7f2;
+  --tunit-chart-primary: #0b7567;
+  --tunit-chart-secondary: #17171c;
+  --tunit-chart-comparison: #6b6b78;
+  --tunit-chart-label: #fbfaf8;
 
-  /* The homepage wall. Text on --tunit-pass-fill uses --tunit-on-fill in both themes. */
-  --tunit-on-fill: #06140c;
-  --tunit-wall-running: #c9f0d9;
-  --tunit-wall-quick: #3ddc8e;
-  --tunit-wall-steady: #17b866;
-  --tunit-wall-slow: #0c9450;
-  --tunit-wall-letter: #0b1410;
-  --tunit-wall-failed: #fff6ee;
-  --tunit-wall-red-quick: #ff8a6e;
-  --tunit-wall-red-steady: #ee5236;
-  --tunit-wall-red-slow: #cf3d24;
+  /* The homepage score. The stage is dark in both themes so the note colours keep their strength. */
+  --tunit-stage: #17171c;
+  --tunit-stage-line: #2a2a33;
+  --tunit-stage-ink: #f0eff4;
+  --tunit-stage-muted: #9d9cab;
+  --tunit-note-1: #ff6b5e;
+  --tunit-note-2: #ffbe3d;
+  --tunit-note-3: #2fd0a5;
+  --tunit-note-4: #4aa8ff;
+  --tunit-note-5: #c58cff;
 
-  --ifm-color-primary: #0a7a3f;
-  --ifm-color-primary-dark: #096e39;
-  --ifm-color-primary-darker: #086836;
-  --ifm-color-primary-darkest: #07562c;
-  --ifm-color-primary-light: #0b8645;
-  --ifm-color-primary-lighter: #0c8c48;
-  --ifm-color-primary-lightest: #0ea354;
-  --ifm-color-emphasis-100: #f0efe8;
-  --ifm-color-emphasis-200: #e7e6dc;
-  --ifm-color-emphasis-300: #dbdacf;
-  --ifm-color-emphasis-400: #b9bcb2;
-  --ifm-color-emphasis-500: #8c958d;
-  --ifm-color-emphasis-600: #5a665f;
-  --ifm-color-emphasis-700: #2c3832;
-  --ifm-color-emphasis-800: #1b2620;
-  --ifm-color-emphasis-900: #0b1410;
+  --ifm-color-primary: #0b7567;
+  --ifm-color-primary-dark: #0a695d;
+  --ifm-color-primary-darker: #096357;
+  --ifm-color-primary-darkest: #085248;
+  --ifm-color-primary-light: #0c8171;
+  --ifm-color-primary-lighter: #0d8777;
+  --ifm-color-primary-lightest: #0f9e8b;
+  --ifm-color-emphasis-100: #f4f3f0;
+  --ifm-color-emphasis-200: #eae8e4;
+  --ifm-color-emphasis-300: #e2e0db;
+  --ifm-color-emphasis-400: #bdbbb8;
+  --ifm-color-emphasis-500: #93929a;
+  --ifm-color-emphasis-600: #6b6b78;
+  --ifm-color-emphasis-700: #3a3a44;
+  --ifm-color-emphasis-800: #26262d;
+  --ifm-color-emphasis-900: #17171c;
   --syntax-keyword: #3a5ea8;
   --syntax-string: #9a5528;
   --syntax-function: #7b4a8f;
@@ -70,58 +69,50 @@
 }
 
 html[data-theme='dark'] {
-  --tunit-ink: #eaf2ec;
-  --tunit-body: #c0cbc4;
-  --tunit-muted: #8b978f;
-  --tunit-paper: #0a100d;
-  --tunit-surface: #111a15;
-  --tunit-border: #223028;
-  --tunit-accent: #4ee39a;
-  --tunit-accent-surface: #12291d;
-  --tunit-code: #0f1713;
-  --tunit-on-primary: #0a100d;
-  --tunit-pass: #4ee39a;
-  --tunit-pass-fill: #17b866;
-  --tunit-pass-light: #1d5a3b;
-  --tunit-pass-mid: #178a50;
-  --tunit-fail: #ff8a70;
-  --tunit-cell: #18221c;
+  --tunit-ink: #f0eff4;
+  --tunit-body: #c8c7d0;
+  --tunit-muted: #9291a0;
+  --tunit-paper: #121216;
+  --tunit-surface: #1a1a20;
+  --tunit-border: #2b2b34;
+  --tunit-accent: #4fdcbb;
+  --tunit-accent-surface: #143029;
+  --tunit-code: #18181e;
+  --tunit-on-primary: #121216;
+  --tunit-pass: #4fdcbb;
+  --tunit-pass-fill: #2fd0a5;
+  --tunit-pass-light: #1c5a4c;
+  --tunit-pass-mid: #228f78;
+  --tunit-fail: #ff8d85;
+  --tunit-cell: #24242c;
   --tunit-warning: #ead39a;
   --tunit-warning-surface: #2a2719;
-  --tunit-danger: #ffb3a3;
-  --tunit-danger-surface: #33190f;
-  --tunit-chart-primary: #17b866;
-  --tunit-chart-secondary: #eaf2ec;
-  --tunit-chart-comparison: #8b978f;
-  --tunit-chart-label: #0a100d;
+  --tunit-danger: #ffb5af;
+  --tunit-danger-surface: #351917;
+  --tunit-chart-primary: #2fd0a5;
+  --tunit-chart-secondary: #f0eff4;
+  --tunit-chart-comparison: #9291a0;
+  --tunit-chart-label: #121216;
 
-  --tunit-on-fill: #06140c;
-  --tunit-wall-running: #1c4631;
-  --tunit-wall-quick: #3ddc8e;
-  --tunit-wall-steady: #17b866;
-  --tunit-wall-slow: #0c9450;
-  --tunit-wall-letter: #0a100d;
-  --tunit-wall-failed: #fff6ee;
-  --tunit-wall-red-quick: #ff8a6e;
-  --tunit-wall-red-steady: #ee5236;
-  --tunit-wall-red-slow: #cf3d24;
+  --tunit-stage: #1b1b22;
+  --tunit-stage-line: #2e2e38;
 
-  --ifm-color-primary: #4ee39a;
-  --ifm-color-primary-dark: #33df8b;
-  --ifm-color-primary-darker: #26dd83;
-  --ifm-color-primary-darkest: #1cbd6d;
-  --ifm-color-primary-light: #69e7a9;
-  --ifm-color-primary-lighter: #76e9b1;
-  --ifm-color-primary-lightest: #9ff0c8;
-  --ifm-color-emphasis-100: #111a15;
-  --ifm-color-emphasis-200: #17211b;
-  --ifm-color-emphasis-300: #223028;
-  --ifm-color-emphasis-400: #34443a;
-  --ifm-color-emphasis-500: #56655b;
-  --ifm-color-emphasis-600: #8b978f;
-  --ifm-color-emphasis-700: #c0cbc4;
-  --ifm-color-emphasis-800: #d6dfd9;
-  --ifm-color-emphasis-900: #eaf2ec;
+  --ifm-color-primary: #4fdcbb;
+  --ifm-color-primary-dark: #35d7b1;
+  --ifm-color-primary-darker: #29d4ac;
+  --ifm-color-primary-darkest: #22b592;
+  --ifm-color-primary-light: #69e1c5;
+  --ifm-color-primary-lighter: #75e4ca;
+  --ifm-color-primary-lightest: #9fedda;
+  --ifm-color-emphasis-100: #1a1a20;
+  --ifm-color-emphasis-200: #202027;
+  --ifm-color-emphasis-300: #2b2b34;
+  --ifm-color-emphasis-400: #3d3d49;
+  --ifm-color-emphasis-500: #62616f;
+  --ifm-color-emphasis-600: #9291a0;
+  --ifm-color-emphasis-700: #c8c7d0;
+  --ifm-color-emphasis-800: #dddce4;
+  --ifm-color-emphasis-900: #f0eff4;
   --syntax-keyword: #9db8ec;
   --syntax-string: #e2b48c;
   --syntax-function: #d3b0e3;
@@ -133,11 +124,12 @@ html[data-theme='dark'] {
 /* Define aliases in both themes so inherited values resolve against that theme. */
 :root, html[data-theme='dark'] {
   --tunit-mono: 'Martian Mono', 'Cascadia Code', Consolas, monospace;
-  --ifm-font-family-base: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --tunit-display: 'Bricolage Grotesque', 'Hanken Grotesk', sans-serif;
+  --ifm-font-family-base: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --ifm-font-family-monospace: 'Martian Mono', 'Cascadia Code', Consolas, monospace;
   --ifm-line-height-base: 1.7;
-  --ifm-heading-font-family: var(--ifm-font-family-base);
-  --ifm-heading-font-weight: 750;
+  --ifm-heading-font-family: var(--tunit-display);
+  --ifm-heading-font-weight: 700;
   --ifm-font-color-base: var(--tunit-body);
   --ifm-heading-color: var(--tunit-ink);
   --ifm-background-color: var(--tunit-paper);
@@ -190,7 +182,7 @@ a { text-underline-offset: 3px; }
   box-shadow: none;
 }
 .navbar__brand { gap: 0.6rem; }
-.navbar__title { color: var(--tunit-ink); font-size: 1.2rem; font-stretch: 125%; font-weight: 800; letter-spacing: -0.04em; }
+.navbar__title { color: var(--tunit-ink); font-family: var(--tunit-display); font-size: 1.3rem; font-weight: 750; letter-spacing: -0.03em; }
 .navbar__link { font-size: 0.95rem; font-weight: 600; }
 .navbar__link--active { color: var(--tunit-accent); }
 .navbar__logo { height: 1.7rem; }
@@ -224,14 +216,14 @@ a { text-underline-offset: 3px; }
   --ifm-footer-link-hover-color: var(--tunit-accent);
   border-top: 1px solid var(--tunit-border);
 }
-.footer__title { font-size: 0.9rem; font-stretch: 112%; }
+.footer__title { font-size: 0.9rem; }
 
 /* The same palette also applies to the Algolia dialog, not just its trigger. */
 html[data-theme] {
   --docsearch-primary-color: var(--tunit-accent);
   --docsearch-text-color: var(--tunit-ink);
   --docsearch-muted-color: var(--tunit-muted);
-  --docsearch-container-background: rgb(11 20 16 / 60%);
+  --docsearch-container-background: rgb(18 18 22 / 60%);
   --docsearch-modal-background: var(--tunit-paper);
   --docsearch-searchbox-background: var(--tunit-code);
   --docsearch-searchbox-focus-background: var(--tunit-paper);
@@ -247,7 +239,7 @@ html[data-theme] {
   --docsearch-footer-shadow: 0 -1px 0 var(--tunit-border);
   --docsearch-logo-color: var(--tunit-muted);
 }
-.DocSearch-Button { background: var(--tunit-surface); border: 1px solid var(--tunit-border); color: var(--tunit-muted); border-radius: 6px; }
+.DocSearch-Button { background: var(--tunit-surface); border: 1px solid var(--tunit-border); color: var(--tunit-muted); border-radius: 999px; }
 .DocSearch-Button:hover { background: var(--tunit-code); color: var(--tunit-ink); box-shadow: inset 0 0 0 1px var(--tunit-accent); }
 .DocSearch-Button-Key { background: var(--tunit-paper); border: 1px solid var(--tunit-border); color: var(--tunit-muted); box-shadow: none; }
 .DocSearch-Hit[aria-selected='true'] a { background: var(--tunit-accent-surface); }
@@ -289,8 +281,8 @@ html[data-theme] {
 .table-of-contents__link--active { color: var(--tunit-accent); font-weight: 600; }
 .table-of-contents__link:hover { color: var(--tunit-accent); }
 .theme-doc-markdown { --ifm-h1-font-size: 2.4rem; --ifm-h2-font-size: 1.55rem; --ifm-h3-font-size: 1.2rem; }
-.theme-doc-markdown h1 { font-stretch: 118%; font-weight: 800; letter-spacing: -0.035em; line-height: 1.05; }
-.theme-doc-markdown h2 { font-stretch: 112%; font-weight: 750; letter-spacing: -0.025em; margin-top: 3rem; }
+.theme-doc-markdown h1 { font-weight: 750; letter-spacing: -0.035em; line-height: 1.05; }
+.theme-doc-markdown h2 { font-weight: 700; letter-spacing: -0.025em; margin-top: 3rem; }
 .theme-doc-markdown h3 { font-weight: 700; letter-spacing: -0.015em; margin-top: 2rem; }
 .theme-doc-markdown :is(h2, h3) { scroll-margin-top: calc(var(--ifm-navbar-height) + 1rem); }
 .theme-doc-markdown > p, .theme-doc-markdown > ul, .theme-doc-markdown > ol { max-width: 72ch; }
@@ -302,7 +294,7 @@ html[data-theme] {
 .pagination-nav__sublabel { color: var(--tunit-muted); }
 
 :not(pre) > code { color: var(--tunit-ink); background: var(--tunit-code); border: 0; padding: 0.12em 0.4em; border-radius: 3px; }
-.theme-code-block { --prism-background-color: var(--tunit-code); background: var(--tunit-code); border: 1px solid var(--tunit-border); border-radius: 6px; box-shadow: none; }
+.theme-code-block { --prism-background-color: var(--tunit-code); background: var(--tunit-code); border: 1px solid var(--tunit-border); border-radius: 10px; box-shadow: none; }
 .theme-code-block pre { background: var(--tunit-code) !important; color: var(--tunit-ink) !important; font-size: 0.8rem; line-height: 1.75; }
 .theme-code-block pre code { background: transparent; color: inherit; border: 0; padding-block: 0; }
 /* Titled code blocks look like an editor tab, since the title is almost always a file name. */

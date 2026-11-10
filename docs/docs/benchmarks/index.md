@@ -75,7 +75,7 @@ All benchmark source code is available in the [`tools/speed-comparison`](https:/
 ---
 
 :::note Continuous Benchmarking
-These benchmarks run automatically daily via [GitHub Actions](https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml).
+These benchmarks run automatically every week via [GitHub Actions](https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml).
 
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
