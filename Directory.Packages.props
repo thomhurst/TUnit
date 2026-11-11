@@ -60,19 +60,19 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="2.1.6" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
     <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="10.0.404" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.5.2" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.5.2" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.HtmlReport" Version="2.5.2" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.5.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.5.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.5.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HtmlReport" Version="2.5.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.5.3" />
     <!-- 2.4.0's controller-backed TRX path kills the test host on Ctrl+C instead of allowing hook cleanup. -->
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.5.2" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="2.5.2" />
-    <PackageVersion Include="Microsoft.Testing.Platform" Version="2.5.2" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.5.2" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.5.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="2.5.3" />
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="2.5.3" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.5.3" />
     <PackageVersion Include="Imposter" Version="1.0.13"/>
     <PackageVersion Include="Mockolate" Version="3.6.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
@@ -81,19 +81,19 @@
     <PackageVersion Include="ModularPipelines.DotNet" Version="3.2.8" />
     <PackageVersion Include="ModularPipelines.Git" Version="3.2.8" />
     <PackageVersion Include="ModularPipelines.GitHub" Version="3.2.8" />
-    <PackageVersion Include="MSTest" Version="4.5.2" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.2" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.5.2" />
+    <PackageVersion Include="MSTest" Version="4.5.3" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.5.3" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.5.3" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="NuGet.Protocol" Version="8.0.0" />
-    <PackageVersion Include="OpenTelemetry" Version="1.20.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.20.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.20.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.20.1" />
-    <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.20.1" />
-    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.20.1" />
+    <PackageVersion Include="OpenTelemetry" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.InMemory" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.20.2" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.20.2" />
     <PackageVersion Include="NUnit" Version="5.0.0" />
