@@ -114,6 +114,13 @@ internal sealed class TestGroupingService : ITestGroupingService
             };
         }
 
+        return GroupConstrainedTests(testsWithKeys, traceMessages);
+    }
+
+    // Kept out of GroupTestsByConstraintsCore: a run without parallel constraints returns above, and
+    // compiling this method loads all of the tuple, list and dictionary types it uses.
+    private static GroupedTests GroupConstrainedTests(List<(AbstractExecutableTest Test, TestSortKey Key)> testsWithKeys, List<string>? traceMessages)
+    {
         var estimatedCount = testsWithKeys.Count;
         var notInParallelList = new List<(AbstractExecutableTest Test, string ClassName, TestPriority Priority)>(estimatedCount / 4);
         var keyedNotInParallelList = new List<(AbstractExecutableTest Test, string ClassName, IReadOnlyList<string> ConstraintKeys, TestPriority Priority)>(estimatedCount / 8);

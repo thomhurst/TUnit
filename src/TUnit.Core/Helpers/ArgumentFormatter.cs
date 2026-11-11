@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Globalization;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace TUnit.Core.Helpers;
@@ -165,8 +166,21 @@ public static class ArgumentFormatter
         // IntPtr and UIntPtr are primitive too: IFormattable from .NET 5, so formatted invariantly there; on
         // netstandard2.0 they are not IFormattable and keep ToString(), which formats with the invariant culture.
         // ArgumentFormatterCultureTests checks every INumberBase<T> type of the runtime against this list.
-        return (type.IsPrimitive && o is IFormattable)
-            || o is decimal or BigInteger or Complex
+        if (type.IsPrimitive)
+        {
+            return o is IFormattable;
+        }
+
+        // Every other numeric type is a struct, so strings and other reference types stop here.
+        return type.IsValueType && IsNonPrimitiveNumeric(o);
+    }
+
+    // Kept out of IsNumeric: compiling these type checks loads every listed type (and System.Runtime.Numerics),
+    // which costs about a millisecond at startup. Most runs only format primitives, strings and reference types.
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static bool IsNonPrimitiveNumeric(object o)
+    {
+        return o is decimal or BigInteger or Complex
 #if NET
             || o is Half or Int128 or UInt128 or System.Runtime.InteropServices.NFloat
 #endif

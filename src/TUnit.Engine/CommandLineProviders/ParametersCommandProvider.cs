@@ -22,8 +22,6 @@ internal class ParametersCommandProvider(IExtension extension) : ICommandLineOpt
 
     public string Description => extension.Description;
 
-    public readonly Regex Regex = new("^.+=.*$");
-
     public IReadOnlyCollection<CommandLineOption> GetCommandLineOptions()
     {
         return
@@ -34,7 +32,9 @@ internal class ParametersCommandProvider(IExtension extension) : ICommandLineOpt
 
     public Task<ValidationResult> ValidateOptionArgumentsAsync(CommandLineOption commandOption, string[] arguments)
     {
-        if (arguments.Any(argument => !Regex.IsMatch(argument)))
+        // Matched on demand: building the Regex up front loaded System.Text.RegularExpressions on every
+        // run, though it is only needed when --test-parameter is passed.
+        if (arguments.Any(static argument => !Regex.IsMatch(argument, "^.+=.*$")))
         {
             return ValidationResult.InvalidTask("ParameterMetadata must be in the format of KEY=VALUE");
         }
