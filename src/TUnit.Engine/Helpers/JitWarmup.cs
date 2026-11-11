@@ -78,56 +78,81 @@ internal static class JitWarmup
         }.Start();
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026",
-        Justification = "Best effort: a type or member the trimmer removed is not warmed.")]
     private static void WarmEntries()
+    {
+        var membersByType = new Dictionary<Type, TypeMembers>();
+
+        foreach (var entry in ReadEntries())
+        {
+            foreach (var method in ResolveEntry(entry, membersByType))
+            {
+                try
+                {
+                    RuntimeHelpers.PrepareMethod(method.MethodHandle);
+                }
+                catch
+                {
+                    // Methods without a compilable body are not worth failing the warm-up over.
+                }
+            }
+        }
+    }
+
+    internal static IEnumerable<string> ReadEntries()
     {
         using var stream = typeof(JitWarmup).Assembly.GetManifestResourceStream(ResourceName);
 
         if (stream is null)
         {
-            return;
+            yield break;
         }
-
-        var coreAssembly = typeof(TestContext).Assembly;
-        var engineAssembly = typeof(JitWarmup).Assembly;
-        var membersByType = new Dictionary<Type, TypeMembers>();
 
         using var reader = new StreamReader(stream);
 
         while (reader.ReadLine() is { } entry)
         {
-            var separator = entry.IndexOf(Separator, StringComparison.Ordinal);
-
-            if (separator < 0)
-            {
-                continue;
-            }
-
-            var typeName = entry[..separator];
-            var type = engineAssembly.GetType(typeName) ?? coreAssembly.GetType(typeName);
-
-            if (type is null || type.ContainsGenericParameters)
-            {
-                continue;
-            }
-
-            if (!membersByType.TryGetValue(type, out var members))
-            {
-                membersByType[type] = members = new TypeMembers(type);
-            }
-
-            Warm(members, entry[(separator + Separator.Length)..]);
+            yield return entry;
         }
     }
 
-    private static void Warm(TypeMembers members, string methodName)
+    /// <summary>The methods an entry warms; empty when the entry no longer matches the code.</summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2026",
+        Justification = "Best effort: a type or member the trimmer removed is not warmed.")]
+    internal static IEnumerable<MethodBase> ResolveEntry(string entry, Dictionary<Type, TypeMembers> membersByType)
+    {
+        var separator = entry.IndexOf(Separator, StringComparison.Ordinal);
+
+        if (separator < 0)
+        {
+            return [];
+        }
+
+        var typeName = entry[..separator];
+        var type = typeof(JitWarmup).Assembly.GetType(typeName) ?? typeof(TestContext).Assembly.GetType(typeName);
+
+        if (type is null || type.ContainsGenericParameters)
+        {
+            return [];
+        }
+
+        if (!membersByType.TryGetValue(type, out var members))
+        {
+            membersByType[type] = members = new TypeMembers(type);
+        }
+
+        return FindMethods(members, entry[(separator + Separator.Length)..]);
+    }
+
+    /// <summary>
+    /// The method named <paramref name="methodName"/> and everything the compiler generated for it.
+    /// </summary>
+    internal static IEnumerable<MethodBase> FindMethods(TypeMembers members, string methodName)
     {
         foreach (var method in members.Own)
         {
             if (method.Name == methodName || IsGeneratedFor(method.Name, methodName))
             {
-                Prepare(method);
+                yield return method;
             }
         }
 
@@ -139,7 +164,7 @@ internal static class JitWarmup
             {
                 if (isStateMachine || IsGeneratedFor(method.Name, methodName))
                 {
-                    Prepare(method);
+                    yield return method;
                 }
             }
         }
@@ -161,54 +186,64 @@ internal static class JitWarmup
             && name.StartsWith(methodName, StringComparison.Ordinal);
     }
 
-    private static void Prepare(MethodBase method)
-    {
-        // Static constructors are left alone so type initialisation keeps its normal timing.
-        if (method.IsAbstract || method.ContainsGenericParameters || method is ConstructorInfo { IsStatic: true })
-        {
-            return;
-        }
-
-        try
-        {
-            RuntimeHelpers.PrepareMethod(method.MethodHandle);
-        }
-        catch
-        {
-            // Methods without a compilable body are not worth failing the warm-up over.
-        }
-    }
-
-    private sealed class TypeMembers
+    internal sealed class TypeMembers
     {
         public MethodBase[] Own { get; }
 
-        /// <summary>Compiler-generated nested types (closures and state machines) and their methods.</summary>
+        /// <summary>
+        /// Compiler-generated nested types (closures and state machines) and their methods, at any
+        /// depth: an async lambda that captures locals has its state machine inside its closure class.
+        /// </summary>
         public (string Name, MethodBase[] Methods)[] Generated { get; }
 
-        [UnconditionalSuppressMessage("Trimming", "IL2070",
-            Justification = "Best effort: a member the trimmer removed is not warmed.")]
         public TypeMembers(Type type)
         {
             Own = GetMethods(type);
 
             var generated = new List<(string, MethodBase[])>();
-
-            foreach (var nested in type.GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic))
-            {
-                if (nested.Name.StartsWith('<') && !nested.ContainsGenericParameters)
-                {
-                    generated.Add((nested.Name, GetMethods(nested)));
-                }
-            }
-
+            AddGenerated(type, generated);
             Generated = generated.ToArray();
         }
 
         [UnconditionalSuppressMessage("Trimming", "IL2070",
             Justification = "Best effort: a member the trimmer removed is not warmed.")]
+        private static void AddGenerated(Type type, List<(string, MethodBase[])> generated)
+        {
+            foreach (var nested in type.GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic))
+            {
+                if (nested.Name.StartsWith('<') && !nested.ContainsGenericParameters)
+                {
+                    generated.Add((nested.Name, GetMethods(nested)));
+                    AddGenerated(nested, generated);
+                }
+            }
+        }
+
+        [UnconditionalSuppressMessage("Trimming", "IL2070",
+            Justification = "Best effort: a member the trimmer removed is not warmed.")]
         private static MethodBase[] GetMethods(Type type)
-            => [.. type.GetMethods(DeclaredMembers), .. type.GetConstructors(DeclaredMembers)];
+        {
+            var methods = new List<MethodBase>();
+
+            foreach (var method in type.GetMethods(DeclaredMembers))
+            {
+                if (!method.IsAbstract && !method.ContainsGenericParameters)
+                {
+                    methods.Add(method);
+                }
+            }
+
+            foreach (var constructor in type.GetConstructors(DeclaredMembers))
+            {
+                // Static constructors are left alone so type initialisation keeps its normal timing.
+                if (!constructor.IsStatic)
+                {
+                    methods.Add(constructor);
+                }
+            }
+
+            return methods.ToArray();
+        }
     }
 
     /// <summary>
@@ -232,7 +267,9 @@ internal static class JitWarmup
 
         if (generatedType >= 0)
         {
-            var nestedName = typeName[(generatedType + 1)..];
+            // The innermost generated type decides: "Type+<>c__DisplayClass1_0+<<Method>b__0>d" is
+            // the state machine of a lambda in Method.
+            var nestedName = typeName[(typeName.LastIndexOf('+') + 1)..];
             typeName = typeName[..generatedType];
 
             if (!nestedName.StartsWith("<>", StringComparison.Ordinal))
@@ -281,9 +318,22 @@ internal static class JitWarmup
 
             AppDomain.CurrentDomain.ProcessExit += (_, _) =>
             {
-                lock (s_lock)
+                try
                 {
-                    File.WriteAllLines(path, s_recorded);
+                    var membersByType = new Dictionary<Type, TypeMembers>();
+
+                    lock (s_lock)
+                    {
+                        // Leave out what could not be warmed anyway, such as generic methods.
+                        File.WriteAllLines(path, s_recorded.Where(entry => ResolveEntry(entry, membersByType).Any()));
+                    }
+                }
+                catch (Exception exception)
+                {
+                    // A bad path must not fail the run or stop later exit handlers.
+                    // Console.Error is intercepted for test output by now, so write to the real stream.
+                    using var standardError = new StreamWriter(Console.OpenStandardError());
+                    standardError.WriteLine($"Could not write {EnvironmentConstants.JitWarmupRecord} output to '{path}': {exception.Message}");
                 }
             };
         }
