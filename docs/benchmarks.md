@@ -29,7 +29,7 @@ These benchmarks compare TUnit against the most popular .NET testing frameworks:
 
 | Framework    | Version Tested |
 | ------------ | -------------- |
-| **TUnit**    | 1.83.0         |
+| **TUnit**    | 1.83.8         |
 | **xUnit v3** | 4.0.3          |
 | **NUnit**    | 5.0.0          |
 | **MSTest**   | 4.5.3          |
@@ -72,4 +72,4 @@ These benchmarks run automatically every week via [GitHub Actions](https://githu
 
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 
-*Last generated: 2026-11-11T19:48:26.574Z*
+*Last generated: 2026-11-11T22:02:50.440Z*
