@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.be4c87e3.css">
-<script src="/assets/js/runtime~main.56eab137.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.8e45e459.js" defer="defer"></script>
 <script src="/assets/js/main.9d321a10.js" defer="defer"></script>
 </head>
 <body>
@@ -86,9 +86,8 @@
 <p><strong>Purpose</strong>: Measure compilation time impact</p>
 <p><strong>What&#x27;s tested</strong>:</p>
 <ul>
-<li class="">Clean build time</li>
-<li class="">Incremental build time</li>
-<li class="">Source generator overhead</li>
+<li class="">Cold, non-incremental build time (<code>dotnet build --no-incremental --disable-build-servers</code>), so every build starts without a warm compiler server and the order frameworks are built in does not affect the result</li>
+<li class="">Source generator and analyzer overhead, including their first-run cost</li>
 </ul>
 <p><strong>Why it matters</strong>: Fast builds improve developer productivity.</p>
 <h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="environment">Environment<a href="#environment" class="hash-link" aria-label="Direct link to Environment" title="Direct link to Environment" translate="no">​</a></h2>
