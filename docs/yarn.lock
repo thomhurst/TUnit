@@ -7483,10 +7483,10 @@ minimalistic-assert@^1.0.0:
   resolved "https://registry.yarnpkg.com/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz#2e194de044626d4a10e7f7fbc00ce73e83e4d5c7"
   integrity sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==
 
-minimatch@11.0.6, minimatch@3.1.5:
-  version "11.0.6"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-11.0.6.tgz#99b1cdf4592b77aac7b12a83d2d76dfa78420016"
-  integrity sha512-6NZbDPQIRnsJFjJ9wbd5659OKaTHCqpPHdldE3WwArjxr5wLxHIwnx4eTGcPebpVBZZQbITvQQIx8K0VGXoT3Q==
+minimatch@11.0.7, minimatch@3.1.5:
+  version "11.0.7"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-11.0.7.tgz#696d78046604553717a82bb45b451b5319d63d34"
+  integrity sha512-Tnk+M9mPjqKDZlUd77eMSjPjhnlBIa1mABOwetMryIshUwi1YmOBdGFfQnHgn4Z8A66eLT8ENzJrxwYmKfqrZg==
   dependencies:
     "@isaacs/nonrecursive-glob-match" "^1.1.0"
     brace-expansion "^5.0.12"
