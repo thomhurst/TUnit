@@ -32,13 +32,18 @@ public sealed class EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerab
 
     public bool Equals(EquatableArray<T>? other)
     {
+        if (other is null)
+        {
+            return false;
+        }
+
         if (ReferenceEquals(this, other))
         {
             return true;
         }
 
         var left = _array ?? Array.Empty<T>();
-        var right = other?._array ?? Array.Empty<T>();
+        var right = other._array ?? Array.Empty<T>();
 
         if (left.Length != right.Length)
         {
@@ -89,7 +94,7 @@ public sealed class EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerab
     // A null reference compares equal to an empty array, as default(EquatableArray<T>) did as a struct.
     public static bool operator ==(EquatableArray<T>? left, EquatableArray<T>? right)
     {
-        return (left ?? Empty).Equals(right);
+        return (left ?? Empty).Equals(right ?? Empty);
     }
 
     public static bool operator !=(EquatableArray<T>? left, EquatableArray<T>? right)
