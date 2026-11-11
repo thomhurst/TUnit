@@ -1,9 +1,4 @@
 <Project>
-  <!-- The browser runs on CoreCLR: Mono cannot run the runtime-async code in TUnit's net11.0
-       assemblies (dotnet/runtime#109632). Set before the WebAssembly SDK defaults it to Mono. -->
-  <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser'">
-    <UseMonoRuntime>false</UseMonoRuntime>
-  </PropertyGroup>
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" Condition="'$(SmokePlatform)' != 'Browser'" />
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="'$(SmokePlatform)' == 'Browser'" />
   <Import Project="../../eng/TestProject.props" />
