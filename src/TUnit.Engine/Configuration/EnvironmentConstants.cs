@@ -32,6 +32,10 @@ internal static class EnvironmentConstants
     // Opts out of the thread pool starvation monitor (raises min worker threads when tests block).
     // Takes precedence over TUnitSettings.Execution.ThreadPoolTuningEnabled.
     public const string DisableThreadPoolTuning = "TUNIT_DISABLE_THREADPOOL_TUNING";
+    // Opts out of compiling the engine's startup methods on a background thread (JitWarmup).
+    public const string DisableJitWarmup = "TUNIT_DISABLE_JIT_WARMUP";
+    // Maintenance: path to write the startup methods this run compiled, for JitWarmupMethods.txt.
+    public const string JitWarmupRecord = "TUNIT_JIT_WARMUP_RECORD";
 
     // TUnit-specific: Display and diagnostics
     public const string DisableLogo = "TUNIT_DISABLE_LOGO";
