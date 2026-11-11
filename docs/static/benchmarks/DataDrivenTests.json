@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-10T20:21:13.647Z",
+  "timestamp": "2026-11-11T00:47:49.900Z",
   "category": "DataDrivenTests",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.16.0-preview.2, Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
@@ -9,51 +9,51 @@
   "results": [
     {
       "Method": "TUnit",
-      "Version": "1.81.16",
-      "Mean": "380.89 ms",
-      "Error": "8.413 ms",
-      "StdDev": "24.140 ms",
-      "Median": "375.69 ms"
+      "Version": "1.83.0",
+      "Mean": "376.60 ms",
+      "Error": "8.911 ms",
+      "StdDev": "26.134 ms",
+      "Median": "372.87 ms"
     },
     {
       "Method": "NUnit",
       "Version": "5.0.0",
-      "Mean": "425.77 ms",
-      "Error": "13.530 ms",
-      "StdDev": "39.681 ms",
-      "Median": "428.07 ms"
+      "Mean": "400.71 ms",
+      "Error": "10.741 ms",
+      "StdDev": "31.501 ms",
+      "Median": "395.45 ms"
     },
     {
       "Method": "MSTest",
       "Version": "4.5.2",
-      "Mean": "334.07 ms",
-      "Error": "8.834 ms",
-      "StdDev": "25.907 ms",
-      "Median": "335.00 ms"
+      "Mean": "292.19 ms",
+      "Error": "7.026 ms",
+      "StdDev": "20.607 ms",
+      "Median": "290.55 ms"
     },
     {
       "Method": "xUnit3",
       "Version": "4.0.3",
-      "Mean": "454.53 ms",
-      "Error": "11.086 ms",
-      "StdDev": "32.338 ms",
-      "Median": "444.39 ms"
+      "Mean": "426.69 ms",
+      "Error": "9.558 ms",
+      "StdDev": "27.880 ms",
+      "Median": "420.61 ms"
     },
     {
       "Method": "TUnit_AOT",
-      "Version": "1.81.16",
-      "Mean": "15.92 ms",
-      "Error": "0.312 ms",
-      "StdDev": "0.447 ms",
-      "Median": "15.98 ms"
+      "Version": "1.83.0",
+      "Mean": "15.96 ms",
+      "Error": "0.319 ms",
+      "StdDev": "0.889 ms",
+      "Median": "15.81 ms"
     },
     {
       "Method": "xUnit3_AOT",
       "Version": "4.0.3",
-      "Mean": "20.09 ms",
-      "Error": "0.162 ms",
-      "StdDev": "0.144 ms",
-      "Median": "20.09 ms"
+      "Mean": "18.54 ms",
+      "Error": "0.345 ms",
+      "StdDev": "0.355 ms",
+      "Median": "18.65 ms"
     }
   ]
 }
