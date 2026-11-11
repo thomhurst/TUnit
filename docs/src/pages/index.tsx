@@ -392,7 +392,8 @@ const scenarios = [
 ].filter(scenario => benchmarkCategories[scenario.key]);
 
 const runtimes = [
-  {label: 'JIT', lanes: [['TUnit', 'TUnit'], ['xUnit3', 'xUnit v3'], ['NUnit', 'NUnit'], ['MSTest', 'MSTest']]},
+  // The AOT lane is shown for reference only: the headline figure stays JIT against JIT.
+  {label: 'JIT', lanes: [['TUnit', 'TUnit'], ['xUnit3', 'xUnit v3'], ['NUnit', 'NUnit'], ['MSTest', 'MSTest']], aotLane: ['TUnit_AOT', 'TUnit (AOT)']},
   {label: 'Native AOT', lanes: [['TUnit_AOT', 'TUnit'], ['xUnit3_AOT', 'xUnit v3']]},
 ];
 
@@ -447,16 +448,20 @@ function Race(): JSX.Element | null {
   if (scenarios.length === 0) return null;
   const scenario = scenarios[scenarioIndex];
   const rows = benchmarkCategories[scenario.key];
-  const lanes = runtimes[runtimeIndex].lanes.flatMap(([method, label]) => {
+  const toLane = ([method, label]: string[]) => {
     const row = rows.find(candidate => candidate.Method === method);
     // A benchmark that failed to run is published without a usable mean; leave its lane out.
     const ms = row ? parseMs(row.Mean) : NaN;
     return row && Number.isFinite(ms) && ms > 0 ? [{method, label, version: row.Version, ms}] : [];
-  });
+  };
+  const runtime = runtimes[runtimeIndex];
+  const lanes = runtime.lanes.flatMap(toLane);
+  const aotLanes = runtime.aotLane ? toLane(runtime.aotLane) : [];
   const tunit = lanes[0];
   const rivals = lanes.slice(1);
   if (!tunit || !tunit.method.startsWith('TUnit') || rivals.length === 0) return null;
-  const slowest = Math.max(...lanes.map(lane => lane.ms));
+  const shownLanes = [...lanes, ...aotLanes];
+  const slowest = Math.max(...shownLanes.map(lane => lane.ms));
   const closest = rivals.reduce((best, lane) => lane.ms < best.ms ? lane : best);
   const ahead = closest.ms >= tunit.ms;
   const factor = ahead ? closest.ms / tunit.ms : tunit.ms / closest.ms;
@@ -497,14 +502,15 @@ function Race(): JSX.Element | null {
             <p>{scenario.description}.</p>
           </div>
           <ol className={`${styles.lanes} ${racing ? '' : styles.lanesReset}`}>
-            {lanes.map((lane, index) => (
-              <li key={lane.method} className={index === 0 ? styles.laneLead : undefined}
+            {shownLanes.map((lane, index) => (
+              <li key={lane.method} className={index === 0 || index >= lanes.length ? styles.laneLead : undefined}
                 style={{'--share': `${lane.ms / slowest * 100}%`, '--ms': `${Math.round(lane.ms)}ms`} as CSSProperties}>
                 <span className={styles.laneName}>{lane.label} <small>{lane.version}</small></span>
                 <span className={styles.laneTrack}><span className={styles.laneBar} /></span>
                 <span className={styles.laneValue}>
                   {formatMs(lane.ms)}
-                  {index > 0 && <small>{(lane.ms / tunit.ms).toFixed(1)}× TUnit</small>}
+                  {index > 0 && index < lanes.length && <small>{(lane.ms / tunit.ms).toFixed(1)}× TUnit</small>}
+                  {index >= lanes.length && <small>{(tunit.ms / lane.ms).toFixed(1)}× faster than JIT</small>}
                 </span>
               </li>
             ))}
