@@ -9,9 +9,9 @@ sidebar_position: 3
 > Full workflow: create → setup → invoke → verify — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-11-10** from the latest CI run.
+This benchmark was automatically generated on **2026-11-11** from the latest CI run.
 
-**Environment:** Ubuntu Latest • .NET SDK 10.0.403
+**Environment:** Ubuntu Latest • .NET SDK 11.0.100
 :::
 
 ## 📊 Results
@@ -20,12 +20,12 @@ Full workflow: create → setup → invoke → verify:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 1,574.4 ns | 23.79 ns | 22.26 ns | 6.31 KB |
-| Imposter | 789.3 ns | 7.60 ns | 5.93 ns | 3.47 KB |
-| Mockolate | 1,318.8 ns | 20.70 ns | 19.37 ns | 7.36 KB |
-| Moq | 245,822.9 ns | 1,888.85 ns | 1,766.83 ns | 36.16 KB |
-| NSubstitute | 13,990.3 ns | 135.37 ns | 126.62 ns | 26.72 KB |
-| FakeItEasy | 12,675.2 ns | 73.04 ns | 60.99 ns | 25.52 KB |
+| **TUnit.Mocks** | 1,014.7 ns | 8.94 ns | 7.93 ns | 6.31 KB |
+| Imposter | 492.2 ns | 9.62 ns | 10.29 ns | 3.45 KB |
+| Mockolate | 848.3 ns | 16.66 ns | 31.71 ns | 7.21 KB |
+| Moq | 121,527.5 ns | 1,846.72 ns | 1,727.42 ns | 36.61 KB |
+| NSubstitute | 9,571.4 ns | 145.46 ns | 128.95 ns | 26.51 KB |
+| FakeItEasy | 8,469.4 ns | 155.64 ns | 145.59 ns | 24.8 KB |
 
 ```mermaid
 %%{init: {
@@ -51,8 +51,8 @@ Full workflow: create → setup → invoke → verify:
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 294988
-  bar [1574.4, 789.3, 1318.8, 245822.9, 13990.3, 12675.2]
+  y-axis "Time (ns)" 0 --> 145833
+  bar [1014.7, 492.2, 848.3, 121527.5, 9571.4, 8469.4]
 ```
 
 ## 🎯 Key Insights
@@ -65,4 +65,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-11-10T02:26:34.876Z*
+*Last generated: 2026-11-11T02:20:11.802Z*
