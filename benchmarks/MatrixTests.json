@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-10T20:21:13.647Z",
+  "timestamp": "2026-11-11T00:47:49.900Z",
   "category": "MatrixTests",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.16.0-preview.2, Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
@@ -9,50 +9,50 @@
   "results": [
     {
       "Method": "TUnit",
-      "Version": "1.81.16",
-      "Mean": "499.3 ms",
-      "Error": "9.93 ms",
-      "StdDev": "19.37 ms",
-      "Median": "498.9 ms"
+      "Version": "1.83.0",
+      "Mean": "473.0 ms",
+      "Error": "9.32 ms",
+      "StdDev": "15.83 ms",
+      "Median": "469.7 ms"
     },
     {
       "Method": "NUnit",
       "Version": "5.0.0",
-      "Mean": "1,406.8 ms",
-      "Error": "27.85 ms",
-      "StdDev": "34.21 ms",
-      "Median": "1,406.5 ms"
+      "Mean": "1,395.9 ms",
+      "Error": "27.65 ms",
+      "StdDev": "31.85 ms",
+      "Median": "1,388.8 ms"
     },
     {
       "Method": "MSTest",
       "Version": "4.5.2",
-      "Mean": "1,299.9 ms",
-      "Error": "20.50 ms",
-      "StdDev": "19.18 ms",
-      "Median": "1,294.5 ms"
+      "Mean": "1,305.3 ms",
+      "Error": "25.09 ms",
+      "StdDev": "28.89 ms",
+      "Median": "1,293.2 ms"
     },
     {
       "Method": "xUnit3",
       "Version": "4.0.3",
-      "Mean": "681.8 ms",
-      "Error": "13.45 ms",
-      "StdDev": "22.83 ms",
-      "Median": "675.7 ms"
+      "Mean": "664.3 ms",
+      "Error": "13.13 ms",
+      "StdDev": "21.94 ms",
+      "Median": "657.7 ms"
     },
     {
       "Method": "TUnit_AOT",
-      "Version": "1.81.16",
-      "Mean": "161.0 ms",
-      "Error": "0.53 ms",
-      "StdDev": "0.49 ms",
-      "Median": "160.9 ms"
+      "Version": "1.83.0",
+      "Mean": "161.1 ms",
+      "Error": "0.35 ms",
+      "StdDev": "0.33 ms",
+      "Median": "161.0 ms"
     },
     {
       "Method": "xUnit3_AOT",
       "Version": "4.0.3",
-      "Mean": "267.1 ms",
-      "Error": "1.48 ms",
-      "StdDev": "1.38 ms",
+      "Mean": "266.9 ms",
+      "Error": "0.81 ms",
+      "StdDev": "0.72 ms",
       "Median": "267.0 ms"
     }
   ]
