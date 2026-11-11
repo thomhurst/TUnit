@@ -94,8 +94,8 @@
     <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.21.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.Zipkin" Version="1.21.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.20.2" />
-    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.20.2" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.21.0" />
     <PackageVersion Include="NUnit" Version="5.0.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.15.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.1" />
@@ -131,8 +131,8 @@
     <PackageVersion Include="Verify" Version="33.3.4" />
     <PackageVersion Include="Verify.NUnit" Version="33.3.4" />
     <PackageVersion Include="TUnit" Version="1.83.0" />
-    <PackageVersion Include="TUnit.AspNetCore" Version="1.83.0" />
-    <PackageVersion Include="TUnit.Core" Version="1.83.0" />
+    <PackageVersion Include="TUnit.AspNetCore" Version="1.83.8" />
+    <PackageVersion Include="TUnit.Core" Version="1.83.8" />
     <PackageVersion Include="TUnit.Engine" Version="1.83.0" />
     <PackageVersion Include="TUnit.Assertions" Version="1.83.0" />
     <PackageVersion Include="Verify.TUnit" Version="33.3.4" />
