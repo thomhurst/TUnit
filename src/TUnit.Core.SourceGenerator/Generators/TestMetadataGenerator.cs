@@ -51,12 +51,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var enabledProvider = context.AnalyzerConfigOptionsProvider
-            .Select((options, _) =>
-            {
-                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
-                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
-            });
+        var enabledProvider = GenerationEnabled.CreateProvider(context);
 
         var generationStates = new ConditionalWeakTable<Compilation, GenerationState>();
 

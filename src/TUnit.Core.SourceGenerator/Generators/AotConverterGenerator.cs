@@ -30,12 +30,7 @@ public class AotConverterGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var enabledProvider = context.AnalyzerConfigOptionsProvider
-            .Select((options, _) =>
-            {
-                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
-                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
-            });
+        var enabledProvider = GenerationEnabled.CreateProvider(context);
 
         var testMethods = context.SyntaxProvider
             .ForAttributeWithMetadataName(
