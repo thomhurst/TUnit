@@ -7,8 +7,8 @@ using TUnit.Core;
 
 namespace TUnit.Performance.Tests;
 
-[SimpleJob(RuntimeMoniker.Net80)]
-[SimpleJob(RuntimeMoniker.NativeAot80)]
+[SimpleJob(RuntimeMoniker.Net11_0)]
+[SimpleJob(RuntimeMoniker.NativeAot11_0)]
 [MemoryDiagnoser]
 [JsonExporterAttribute.Full]
 public class TestExecutionBenchmarks

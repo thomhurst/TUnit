@@ -107,6 +107,7 @@
 
   <!-- Build infrastructure -->
   <Folder Name="/Build/">
+    <Project Path="tools/TUnit.Pipeline/TUnit.Pipeline.csproj" />
   </Folder>
 
   <!-- Example/test projects needed by pipeline -->

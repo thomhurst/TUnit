@@ -12,7 +12,7 @@ The C#, F# and VB variants of the `TUnit` template support:
 
 The C# `TUnit` template additionally supports:
 
-- `--framework <tfm>` - Target framework. Default `net10.0`; also `net9.0`, `net8.0`, `net481`, `net48`, `net472` and `net462`.
+- `--framework <tfm>` - Target framework. Default `net10.0`; also `net11.0`, `net481`, `net48`, `net472` and `net462`.
 
 ```bash
 dotnet new TUnit -n MyTests --enable-dotcover

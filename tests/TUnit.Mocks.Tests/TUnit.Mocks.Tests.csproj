@@ -30,7 +30,7 @@
 
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net11.0'">
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
   </ItemGroup>
 

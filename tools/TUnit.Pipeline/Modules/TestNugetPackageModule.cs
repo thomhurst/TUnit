@@ -41,9 +41,11 @@ public abstract class AbstractTestNugetPackageModule : TestBaseModule
         {
             yield return "net10.0";
 
-            // See ModernFrameworks: only Linux covers net8.0.
+            // See ModernFrameworks: only Linux covers net11.0. net8.0 is the oldest packaged
+            // modern target, so it is covered there too.
             if (IsLinux)
             {
+                yield return "net11.0";
                 yield return "net8.0";
             }
 

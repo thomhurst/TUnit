@@ -31,17 +31,20 @@ public abstract class AttributePolyfillGenerator : IIncrementalGenerator
         var hintName = HintName;
         var source = Source;
 
-        var allowedProvider = context.AnalyzerConfigOptionsProvider
-            .Select((options, _) => IsAllowed(options.GlobalOptions, metadataName));
+        // One step yielding the source to add, or null. Separate bool steps combined into a
+        // (bool, bool) tuple made the runtime JIT-compile its own copy of Roslyn's generic node code
+        // for those value-type shapes.
+        var sourceProvider = context.CompilationProvider
+            .Combine(context.AnalyzerConfigOptionsProvider)
+            .Select((data, _) => IsAllowed(data.Right.GlobalOptions, metadataName) && !HasAccessibleAttribute(data.Left, metadataName)
+                ? source
+                : null);
 
-        var attributeMissingProvider = context.CompilationProvider
-            .Select((compilation, _) => !HasAccessibleAttribute(compilation, metadataName));
-
-        context.RegisterSourceOutput(attributeMissingProvider.Combine(allowedProvider), (spc, data) =>
+        context.RegisterSourceOutput(sourceProvider, (spc, polyfillSource) =>
         {
-            if (data.Left && data.Right)
+            if (polyfillSource is not null)
             {
-                spc.AddSource(hintName, SourceText.From(source, System.Text.Encoding.UTF8));
+                spc.AddSource(hintName, SourceText.From(polyfillSource, System.Text.Encoding.UTF8));
             }
         });
     }

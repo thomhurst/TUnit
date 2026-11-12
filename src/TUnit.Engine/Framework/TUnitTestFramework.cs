@@ -45,10 +45,8 @@ internal sealed class TUnitTestFramework : ITestFramework, IDataProducer
         return Task.FromResult(new CreateTestSessionResult { IsSuccess = true });
     }
 
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
     [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "Reflection mode is not used in AOT scenarios")]
-    #endif
     public async Task ExecuteRequestAsync(ExecuteRequestContext context)
     {
         TestSessionContext? sessionContext = null;

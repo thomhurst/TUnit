@@ -18,8 +18,6 @@ public static partial class CSharpCodeFixVerifier<TAnalyzer, TCodeFix>
     {
 #if NET472
         return ReferenceAssemblies.NetFramework.Net472.Default;
-#elif NET8_0
-        return ReferenceAssemblies.Net.Net80;
 #elif NET9_0 || NET10_0_OR_GREATER
         return ReferenceAssemblies.Net.Net90;
 #else

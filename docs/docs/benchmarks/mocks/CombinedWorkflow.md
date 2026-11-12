@@ -9,9 +9,9 @@ sidebar_position: 3
 > Full workflow: create → setup → invoke → verify — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-11-08** from the latest CI run.
+This benchmark was automatically generated on **2026-11-12** from the latest CI run.
 
-**Environment:** Ubuntu Latest • .NET SDK 10.0.403
+**Environment:** Ubuntu Latest • .NET SDK 11.0.100
 :::
 
 ## 📊 Results
@@ -20,12 +20,12 @@ Full workflow: create → setup → invoke → verify:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 1,928.5 ns | 16.23 ns | 15.18 ns | 6.31 KB |
-| Imposter | 909.1 ns | 5.67 ns | 5.31 ns | 3.47 KB |
-| Mockolate | 1,660.2 ns | 16.67 ns | 13.92 ns | 7.36 KB |
-| Moq | 406,997.5 ns | 2,949.38 ns | 2,758.85 ns | 36.35 KB |
-| NSubstitute | 18,940.9 ns | 258.78 ns | 229.40 ns | 26.72 KB |
-| FakeItEasy | 18,132.8 ns | 156.13 ns | 130.38 ns | 25.52 KB |
+| **TUnit.Mocks** | 1,640.6 ns | 30.59 ns | 27.12 ns | 6.31 KB |
+| Imposter | 807.1 ns | 14.07 ns | 13.16 ns | 3.45 KB |
+| Mockolate | 1,468.7 ns | 28.69 ns | 31.89 ns | 7.21 KB |
+| Moq | 266,507.0 ns | 5,270.77 ns | 6,665.84 ns | 36.31 KB |
+| NSubstitute | 14,869.2 ns | 295.60 ns | 328.56 ns | 26.51 KB |
+| FakeItEasy | 12,944.3 ns | 150.39 ns | 140.67 ns | 24.8 KB |
 
 ```mermaid
 %%{init: {
@@ -51,8 +51,8 @@ Full workflow: create → setup → invoke → verify:
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 488397
-  bar [1928.5, 909.1, 1660.2, 406997.5, 18940.9, 18132.8]
+  y-axis "Time (ns)" 0 --> 319809
+  bar [1640.6, 807.1, 1468.7, 266507, 14869.2, 12944.3]
 ```
 
 ## 🎯 Key Insights
@@ -65,4 +65,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-11-08T02:26:36.812Z*
+*Last generated: 2026-11-12T02:21:42.541Z*

@@ -117,29 +117,10 @@ import BenchmarkChart from '@site/src/components/BenchmarkChart';
 
 ---
 
-#### 3. BenchmarkHighlight Component (Homepage)
-**Files:**
-- `docs/src/components/BenchmarkHighlight/index.tsx`
-- `docs/src/components/BenchmarkHighlight/styles.module.css`
-- Updated: `docs/src/pages/index.tsx`
+#### 3. Homepage race
+**File:** `docs/src/pages/index.tsx`
 
-**Features:**
-- Prominent 4-card grid showing speedup factors
-- Auto-loads real benchmark data from JSON
-- Fallback data for initial rendering
-- Feature checkmarks (source-generated, parallel, AOT)
-- Call-to-action buttons to detailed benchmarks
-- Methodology link
-- Gradient backgrounds and animations
-- Fully responsive
-
-**Display:**
-```
-⚡ 2.6x - Faster than xUnit
-🚀 4.5x - Faster than NUnit
-⚡ 5.1x - Faster than MSTest
-🏆 10x - Faster with Native AOT
-```
+The homepage reads `docs/static/benchmarks/latest.json` at build time and replays the measured run times as a race, with a JIT view (plus a TUnit Native AOT lane for reference) and a Native AOT view.
 
 ---
 
@@ -236,10 +217,7 @@ TUnit/
 │   │
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── BenchmarkChart/
-│   │   │   │   ├── index.tsx            [NEW]
-│   │   │   │   └── styles.module.css    [NEW]
-│   │   │   └── BenchmarkHighlight/
+│   │   │   └── BenchmarkChart/
 │   │   │       ├── index.tsx            [NEW]
 │   │   │       └── styles.module.css    [NEW]
 │   │   └── pages/

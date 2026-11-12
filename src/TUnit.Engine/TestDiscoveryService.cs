@@ -282,9 +282,7 @@ internal sealed class TestDiscoveryService : IDataProducer
     // It currently has no callers; if it is ever wired into an execution path, tests must be
     // registered with isForExecution: true before they run, or property injection and shared
     // fixture disposal will silently break.
-    #if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Generic test instantiation requires MakeGenericType")]
-    #endif
     public async IAsyncEnumerable<AbstractExecutableTest> DiscoverTestsFullyStreamingAsync(
         string testSessionId,
         ITestExecutionFilter? filter,

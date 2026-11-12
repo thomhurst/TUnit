@@ -23,6 +23,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || (github.event_name == 'push' && github.ref) || github.run_id }}
   cancel-in-progress: true
 
+# Every job that builds the pipeline restores this version. Empty on normal CI:
+# Directory.Packages.props keeps the release default.
+env:
+  ModularPipelinesVersion: ${{ inputs.modular-pipelines-version }}
+
 jobs:
   modularpipeline:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
@@ -37,9 +42,6 @@ jobs:
       actions: read
       contents: write
       id-token: write
-    env:
-      # Empty on normal CI: Directory.Packages.props keeps the release default.
-      ModularPipelinesVersion: ${{ inputs.modular-pipelines-version }}
 
     steps:
       - name: Validate pipeline package override
@@ -99,6 +101,11 @@ jobs:
       # then spent up to 3 minutes saving an entry that was evicted within the hour.
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+            11.0.x
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
@@ -325,6 +332,10 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       # TUnit.Mocks.Aot.Tests sets TreatWarningsAsErrors, so any trim/AOT warning ILC reports
       # for everyday mock usage fails its publish (#7027). Every framework still runs after an
@@ -333,7 +344,7 @@ jobs:
         shell: bash
         run: |
           failed=()
-          for framework in net8.0 net9.0 net10.0; do
+          for framework in net10.0 net11.0; do
             for project in TUnit.Mocks.Tests TUnit.Mocks.Aot.Tests; do
               echo "::group::$project ($framework)"
               if dotnet publish "tests/$project/$project.csproj" -c Release --use-current-runtime \
@@ -382,6 +393,10 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       - name: Enable Long Paths
         run: |
@@ -421,7 +436,7 @@ jobs:
             exit 1
           fi
           dotnet build libraries.slnf -c Release
-
+          dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
@@ -458,6 +473,10 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       # Packing reads the Roslyn analyzer/generator variants from their own bin folders, so build
       # every library project, not just the packed ones.

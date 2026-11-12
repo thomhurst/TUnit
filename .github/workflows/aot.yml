@@ -25,9 +25,18 @@ on:
         description: 'Exact dump artifact ID (optional; disambiguates artifacts from rerun attempts)'
         required: false
         type: string
+      modular-pipelines-version:
+        description: Optional ModularPipelines version for branch validation (ignored on main)
+        required: false
+        type: string
 
 permissions:
   contents: read
+
+# Empty on normal CI: Directory.Packages.props keeps the release default. Ignored on main, where
+# UploadToNuGetModule treats a passing run as clearance to publish.
+env:
+  ModularPipelinesVersion: ${{ github.ref != 'refs/heads/main' && inputs.modular-pipelines-version || '' }}
 
 # Push runs are grouped by commit, not by ref: UploadToNuGetModule requires a passing run on the
 # exact commit it publishes, so a newer push to main must not cancel the run for an older one.
@@ -72,6 +81,10 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
@@ -127,7 +140,7 @@ jobs:
           fi
           dotnet build libraries.slnf -c Release
           dotnet build tests/TUnit.Engine.Tests/TUnit.Engine.Tests.csproj -c Release
-
+          dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
@@ -181,6 +194,10 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
@@ -192,7 +209,7 @@ jobs:
         shell: bash
         run: |
           dotnet build tests/TUnit.Engine.Tests/TUnit.Engine.Tests.csproj -c Release
-
+          dotnet build tools/TUnit.Pipeline/TUnit.Pipeline.csproj -c Release
 
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
@@ -224,7 +241,7 @@ jobs:
     steps:
       - uses: actions/setup-dotnet@v6.1.0
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '11.0.x'
 
       # download-artifact filters out earlier attempts, even when given an exact ID.
       - name: Download exact captured Windows engine dump

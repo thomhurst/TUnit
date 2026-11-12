@@ -13,8 +13,6 @@ The migration targets ModularPipelines 4.0.0. Until that package set is publishe
     -EvidenceDirectory C:/path/to/migration-evidence
 ```
 
-The matching `TUnit v4 migration` workflow checks out a pinned revision of this branch and supplies local packages. Keep the consumer upgrade unmerged until ModularPipelines 4.0.0 is available; ordinary TUnit CI will then restore the default version without a local feed. Only the pipeline projects move to net11.0; the applications and test projects retain their target frameworks.
+The matching `TUnit v4 migration` workflow checks out a pinned revision of this branch and supplies local packages. Keep the consumer upgrade unmerged until ModularPipelines 4.0.0 is available; ordinary TUnit CI will then restore the default version without a local feed.
 
 Migration findings and validation evidence are tracked in [ModularPipelines #7321](https://github.com/thomhurst/ModularPipelines/issues/7321). Findings: [MP0013 assembly-registration false positives](https://github.com/thomhurst/ModularPipelines/issues/7352) and [the missing FileSystem import in the guide](https://github.com/thomhurst/ModularPipelines/issues/7353).
-
-The repository root stays on stable SDK 10.0.403. Each pipeline project has its own .NET 11 SDK pin. Build the pipeline from its project directory; passing --project from the root does not select the nested SDK. The root solutions exclude the pipeline; the shared execute-pipeline action builds it separately, then launches its DLL from the repository root so product commands keep using SDK 10.

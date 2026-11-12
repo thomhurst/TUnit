@@ -37,7 +37,7 @@ An explicit `[ParallelLimiter<T>]` takes precedence over a limiter set through `
 
 ## Execution Stage Control
 
-> **Note**: This feature is available on .NET 8.0+ only due to default interface member requirements.
+> **Note**: This feature is available on .NET 10.0+ only due to default interface member requirements.
 
 For `ITestStartEventReceiver` and `ITestEndEventReceiver`, you can control when your event receivers execute relative to instance-level hooks (`[Before(Test)]` and `[After(Test)]`) by setting the `Stage` property.
 

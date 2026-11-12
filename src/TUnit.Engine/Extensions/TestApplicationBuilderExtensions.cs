@@ -20,6 +20,11 @@ public static class TestApplicationBuilderExtensions
 
     public static void AddTUnit(this ITestApplicationBuilder testApplicationBuilder, HtmlCliMode htmlCliMode)
     {
+#if NET
+        // First engine code to run: start compiling the rest while the platform bootstraps.
+        Helpers.JitWarmup.Start();
+#endif
+
         TUnitExtension extension = new();
 
         var githubReporter = new GitHubReporter(extension);

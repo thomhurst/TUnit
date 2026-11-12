@@ -2,17 +2,17 @@
 #pragma warning disable
 #nullable enable
 
-namespace Microsoft.Extensions.Configuration
+namespace External.Configuration
 {
-    public sealed class IConfigurationMock : global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration>, global::Microsoft.Extensions.Configuration.IConfiguration
+    public sealed class IConfigurationMock : global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration>, global::External.Configuration.IConfiguration
     {
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        internal IConfigurationMock(global::Microsoft.Extensions.Configuration.IConfiguration mockObject, global::TUnit.Mocks.MockEngine<global::Microsoft.Extensions.Configuration.IConfiguration> engine)
+        internal IConfigurationMock(global::External.Configuration.IConfiguration mockObject, global::TUnit.Mocks.MockEngine<global::External.Configuration.IConfiguration> engine)
             : base(mockObject, engine) { }
 
-        string? global::Microsoft.Extensions.Configuration.IConfiguration.GetSectionValue(string key) => Object.GetSectionValue(key);
+        string? global::External.Configuration.IConfiguration.GetSectionValue(string key) => Object.GetSectionValue(key);
 
-        string? global::Microsoft.Extensions.Configuration.IConfiguration.this[string key] { get => Object[key]; set => Object[key] = value; }
+        string? global::External.Configuration.IConfiguration.this[string key] { get => Object[key]; set => Object[key] = value; }
     }
 }
 
@@ -23,16 +23,16 @@ namespace Microsoft.Extensions.Configuration
 #pragma warning disable
 #nullable enable
 
-namespace Microsoft.Extensions.Configuration
+namespace External.Configuration
 {
-    file sealed class IConfigurationMockImpl : global::Microsoft.Extensions.Configuration.IConfiguration, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
+    file sealed class IConfigurationMockImpl : global::External.Configuration.IConfiguration, global::TUnit.Mocks.IRaisable, global::TUnit.Mocks.IMockObject
     {
-        private readonly global::TUnit.Mocks.MockEngine<global::Microsoft.Extensions.Configuration.IConfiguration> _engine;
+        private readonly global::TUnit.Mocks.MockEngine<global::External.Configuration.IConfiguration> _engine;
 
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
         global::TUnit.Mocks.IMock? global::TUnit.Mocks.IMockObject.MockWrapper { get; set; }
 
-        internal IConfigurationMockImpl(global::TUnit.Mocks.MockEngine<global::Microsoft.Extensions.Configuration.IConfiguration> engine)
+        internal IConfigurationMockImpl(global::TUnit.Mocks.MockEngine<global::External.Configuration.IConfiguration> engine)
         {
             _engine = engine;
         }
@@ -60,22 +60,22 @@ namespace Microsoft.Extensions.Configuration
         [global::System.Runtime.CompilerServices.ModuleInitializer]
         internal static void Register()
         {
-            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::Microsoft.Extensions.Configuration.IConfiguration>(Create);
+            global::TUnit.Mocks.MockRegistry.RegisterFactory<global::External.Configuration.IConfiguration>(Create);
         }
 
-        internal static global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> CreateAutoMock(global::TUnit.Mocks.MockBehavior behavior)
+        internal static global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> CreateAutoMock(global::TUnit.Mocks.MockBehavior behavior)
         {
-            var engine = new global::TUnit.Mocks.MockEngine<global::Microsoft.Extensions.Configuration.IConfiguration>(behavior);
+            var engine = new global::TUnit.Mocks.MockEngine<global::External.Configuration.IConfiguration>(behavior);
             var impl = new IConfigurationMockImpl(engine);
             engine.Raisable = impl;
             var mock = new IConfigurationMock(impl, engine);
             return mock;
         }
 
-        internal static global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
+        internal static global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> Create(global::TUnit.Mocks.MockBehavior behavior, object[] constructorArgs)
         {
-            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::Microsoft.Extensions.Configuration.IConfiguration' does not support constructor arguments, but {constructorArgs.Length} were provided.");
-            var engine = new global::TUnit.Mocks.MockEngine<global::Microsoft.Extensions.Configuration.IConfiguration>(behavior);
+            if (constructorArgs.Length > 0) throw new global::System.ArgumentException($"Interface mock 'global::External.Configuration.IConfiguration' does not support constructor arguments, but {constructorArgs.Length} were provided.");
+            var engine = new global::TUnit.Mocks.MockEngine<global::External.Configuration.IConfiguration>(behavior);
             var impl = new IConfigurationMockImpl(engine);
             engine.Raisable = impl;
             var mock = new IConfigurationMock(impl, engine);
@@ -93,28 +93,28 @@ namespace Microsoft.Extensions.Configuration
 
 namespace TUnit.Mocks.Generated
 {
-    public static class Microsoft_Extensions_Configuration_IConfiguration_MockMemberExtensions
+    public static class External_Configuration_IConfiguration_MockMemberExtensions
     {
-        public static Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall GetSectionValue(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock, global::TUnit.Mocks.Arguments.Arg<string> key)
+        public static External_Configuration_IConfiguration_GetSectionValue_M0_MockCall GetSectionValue(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock, global::TUnit.Mocks.Arguments.Arg<string> key)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher };
-            return new Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetSectionValue", matchers);
+            return new External_Configuration_IConfiguration_GetSectionValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetSectionValue", matchers);
         }
 
-        public static Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall GetSectionValue(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock, global::System.Func<string, bool>? key)
+        public static External_Configuration_IConfiguration_GetSectionValue_M0_MockCall GetSectionValue(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock, global::System.Func<string, bool>? key)
         {
             global::TUnit.Mocks.Arguments.Arg<string> __fa_key = key is null ? global::TUnit.Mocks.Arguments.Arg.Is<string>(default(string)!) : (global::TUnit.Mocks.Arguments.Arg<string>)key;
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { __fa_key.Matcher };
-            return new Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetSectionValue", matchers);
+            return new External_Configuration_IConfiguration_GetSectionValue_M0_MockCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 0, "GetSectionValue", matchers);
         }
 
-        public static global::TUnit.Mocks.MockMethodCall<string?> Item(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock, global::TUnit.Mocks.Arguments.Arg<string> key)
+        public static global::TUnit.Mocks.MockMethodCall<string?> Item(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock, global::TUnit.Mocks.Arguments.Arg<string> key)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher };
             return new global::TUnit.Mocks.MockMethodCall<string?>(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 1, "get_Item", matchers);
         }
 
-        public static global::TUnit.Mocks.VoidMockMethodCall SetItem(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock, global::TUnit.Mocks.Arguments.Arg<string> key, global::TUnit.Mocks.Arguments.Arg<string?> value)
+        public static global::TUnit.Mocks.VoidMockMethodCall SetItem(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock, global::TUnit.Mocks.Arguments.Arg<string> key, global::TUnit.Mocks.Arguments.Arg<string?> value)
         {
             var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] { key.Matcher, value.Matcher };
             return new global::TUnit.Mocks.VoidMockMethodCall(global::TUnit.Mocks.MockRegistry.GetEngine(mock), 2, "set_Item", matchers);
@@ -122,38 +122,38 @@ namespace TUnit.Mocks.Generated
 
         #if NET9_0_OR_GREATER
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-        public static void ClearCalls(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock)
+        public static void ClearCalls(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock)
             => global::TUnit.Mocks.Mock.ClearCalls(mock);
 
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-        public static void Reset(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock)
+        public static void Reset(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock)
             => global::TUnit.Mocks.Mock.Reset(mock);
 
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-        public static void VerifyAll(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock)
+        public static void VerifyAll(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock)
             => global::TUnit.Mocks.Mock.VerifyAll(mock);
 
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-        public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock)
+        public static void VerifyNoOtherCalls(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock)
             => global::TUnit.Mocks.Mock.VerifyNoOtherCalls(mock);
 
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-        public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock)
+        public static void SetupAllProperties(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock)
             => global::TUnit.Mocks.Mock.SetupAllProperties(mock);
 
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-        public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock)
+        public static global::TUnit.Mocks.Diagnostics.MockDiagnostics GetDiagnostics(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock)
             => global::TUnit.Mocks.Mock.GetDiagnostics(mock);
 
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-        public static void SetState(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock, string? stateName)
+        public static void SetState(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock, string? stateName)
             => global::TUnit.Mocks.Mock.SetState(mock, stateName);
 
         [global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]
-        public static void InState(this global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration>> configure)
+        public static void InState(this global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock, string stateName, global::System.Action<global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration>> configure)
             => global::TUnit.Mocks.Mock.InState(mock, stateName, configure);
 
-        extension(global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration> mock)
+        extension(global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration> mock)
         {
             public global::System.Collections.Generic.IReadOnlyList<global::TUnit.Mocks.Verification.CallRecord> Invocations => global::TUnit.Mocks.Mock.Invocations(mock);
 
@@ -169,27 +169,27 @@ namespace TUnit.Mocks.Generated
     }
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-    public sealed class Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall : global::TUnit.Mocks.MockMethodCallBase<Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall, string?>
+    public sealed class External_Configuration_IConfiguration_GetSectionValue_M0_MockCall : global::TUnit.Mocks.MockMethodCallBase<External_Configuration_IConfiguration_GetSectionValue_M0_MockCall, string?>
     {
-        internal Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
+        internal External_Configuration_IConfiguration_GetSectionValue_M0_MockCall(global::TUnit.Mocks.IMockEngineAccess engine, int memberId, string memberName, global::TUnit.Mocks.Arguments.IArgumentMatcher[] matchers)
             : base(engine, memberId, memberName, matchers, default) { }
 
         /// <summary>Configure a typed computed return value using the actual method parameters.</summary>
-        public Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall Returns(global::System.Func<string, string?> factory)
+        public External_Configuration_IConfiguration_GetSectionValue_M0_MockCall Returns(global::System.Func<string, string?> factory)
         {
             EnsureSetup().Returns(args => factory((string)args[0]!));
             return this;
         }
 
         /// <summary>Execute a typed callback using the actual method parameters.</summary>
-        public Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall Callback(global::System.Action<string> callback)
+        public External_Configuration_IConfiguration_GetSectionValue_M0_MockCall Callback(global::System.Action<string> callback)
         {
             EnsureSetup().Callback(callback);
             return this;
         }
 
         /// <summary>Configure a typed computed exception using the actual method parameters.</summary>
-        public Microsoft_Extensions_Configuration_IConfiguration_GetSectionValue_M0_MockCall Throws(global::System.Func<string, global::System.Exception> exceptionFactory)
+        public External_Configuration_IConfiguration_GetSectionValue_M0_MockCall Throws(global::System.Func<string, global::System.Exception> exceptionFactory)
         {
             EnsureSetup().Throws(args => exceptionFactory((string)args[0]!));
             return this;
@@ -206,18 +206,18 @@ namespace TUnit.Mocks.Generated
 
 namespace TUnit.Mocks
 {
-    public static class Microsoft_Extensions_Configuration_IConfiguration_MockStaticExtension
+    public static class External_Configuration_IConfiguration_MockStaticExtension
     {
-        extension(global::Microsoft.Extensions.Configuration.IConfiguration _)
+        extension(global::External.Configuration.IConfiguration _)
         {
-            public static global::Microsoft.Extensions.Configuration.IConfigurationMock Mock()
+            public static global::External.Configuration.IConfigurationMock Mock()
             {
-                return (global::Microsoft.Extensions.Configuration.IConfigurationMock)global::Microsoft.Extensions.Configuration.IConfigurationMockFactory.CreateAutoMock(global::TUnit.Mocks.Mock.DefaultBehavior);
+                return (global::External.Configuration.IConfigurationMock)global::External.Configuration.IConfigurationMockFactory.CreateAutoMock(global::TUnit.Mocks.Mock.DefaultBehavior);
             }
 
-            public static global::Microsoft.Extensions.Configuration.IConfigurationMock Mock(global::TUnit.Mocks.MockBehavior behavior)
+            public static global::External.Configuration.IConfigurationMock Mock(global::TUnit.Mocks.MockBehavior behavior)
             {
-                return (global::Microsoft.Extensions.Configuration.IConfigurationMock)global::Microsoft.Extensions.Configuration.IConfigurationMockFactory.CreateAutoMock(behavior);
+                return (global::External.Configuration.IConfigurationMock)global::External.Configuration.IConfigurationMockFactory.CreateAutoMock(behavior);
             }
         }
     }

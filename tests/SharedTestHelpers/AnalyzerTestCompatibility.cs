@@ -66,18 +66,15 @@ internal static class AnalyzerTestCompatibility
         return path;
     }
 
-    public static string GetSystemTextJson9DllPath()
-    {
-        const string fileName = "System.Text.Json.9.0.dll";
-        var path = Path.Combine(AppContext.BaseDirectory, fileName);
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException(
-                $"System.Text.Json 9.0 reference not found at '{path}'. " +
-                "Run 'dotnet build' before running analyzer tests.",
-                path);
-        }
-
-        return path;
-    }
+    /// <summary>
+    /// Reference assemblies for tests that reference TUnit's runtime-loaded builds
+    /// (<c>typeof(...).Assembly</c>): at least as new as the newest target framework those builds
+    /// compile for, so they never reference a higher System.Runtime than the compilation (CS1705).
+    /// </summary>
+    public static Microsoft.CodeAnalysis.Testing.ReferenceAssemblies RuntimeReferenceAssemblies { get; } =
+#if NET11_0_OR_GREATER
+        new("net11.0", new Microsoft.CodeAnalysis.Testing.PackageIdentity("Microsoft.NETCore.App.Ref", "11.0.0"), Path.Combine("ref", "net11.0"));
+#else
+        new("net10.0", new Microsoft.CodeAnalysis.Testing.PackageIdentity("Microsoft.NETCore.App.Ref", "10.0.0"), Path.Combine("ref", "net10.0"));
+#endif
 }

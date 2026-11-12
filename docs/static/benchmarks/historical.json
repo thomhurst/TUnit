@@ -1,25 +1,5 @@
 [
   {
-    "date": "2026-04-05",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-04-05",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-04-06",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-04-07",
-    "environment": "Ubuntu"
-  },
-  {
-    "date": "2026-04-08",
-    "environment": "Ubuntu"
-  },
-  {
     "date": "2026-04-09",
     "environment": "Ubuntu"
   },
@@ -357,6 +337,26 @@
   },
   {
     "date": "2026-11-08",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-11-10",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-11-10",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-11-11",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-11-11",
+    "environment": "Ubuntu"
+  },
+  {
+    "date": "2026-11-11",
     "environment": "Ubuntu"
   }
 ]

@@ -7,9 +7,9 @@ sidebar_position: 4
 # Mock Library Benchmarks
 
 :::info Last Updated
-These benchmarks were automatically generated on **2026-11-08** from the latest CI run.
+These benchmarks were automatically generated on **2026-11-12** from the latest CI run.
 
-**Environment:** Ubuntu Latest • .NET SDK 10.0.403
+**Environment:** Ubuntu Latest • .NET SDK 11.0.100
 :::
 
 ## 🚀 Overview
@@ -49,9 +49,9 @@ Each benchmark category tests a specific aspect of mocking library usage:
 
 ## 🔧 Methodology
 
-- **Tool**: BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.5 LTS (Noble Numbat)
+- **Tool**: BenchmarkDotNet v0.16.0-preview.2, Linux Ubuntu 26.04.1 LTS (Resolute Raccoon)
 - **OS**: Ubuntu Latest (GitHub Actions)
-- **Runtime**: .NET 10.0.14 (10.0.14, 10.0.1426.52326), X64 RyuJIT x86-64-v4
+- **Runtime**: .NET 11.0.0 (11.0.0, 11.0.26.53018), X64 RyuJIT x86-64-v3
 - **Statistical Rigor**: Multiple iterations with warm-up and outlier detection
 - **Memory**: Allocation tracking enabled via `[MemoryDiagnoser]`
 
@@ -76,4 +76,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
 
-*Last generated: 2026-11-08T02:26:36.812Z*
+*Last generated: 2026-11-12T02:21:42.541Z*

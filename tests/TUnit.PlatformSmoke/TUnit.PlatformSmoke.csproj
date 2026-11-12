@@ -29,19 +29,16 @@
 
   <PropertyGroup Condition="'$(SmokePlatform)' == 'Android'">
     <AndroidUseInstrumentation>true</AndroidUseInstrumentation>
+    <!-- Matches the [Instrumentation] name in AndroidInstrumentation.cs. `dotnet test` reports
+         that the instrument option is required when the SDK does not resolve it from the manifest. -->
+    <AndroidInstrumentation>net.dot.TUnitSmoke.TestInstrumentation</AndroidInstrumentation>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser' or '$(SmokePlatform)' == 'WASI'">
-    <RuntimeFrameworkVersion>11.0.0-rc.1.26425.128</RuntimeFrameworkVersion>
-    <UseMonoRuntime>true</UseMonoRuntime>
+  <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser'">
     <SelfContained>true</SelfContained>
     <PublishTrimmed>false</PublishTrimmed>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(SmokePlatform)' == 'WASI'">
-    <RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
-    <DefineConstants>$(DefineConstants);WASI</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(SmokePlatform)' == 'Browser'">
     <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>

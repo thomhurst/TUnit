@@ -13,7 +13,7 @@ public class BenchmarkConfig : ManualConfig
     public BenchmarkConfig()
     {
         var job = Job.Default
-            .WithRuntime(CoreRuntime.Core10_0);
+            .WithRuntime(CoreRuntime.Core11_0);
 
         AddJob(job);
         AddLogger(ConsoleLogger.Default);

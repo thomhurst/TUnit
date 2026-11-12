@@ -21,8 +21,6 @@ public class SmokeTest
         await Assert.That(OperatingSystem.IsTvOS()).IsTrue();
 #elif MACCATALYST
         await Assert.That(OperatingSystem.IsMacCatalyst()).IsTrue();
-#elif WASI
-        await Assert.That(OperatingSystem.IsWasi()).IsTrue();
 #endif
 #if IOS || TVOS || MACCATALYST
         await Assert.That(System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture)

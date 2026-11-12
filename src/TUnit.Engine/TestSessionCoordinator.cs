@@ -199,10 +199,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     /// as their own failed child via the standard data-generation-error path.) The returned list pairs each
     /// successfully-expanded placeholder with its children so its final result can be reported post-run.
     /// </summary>
-#if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflection mode is not used in AOT/trimmed scenarios")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Reflection mode is not used in AOT scenarios")]
-#endif
     private async Task<List<(AbstractExecutableTest Placeholder, IReadOnlyList<AbstractExecutableTest> Children)>> ExpandDeferredPlaceholdersAsync(
         List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
@@ -315,10 +313,8 @@ internal sealed class TestSessionCoordinator : ITestExecutor, IDisposable, IAsyn
     }
 
 
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Test scheduler uses mode-specific services that handle reflection properly")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Test scheduler uses mode-specific services that handle dynamic code properly")]
-    #endif
     private async Task ExecuteTestsCore(List<AbstractExecutableTest> testList, CancellationToken cancellationToken)
     {
         // Combine cancellation tokens from multiple sources:

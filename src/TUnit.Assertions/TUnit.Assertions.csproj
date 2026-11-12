@@ -49,6 +49,9 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <!-- Referenced directly: net8.0/net9.0 consumers use these netstandard2.0 assets, and there
+             System.Text.Json no longer brings this package in transitively (#7739). -->
+        <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
         <PackageReference Include="System.Collections.Immutable" />
         <PackageReference Include="System.Text.Json" />
     </ItemGroup>

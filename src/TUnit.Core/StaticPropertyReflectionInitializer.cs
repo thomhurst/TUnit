@@ -9,9 +9,7 @@ namespace TUnit.Core;
 /// <summary>
 /// Handles initialization of static properties with data sources in reflection mode
 /// </summary>
-#if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Reflection mode requires dynamic access for static property initialization")]
-#endif
 public static class StaticPropertyReflectionInitializer
 {
     // A static property is shared by every session in the process. Keep one value until
@@ -34,9 +32,7 @@ public static class StaticPropertyReflectionInitializer
         private TestBuilderContext? _context;
         private Exception? _error;
 
-#if NET8_0_OR_GREATER
         [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
-#endif
         public async Task AcquireAsync(Type type, PropertyInfo[] properties, TestBuilderContext sessionContext,
             SessionInitialization session)
         {
@@ -134,9 +130,7 @@ public static class StaticPropertyReflectionInitializer
     /// <summary>
     /// Initializes static properties with data sources for all loaded types
     /// </summary>
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
-#endif
     public static async Task InitializeAllStaticPropertiesAsync()
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies()
@@ -165,9 +159,7 @@ public static class StaticPropertyReflectionInitializer
     /// <summary>
     /// Initializes static properties with data sources for a specific type
     /// </summary>
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
-#endif
     public static async Task InitializeStaticPropertiesForType(Type type)
     {
         var context = TestSessionContext.GlobalStaticPropertyContext;
@@ -184,9 +176,7 @@ public static class StaticPropertyReflectionInitializer
         await shared.AcquireAsync(type, staticProperties, context, initializedTypes).ConfigureAwait(false);
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
-#endif
     private static async Task InitializeTypeAsync(Type type, PropertyInfo[] staticProperties, TestBuilderContext context)
     {
         foreach (var property in staticProperties)
@@ -229,9 +219,7 @@ public static class StaticPropertyReflectionInitializer
         return null;
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Data source initialization may require dynamic code generation")]
-#endif
     private static async Task InitializeStaticProperty(PropertyInfo property, IDataSourceAttribute dataSourceAttr, TestBuilderContext context)
     {
         // Create metadata for the data source
