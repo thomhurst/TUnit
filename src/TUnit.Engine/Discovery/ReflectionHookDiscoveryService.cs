@@ -14,9 +14,7 @@ namespace TUnit.Engine.Discovery;
 /// <summary>
 /// Discovers hooks at runtime using reflection for VB.NET and other languages that don't support source generation.
 /// </summary>
-#if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Uses reflection to access nested members")]
-#endif
 internal sealed class ReflectionHookDiscoveryService
 {
     private static readonly ConcurrentDictionary<Assembly, bool> _scannedAssemblies = new();
@@ -179,14 +177,10 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
-    #endif
     public static void DiscoverHooks() => s_discoveryGate.Run(DiscoverHooksCore);
 
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Hook discovery scans assemblies and types using reflection")]
-    #endif
     private static void DiscoverHooksCore()
     {
         // Clear source-generated hooks since we're discovering via reflection
@@ -212,9 +206,7 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Assembly.GetReferencedAssemblies is reflection-based but safe for checking references")]
-    #endif
     private static bool ShouldScanAssembly(Assembly assembly)
     {
         if (_scannedAssemblies.ContainsKey(assembly))
@@ -266,9 +258,7 @@ internal sealed class ReflectionHookDiscoveryService
         return referencesTUnit;
     }
 
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Types from Assembly.GetTypes() are used with appropriate annotations")]
-    #endif
     private static void DiscoverHooksInAssembly(Assembly assembly)
     {
         if (!_scannedAssemblies.TryAdd(assembly, true))
@@ -278,10 +268,8 @@ internal sealed class ReflectionHookDiscoveryService
 
         try
         {
-            #if NET8_0_OR_GREATER
             [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Assembly.GetTypes is reflection-based but required for hook discovery")]
             [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Types from Assembly.GetTypes() are passed to annotated parameters")]
-            #endif
             Type[] GetTypes() => assembly.GetTypes();
 
             var types = GetTypes();
@@ -297,10 +285,8 @@ internal sealed class ReflectionHookDiscoveryService
         }
     }
 
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Types in inheritance chain preserve annotations from the annotated parameter")]
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Types in inheritance chain preserve annotations from the annotated parameter")]
-    #endif
     private static void DiscoverHooksInType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] Type type, Assembly assembly)
     {
         // Build inheritance chain from base to derived to ensure hooks execute in correct order
@@ -857,9 +843,7 @@ internal sealed class ReflectionHookDiscoveryService
         bag.Add(new LazyHookEntry<AfterAssemblyHookMethod>(hook));
     }
 
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Parameter types in hooks are determined at runtime and cannot be statically analyzed")]
-    #endif
     private static MethodMetadata CreateMethodMetadata(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods | DynamicallyAccessedMemberTypes.PublicProperties)]
         Type type,
@@ -1068,10 +1052,8 @@ internal sealed class ReflectionHookDiscoveryService
     /// <summary>
     /// Extracts the HookExecutor from method attributes, or returns DefaultHookExecutor if not found
     /// </summary>
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "Attribute type reflection is required for hook executor discovery")]
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Hook executor types are determined at runtime from attributes")]
-    #endif
     private static IHookExecutor GetHookExecutor(MethodInfo method)
     {
         // Look for HookExecutorAttribute on the method

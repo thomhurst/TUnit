@@ -16,17 +16,13 @@ internal static class SoleTupleInference
         Candidate
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
-#endif
     // On false, callers must discard bindings: runtime callers abort the row with a
     // resolution exception, and declared-row discovery discards its local dictionary.
     internal static bool TryInfer(Type parameterType, Type argumentType, Dictionary<Type, Type> bindings)
         => TryInfer(parameterType, argumentType, bindings, InferenceMode.Structural);
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
-#endif
     private static bool TryMergeCandidate(Type parameterType, Type candidateType, Dictionary<Type, Type> bindings)
     {
         var candidateBindings = new Dictionary<Type, Type>(bindings);
@@ -35,9 +31,7 @@ internal static class SoleTupleInference
         return true;
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type mapping inference uses Type.GetInterfaces and reflection")]
-#endif
     private static bool TryInfer(
         Type parameterType,
         Type argumentType,

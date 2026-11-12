@@ -31,9 +31,7 @@ internal sealed class DeferredTestExpander
     /// receivers + argument/reference tracking), and returns them. Each child is parented to the
     /// placeholder so reporters can nest them underneath it.
     /// </summary>
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Building tests in reflection mode uses generic type resolution which requires unreferenced code")]
-#endif
     public async Task<IReadOnlyList<AbstractExecutableTest>> ExpandAsync(
         AbstractExecutableTest placeholder,
         CancellationToken cancellationToken)

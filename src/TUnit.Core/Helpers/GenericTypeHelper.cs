@@ -16,10 +16,8 @@ public static class GenericTypeHelper
     /// <returns>The constructed generic type</returns>
     /// <exception cref="ArgumentNullException">Thrown when genericTypeDefinition is null</exception>
     /// <exception cref="ArgumentException">Thrown when type arguments don't match the generic type definition</exception>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("MakeGenericType requires runtime code generation")]
     [RequiresDynamicCode("MakeGenericType requires runtime code generation")]
-#endif
     public static Type MakeGenericTypeSafe(Type genericTypeDefinition, params Type[] typeArguments)
     {
         if (genericTypeDefinition == null)

@@ -12,9 +12,7 @@ internal static class TestInstanceHelper
     /// <summary>
     /// Creates a test instance with data from class data sources
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Test instance creation uses reflection on constructors and properties")]
-    #endif
     public static object? CreateTestInstanceWithData(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass,
         IDataSourceAttribute[]? classDataSources)
@@ -134,9 +132,7 @@ internal static class TestInstanceHelper
     /// <summary>
     /// Creates test instance for inherited test classes
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Inherited test instance creation uses reflection on type hierarchy")]
-    #endif
     public static object? CreateInheritedTestInstance(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
     {
@@ -185,9 +181,7 @@ internal static class TestInstanceHelper
         public override string ToString() => "<discovery-placeholder>";
     }
     
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Property initialization traverses type hierarchy using reflection")]
-    #endif
     private static void InitializeInheritedRequiredProperties(object instance, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         var currentType = type;

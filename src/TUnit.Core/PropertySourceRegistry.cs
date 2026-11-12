@@ -82,9 +82,7 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Discovers injectable properties using reflection (legacy compatibility)
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Reflection discovery is used when source-generated metadata is not available")]
-    #endif
     public static PropertyInjectionData[] DiscoverInjectableProperties([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type)
     {
         var sourceGenerated = GetPropertyInjectionData(type);
@@ -151,9 +149,7 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Creates PropertyInjectionData from PropertyInfo (legacy compatibility)
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
-    #endif
     private static PropertyInjectionData CreatePropertyInjection(System.Reflection.PropertyInfo property, Type? testClassType = null)
     {
         var setter = CreatePropertySetter(property, testClassType);
@@ -171,9 +167,7 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Creates property setter (legacy compatibility)
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field access for init-only properties requires reflection")]
-    #endif
     private static Action<object, object?> CreatePropertySetter(System.Reflection.PropertyInfo property, Type? testClassType = null)
     {
         if (property.CanWrite && property.SetMethod != null)
@@ -205,9 +199,7 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Gets backing field for property (legacy compatibility)
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Backing field discovery needed for init-only properties in reflection mode")]
-    #endif
     private static System.Reflection.FieldInfo? GetBackingField(System.Reflection.PropertyInfo property, Type? testClassType = null)
     {
         var declaringType = property.DeclaringType;
@@ -284,9 +276,7 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Helper method to get field with proper trimming suppression
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Field access for property backing fields requires reflection")]
-    #endif
     private static System.Reflection.FieldInfo? GetFieldSafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type, string name, System.Reflection.BindingFlags bindingFlags)
     {
         return type.GetField(name, bindingFlags);
@@ -295,9 +285,7 @@ public static class PropertySourceRegistry
     /// <summary>
     /// Checks if method is init-only (legacy compatibility)
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Checking for init-only setters requires reflection")]
-    #endif
     private static bool IsInitOnlyMethod(System.Reflection.MethodInfo setMethod)
     {
         var methodType = setMethod.GetType();

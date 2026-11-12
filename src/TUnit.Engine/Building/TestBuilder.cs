@@ -114,9 +114,7 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
-#endif
     public async ValueTask<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, CancellationToken cancellationToken = default)
     {
         // OPTIMIZATION: Pre-filter in execution mode to skip building tests that cannot match the filter
@@ -752,9 +750,7 @@ internal sealed class TestBuilder : ITestBuilder
         return resolvedTypes;
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Generic type inference uses reflection on data sources and parameters")]
-#endif
     private static Type[] TryInferClassGenericsFromDataSources(TestMetadata metadata)
     {
         var genericClassType = metadata.TestClassType;
@@ -1458,9 +1454,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// Invokes event receivers after dependencies have been resolved.
     /// This is called from TestDiscoveryService after all tests are built and dependencies resolved.
     /// </summary>
-#if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
     public ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test)
     {
         var context = test.Context;
@@ -2208,9 +2202,7 @@ internal sealed class TestBuilder : ITestBuilder
         return null;
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type compatibility checking uses reflection")]
-#endif
     private static bool IsTypeCompatible(Type actualType, Type expectedType)
     {
         // Direct match
@@ -2320,9 +2312,7 @@ internal sealed class TestBuilder : ITestBuilder
         public static InstanceCreationResult CreateFailure(Exception exception) => new(null, exception);
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Generic type resolution for instance creation uses reflection")]
-#endif
     private async Task<InstanceCreationResult> CreateInitializedInstanceForMethodDataSources(
         TestMetadata metadata,
         int classDataAttributeIndex,
@@ -2371,9 +2361,7 @@ internal sealed class TestBuilder : ITestBuilder
         return instanceResult;
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Generic type resolution for instance creation uses reflection")]
-#endif
     private async Task<InstanceCreationResult> CreateInstanceForMethodDataSources(
         TestMetadata metadata, int classDataAttributeIndex, int classDataLoopIndex, object?[] classData, TestBuilderContext testBuilderContext)
     {

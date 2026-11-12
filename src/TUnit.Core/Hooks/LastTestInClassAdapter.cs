@@ -3,9 +3,7 @@ using TUnit.Core.Interfaces;
 
 namespace TUnit.Core.Hooks;
 
-#if NET8_0_OR_GREATER
 [RequiresUnreferencedCode("Method with DynamicallyAccessedMembersAttribute accessed via reflection")]
-#endif
 public class LastTestInClassAdapter(ILastTestInClassEventReceiver lastTestInClassEventReceiver, TestContext testContext) : IExecutableHook<ClassHookContext>
 {
     public string Name => nameof(lastTestInClassEventReceiver.OnLastTestInClass);
