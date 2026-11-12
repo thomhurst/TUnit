@@ -68,15 +68,12 @@ public class HookMetadataGenerator : IIncrementalGenerator
             .Where(static m => m is not null)
             .WithTrackingName(ExtractAfterEveryHooks);
 
-        var allHooks = beforeHooks.Collect()
-            .Combine(afterHooks.Collect())
-            .Combine(beforeEveryHooks.Collect())
-            .Combine(afterEveryHooks.Collect())
-            .Select(static (data, _) =>
-            {
-                var (((before, after), beforeEvery), afterEvery) = data;
-                return new[] { before, after, beforeEvery, afterEvery };
-            });
+        // Combined in pairs and flattened to arrays straight away. A single chain of three Combines
+        // carries ((a, b), c) and (((a, b), c), d) tuples of ImmutableArray, and the runtime JIT-compiles
+        // a separate copy of Roslyn's generic node code for each of those value-type shapes.
+        var allHooks = CombineCollected(beforeHooks, afterHooks)
+            .Combine(CombineCollected(beforeEveryHooks, afterEveryHooks))
+            .Select(static (data, _) => new[] { data.Left[0], data.Left[1], data.Right[0], data.Right[1] });
 
         // The files that declare hooks, in compilation order. Only this small list is compared between
         // runs, so edits that add, remove or reorder unrelated files leave the grouping step cached.
@@ -103,6 +100,15 @@ public class HookMetadataGenerator : IIncrementalGenerator
             .WithTrackingName(HookClassGroups);
 
         context.RegisterSourceOutput(hookClassGroups, GenerateHookClassFile);
+    }
+
+    private static IncrementalValueProvider<ImmutableArray<HookModel?>[]> CombineCollected(
+        IncrementalValuesProvider<HookModel?> first,
+        IncrementalValuesProvider<HookModel?> second)
+    {
+        return first.Collect()
+            .Combine(second.Collect())
+            .Select(static (data, _) => new[] { data.Left, data.Right });
     }
 
     private static EquatableArray<string> GetHookFilePaths(ImmutableArray<HookModel?>[] hookArrays)
