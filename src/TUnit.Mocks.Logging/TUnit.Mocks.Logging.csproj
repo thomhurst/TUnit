@@ -3,7 +3,7 @@
     <Import Project="..\..\eng\Library.props" />
 
     <PropertyGroup>
-        <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
+        <TargetFrameworks>net8.0;net10.0;net11.0</TargetFrameworks>
         <Description>ILogger verification helpers for TUnit.Mocks. Enables fluent verification of log calls without dealing with the complex Log&lt;TState&gt;() signature.</Description>
     </PropertyGroup>
 
