@@ -6,6 +6,7 @@ using System.Text;
 using System.Xml;
 using Microsoft.Testing.Platform.Extensions.Messages;
 using TUnit.Engine.Exceptions;
+using TUnit.Engine.Reporters;
 
 namespace TUnit.Engine.Xml;
 
@@ -62,7 +63,8 @@ internal static class JUnitXmlWriter
     public static string GenerateXml(
         IEnumerable<TestNodeUpdateMessage> testUpdates,
         string? filter,
-        IReadOnlyList<Exception>? unobservedTaskExceptions = null)
+        IReadOnlyList<Exception>? unobservedTaskExceptions = null,
+        SourceControlContext? sourceControl = null)
     {
         // Get the last state for each test
         var lastStates = GetLastStates(testUpdates);
@@ -108,7 +110,7 @@ internal static class JUnitXmlWriter
         xmlWriter.WriteAttributeString("timestamp", summary.Timestamp.ToString("o", CultureInfo.InvariantCulture));
 
         // Write test suite
-        WriteTestSuite(xmlWriter, lastStates.Values, assemblyName, targetFramework, summary, filter, unobservedTaskExceptions);
+        WriteTestSuite(xmlWriter, lastStates.Values, assemblyName, targetFramework, summary, filter, unobservedTaskExceptions, sourceControl ?? SourceControlContext.Empty);
 
         xmlWriter.WriteEndElement(); // testsuites
         xmlWriter.WriteEndDocument();
@@ -123,7 +125,8 @@ internal static class JUnitXmlWriter
         string targetFramework,
         TestSummary summary,
         string? filter,
-        IReadOnlyList<Exception>? unobservedTaskExceptions)
+        IReadOnlyList<Exception>? unobservedTaskExceptions,
+        SourceControlContext sourceControl)
     {
         writer.WriteStartElement("testsuite");
         writer.WriteAttributeString("name", SanitizeForXml(assemblyName));
@@ -141,7 +144,7 @@ internal static class JUnitXmlWriter
         // Write test cases
         foreach (var test in tests)
         {
-            WriteTestCase(writer, test);
+            WriteTestCase(writer, test, sourceControl);
         }
 
         // Unobserved task exceptions belong to no single test, so they go in the suite-level
@@ -190,14 +193,15 @@ internal static class JUnitXmlWriter
         writer.WriteEndElement(); // properties
     }
 
-    private static void WriteTestCase(XmlWriter writer, TestNodeUpdateMessage test)
+    private static void WriteTestCase(XmlWriter writer, TestNodeUpdateMessage test, SourceControlContext sourceControl)
     {
         var testNode = test.TestNode;
 
-        // Get state, timing, and method identifier in a single pass
+        // Get state, timing, method identifier, and file location in a single pass
         TestNodeStateProperty? stateProperty = null;
         TimingProperty? timingProperty = null;
         TestMethodIdentifierProperty? testMethodIdentifier = null;
+        TestFileLocationProperty? fileLocation = null;
         foreach (var prop in testNode.Properties.AsEnumerable())
         {
             if (stateProperty is null && prop is TestNodeStateProperty s)
@@ -212,8 +216,12 @@ internal static class JUnitXmlWriter
             {
                 testMethodIdentifier = m;
             }
+            else if (fileLocation is null && prop is TestFileLocationProperty f)
+            {
+                fileLocation = f;
+            }
 
-            if (stateProperty is not null && timingProperty is not null && testMethodIdentifier is not null)
+            if (stateProperty is not null && timingProperty is not null && testMethodIdentifier is not null && fileLocation is not null)
             {
                 break;
             }
@@ -229,6 +237,15 @@ internal static class JUnitXmlWriter
         writer.WriteAttributeString("name", SanitizeForXml(testName));
         writer.WriteAttributeString("classname", SanitizeForXml(className));
         writer.WriteAttributeString("time", duration.TotalSeconds.ToString("F3", CultureInfo.InvariantCulture));
+
+        // Line numbers are 1-based; a test with no known source location has line 0 and gets neither attribute.
+        if (fileLocation is { LineSpan.Start.Line: > 0 } && !string.IsNullOrEmpty(fileLocation.FilePath))
+        {
+            var filePath = SourcePathResolver.ToRepoRelativePath(fileLocation.FilePath, sourceControl.Workspace, sourceControl.RepositorySlug)
+                ?? fileLocation.FilePath;
+            writer.WriteAttributeString("file", SanitizeForXml(filePath));
+            writer.WriteAttributeString("line", fileLocation.LineSpan.Start.Line.ToString(CultureInfo.InvariantCulture));
+        }
 
         // Write state-specific child elements
         switch (stateProperty)
