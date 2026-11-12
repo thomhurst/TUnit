@@ -15,7 +15,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.33" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.34" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
@@ -114,7 +114,7 @@
     <PackageVersion Include="PublicApiGenerator" Version="11.5.4" />
     <PackageVersion Include="RandomDataGenerator.Net" Version="1.0.19.1" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
-    <PackageVersion Include="StackExchange.Redis" Version="3.4.31" />
+    <PackageVersion Include="StackExchange.Redis" Version="3.4.35" />
     <PackageVersion Include="System.Reactive" Version="7.0.0" />
     <PackageVersion Include="Sourcy.DotNet" Version="1.1.1">
       <PrivateAssets>all</PrivateAssets>
@@ -134,14 +134,14 @@
     <PackageVersion Include="Testcontainers.PostgreSql" Version="4.16.0" />
     <PackageVersion Include="Testcontainers.Redis" Version="4.16.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.83.8" />
+    <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.84.0" />
     <PackageVersion Include="Verify" Version="33.3.4" />
     <PackageVersion Include="Verify.NUnit" Version="33.3.4" />
-    <PackageVersion Include="TUnit" Version="1.83.8" />
-    <PackageVersion Include="TUnit.AspNetCore" Version="1.83.8" />
-    <PackageVersion Include="TUnit.Core" Version="1.83.8" />
-    <PackageVersion Include="TUnit.Engine" Version="1.83.8" />
-    <PackageVersion Include="TUnit.Assertions" Version="1.83.8" />
+    <PackageVersion Include="TUnit" Version="1.84.0" />
+    <PackageVersion Include="TUnit.AspNetCore" Version="1.84.0" />
+    <PackageVersion Include="TUnit.Core" Version="1.84.0" />
+    <PackageVersion Include="TUnit.Engine" Version="1.84.0" />
+    <PackageVersion Include="TUnit.Assertions" Version="1.84.0" />
     <PackageVersion Include="Verify.TUnit" Version="33.3.4" />
     <PackageVersion Include="Vogen" Version="8.0.7" />
     <PackageVersion Include="xunit" Version="2.9.3" />
