@@ -215,6 +215,14 @@ test:
 
 The `trx2junit` tool converts TRX output to JUnit XML that GitLab can parse.
 
+### Source Locations in JUnit XML
+
+Each `<testcase>` in TUnit's JUnit report has `file` and `line` attributes that point to the test's source, so tools that read JUnit XML can show a failure at its source line. The XML format comes from the test reports of [JUnit](https://docs.junit.org/6.1.3/overview.html), the Java test framework.
+
+```xml
+<testcase name="Add_ReturnsSum" classname="Calculator.Tests.MathTests" time="0.012" file="tests/Calculator.Tests/MathTests.cs" line="12" />
+```
+
 ## Unobserved Task Exceptions
 
 A task that faults when nothing awaits it, such as a fire-and-forget `Task.Run` or the losing branch of a `Task.WhenAny`, raises `TaskScheduler.UnobservedTaskException` when the runtime garbage-collects it. TUnit keeps the process alive and records each of these exceptions for the session:
