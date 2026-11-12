@@ -217,7 +217,7 @@ The `trx2junit` tool converts TRX output to JUnit XML that GitLab can parse.
 
 ### Source Locations in JUnit XML
 
-TUnit's JUnit reporter writes `file` and `line` attributes on each `<testcase>`. Tools that read these attributes, such as [publish-unit-test-result-action](https://github.com/EnricoMi/publish-unit-test-result-action), can show a failed test on its source line.
+TUnit's JUnit reporter writes `file` and `line` attributes on each `<testcase>`. Tools that read these attributes can show a failed test on its source line. The XML format comes from the test reports of [JUnit](https://docs.junit.org/6.1.3/overview.html), the Java test framework.
 
 ```xml
 <testcase name="Add_ReturnsSum" classname="Calculator.Tests.MathTests" time="0.012" file="tests/Calculator.Tests/MathTests.cs" line="12" />
