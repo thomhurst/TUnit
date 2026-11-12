@@ -64,9 +64,7 @@ internal sealed class TestScheduler : ITestScheduler
         _maxParallelismLimiter = maxParallelismLimiter;
     }
 
-    #if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     public async Task<bool> ScheduleAndExecuteAsync(
         List<AbstractExecutableTest> testList,
         CancellationToken cancellationToken)
@@ -378,9 +376,7 @@ internal sealed class TestScheduler : ITestScheduler
         return executableTests;
     }
 
-    #if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     private async Task ExecuteGroupedTestsAsync(
         GroupedTests groupedTests,
         CancellationToken cancellationToken)
@@ -414,9 +410,7 @@ internal sealed class TestScheduler : ITestScheduler
         await dynamicTestProcessingTask.ConfigureAwait(false);
     }
 
-    #if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     private async Task ExecuteAllPhasesAsync(GroupedTests groupedTests, CancellationToken cancellationToken)
     {
         // Unconstrained Parallel and KeyedNotInParallel buckets share no state — keyed tests
@@ -488,9 +482,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    #if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     private async Task ProcessDynamicTestQueueAsync(CancellationToken cancellationToken)
     {
         var dynamicTests = new List<AbstractExecutableTest>();
@@ -570,9 +562,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-    #if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     private async Task ExecuteDynamicBatchAsync(List<AbstractExecutableTest> dynamicTests, CancellationToken cancellationToken)
     {
         // Route through the same phase pipeline as the main test set so dynamically-added
@@ -649,9 +639,7 @@ internal sealed class TestScheduler : ITestScheduler
         }
     }
 
-#if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     private Task ExecuteTestsAsync(
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)
@@ -662,9 +650,7 @@ internal sealed class TestScheduler : ITestScheduler
         return ExecuteWithGlobalLimitAsync(tests, _maxParallelismLimiter.Semaphore, cancellationToken);
     }
 
-#if NET
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
-    #endif
     private async Task ExecuteSequentiallyAsync(
         AbstractExecutableTest[] tests,
         CancellationToken cancellationToken)

@@ -15,9 +15,7 @@ internal static class ClassMetadataHelper
     /// <summary>
     /// Gets or creates ClassMetadata for the specified type.
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Metadata creation requires reflection")]
-    #endif
     public static ClassMetadata GetOrCreateClassMetadata(
         [DynamicallyAccessedMembers(
             DynamicallyAccessedMemberTypes.PublicConstructors |
@@ -57,9 +55,7 @@ internal static class ClassMetadataHelper
 
     // Match generated metadata: properties declared on this type, including static properties.
     // Called inside the class cache factory, so back-references never recurse through that cache.
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Property metadata creation requires reflection")]
-    #endif
     public static ClassMetadata WithProperties(ClassMetadata metadata)
     {
         if (!Properties.TryGetValue(metadata.Type, out var properties))

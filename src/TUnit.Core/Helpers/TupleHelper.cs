@@ -123,9 +123,7 @@ public static class TupleHelper
 
     private static readonly ConcurrentDictionary<Type, MemberInfo[]> TupleMembers = new();
 
-#if NET
     [RequiresUnreferencedCode("Tuple fallback reads tuple fields and properties through reflection.")]
-#endif
     private static void AppendTupleElements(object value, List<object?> elements)
     {
         var members = TupleMembers.GetOrAdd(value.GetType(), static type =>
@@ -174,9 +172,7 @@ public static class TupleHelper
     }
 
     // Kept callable in modern builds so tests exercise the netstandard2.0 fallback directly.
-#if NET
     [RequiresUnreferencedCode("Tuple fallback reads tuple fields and properties through reflection.")]
-#endif
     internal static object?[] UnwrapTupleUsingReflection(object? value)
     {
         if (value == null)
@@ -239,9 +235,7 @@ public static class TupleHelper
     /// Expands an array of tuples into individual tuple elements for data source generation
     /// For example: [(1, "a"), (2, "b")] becomes individual items that each unwrap to [1, "a"] and [2, "b"]
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Tuple expansion uses reflection as fallback")]
-    #endif
     public static IEnumerable<object?[]> ExpandTupleArray(object? value)
     {
         if (value == null)

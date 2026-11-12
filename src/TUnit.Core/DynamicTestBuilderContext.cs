@@ -24,9 +24,7 @@ public class DynamicTestBuilderContext
 
     public IReadOnlyList<AbstractDynamicTest> Tests => _tests.AsReadOnly();
 
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Adding dynamic tests requires reflection which is not supported in native AOT scenarios.")]
-    #endif
     public void AddTest(AbstractDynamicTest test)
     {
         // Set creator location if the test implements IDynamicTestCreatorLocation

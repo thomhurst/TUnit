@@ -67,9 +67,7 @@ internal static class PropertyInjectionPlanBuilder
     /// <summary>
     /// Creates an injection plan for reflection mode.
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Reflection mode requires runtime property discovery")]
-    #endif
     public static PropertyInjectionPlan BuildReflectionPlan(Type type)
     {
         var propertyDataSourcePairs = new List<(PropertyInfo property, IDataSourceAttribute dataSource)>();
