@@ -242,7 +242,7 @@ internal static class JUnitXmlWriter
         if (fileLocation is { LineSpan.Start.Line: > 0 } && !string.IsNullOrEmpty(fileLocation.FilePath))
         {
             var filePath = SourcePathResolver.ToRepoRelativePath(fileLocation.FilePath, sourceControl.Workspace, sourceControl.RepositorySlug)
-                ?? fileLocation.FilePath.Replace('\\', '/');
+                ?? fileLocation.FilePath;
             writer.WriteAttributeString("file", SanitizeForXml(filePath));
             writer.WriteAttributeString("line", fileLocation.LineSpan.Start.Line.ToString(CultureInfo.InvariantCulture));
         }

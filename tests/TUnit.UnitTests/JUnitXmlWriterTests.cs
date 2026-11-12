@@ -42,7 +42,7 @@ public class JUnitXmlWriterTests
     }
 
     [Test]
-    [Arguments(@"C:\src\shop\tests\MathTests.cs", null, null, "C:/src/shop/tests/MathTests.cs")]
+    [Arguments(@"C:\src\shop\tests\MathTests.cs", null, null, @"C:\src\shop\tests\MathTests.cs")]
     [Arguments("/home/runner/work/shop/shop/tests/MathTests.cs", "/home/runner/work/shop/shop", "octo/shop", "tests/MathTests.cs")]
     [Arguments(@"D:\a\shop\shop\tests\MathTests.cs", @"D:\a\shop\shop", "octo/shop", "tests/MathTests.cs")]
     [Arguments("/_/tests/MathTests.cs", "/builds/octo/shop", "octo/shop", "tests/MathTests.cs")]
