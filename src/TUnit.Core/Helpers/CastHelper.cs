@@ -448,6 +448,8 @@ public static class CastHelper
 
     [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute'",
         Justification = "Not called in AOT mode; the source generator registers AOT converters that construct the declared converter directly.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method",
+        Justification = "Not called in AOT mode; the source generator registers AOT converters that construct the declared converter directly.")]
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
         Justification = "Not called in AOT mode; the source generator registers AOT converters that construct the declared converter directly.")]
     private static bool TryTypeConverterConvert(Type targetType, string value, out object? result)
