@@ -83,7 +83,7 @@
     <PackageVersion Include="FakeItEasy" Version="9.0.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
     <PackageVersion Include="FsCheck" Version="3.6.0" />
-    <PackageVersion Include="FSharp.Core" Version="10.1.404" />
+    <PackageVersion Include="FSharp.Core" Version="11.0.101" />
     <PackageVersion Include="Humanizer" Version="3.0.10" />
     <PackageVersion Include="MessagePack" Version="3.1.12" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.10" />
