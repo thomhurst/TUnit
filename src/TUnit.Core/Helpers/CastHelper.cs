@@ -402,6 +402,12 @@ public static class CastHelper
             }
         }
 
+        // [TypeConverter] string conversions when no generated AOT converter is registered (e.g. source generation disabled)
+        if (!isAotMode && value is string stringValue && TryTypeConverterConvert(targetType, stringValue, out result))
+        {
+            return true;
+        }
+
         // Try IConvertible for non-primitives
         if (value is IConvertible)
         {
@@ -434,6 +440,25 @@ public static class CastHelper
         if (Environment.GetEnvironmentVariable("TUNIT_DIAGNOSTIC_CAST") == "true")
         {
             Console.WriteLine($"[CastHelper] No conversion found from {sourceType.FullName} to {targetType.FullName}");
+        }
+
+        result = null;
+        return false;
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute'",
+        Justification = "Not called in AOT mode; the source generator registers AOT converters that construct the declared converter directly.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "Not called in AOT mode; the source generator registers AOT converters that construct the declared converter directly.")]
+    private static bool TryTypeConverterConvert(Type targetType, string value, out object? result)
+    {
+        // Only declared converters, matching what the source generator and analyzer recognise.
+        if (targetType.IsDefined(typeof(System.ComponentModel.TypeConverterAttribute), inherit: true)
+            && System.ComponentModel.TypeDescriptor.GetConverter(targetType) is { } converter
+            && converter.CanConvertFrom(typeof(string)))
+        {
+            result = converter.ConvertFrom(null, System.Globalization.CultureInfo.InvariantCulture, value);
+            return true;
         }
 
         result = null;

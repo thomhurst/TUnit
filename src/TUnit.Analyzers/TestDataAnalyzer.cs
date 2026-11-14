@@ -1681,7 +1681,8 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         if (argument.Type?.SpecialType == SpecialType.System_String &&
             argument.Value is string &&
-            methodParameterType.IsParsableFromString())
+            (methodParameterType.IsParsableFromString()
+             || methodParameterType.TryGetStringTypeConverter(context.Compilation, out _, out _)))
         {
             return true;
         }

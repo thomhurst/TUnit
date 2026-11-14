@@ -42,6 +42,49 @@ public class AotConverterScanTests
     }
 
     [Test]
+    public async Task GeneratesTypeConverterConversionsFromString()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using TUnit.Core;
+            [TypeConverter(typeof(PlainConverter))]
+            public class Plain { }
+            [TypeConverter(typeof(TypedConverter))]
+            public struct Typed { }
+            [TypeConverter("NamedConverter, TypeConverters")]
+            public class Named { }
+            [TypeConverter(typeof(PlainConverter))]
+            public class WithOperator { public static implicit operator WithOperator(string value) => new(); }
+            public class PlainConverter : TypeConverter { }
+            public class TypedConverter : TypeConverter { public TypedConverter(Type type) { } }
+            public class NamedConverter : TypeConverter { }
+            public class Tests
+            {
+                public Tests(Named named) { }
+                [Test, Arguments("a", "b", "c")]
+                public void Convert(Plain plain, Typed? typed, WithOperator withOperator) { }
+            }
+            """;
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var compilation = CSharpCompilation.Create("TypeConverters",
+            [CSharpSyntaxTree.ParseText(source, parseOptions)], ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new AotConverterGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
+        await Assert.That(generated).Contains("global::Plain converted = (global::Plain)new global::PlainConverter().ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
+        await Assert.That(generated).Contains("global::Typed converted = (global::Typed)new global::TypedConverter(typeof(global::Typed)).ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
+        await Assert.That(generated).Contains("global::Named converted = (global::Named)new global::NamedConverter().ConvertFrom(");
+        // The language conversion is kept rather than replaced by the converter.
+        await Assert.That(generated).DoesNotContain("(global::WithOperator)new global::PlainConverter()");
+    }
+
+    [Test]
     public async Task HandlesInheritedPropertyAndAmbiguousSources()
     {
         const string providerSource = """
