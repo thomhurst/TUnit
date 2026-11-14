@@ -25,18 +25,9 @@ on:
         description: 'Exact dump artifact ID (optional; disambiguates artifacts from rerun attempts)'
         required: false
         type: string
-      modular-pipelines-version:
-        description: Optional ModularPipelines version for branch validation (ignored on main)
-        required: false
-        type: string
 
 permissions:
   contents: read
-
-# Empty on normal CI: Directory.Packages.props keeps the release default. Ignored on main, where
-# UploadToNuGetModule treats a passing run as clearance to publish.
-env:
-  ModularPipelinesVersion: ${{ github.ref != 'refs/heads/main' && inputs.modular-pipelines-version || '' }}
 
 # Push runs are grouped by commit, not by ref: UploadToNuGetModule requires a passing run on the
 # exact commit it publishes, so a newer push to main must not cancel the run for an older one.
