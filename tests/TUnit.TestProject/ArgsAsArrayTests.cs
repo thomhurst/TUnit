@@ -125,7 +125,7 @@ public class ArgsAsArrayTests
     [Arguments(new int[] { 1, 2 })]
     public async Task ParamsObjectArray_ArrayArgumentStaysSingleElement(params object[] values)
     {
-        await Assert.That(values).HasCount(1);
+        await Assert.That(values).Count().IsEqualTo(1);
         await Assert.That(values[0]).IsTypeOf<int[]>();
     }
 }

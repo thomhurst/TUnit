@@ -625,6 +625,22 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                 return;
             }
             
+            // A scalar row can bind the first parameter while optional test parameters keep
+            // their defaults and params tails are empty. Typed tuple rows use their separate
+            // whole-tuple binding rules below. Runtime tuple rows must either bind whole
+            // to a tuple-compatible parameter or keep their expansion diagnostics.
+            if (!isTuples && unwrappedTypes.Length == 1 && testParameterTypes.Length > 1
+                && (!IsRuntimeTupleRow(unwrappedTypes[0])
+                    || (IsRuntimeTupleRow(testParameterTypes[0], unwrapNullable: false)
+                        && context.Compilation.ClassifyCommonConversion(unwrappedTypes[0], testParameterTypes[0])
+                            is { IsImplicit: true, IsUserDefined: false }))
+                && context.Symbol is IMethodSymbol testMethod
+                && testMethod.Parameters.WithoutTestMethodCancellationTokens().Skip(1)
+                    .All(p => p.IsOptional || p.HasExplicitDefaultValue || p.IsParams))
+            {
+                testParameterTypes = testParameterTypes.Take(1).ToImmutableArray();
+            }
+
             if (isTuples && unwrappedTypes.Length != testParameterTypes.Length)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
@@ -948,6 +964,23 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
                || parameterType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
     }
 
+    // Nullable value tuples box as their underlying tuple type before runtime row expansion.
+    private static bool IsRuntimeTupleRow(ITypeSymbol type, bool unwrapNullable = true)
+    {
+        if (unwrapNullable && type is INamedTypeSymbol
+            {
+                OriginalDefinition.SpecialType: SpecialType.System_Nullable_T,
+                TypeArguments: [var underlyingType]
+            })
+        {
+            type = underlyingType;
+        }
+
+        return type.IsGloballyQualified("global::System.Runtime.CompilerServices.ITuple")
+            || type.AllInterfaces.Any(i =>
+                i.IsGloballyQualified("global::System.Runtime.CompilerServices.ITuple"));
+    }
+
     // Only a matching tuple row binds whole before omittable parameters. A nested tuple row
     // has a different type and continues to spread, including an explicitly supplied optional.
     private static bool CanBindWholeTupleWithOmissions(SymbolAnalysisContext context, ITypeSymbol rowType,
@@ -962,8 +995,11 @@ public class TestDataAnalyzer : ConcurrentDiagnosticAnalyzer
 
         // testParameterTypes and this parameter list both exclude engine-injected tokens.
         var cancellationToken = context.Compilation.GetTypeByMetadataName("System.Threading.CancellationToken");
-        return method.Parameters.Where(parameter => !SymbolEqualityComparer.Default.Equals(parameter.Type, cancellationToken))
-            .Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams);
+        var dataParameters = method.Parameters
+            .Where(parameter => !SymbolEqualityComparer.Default.Equals(parameter.Type, cancellationToken)).ToArray();
+        return dataParameters.Skip(1).All(parameter => parameter.IsOptional || parameter.IsParams
+            || SymbolEqualityComparer.Default.Equals(parameter, dataParameters[^1])
+            && parameter.Type is IArrayTypeSymbol { IsSZArray: true });
     }
 
     private ImmutableArray<ITypeSymbol> UnwrapTypes(SymbolAnalysisContext context,

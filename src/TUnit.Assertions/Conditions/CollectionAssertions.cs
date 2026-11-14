@@ -76,8 +76,8 @@ public class CollectionIsNotEmptyAssertion<TCollection, TItem> : Sources.Collect
 
 /// <summary>
 /// Asserts that a collection contains the expected item.
-/// Delegates to CollectionChecks for the actual logic.
 /// </summary>
+// Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("Contains")]
 public class CollectionContainsAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
@@ -116,8 +116,8 @@ public class CollectionContainsAssertion<TCollection, TItem> : Sources.Collectio
 
 /// <summary>
 /// Asserts that a collection does NOT contain the expected item.
-/// Delegates to CollectionChecks for the actual logic.
 /// </summary>
+// Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("DoesNotContain")]
 public class CollectionDoesNotContainAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
@@ -156,8 +156,8 @@ public class CollectionDoesNotContainAssertion<TCollection, TItem> : Sources.Col
 
 /// <summary>
 /// Asserts that a collection does NOT contain any item matching the predicate.
-/// Delegates to CollectionChecks for the actual logic.
 /// </summary>
+// Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("DoesNotContain")]
 public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
@@ -386,8 +386,8 @@ public class CollectionAllSatisfyHelper<TCollection, TItem>
 
 /// <summary>
 /// Asserts that all items in a collection satisfy a predicate.
-/// Delegates to CollectionChecks for the actual logic.
 /// </summary>
+// Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("All")]
 public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
@@ -426,8 +426,8 @@ public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionAsse
 
 /// <summary>
 /// Asserts that at least one item in a collection satisfies a predicate.
-/// Delegates to CollectionChecks for the actual logic.
 /// </summary>
+// Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("Any")]
 public class CollectionAnyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
@@ -467,8 +467,8 @@ public class CollectionAnyAssertion<TCollection, TItem> : Sources.CollectionAsse
 /// <summary>
 /// Asserts that a collection contains exactly one item.
 /// When awaited, returns the single item for further assertions.
-/// Delegates to CollectionChecks for the count check, but captures the item for return.
 /// </summary>
+// Delegates to CollectionChecks for the count check, but captures the item for return.
 [AssertionExtension("HasSingleItem")]
 public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
@@ -535,8 +535,8 @@ public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAsse
 /// <summary>
 /// Asserts that a collection contains exactly one item matching the predicate.
 /// When awaited, returns the matching item for further assertions.
-/// Delegates to CollectionChecks for the actual logic.
 /// </summary>
+// Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("HasSingleItem")]
 public class HasSingleItemPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
@@ -608,8 +608,8 @@ public class HasSingleItemPredicateAssertion<TCollection, TItem> : Sources.Colle
 /// <summary>
 /// Asserts that a collection contains an item matching the predicate.
 /// When awaited, returns the found item for further assertions.
-/// Delegates to CollectionChecks for the actual logic.
 /// </summary>
+// Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("Contains")]
 public class CollectionContainsPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
@@ -790,8 +790,8 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
 
 /// <summary>
 /// Asserts that a collection is in ascending order.
-/// Delegates to CollectionChecks for the actual logic.
 /// </summary>
+// Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("IsInOrder")]
 public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
@@ -823,8 +823,8 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.Collecti
 
 /// <summary>
 /// Asserts that a collection is in descending order.
-/// Delegates to CollectionChecks for the actual logic.
 /// </summary>
+// Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("IsInDescendingOrder")]
 public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>

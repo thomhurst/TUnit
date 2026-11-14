@@ -114,9 +114,7 @@ internal sealed class TestBuilder : ITestBuilder
         }
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Test building in reflection mode uses generic type resolution which requires unreferenced code")]
-#endif
     public async ValueTask<IEnumerable<AbstractExecutableTest>> BuildTestsFromMetadataAsync(TestMetadata metadata, TestBuildingContext buildingContext, CancellationToken cancellationToken = default)
     {
         // OPTIMIZATION: Pre-filter in execution mode to skip building tests that cannot match the filter
@@ -176,7 +174,11 @@ internal sealed class TestBuilder : ITestBuilder
                 InitializedAttributes = attributes  // Store the initialized attributes
             };
 
-            var classConstructorAttribute = attributes.FirstOfType<ClassConstructorAttribute>();
+            // Violation entries only enumerate failing rows; initializing user constructors can
+            // hide those errors and collapse multiple violations into one failure.
+            var classConstructorAttribute = metadata is GenericConstraintViolationTestMetadata
+                ? null
+                : attributes.FirstOfType<ClassConstructorAttribute>();
 
             // Without data sources or a class constructor no user code runs while building, so nothing
             // can observe TestBuilderContext.Current — skip publishing it (each AsyncLocal write
@@ -262,7 +264,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                     var needsInstanceForMethodDataSources = HasInstanceDataAccessor(metadata.DataSources);
 
-                    var classEnumerationContext = contextAccessor.Current;
+                    using var rowLifetime = new RowContextLifetime(contextAccessor, classSourceContext, unclaimedClassRow);
                     object? instanceForMethodDataSources = null;
                     try
                     {
@@ -283,7 +285,7 @@ internal sealed class TestBuilder : ITestBuilder
 
                             if (!instanceResult.Success)
                             {
-                                unclaimedClassRow.TransferCleanupTo(contextAccessor.Current);
+                                rowLifetime.TransferCleanupToCurrent();
                                 var failedTest = CreateFailedTestForInstanceDataSourceError(metadata, instanceResult.Exception!, classData, contextAccessor.Current);
                                 tests.Add(failedTest);
                                 continue;
@@ -332,6 +334,7 @@ internal sealed class TestBuilder : ITestBuilder
                                         // constraints: fail this row only, as reflection mode does when it resolves
                                         // the row's type arguments, and keep building the remaining rows.
                                         var (reportedException, rowData) = UnpackConstraintViolation(ex, metadata.MethodMetadata.Parameters);
+                                        unclaimedClassRow.ClaimCleanupTo(contextAccessor.Current);
                                         tests.Add(CreateFailedTestForDataRowError(metadata, reportedException, classDataAttributeIndex, classDataLoopIndex, methodDataAttributeIndex, methodDataLoopIndex, i, unclaimedClassRow.WithLentObjects(classData), rowData, contextAccessor.Current));
                                         continue;
                                     }
@@ -368,6 +371,8 @@ internal sealed class TestBuilder : ITestBuilder
                                             continue;
                                         }
                                     }
+
+                                    unclaimedClassRow.ClaimCleanupTo(contextAccessor.Current);
 
                                     Type[] resolvedClassGenericArgs;
                                     Type[] resolvedMethodGenericArgs;
@@ -508,7 +513,6 @@ internal sealed class TestBuilder : ITestBuilder
                                 // and tracks any objects that a temporary instance used.
                                 var lentClassRowObjects = unclaimedClassRow.TakeLentObjects();
                                 var skippedRowContext = unclaimedClassRow.CreateEnumerationFailureContext(contextAccessor.Current);
-                                unclaimedClassRow.Clear();
 
                                 Type[] resolvedClassGenericArgs;
                                 Exception? genericResolutionException = null;
@@ -562,10 +566,7 @@ internal sealed class TestBuilder : ITestBuilder
                     {
                         // Enumeration may resume on a context whose class cleanup already belongs
                         // to a runnable row. Only the unclaimed row may lend cleanup to this failure.
-                        var failureContext = ReferenceEquals(contextAccessor.Current, classEnumerationContext)
-                            ? unclaimedClassRow.CreateEnumerationFailureContext(classEnumerationContext)
-                            : contextAccessor.Current;
-                        contextAccessor.Current = failureContext;
+                        var failureContext = rowLifetime.ClaimFailureContext();
                         var failedTest = CreateFailedTestForDataGenerationError(metadata, ex,
                             new TestDataCombination(), methodData: unclaimedClassRow.TakeLentObjects(),
                             rowContext: failureContext);
@@ -575,7 +576,9 @@ internal sealed class TestBuilder : ITestBuilder
                     finally
                     {
                         await DisposeInstanceForMethodDataSourcesAsync(instanceForMethodDataSources);
-                        contextAccessor.Current = classSourceContext;
+                        if (await rowLifetime.ReleaseAsync(CreateCleanupContext) is { Count: > 0 } cleanupErrors)
+                            tests.Add(CreateFailedTestForDataGenerationError(metadata, new AggregateException(cleanupErrors),
+                                new TestDataCombination { ClassDataSourceIndex = classDataAttributeIndex, ClassLoopIndex = classDataLoopIndex }));
                     }
                 }
 
@@ -673,8 +676,19 @@ internal sealed class TestBuilder : ITestBuilder
             tests.Add(failedTest);
             return tests;
         }
+        finally
+        {
+            if (activeClassRow is not null && await activeClassRow.ReleaseAsync(CreateCleanupContext) is { Count: > 0 } cleanupErrors)
+                tests.Add(CreateFailedTestForDataGenerationError(metadata, new AggregateException(cleanupErrors)));
+        }
 
         return tests;
+
+        TestContext CreateCleanupContext(TestBuilderContext rowContext)
+        {
+            var details = CreateFailedTestDetails(metadata, TestIdentifierService.GenerateFailedTestId(metadata, new TestDataCombination()), []);
+            return CreateFailedTestContext(metadata, details, rowContext, registerAsTest: false);
+        }
     }
 
     private readonly struct BuildContextLease(TestBuildContext buildContext) : IDisposable
@@ -736,9 +750,7 @@ internal sealed class TestBuilder : ITestBuilder
         return resolvedTypes;
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Generic type inference uses reflection on data sources and parameters")]
-#endif
     private static Type[] TryInferClassGenericsFromDataSources(TestMetadata metadata)
     {
         var genericClassType = metadata.TestClassType;
@@ -1040,6 +1052,73 @@ internal sealed class TestBuilder : ITestBuilder
     }
 
     /// <summary>
+    /// Keeps the accessor on a row until failure cleanup has been transferred, then restores
+    /// its source even when temporary-instance disposal or row cleanup throws.
+    /// </summary>
+    internal readonly struct RowContextLifetime(
+        TestBuilderContextAccessor accessor, TestBuilderContext source, UnclaimedClassRow row) : IDisposable
+    {
+        internal void TransferCleanupToCurrent() => row.TransferCleanupTo(accessor.Current);
+
+        internal TestBuilderContext ClaimFailureContext()
+        {
+            var context = row.CreateFailureContext(accessor.Current);
+            row.ClaimCleanupTo(context);
+            accessor.Current = context;
+            return context;
+        }
+
+        internal ValueTask<List<Exception>?> ReleaseAsync(Func<TestBuilderContext, TestContext> createContext)
+            => row.ReleaseAsync(createContext);
+
+        public void Dispose() => accessor.Current = source;
+    }
+
+    /// <summary>
+    /// An immutable log of constructor dictionary writes and removals, captured before any
+    /// method factory runs. An inherited value with the same reference is not a dictionary
+    /// write: in-place mutations stay visible to consumers of that object, but do not undo a
+    /// later method-enumeration replacement or removal of its key. Values are never deep-cloned.
+    /// </summary>
+    private readonly struct ConstructorStateReplay(
+        List<KeyValuePair<string, object?>>? writes, List<string>? removals)
+    {
+        internal static ConstructorStateReplay Capture(Dictionary<string, object?>? baseline, TestBuilderContext saved)
+        {
+            List<KeyValuePair<string, object?>>? writes = null;
+            List<string>? removals = null;
+            if (saved.HasStateBag)
+            {
+                foreach (var entry in saved.StateBag)
+                {
+                    if (baseline is null || !baseline.TryGetValue(entry.Key, out var inherited)
+                        || !ReferenceEquals(inherited, entry.Value))
+                        (writes ??= []).Add(entry);
+                }
+            }
+            if (baseline is not null)
+            {
+                foreach (var key in baseline.Keys)
+                {
+                    if (!saved.HasStateBag || !saved.StateBag.ContainsKey(key))
+                        (removals ??= []).Add(key);
+                }
+            }
+            return new(writes, removals);
+        }
+
+        internal void ApplyTo(TestBuilderContext target)
+        {
+            if (removals is not null && target.HasStateBag)
+                foreach (var key in removals)
+                    target.StateBag.TryRemove(key, out _);
+            if (writes is not null)
+                foreach (var entry in writes)
+                    target.StateBag[entry.Key] = entry.Value;
+        }
+    }
+
+    /// <summary>
     /// The objects of a class data row that were fetched but that no test holds yet. The builder fetches a
     /// class row once before it evaluates the method data sources, and its tests used to fetch it again,
     /// so a non-shared source created an extra instance per class row that nothing tracked or disposed.
@@ -1049,7 +1128,8 @@ internal sealed class TestBuilder : ITestBuilder
     /// When the row needs a temporary instance for an instance method data source, that instance is built
     /// from these objects and disposed once the method rows are read, so no test may receive them. They
     /// are lent to the instance instead, and the next test built from the row tracks them without
-    /// receiving them, so they are still disposed.
+    /// receiving them, so they are still disposed. Their cleanup owner is claimed by the session,
+    /// keeping constructor scopes alive while later method rows still borrow those objects.
     /// </remarks>
     internal sealed class UnclaimedClassRow(object?[] data, TestDataRowMetadata? metadata, TestBuilderContext rowContext, TestBuilderContext? enumerationContext = null)
     {
@@ -1058,15 +1138,26 @@ internal sealed class TestBuilder : ITestBuilder
         private object?[]? _lent;
 
         private readonly TestBuilderContext _enumerationContext = enumerationContext ?? rowContext;
-        // Compare each saved constructor row against its own pre-factory state.
-        // Method enumeration can change between constructor fetches.
-        private Dictionary<string, object?>? _constructorBaseline = enumerationContext?.HasStateBag == true
-            ? new(enumerationContext.StateBag)
-            : null;
-        private TestBuilderContext _rowContext = rowContext;
+        private ConstructorStateReplay _constructorState = ConstructorStateReplay.Capture(
+            enumerationContext?.HasStateBag == true ? new(enumerationContext.StateBag) : null, rowContext);
         // Snapshot before any method factory can mutate the class subscriptions.
-        private TestContextEvents? _events = rowContext.EventsIfCreated?.Clone();
-        private TestContextEvents? _rejectedCleanup;
+        private TestContextEvents? _lifecycleEvents = LifecycleEvents(rowContext);
+        private RowCleanupOwner? _cleanup = RowCleanupOwner.Capture(rowContext);
+        private List<RowCleanupOwner>? _rejectedCleanup;
+        private bool _pending = true;
+
+        private static TestContextEvents? LifecycleEvents(TestBuilderContext context)
+        {
+            return context.EventsIfCreated is { } events ? new TestContextEvents
+            {
+                OnTestRegistered = events.OnTestRegistered?.Clone(),
+                OnInitialize = events.OnInitialize?.Clone(),
+                OnTestStart = events.OnTestStart?.Clone(),
+                OnTestEnd = events.OnTestEnd?.Clone(),
+                OnTestSkipped = events.OnTestSkipped?.Clone(),
+                OnTestRetry = events.OnTestRetry?.Clone()
+            } : null;
+        }
 
         /// <summary>
         /// Takes the unclaimed objects, or fetches a new row from <paramref name="classDataFactory"/> when a
@@ -1078,61 +1169,38 @@ internal sealed class TestBuilder : ITestBuilder
             {
                 ApplySavedContextTo(context);
                 var row = (data, _metadata);
-                Clear();
+                _data = null;
+                _metadata = null;
                 return new ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)>(row);
             }
+
+            if (_pending)
+                throw new InvalidOperationException("The previous class row must be claimed or returned before fetching another row.");
 
             return FetchAsync(classDataFactory, context);
 
             async ValueTask<(object?[] Data, TestDataRowMetadata? Metadata)> FetchAsync(Func<Task<object?[]?>> factory, TestBuilderContext target)
             {
-                _constructorBaseline = target.HasStateBag ? new(target.StateBag) : null;
+                var baseline = target.HasStateBag ? new Dictionary<string, object?>(target.StateBag) : null;
                 var row = DataUnwrapper.UnwrapWithMetadata(await factory() ?? []);
-                _rowContext = target with { };
-                // Record cloning shares the bag, so even a materialized empty bag must
-                // be detached before a rejected method factory can mutate the target.
-                if (target.HasStateBag)
-                {
-                    _rowContext.StateBag = new ConcurrentDictionary<string, object?>(target.StateBag);
-                }
-                _events = target.EventsIfCreated?.Clone();
+                _constructorState = ConstructorStateReplay.Capture(baseline, target);
+                _lifecycleEvents = LifecycleEvents(target);
+                _cleanup = RowCleanupOwner.Capture(target);
+                _pending = true;
+                // Class cleanup stays with its owner until a test claims the row. Method
+                // factories see the lifecycle subscriptions, but own separate cleanup.
+                if (target.EventsIfCreated is not null)
+                    target.Events = _lifecycleEvents!.Clone();
                 return row;
             }
         }
 
         private void ApplySavedContextTo(TestBuilderContext context)
         {
-            // Keep method-enumeration state, but replay constructor-factory updates
-            // and removals of inherited keys as well as newly added constructor state.
-            if (_rowContext.HasStateBag)
-            {
-                if (_constructorBaseline is not null && context.HasStateBag)
-                {
-                    foreach (var key in _constructorBaseline.Keys)
-                    {
-                        if (!_rowContext.StateBag.ContainsKey(key))
-                        {
-                            context.StateBag.TryRemove(key, out _);
-                        }
-                    }
-                }
-                foreach (var entry in _rowContext.StateBag)
-                {
-                    if (_constructorBaseline is null
-                        || !_constructorBaseline.TryGetValue(entry.Key, out var inherited)
-                        || !ReferenceEquals(inherited, entry.Value))
-                    {
-                        context.StateBag[entry.Key] = entry.Value;
-                    }
-                }
-            }
-            if (_events is { } savedEvents)
+            _constructorState.ApplyTo(context);
+            if (_lifecycleEvents is { } savedEvents)
             {
                 context.Events = savedEvents.Clone();
-            }
-            if (_rejectedCleanup is { } cleanup)
-            {
-                context.Events.AddCleanupFrom(cleanup);
             }
         }
 
@@ -1143,45 +1211,54 @@ internal sealed class TestBuilder : ITestBuilder
         {
             _data = data;
             _metadata = metadata;
-            // Only cleanup follows a rejected method row. Its other lifecycle handlers must
-            // never become constructor subscriptions on later compatible rows.
-            if (rejectedContext.EventsIfCreated is { } rejectedEvents)
+            if (RowCleanupOwner.Capture(rejectedContext) is { } methodCleanup)
             {
-                var cleanup = _rejectedCleanup ??= new();
-                if (rejectedEvents.DataRowScopes is { } scopes)
-                    cleanup.AddDataRowScopes(scopes);
-
-                // Constructor callbacks already belong to the saved class row. Bind only
-                // method-row callbacks to their own state, rather than the next test's bag.
-                var callbacks = rejectedEvents.OnDispose?.InvocationList
-                    .Where(invocation => _events?.OnDispose?.InvocationList.Contains(invocation) != true
-                        && cleanup.OnDispose?.InvocationList.Contains(invocation) != true)
-                    .ToArray();
-                if (callbacks is { Length: > 0 })
-                {
-                    var saved = rejectedContext with { StateBag = new(rejectedContext.StateBag) };
-                    foreach (var callback in callbacks)
-                    {
-                        (cleanup.OnDispose ??= new()).Add(async (_, owner) =>
-                        {
-                            // Rejected rows have no executable test. Give their cleanup a
-                            // context with the owning state and the final test's metadata.
-                            var context = new TestContext(owner.TestDetails.TestName, owner.ServiceProvider,
-                                owner.ClassContext, saved, owner.CancellationToken);
-                            context.Metadata.TestDetails = owner.TestDetails;
-                            try
-                            {
-                                await callback.InvokeAsync(context, context);
-                            }
-                            finally
-                            {
-                                context.RemoveFromRegistry();
-                                context.Dispose();
-                            }
-                        }, callback.Order);
-                    }
-                }
+                (_rejectedCleanup ??= []).Add(methodCleanup);
             }
+        }
+
+        /// <summary>Claims class and method cleanup for one executable (including failed) row.</summary>
+        public void ClaimCleanupTo(TestBuilderContext target)
+        {
+            if (!_pending)
+                return;
+
+            // Capture the method's cleanup before adding the class row's subscriptions.
+            var methodCleanup = RowCleanupOwner.Capture(target);
+            if (methodCleanup is not null)
+            {
+                target.Events.OnDispose = null;
+                target.Events.DataRowScopes = null;
+            }
+            _cleanup?.ClaimTo(target);
+            if (_rejectedCleanup is not null)
+            {
+                foreach (var cleanup in _rejectedCleanup)
+                    cleanup.ClaimTo(target, bindState: true);
+                _rejectedCleanup = null;
+            }
+            methodCleanup?.ClaimTo(target);
+            _pending = false;
+            _data = null;
+            _metadata = null;
+        }
+
+        /// <summary>Releases only rows that no executable test or session claimed.</summary>
+        public async ValueTask<List<Exception>?> ReleaseAsync(Func<TestBuilderContext, TestContext> createContext)
+        {
+            List<Exception>? exceptions = null;
+            if (_cleanup is not null)
+                exceptions = await _cleanup.ReleaseAsync(createContext, exceptions);
+            if (_rejectedCleanup is not null)
+            {
+                foreach (var cleanup in _rejectedCleanup)
+                    exceptions = await cleanup.ReleaseAsync(createContext, exceptions);
+                _rejectedCleanup = null;
+            }
+            _pending = false;
+            _data = null;
+            _metadata = null;
+            return exceptions;
         }
 
         /// <summary>
@@ -1189,9 +1266,10 @@ internal sealed class TestBuilder : ITestBuilder
         /// </summary>
         public void TransferCleanupTo(TestBuilderContext target)
         {
-            if (_data is not null)
+            if (_pending)
             {
                 ApplySavedContextTo(target);
+                ClaimCleanupTo(target);
             }
         }
 
@@ -1214,15 +1292,6 @@ internal sealed class TestBuilder : ITestBuilder
             return failureContext;
         }
 
-        /// <summary>Marks the unclaimed objects as held by a test.</summary>
-        public void Clear()
-        {
-            _data = null;
-            _metadata = null;
-            _lent = null;
-            _rejectedCleanup = null;
-        }
-
         /// <summary>
         /// Marks the unclaimed objects as used by a temporary instance, so no test receives them, but the
         /// next test tracks them through <see cref="TakeLentObjects"/> or <see cref="WithLentObjects"/>.
@@ -1231,15 +1300,12 @@ internal sealed class TestBuilder : ITestBuilder
         {
             _lent = _data;
             // Method rows share this constructor row until session end.
-            if (lifetimeContext is not null && _events is not null)
-            {
-                lifetimeContext.Events.AddCleanupFrom(_events);
-            }
+            if (lifetimeContext is not null)
+                _cleanup?.ClaimTo(lifetimeContext);
             else
-            {
-                TestSessionContext.DeferOnDisposeToSessionEnd(_events);
-            }
-            _events = null;
+                _cleanup?.ClaimForSession();
+            _pending = false;
+            _lifecycleEvents = null;
             _data = null;
             _metadata = null;
         }
@@ -1388,9 +1454,7 @@ internal sealed class TestBuilder : ITestBuilder
     /// Invokes event receivers after dependencies have been resolved.
     /// This is called from TestDiscoveryService after all tests are built and dependencies resolved.
     /// </summary>
-#if NET8_0_OR_GREATER
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Type comes from runtime objects that cannot be annotated")]
-#endif
     public ValueTask InvokePostResolutionEventsAsync(AbstractExecutableTest test)
     {
         var context = test.Context;
@@ -1916,7 +1980,7 @@ internal sealed class TestBuilder : ITestBuilder
         return attributes;
     }
 
-    private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, TestBuilderContext? rowContext)
+    private TestContext CreateFailedTestContext(TestMetadata metadata, TestDetails testDetails, TestBuilderContext? rowContext, bool registerAsTest = true)
     {
         var builderContext = new TestBuilderContext { TestMetadata = metadata.MethodMetadata };
         if (rowContext is not null)
@@ -1929,7 +1993,8 @@ internal sealed class TestBuilder : ITestBuilder
             metadata.TestClassType,
             builderContext,
             testDetails,
-            CancellationToken.None);
+            CancellationToken.None,
+            registerAsTest);
 
         return context;
     }
@@ -2137,9 +2202,7 @@ internal sealed class TestBuilder : ITestBuilder
         return null;
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Type compatibility checking uses reflection")]
-#endif
     private static bool IsTypeCompatible(Type actualType, Type expectedType)
     {
         // Direct match
@@ -2249,9 +2312,7 @@ internal sealed class TestBuilder : ITestBuilder
         public static InstanceCreationResult CreateFailure(Exception exception) => new(null, exception);
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Generic type resolution for instance creation uses reflection")]
-#endif
     private async Task<InstanceCreationResult> CreateInitializedInstanceForMethodDataSources(
         TestMetadata metadata,
         int classDataAttributeIndex,
@@ -2300,9 +2361,7 @@ internal sealed class TestBuilder : ITestBuilder
         return instanceResult;
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Generic type resolution for instance creation uses reflection")]
-#endif
     private async Task<InstanceCreationResult> CreateInstanceForMethodDataSources(
         TestMetadata metadata, int classDataAttributeIndex, int classDataLoopIndex, object?[] classData, TestBuilderContext testBuilderContext)
     {

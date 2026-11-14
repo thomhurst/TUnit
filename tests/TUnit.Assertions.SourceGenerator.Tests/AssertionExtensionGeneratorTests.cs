@@ -263,4 +263,62 @@ internal class AssertionExtensionGeneratorTests : TestsBase<AssertionExtensionGe
 
             await CompileChecker.AssertNoErrors(generatedFiles);
         });
+
+    [Test]
+    public Task DocumentedAssertionClasses() => RunTest(
+        Path.Combine(Git.TestsDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "DocumentedAssertionExtension.cs"),
+        async generatedFiles =>
+        {
+            // One file per assertion class.
+            await Assert.That(generatedFiles).Count().IsEqualTo(7);
+
+            var allFiles = string.Join(Environment.NewLine, generatedFiles);
+            const string classPath = " path=\"/*[self::summary or self::remarks or self::typeparam]\"/>";
+            const string constructorPath = " path=\"/*[(self::param and not(@name='context')) or self::exception]\"/>";
+            const string rangeClass = "    /// <inheritdoc cref=\"T:TUnit.Assertions.Tests.TestData.DocumentedRangeAssertion\"" + classPath;
+
+            // Edge 1: a documented class lends its docs first, then the documented constructor the
+            // extension wraps lends its parameters (without the context) and exceptions.
+            await Assert.That(allFiles).Contains(rangeClass + Environment.NewLine
+                + "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.DocumentedRangeAssertion.#ctor(TUnit.Assertions.Core.AssertionContext{System.Int32},System.Int32,System.Int32)\"" + constructorPath);
+
+            // Edge 2: each constructor's extension names its own constructor.
+            await Assert.That(allFiles).Contains(rangeClass + Environment.NewLine
+                + "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.DocumentedRangeAssertion.#ctor(TUnit.Assertions.Core.AssertionContext{System.Int32},System.Int32)\"" + constructorPath);
+
+            // Edge 3: a generic class uses the ID syntax for type parameters, and the path names the
+            // context parameter as the constructor does.
+            await Assert.That(allFiles).Contains(
+                "    /// <inheritdoc cref=\"T:TUnit.Assertions.Tests.TestData.DocumentedTagAssertion`1\"" + classPath + Environment.NewLine
+                + "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.DocumentedTagAssertion`1.#ctor(TUnit.Assertions.Core.AssertionContext{TUnit.Assertions.Tests.TestData.DocumentedSubject},`0)\" path=\"/*[(self::param and not(@name='assertionContext')) or self::exception]\"/>");
+
+            // Edge 4: the pinned-receiver overload inherits the same docs as the covariant one.
+            await Assert.That(System.Text.RegularExpressions.Regex.Matches(allFiles,
+                System.Text.RegularExpressions.Regex.Escape("/// <inheritdoc cref=\"T:TUnit.Assertions.Tests.TestData.DocumentedTagOfTypeAssertion`1\"")).Count).IsEqualTo(2);
+
+            // Edge 5: a documented class with an undocumented constructor lends only the class docs.
+            await Assert.That(allFiles).Contains("    /// <inheritdoc cref=\"T:TUnit.Assertions.Tests.TestData.ClassOnlyDocumentedAssertion\"" + classPath);
+            await Assert.That(allFiles).DoesNotContain("ClassOnlyDocumentedAssertion.#ctor");
+
+            // Edge 6: an undocumented class keeps the placeholder, even with a documented constructor,
+            // because the class's docs are what describe the assertion.
+            await Assert.That(allFiles).Contains("    /// Extension method for UndocumentedAssertion.");
+            await Assert.That(allFiles).Contains("    /// Extension method for ConstructorOnlyDocumentedAssertion.");
+            await Assert.That(allFiles).DoesNotContain("ConstructorOnlyDocumentedAssertion.#ctor");
+
+            // Edge 7: the negated method keeps the placeholder, as the class describes the positive
+            // assertion; the positive method inherits.
+            await Assert.That(allFiles).Contains("    /// <inheritdoc cref=\"T:TUnit.Assertions.Tests.TestData.NegatableDocumentedAssertion\"" + classPath);
+            await Assert.That(allFiles).Contains("    /// Extension method for NegatableDocumentedAssertion." + Environment.NewLine
+                + "    /// </summary>" + Environment.NewLine
+                + "    public static NegatableDocumentedAssertion IsDocumentedFalse(");
+
+            // Edge 8: the extension keeps the constructor's parameter names, so inherited <param> docs match.
+            await Assert.That(allFiles).Contains("IsInDocumentedRange(this IAssertionSource<int> source, int minimum, int maximum,");
+
+            await CompileChecker.AssertNoErrors(generatedFiles);
+        });
 }

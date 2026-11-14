@@ -292,3 +292,12 @@ public class TypeValueMethodRowInfersClassConstraintTests<T> where T : struct
     [Arguments(typeof(int))]
     public async Task Run(T value) => await Assert.That(value).IsNotEqualTo(default(T));
 }
+
+// Partial constructor rows do not suppress constraint failures inferred from method rows.
+[Arguments(1)]
+public class PartialConstructorMethodConstraintTests<T, U>(T seed) where T : struct
+{
+    [Test]
+    [Arguments("x", "y")]
+    public void Run(T value, U other) => throw new InvalidOperationException($"Must fail during discovery (constructor seed: {seed})");
+}

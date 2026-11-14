@@ -2,7 +2,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$Framework = "net9.0",
+    [string]$Framework = "net10.0",
     [string]$Configuration = "Release",
     [string]$Filter = "/*/*/*/*[EngineTest=Pass]"  # Changed to include all EngineTest tests
 )

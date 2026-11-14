@@ -1,12 +1,7 @@
-using ModularPipelines.Attributes;
-using ModularPipelines.Configuration;
+using ModularPipelines;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
-using ModularPipelines.Models;
-using ModularPipelines.Modules;
+using ModularPipelines.FileSystem;
 using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
@@ -24,16 +19,15 @@ public class PublishTestProjectAOTModule : Module<CommandResult>
 {
     // The publish once took 24-27 minutes on a 3-core macOS runner, past the default 30-minute
     // module timeout on healthy runs.
-    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
-        .WithTimeout(TimeSpan.FromMinutes(60))
-        .Build();
+    protected override void Configure(ModuleConfigurationBuilder module) => module
+        .WithTimeout(TimeSpan.FromMinutes(60));
 
-    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
+    protected override async Task<CommandResult> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
-        var rootDir = context.Git().RootDirectory.AssertExists();
+        var rootDir = (await context.Tools.Git.Information.GetRequiredInfoAsync(cancellationToken)).Root.AssertExists();
         var project = rootDir.FindFile(x => x.Name == "TUnit.TestProject.csproj").AssertExists();
 
-        return await context.DotNet().Publish(new DotNetPublishOptions
+        return await context.Tools.DotNet.PublishAsync(new DotNetPublishOptions
         {
             ProjectSolution = project.Path,
             Runtime = RuntimeIdentifiers.Current,
@@ -47,7 +41,7 @@ public class PublishTestProjectAOTModule : Module<CommandResult>
             Framework = "net10.0",
         }, new CommandExecutionOptions
         {
-            LogSettings = new CommandLoggingOptions
+            Logging = new CommandLoggingOptions
             {
                 ShowCommandArguments = true,
                 ShowStandardError = true,

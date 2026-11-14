@@ -13,8 +13,6 @@ public class HookCleanupOnFailureTests
     private static int _testExecutionCount = 0;
     private static int _beforeClassCount = 0;
     private static int _afterClassCount = 0;
-    private static int _beforeAssemblyCount = 0;
-    private static int _afterAssemblyCount = 0;
 
     [BeforeEvery(Class)]
     public static void BeforeEveryClass(ClassHookContext context)

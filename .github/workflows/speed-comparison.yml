@@ -5,6 +5,11 @@ on:
     - cron: '0 0 * * 0'
   workflow_dispatch:
 
+env:
+  # With telemetry on, the .NET 11 SDK waits ~9s at exit on these runners for a cloud metadata
+  # endpoint (169.254.169.254) that never answers, which lands in every build-time measurement.
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
 jobs:
   build-test-artifacts:
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
@@ -18,7 +23,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Build All Frameworks
         run: |
@@ -30,8 +35,8 @@ jobs:
 
       - name: Publish AOT
         run: |
-          dotnet publish -c Release -p:TestFramework=TUNIT -p:Aot=true --use-current-runtime --output bin/Release-TUNIT-AOT/net10.0
-          dotnet publish -c Release -p:TestFramework=XUNIT3 -p:Aot=true --use-current-runtime --output bin/Release-XUNIT3-AOT/net10.0
+          dotnet publish -c Release -p:TestFramework=TUNIT -p:Aot=true --use-current-runtime --output bin/Release-TUNIT-AOT/net11.0
+          dotnet publish -c Release -p:TestFramework=XUNIT3 -p:Aot=true --use-current-runtime --output bin/Release-XUNIT3-AOT/net11.0
         working-directory: "tools/speed-comparison/UnifiedTests"
 
       - name: Upload Build Artifacts
@@ -61,7 +66,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Download Build Artifacts
         uses: actions/download-artifact@v8
@@ -76,7 +81,7 @@ jobs:
         working-directory: ${{ github.workspace }}
 
       - name: Run Benchmark
-        run: dotnet run -c Release --framework net10.0 --allCategories=Runtime
+        run: dotnet run -c Release --framework net11.0 --allCategories=Runtime
         working-directory: "tools/speed-comparison/Tests.Benchmark"
         env:
           CLASS_NAME: ${{ matrix.class }}
@@ -105,7 +110,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
         with:
-          dotnet-version: 10.0.x
+          dotnet-version: 11.0.x
 
       - name: Prepare builds
         run: |
@@ -113,7 +118,7 @@ jobs:
         working-directory: "tools/speed-comparison"
 
       - name: Run Benchmark
-        run: dotnet run -c Release --allCategories=Build --framework net10.0
+        run: dotnet run -c Release --allCategories=Build --framework net11.0
         working-directory: "tools/speed-comparison/Tests.Benchmark"
 
       - name: Upload Markdown

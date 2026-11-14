@@ -439,4 +439,62 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await Assert.That(mainFile).DoesNotContain("HasItem<TActual, T>");
             await Assert.That(mainFile).DoesNotContain("where TActual :");
         });
+
+    [Test]
+    public Task DocumentedMethods() => RunTest(
+        Path.Combine(Git.TestsDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "DocumentedMethodAssertion.cs"),
+        async generatedFiles =>
+        {
+            // One file per containing type: the public, nested, internal and file-local classes.
+            await Assert.That(generatedFiles).Count().IsEqualTo(4);
+
+            var allFiles = string.Join(Environment.NewLine, generatedFiles);
+            const string pathFilter = " path=\"/*[not(self::returns) and not(self::param[@name='value'])]\"/>";
+
+            // Edge 1: a documented method inherits its documentation through its documentation ID.
+            // The path filter drops <returns>, which describes the source method's bool, not the
+            // returned assertion, and the <param> of the receiver, which the extension renames to source.
+            await Assert.That(allFiles).Contains(
+                "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsMultipleOf(System.Int32,System.Int32)\"" + pathFilter);
+
+            // Edge 2: overloads get distinct IDs, so each inherits its own documentation.
+            await Assert.That(allFiles).Contains(
+                "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsMultipleOf(System.Int64,System.Int64)\"" + pathFilter);
+
+            // Edge 3: generic methods use the ID syntax for method type parameters, not cref syntax.
+            await Assert.That(allFiles).Contains(
+                "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.IsSameValueAs``1(``0,``0)\"" + pathFilter);
+
+            // Edge 4: a public method resolves from a package whatever its containing type: file-local,
+            // internal or private nested. The file-local type is named as in the XML documentation file,
+            // and the path names the receiver as the source method does.
+            await Assert.That(allFiles).Contains(
+                "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.FileLocalDocumentedAssertions.IsTrimmed(System.String)\" path=\"/*[not(self::returns) and not(self::param[@name='text'])]\"/>");
+            await Assert.That(allFiles).Contains(
+                "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.InternalDocumentedAssertions.IsUpperCase(System.String)\"" + pathFilter);
+            await Assert.That(allFiles).Contains(
+                "    /// <inheritdoc cref=\"M:TUnit.Assertions.Tests.TestData.DocumentedMethodAssertions.NestedAssertions.IsDivisibleByThree(System.Int32)\"" + pathFilter);
+
+            // Edge 5: an undocumented method keeps the placeholder summary.
+            await Assert.That(allFiles).Contains("    /// Generated extension method for IsOdd");
+            await Assert.That(allFiles).DoesNotContain("Generated extension method for IsMultipleOf");
+            await Assert.That(allFiles).DoesNotContain("Generated extension method for IsSameValueAs");
+            await Assert.That(allFiles).DoesNotContain("Generated extension method for IsTrimmed");
+            await Assert.That(allFiles).DoesNotContain("Generated extension method for IsUpperCase");
+            await Assert.That(allFiles).DoesNotContain("Generated extension method for IsDivisibleByThree");
+
+            // Edge 6: a package reference does not expose non-public methods, so a documented internal
+            // method keeps the placeholder.
+            await Assert.That(allFiles).Contains("    /// Generated extension method for IsPowerOfTwo");
+            await Assert.That(allFiles).DoesNotContain("IsPowerOfTwo(System.Int32)");
+
+            // Edge 7: the extension keeps the source parameter names, so inherited <param> docs match.
+            await Assert.That(allFiles).Contains("IsMultipleOf(this IAssertionSource<int> source, int factor,");
+            await Assert.That(allFiles).Contains("IsSameValueAs<T>(this IAssertionSource<T> source, T other,");
+
+            await CompileChecker.AssertNoErrors(generatedFiles);
+        });
 }

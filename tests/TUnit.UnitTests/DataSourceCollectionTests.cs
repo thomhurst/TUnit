@@ -39,11 +39,10 @@ public class DataSourceCollectionTests
     }
 
     [Test]
-    public async Task Null_Scalar_Remains_A_Row()
+    public async Task Null_Scalar_Contributes_No_Rows()
     {
         var rows = await ReadRows(DataSourceFactories.FromTask<string?>(() => Task.FromResult<string?>(null)));
-        await Assert.That(rows.Count).IsEqualTo(1);
-        await Assert.That(rows[0]![0]).IsNull();
+        await Assert.That(rows).IsEmpty();
     }
 
     private static IAsyncEnumerable<Func<Task<object?[]?>>> CreateSource(int variant, string?[]? values)

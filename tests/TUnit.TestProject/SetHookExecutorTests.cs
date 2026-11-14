@@ -34,7 +34,6 @@ public class SetBothExecutorsAttribute : Attribute, ITestRegisteredEventReceiver
 public class SetHookExecutorTests
 {
     private static bool _beforeTestHookExecutedWithCustomExecutor;
-    private static bool _afterTestHookExecutedWithCustomExecutor;
 
     [Before(Test)]
     public async Task BeforeTestHook(TestContext context)
@@ -51,7 +50,6 @@ public class SetHookExecutorTests
         // This hook should execute with the custom executor set by the attribute
         await Assert.That(Thread.CurrentThread.Name).IsEqualTo("CrossPlatformTestExecutor");
         await Assert.That(CrossPlatformTestExecutor.IsRunningInTestExecutor.Value).IsTrue();
-        _afterTestHookExecutedWithCustomExecutor = true;
     }
 
     [Test]

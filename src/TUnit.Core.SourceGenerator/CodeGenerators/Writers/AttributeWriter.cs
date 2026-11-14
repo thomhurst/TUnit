@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
+using TUnit.Core.SourceGenerator.CodeGenerators.Formatting;
 using TUnit.Core.SourceGenerator.Extensions;
 
 namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
@@ -9,6 +10,13 @@ namespace TUnit.Core.SourceGenerator.CodeGenerators.Writers;
 public class AttributeWriter(Compilation compilation)
 {
     private const string TUnitRootNamespace = "TUnit";
+
+    // Attribute constructors are C# expressions; reflection names must retain raw identifiers.
+    private static readonly SymbolDisplayFormat AttributeTypeFormat =
+        DisplayFormats.FullyQualifiedGenericWithGlobalPrefix.WithMiscellaneousOptions(
+            DisplayFormats.FullyQualifiedGenericWithGlobalPrefix.MiscellaneousOptions |
+            SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+    private readonly TypedConstantFormatter _typedConstantFormatter = new(compilation);
 
     private readonly Dictionary<AttributeData, string> _attributeObjectInitializerCache = new();
     private readonly Dictionary<INamedTypeSymbol, string> _argumentFreeAttributeInitializerCache = new(SymbolEqualityComparer.Default);
@@ -31,6 +39,14 @@ public class AttributeWriter(Compilation compilation)
         return _semanticModelCache.GetOrAdd(syntaxTree, tree => compilation.GetSemanticModel(tree));
     }
 
+    /// <summary>Whether this attribute is retained in generated test metadata.</summary>
+    public bool CanWriteAttribute(AttributeData attributeData) =>
+        attributeData.AttributeClass is { } attributeClass
+        && IsTUnitRelatedAttribute(attributeClass)
+        && !attributeData.ConstructorArguments.Any(arg =>
+            arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol }
+            && typeSymbol.IsCompilerGeneratedType());
+
     public void WriteAttributes(ICodeWriter sourceCodeWriter,
         IEnumerable<AttributeData> attributeDatas)
     {
@@ -39,21 +55,7 @@ public class AttributeWriter(Compilation compilation)
         // Filter out attributes that we can write
         foreach (var attributeData in attributeDatas)
         {
-            if (attributeData.AttributeClass is null)
-            {
-                continue;
-            }
-
-            // Only include attributes that are, inherit from, or implement a TUnit type
-            if (!IsTUnitRelatedAttribute(attributeData.AttributeClass))
-            {
-                continue;
-            }
-
-            // Skip attributes with compiler-generated type arguments
-            if (attributeData.ConstructorArguments.Any(arg =>
-                    arg is { Kind: TypedConstantKind.Type, Value: ITypeSymbol typeSymbol } &&
-                    typeSymbol.IsCompilerGeneratedType()))
+            if (!CanWriteAttribute(attributeData))
             {
                 continue;
             }
@@ -134,7 +136,7 @@ public class AttributeWriter(Compilation compilation)
 
         var constructorArgs = arguments.Where(x => x.NameEquals == null);
 
-        var attributeName = attributeData.AttributeClass!.GloballyQualified();
+        var attributeName = attributeData.AttributeClass!.ToDisplayString(AttributeTypeFormat);
 
         var formattedConstructorArgs = string.Join(", ", constructorArgs.Select(x => FormatConstructorArgument(x)));
 
@@ -176,9 +178,9 @@ public class AttributeWriter(Compilation compilation)
         return $"{attributeArgumentSyntax.NameEquals!.Name} = {attributeArgumentSyntax.Expression.Accept(new FullyQualifiedWithGlobalPrefixRewriter(GetSemanticModel(attributeArgumentSyntax.SyntaxTree)))!.ToFullString()}";
     }
 
-    public static void WriteAttributeWithoutSyntax(ICodeWriter sourceCodeWriter, AttributeData attributeData)
+    public void WriteAttributeWithoutSyntax(ICodeWriter sourceCodeWriter, AttributeData attributeData)
     {
-        var attributeName = attributeData.AttributeClass!.GloballyQualified();
+        var attributeName = attributeData.AttributeClass!.ToDisplayString(AttributeTypeFormat);
 
         // Skip if any constructor arguments contain compiler-generated types
         if (attributeData.ConstructorArguments.Any(arg =>
@@ -188,10 +190,10 @@ public class AttributeWriter(Compilation compilation)
             return;
         }
 
-        var constructorArgs = attributeData.ConstructorArguments.Select(arg => TypedConstantParser.GetRawTypedConstantValue(arg));
+        var constructorArgs = attributeData.ConstructorArguments.Select(arg => _typedConstantFormatter.FormatForCode(arg));
         var formattedConstructorArgs = string.Join(", ", constructorArgs);
 
-        var namedArgs = attributeData.NamedArguments.Select(arg => $"{arg.Key} = {TypedConstantParser.GetRawTypedConstantValue(arg.Value)}");
+        var namedArgs = attributeData.NamedArguments.Select(arg => $"{arg.Key} = {_typedConstantFormatter.FormatForCode(arg.Value)}");
         var formattedNamedArgs = string.Join(", ", namedArgs);
 
         sourceCodeWriter.Append($"new {attributeName}({formattedConstructorArgs})");

@@ -16,7 +16,7 @@ public sealed class DependencyInjectionClassConstructor : IClassConstructor
 public abstract class BaseTestClass(IServiceProvider serviceProvider)
 {
     [Before(Test)]
-    public Task Hook() => Task.CompletedTask;
+    public async Task Hook() => await Assert.That(serviceProvider).IsNotNull();
 }
 
 [ClassConstructor<DependencyInjectionClassConstructor>]

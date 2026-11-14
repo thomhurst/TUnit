@@ -18,23 +18,19 @@ namespace TUnit.Engine.Building.Collectors;
 /// </summary>
 internal sealed class AotTestDataCollector : ITestDataCollector
 {
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "AOT implementation uses source-generated metadata, not reflection")]
     [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "AOT implementation uses source-generated metadata, not dynamic code")]
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
-    #endif
     public Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId)
     {
         return CollectTestsAsync(testSessionId, filter: null);
     }
 
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2046", Justification = "AOT implementation uses source-generated metadata, not reflection")]
     [UnconditionalSuppressMessage("AOT", "IL3051", Justification = "AOT implementation uses source-generated metadata, not dynamic code")]
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Dynamic tests are optional and not used in AOT scenarios")]
-    #endif
     public async Task<IEnumerable<TestMetadata>> CollectTestsAsync(string testSessionId, ITestExecutionFilter? filter)
     {
         var filterHints = MetadataFilterMatcher.ExtractFilterHints(filter);
@@ -57,9 +53,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
     /// Collects tests from TestEntry sources (the new fast path).
     /// Uses TestEntryFilterData for pure-data filtering, then materializes only matching entries.
     /// </summary>
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Materialization uses source-generated metadata")]
-    #endif
     private IEnumerable<TestMetadata> CollectTestsFromTestEntries(
         string testSessionId,
         FilterHints filterHints)
@@ -238,9 +232,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
     }
 
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test conversion requires expression compilation")]
-    #endif
     private async IAsyncEnumerable<TestMetadata> ConvertDynamicTestToMetadataStreaming(
         AbstractDynamicTest abstractDynamicTest,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -257,9 +249,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         }
     }
 
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test metadata creation requires expression extraction and reflection")]
-    #endif
     private Task<TestMetadata> CreateMetadataFromDynamicDiscoveryResult(DynamicDiscoveryResult result)
     {
         if (result.TestClassType == null || result.TestMethod == null)
@@ -342,9 +332,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Dynamic test invocation requires LambdaExpression.Compile")]
-    #endif
     private static Func<object, object?[], Task> CreateAotDynamicTestInvoker(DynamicDiscoveryResult result)
     {
         return async (instance, args) =>
@@ -375,9 +363,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Failed metadata creation accesses Type.Name and assembly info")]
-    #endif
     private static TestMetadata CreateFailedTestMetadataForDynamicSource(IDynamicTestSource source, Exception ex)
     {
         var testName = $"[DYNAMIC SOURCE FAILED] {source.GetType().Name}";
@@ -397,9 +383,7 @@ internal sealed class AotTestDataCollector : ITestDataCollector
         };
     }
 
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Dummy metadata creation accesses type and assembly information")]
-    #endif
     private static MethodMetadata CreateDummyMethodMetadata(Type type, string methodName)
     {
         return new MethodMetadata

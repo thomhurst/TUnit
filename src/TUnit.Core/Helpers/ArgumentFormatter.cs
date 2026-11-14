@@ -170,6 +170,9 @@ public static class ArgumentFormatter
 #if NET
             || o is Half or Int128 or UInt128 or System.Runtime.InteropServices.NFloat
 #endif
+#if NET11_0_OR_GREATER
+            || o is Decimal32 or Decimal64 or Decimal128 or BFloat16
+#endif
             ;
     }
 

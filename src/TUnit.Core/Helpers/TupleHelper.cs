@@ -11,6 +11,52 @@ namespace TUnit.Core.Helpers;
 public static class TupleHelper
 {
 
+    // Process-lifetime cache: one entry per distinct parameter/source type pair.
+    private static readonly ConcurrentDictionary<(Type Parameter, Type Row), bool> OpenTupleMatches = new();
+
+    // Open tuple types cannot use IsInstanceOfType. Match their complete shape so a nested
+    // row with separate columns is not mistaken for the first tuple argument.
+    internal static bool MatchesOpenTuple(Type parameter, Type row) =>
+        OpenTupleMatches.GetOrAdd((parameter, row), static pair => MatchesType(pair.Parameter, pair.Row, new Dictionary<Type, Type>()));
+
+    private static bool MatchesType(Type parameter, Type row, Dictionary<Type, Type> bindings)
+    {
+        if (parameter.IsGenericParameter)
+        {
+            if (bindings.TryGetValue(parameter, out var bound)) return bound == row;
+            bindings.Add(parameter, row);
+            return true;
+        }
+
+        if (!parameter.ContainsGenericParameters)
+        {
+            // Tuple type arguments are invariant. Element assignability alone does not make
+            // the constructed outer tuple assignable. Mirrors generator MatchesOpenRowType.
+            return parameter == row;
+        }
+
+        if (parameter.IsArray)
+        {
+            return row.IsArray && parameter.GetArrayRank() == row.GetArrayRank()
+                && MatchesType(parameter.GetElementType()!, row.GetElementType()!, bindings);
+        }
+
+        if (!parameter.IsGenericType || !row.IsGenericType
+            || parameter.GetGenericTypeDefinition() != row.GetGenericTypeDefinition())
+        {
+            return false;
+        }
+
+        var parameters = parameter.GetGenericArguments();
+        var arguments = row.GetGenericArguments();
+        for (var i = 0; i < parameters.Length; i++)
+        {
+            if (!MatchesType(parameters[i], arguments[i], bindings)) return false;
+        }
+
+        return true;
+    }
+
 #if NET
     /// <summary>
     /// Checks if a type is a tuple type (ValueTuple or Tuple)
@@ -77,9 +123,7 @@ public static class TupleHelper
 
     private static readonly ConcurrentDictionary<Type, MemberInfo[]> TupleMembers = new();
 
-#if NET
     [RequiresUnreferencedCode("Tuple fallback reads tuple fields and properties through reflection.")]
-#endif
     private static void AppendTupleElements(object value, List<object?> elements)
     {
         var members = TupleMembers.GetOrAdd(value.GetType(), static type =>
@@ -128,9 +172,7 @@ public static class TupleHelper
     }
 
     // Kept callable in modern builds so tests exercise the netstandard2.0 fallback directly.
-#if NET
     [RequiresUnreferencedCode("Tuple fallback reads tuple fields and properties through reflection.")]
-#endif
     internal static object?[] UnwrapTupleUsingReflection(object? value)
     {
         if (value == null)
@@ -193,9 +235,7 @@ public static class TupleHelper
     /// Expands an array of tuples into individual tuple elements for data source generation
     /// For example: [(1, "a"), (2, "b")] becomes individual items that each unwrap to [1, "a"] and [2, "b"]
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Tuple expansion uses reflection as fallback")]
-    #endif
     public static IEnumerable<object?[]> ExpandTupleArray(object? value)
     {
         if (value == null)

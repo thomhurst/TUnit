@@ -126,9 +126,7 @@ public static class ReflectionExtensions
 #endif
     }
 
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Attribute instantiation uses reflection for .NET Framework compatibility")]
-    #endif
     private static Attribute[] GetAttributesViaCustomAttributeData(ICustomAttributeProvider provider, Type attributeType, bool inherit)
     {
         var attributes = new List<Attribute>();
@@ -177,22 +175,93 @@ public static class ReflectionExtensions
             }
         }
 
-        if (inherit && provider is Type type)
+        if (inherit && provider is MemberInfo member)
         {
-            var baseType = type.BaseType;
-            while (baseType != null && baseType != typeof(object))
+            var seen = new HashSet<Type>(attributes.Select(attribute => attribute.GetType()));
+            foreach (var baseMember in GetInheritedAttributeMembers(member))
             {
-                attributes.AddRange(GetAttributesViaCustomAttributeData(baseType, attributeType, false));
-                baseType = baseType.BaseType;
+                // Inspect usage on the concrete attribute type, as Type.GetCustomAttributes does.
+                // A base attribute class's usage does not supply the runtime defaults.
+                var declaredTypes = new HashSet<Type>();
+                foreach (var data in CustomAttributeData.GetCustomAttributes(baseMember))
+                {
+                    var concreteType = data.AttributeType;
+                    if (!attributeType.IsAssignableFrom(concreteType))
+                    {
+                        continue;
+                    }
+
+                    var usage = CustomAttributeData.GetCustomAttributes(concreteType)
+                        .FirstOrDefault(attribute => attribute.AttributeType == typeof(AttributeUsageAttribute));
+                    var inherited = true;
+                    var allowMultiple = false;
+                    if (usage != null)
+                    {
+                        foreach (var argument in usage.NamedArguments)
+                        {
+                            if (argument.MemberName == nameof(AttributeUsageAttribute.Inherited)) inherited = (bool)argument.TypedValue.Value!;
+                            if (argument.MemberName == nameof(AttributeUsageAttribute.AllowMultiple)) allowMultiple = (bool)argument.TypedValue.Value!;
+                        }
+                    }
+
+                    if (inherited && (allowMultiple || !seen.Contains(concreteType)))
+                    {
+                        try
+                        {
+                            if (CreateAttributeInstance(data) is { } attribute)
+                            {
+                                attributes.Add(attribute);
+                            }
+                        }
+                        catch
+                        {
+                            // Preserve the fallback's handling of attributes that cannot be instantiated.
+                        }
+                    }
+                    declaredTypes.Add(concreteType);
+                }
+                seen.UnionWith(declaredTypes);
             }
         }
 
         return attributes.ToArray();
     }
 
-    #if NET8_0_OR_GREATER
+    [RequiresUnreferencedCode("Base method attribute discovery uses reflection for .NET Framework compatibility")]
+    private static IEnumerable<MemberInfo> GetInheritedAttributeMembers(MemberInfo member)
+    {
+        if (member is Type type)
+        {
+            for (var baseType = type.BaseType; baseType != null && baseType != typeof(object); baseType = baseType.BaseType)
+            {
+                yield return baseType;
+            }
+        }
+        else if (member is MethodInfo { IsVirtual: true } method)
+        {
+            var definition = method.GetBaseDefinition();
+            if (definition == method)
+            {
+                yield break;
+            }
+
+            for (var baseType = method.DeclaringType?.BaseType; baseType != null; baseType = baseType.BaseType)
+            {
+                foreach (var candidate in baseType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly))
+                {
+                    // Slot identity also works for constructed generic bases and excludes overloads/new slots.
+                    var candidateDefinition = candidate.GetBaseDefinition();
+                    if (candidateDefinition.Module == definition.Module && candidateDefinition.MetadataToken == definition.MetadataToken)
+                    {
+                        yield return candidate;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     [RequiresUnreferencedCode("Attribute instantiation uses reflection for .NET Framework compatibility")]
-    #endif
     private static Attribute? CreateAttributeInstance(CustomAttributeData attributeData)
     {
         var attributeType = attributeData.AttributeType;
@@ -257,9 +326,7 @@ public static class ReflectionExtensions
         return attribute;
     }
 
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Runtime type property access for attribute argument extraction")]
-    #endif
     private static object? ExtractArgumentValue(CustomAttributeTypedArgument arg)
     {
         var value = arg.Value;
@@ -295,9 +362,7 @@ public static class ReflectionExtensions
     /// <summary>
     /// Gets the "Value" property from a type in an AOT-safer manner.
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Property access used for unwrapping test data")]
-    #endif
     private static PropertyInfo? GetValuePropertySafe([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] Type type)
     {
         return type.GetProperty("Value");
@@ -306,9 +371,7 @@ public static class ReflectionExtensions
     /// <summary>
     /// Gets the "Value" property from a runtime type.
     /// </summary>
-    #if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Runtime type property access for attribute argument extraction")]
-    #endif
     private static PropertyInfo? GetValuePropertyForType(Type type)
     {
         return GetValuePropertySafe(type);

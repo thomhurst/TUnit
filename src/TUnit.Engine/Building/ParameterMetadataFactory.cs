@@ -19,9 +19,7 @@ namespace TUnit.Engine.Building;
 /// </summary>
 internal static class ParameterMetadataFactory
 {
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Parameter metadata creation uses reflection")]
-#endif
     public static ParameterMetadata[] Build(
         ParameterInfo[] parameters,
         string? nameFallback,
@@ -42,9 +40,7 @@ internal static class ParameterMetadataFactory
         return result;
     }
 
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Parameter metadata creation uses reflection")]
-#endif
     private static ParameterMetadata Create(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors
             | DynamicallyAccessedMemberTypes.PublicMethods

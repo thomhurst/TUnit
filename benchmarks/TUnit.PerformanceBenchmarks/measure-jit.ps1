@@ -43,7 +43,7 @@ if (-not $SkipBuild) {
 }
 
 # Find executable
-$tfm = "net9.0"
+$tfm = "net11.0"
 $exeDir = Join-Path $scriptDir "bin" $Configuration $tfm
 $exeName = "TUnit.PerformanceBenchmarks"
 if ($IsWindows -or $env:OS -match "Windows") {

@@ -263,7 +263,30 @@ internal static class MockMembersBuilder
         writer.AppendLine();
     }
 
-    private const string EngineExpression = "global::TUnit.Mocks.MockRegistry.GetEngine(mock)";
+    // Extension-block receivers share a scope with every setup signature. Reserve names
+    // across the model so the receiver and all setup bodies use the same identifier.
+    internal static string GetSetupIdentifier(MockTypeModel model, string preferredName)
+    {
+        static bool IsOccupied(MockTypeModel model, string name)
+        {
+            foreach (var member in model.Methods.Concat(model.Properties))
+            {
+                foreach (var parameter in member.Parameters)
+                    if (parameter.Name.TrimStart('@') == name) return true;
+                foreach (var parameter in member.TypeParameters)
+                    if (parameter.Name.TrimStart('@') == name) return true;
+            }
+            foreach (var parameter in model.TypeParameters)
+                if (parameter.Name.TrimStart('@') == name) return true;
+            return false;
+        }
+
+        while (IsOccupied(model, preferredName)) preferredName += "_";
+        return preferredName;
+    }
+
+    private static string GetEngineExpression(MockTypeModel model)
+        => $"global::TUnit.Mocks.MockRegistry.GetEngine({GetSetupIdentifier(model, "mock")})";
 
     /// <summary>
     /// Emits the engine lookup for an extension body and returns the expression later code should
@@ -274,10 +297,10 @@ internal static class MockMembersBuilder
     {
         if (!model.IsSecondaryMemberSurface)
         {
-            return EngineExpression;
+            return GetEngineExpression(model);
         }
-        writer.AppendLine($"var __engine = {EngineExpression};");
-        return "__engine";
+        writer.AppendLine($"var {GetSetupIdentifier(model, "__engine")} = {GetEngineExpression(model)};");
+        return GetSetupIdentifier(model, "__engine");
     }
 
     /// <summary>
@@ -286,7 +309,7 @@ internal static class MockMembersBuilder
     /// secondary (pair) surfaces.
     /// </summary>
     private static string FormatMemberId(MockTypeModel model, int memberId)
-        => model.IsSecondaryMemberSurface ? $"__Id(__engine, {memberId.ToString(CultureInfo.InvariantCulture)})" : memberId.ToString(CultureInfo.InvariantCulture);
+        => model.IsSecondaryMemberSurface ? $"__Id({GetSetupIdentifier(model, "__engine")}, {memberId.ToString(CultureInfo.InvariantCulture)})" : memberId.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Emits namespace-scoped delegate types so non-span ref struct out/ref values can travel
@@ -887,7 +910,7 @@ internal static class MockMembersBuilder
         var modelTypeParams = MockImplBuilder.GetTypeParameterList(model);
         var modelConstraints = MockImplBuilder.GetConstraintClauses(model);
 
-        using (writer.Block($"extension{modelTypeParams}(global::TUnit.Mocks.Mock<{MockImplBuilder.GetMockableTypeName(model)}> mock){modelConstraints}"))
+        using (writer.Block($"extension{modelTypeParams}(global::TUnit.Mocks.Mock<{MockImplBuilder.GetMockableTypeName(model)}> {GetSetupIdentifier(model, "mock")}){modelConstraints}"))
         {
             GenerateGenericMethodMembersInCurrentBlock(writer, method, model, safeName);
         }
@@ -896,7 +919,7 @@ internal static class MockMembersBuilder
         {
             var wrapperSafeName = MockImplBuilder.GetCompositeShortSafeName(model);
             var wrapperTypeName = $"{MockImplBuilder.GetGlobalMockNamespacePrefix(model)}{MockImplBuilder.GetGeneratedTypeName($"{wrapperSafeName}Mock", model)}";
-            using (writer.Block($"extension{modelTypeParams}({wrapperTypeName} mock){modelConstraints}"))
+            using (writer.Block($"extension{modelTypeParams}({wrapperTypeName} {GetSetupIdentifier(model, "mock")}){modelConstraints}"))
             {
                 GenerateGenericMethodMembersInCurrentBlock(writer, method, model, safeName);
             }
@@ -1269,7 +1292,7 @@ internal static class MockMembersBuilder
         {
             if (receiverIsThis)
             {
-                writer.AppendLine("var mock = this;");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "mock")} = this;");
             }
 
             EmitOutParamDefaults(writer, method);
@@ -1281,12 +1304,12 @@ internal static class MockMembersBuilder
 
             if (matchableParams.Count == 0)
             {
-                writer.AppendLine("var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "matchers")} = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();");
             }
             else
             {
                 var matcherArgs = string.Join(", ", matchableParams.Select(p => $"{p.Name}.Matcher"));
-                writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "matchers")} = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
             }
 
             EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
@@ -1313,19 +1336,19 @@ internal static class MockMembersBuilder
         if (useTypedWrapper)
         {
             var wrapperName = GetWrapperTypeName(safeName, method, model);
-            writer.AppendLine($"return new {wrapperName}({engineExpr}, {memberIdExpr}, \"{method.Name}\", matchers{typeArgs});");
+            writer.AppendLine($"return new {wrapperName}({engineExpr}, {memberIdExpr}, \"{method.Name}\", {GetSetupIdentifier(model, "matchers")}{typeArgs});");
         }
         else if (method.IsVoid || method.IsRefStructReturn)
         {
-            writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall({engineExpr}, {memberIdExpr}, \"{method.Name}\", matchers{typeArgs});");
+            writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall({engineExpr}, {memberIdExpr}, \"{method.Name}\", {GetSetupIdentifier(model, "matchers")}{typeArgs});");
         }
         else if (method.IsReturnTypeStaticAbstractInterface)
         {
-            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>({engineExpr}, {memberIdExpr}, \"{method.Name}\", matchers{typeArgs});");
+            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<object?>({engineExpr}, {memberIdExpr}, \"{method.Name}\", {GetSetupIdentifier(model, "matchers")}{typeArgs});");
         }
         else
         {
-            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>({engineExpr}, {memberIdExpr}, \"{method.Name}\", matchers{typeArgs});");
+            writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{setupReturnType}>({engineExpr}, {memberIdExpr}, \"{method.Name}\", {GetSetupIdentifier(model, "matchers")}{typeArgs});");
         }
     }
 
@@ -1385,14 +1408,14 @@ internal static class MockMembersBuilder
         {
             if (receiverIsThis)
             {
-                writer.AppendLine("var mock = this;");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "mock")} = this;");
             }
 
             // AnyMatcher<T>.Instance is stateless and shared — unlike Arg.Any<T>(), it skips the
             // CapturingMatcher wrap, so the AnyArgs path doesn't accumulate captured values per call.
             var matcherArgs = string.Join(", ", method.Parameters.Select(p =>
                 $"global::TUnit.Mocks.Matchers.AnyMatcher<{p.FullyQualifiedType}>.Instance"));
-            writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
+            writer.AppendLine($"var {GetSetupIdentifier(model, "matchers")} = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {matcherArgs} }};");
 
             EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
         }
@@ -1504,7 +1527,7 @@ internal static class MockMembersBuilder
         {
             if (receiverIsThis)
             {
-                writer.AppendLine("var mock = this;");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "mock")} = this;");
             }
 
             EmitOutParamDefaults(writer, method);
@@ -1512,11 +1535,23 @@ internal static class MockMembersBuilder
             // A null predicate (including null/default literals) matches the parameter type’s default.
             // This also handles value-type instantiations of unconstrained generic parameters.
             // Keep non-null predicates on the existing implicit-conversion path.
+            // Reserve parameter and type parameter identifiers, including escaped names, before allocating locals.
+            var usedNames = new HashSet<string>(method.Parameters.Select(p => p.Name.TrimStart('@')), StringComparer.Ordinal);
+            usedNames.UnionWith(model.TypeParameters.Select(tp => tp.Name.TrimStart('@')));
+            usedNames.UnionWith(method.TypeParameters.Select(tp => tp.Name.TrimStart('@')));
+            var predicateLocals = new Dictionary<int, string>();
             foreach (var idx in funcIndices.OrderBy(i => i))
             {
                 var p = method.Parameters[idx];
                 var rawName = p.Name.StartsWith("@", StringComparison.Ordinal) ? p.Name[1..] : p.Name;
-                writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> __fa_{rawName} = {p.Name} is null ? global::TUnit.Mocks.Arguments.Arg.Is<{p.FullyQualifiedType}>(default({p.FullyQualifiedType})!) : (global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}>){p.Name};");
+                var baseName = $"__fa_{rawName}";
+                var localName = baseName;
+                for (var suffix = 1; !usedNames.Add(localName); suffix++)
+                {
+                    localName = $"{baseName}_{suffix.ToString(CultureInfo.InvariantCulture)}";
+                }
+                predicateLocals.Add(idx, localName);
+                writer.AppendLine($"global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}> {localName} = {p.Name} is null ? global::TUnit.Mocks.Arguments.Arg.Is<{p.FullyQualifiedType}>(default({p.FullyQualifiedType})!) : (global::TUnit.Mocks.Arguments.Arg<{p.FullyQualifiedType}>){p.Name};");
             }
 
             // Build matchers array
@@ -1527,17 +1562,16 @@ internal static class MockMembersBuilder
                 if (p.Direction == ParameterDirection.Out) continue;
                 if (!includeRefStructArgs && p.IsRefStruct) continue;
 
-                var rawName = p.Name.StartsWith("@", StringComparison.Ordinal) ? p.Name[1..] : p.Name;
-                matcherExprs.Add(funcIndices.Contains(i) ? $"__fa_{rawName}.Matcher" : $"{p.Name}.Matcher");
+                matcherExprs.Add(funcIndices.Contains(i) ? $"{predicateLocals[i]}.Matcher" : $"{p.Name}.Matcher");
             }
 
             if (matcherExprs.Count == 0)
             {
-                writer.AppendLine("var matchers = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "matchers")} = global::System.Array.Empty<global::TUnit.Mocks.Arguments.IArgumentMatcher>();");
             }
             else
             {
-                writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", matcherExprs)} }};");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "matchers")} = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", matcherExprs)} }};");
             }
 
             EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
@@ -1549,7 +1583,7 @@ internal static class MockMembersBuilder
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
         var typeParams = MockImplBuilder.GetTypeParameterList(model);
         var constraints = MockImplBuilder.GetConstraintClauses(model);
-        using (writer.Block($"extension{typeParams}(global::TUnit.Mocks.Mock<{mockableType}> mock){constraints}"))
+        using (writer.Block($"extension{typeParams}(global::TUnit.Mocks.Mock<{mockableType}> {GetSetupIdentifier(model, "mock")}){constraints}"))
         {
             bool first = true;
             foreach (var prop in props)
@@ -1577,7 +1611,7 @@ internal static class MockMembersBuilder
                 else
                 {
                     writer.AppendLine($"public global::TUnit.Mocks.PropertyMockCall<{prop.ReturnType}> {safePropName}");
-                    writer.AppendLine($"    => new({EngineExpression}, {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
+                    writer.AppendLine($"    => new({GetEngineExpression(model)}, {getterMemberId}, {setterMemberId}, \"{prop.Name}\", {hasGetter}, {hasSetter});");
                 }
             }
         }
@@ -1593,7 +1627,7 @@ internal static class MockMembersBuilder
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
         var typeParams = MockImplBuilder.GetTypeParameterList(model);
         var constraints = MockImplBuilder.GetConstraintClauses(model);
-        var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
+        var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> {GetSetupIdentifier(model, "mock")}";
 
         // Indexer parameters as Arg<T> so callers can pass a literal, Arg.Any<T>(), etc.
         var argParams = string.Join(", ", indexer.Parameters.Select(p =>
@@ -1608,9 +1642,9 @@ internal static class MockMembersBuilder
             var getterParams = string.IsNullOrEmpty(argParams) ? extensionParam : $"{extensionParam}, {argParams}";
             using (writer.Block($"public static global::TUnit.Mocks.MockMethodCall<{indexer.ReturnType}> Item{typeParams}({getterParams}){constraints}"))
             {
-                writer.AppendLine($"var matchers = {matcherList};");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "matchers")} = {matcherList};");
                 var engineExpr = EmitEngineLookup(writer, model);
-                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{indexer.ReturnType}>({engineExpr}, {FormatMemberId(model, indexer.MemberId)}, \"get_Item\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.MockMethodCall<{indexer.ReturnType}>({engineExpr}, {FormatMemberId(model, indexer.MemberId)}, \"get_Item\", {GetSetupIdentifier(model, "matchers")});");
             }
         }
 
@@ -1626,9 +1660,9 @@ internal static class MockMembersBuilder
                 : $"new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", indexer.Parameters.Select(p => $"{p.Name}.Matcher"))}, value.Matcher }}";
             using (writer.Block($"public static global::TUnit.Mocks.VoidMockMethodCall SetItem{typeParams}({setterParams}){constraints}"))
             {
-                writer.AppendLine($"var matchers = {setterMatcherList};");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "matchers")} = {setterMatcherList};");
                 var engineExpr = EmitEngineLookup(writer, model);
-                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall({engineExpr}, {FormatMemberId(model, indexer.SetterMemberId)}, \"set_Item\", matchers);");
+                writer.AppendLine($"return new global::TUnit.Mocks.VoidMockMethodCall({engineExpr}, {FormatMemberId(model, indexer.SetterMemberId)}, \"set_Item\", {GetSetupIdentifier(model, "matchers")});");
             }
         }
     }
@@ -1884,19 +1918,19 @@ internal static class MockMembersBuilder
         {
             if (receiverIsThis)
             {
-                writer.AppendLine("var mock = this;");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "mock")} = this;");
             }
 
             EmitOutParamDefaults(writer, method);
 
-            writer.AppendLine($"var __paramsElementMatchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[{last.Name}.Length];");
-            using (writer.Block($"for (int __i = 0; __i < {last.Name}.Length; __i++)"))
+            writer.AppendLine($"var {GetSetupIdentifier(model, "__paramsElementMatchers")} = new global::TUnit.Mocks.Arguments.IArgumentMatcher[{last.Name}.Length];");
+            using (writer.Block($"for (int {GetSetupIdentifier(model, "__i")} = 0; {GetSetupIdentifier(model, "__i")} < {last.Name}.Length; {GetSetupIdentifier(model, "__i")}++)"))
             {
-                writer.AppendLine($"__paramsElementMatchers[__i] = {last.Name}[__i].Matcher;");
+                writer.AppendLine($"{GetSetupIdentifier(model, "__paramsElementMatchers")}[{GetSetupIdentifier(model, "__i")}] = {last.Name}[{GetSetupIdentifier(model, "__i")}].Matcher;");
             }
 
-            EmitMatchersArrayWithParamsSlot(writer, method, includeRefStructArgs,
-                "new global::TUnit.Mocks.Matchers.ParamsArrayMatcher(__paramsElementMatchers)");
+            EmitMatchersArrayWithParamsSlot(writer, method, model, includeRefStructArgs,
+                $"new global::TUnit.Mocks.Matchers.ParamsArrayMatcher({GetSetupIdentifier(model, "__paramsElementMatchers")})");
 
             EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
         }
@@ -1951,13 +1985,13 @@ internal static class MockMembersBuilder
         {
             if (receiverIsThis)
             {
-                writer.AppendLine("var mock = this;");
+                writer.AppendLine($"var {GetSetupIdentifier(model, "mock")} = this;");
             }
 
             EmitOutParamDefaults(writer, method);
 
             // AnyMatcher<T[]>.Instance: whole-array Any, identical to the Arg<T[]> overload with Any().
-            EmitMatchersArrayWithParamsSlot(writer, method, includeRefStructArgs,
+            EmitMatchersArrayWithParamsSlot(writer, method, model, includeRefStructArgs,
                 $"global::TUnit.Mocks.Matchers.AnyMatcher<{last.FullyQualifiedType}>.Instance");
 
             EmitReturnConstruction(writer, method, model, safeName, useTypedWrapper, setupReturnType);
@@ -1970,7 +2004,7 @@ internal static class MockMembersBuilder
     /// <paramref name="paramsSlotExpression"/>. The params parameter is always <c>In</c> and never
     /// a ref struct, so it is always the last matchable parameter.
     /// </summary>
-    private static void EmitMatchersArrayWithParamsSlot(CodeWriter writer, MockMemberModel method,
+    private static void EmitMatchersArrayWithParamsSlot(CodeWriter writer, MockMemberModel method, MockTypeModel model,
         bool includeRefStructArgs, string paramsSlotExpression)
     {
         var matchableParams = includeRefStructArgs
@@ -1979,13 +2013,13 @@ internal static class MockMembersBuilder
 
         var matcherArgs = matchableParams
             .Select((p, i) => i == matchableParams.Count - 1 ? paramsSlotExpression : $"{p.Name}.Matcher");
-        writer.AppendLine($"var matchers = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", matcherArgs)} }};");
+        writer.AppendLine($"var {GetSetupIdentifier(model, "matchers")} = new global::TUnit.Mocks.Arguments.IArgumentMatcher[] {{ {string.Join(", ", matcherArgs)} }};");
     }
 
     private static string BuildExtensionMethodParameterList(MockTypeModel model, string paramList)
     {
         var mockableType = MockImplBuilder.GetMockableTypeName(model);
-        var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> mock";
+        var extensionParam = $"this global::TUnit.Mocks.Mock<{mockableType}> {GetSetupIdentifier(model, "mock")}";
         return string.IsNullOrEmpty(paramList) ? extensionParam : $"{extensionParam}, {paramList}";
     }
 

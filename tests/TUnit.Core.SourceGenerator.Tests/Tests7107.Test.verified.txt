@@ -74,6 +74,10 @@ internal static class TUnit_TestProject_Bugs__7107_ClassRowConstraintTests_T_Run
             FilePath = "",
             LineNumber = 18,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute()
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
@@ -123,6 +127,10 @@ internal static class TUnit_TestProject_Bugs__7107_OnlyInvalidClassRowConstraint
             FilePath = "",
             LineNumber = 26,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute()
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
@@ -203,6 +211,12 @@ internal static class TUnit_TestProject_Bugs__7107_ClassGenerateGenericConstrain
             FilePath = "",
             LineNumber = 35,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute(),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string))
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
@@ -287,6 +301,12 @@ internal static class TUnit_TestProject_Bugs__7107_NullableInterfaceConstraintTe
             FilePath = "",
             LineNumber = 44,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute(),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int?))
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'Nullable`1' does not implement interface 'IComparable' required for generic parameter 'T'" },
         },
     };
@@ -378,6 +398,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             FilePath = "",
             LineNumber = 51,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute()
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
@@ -691,6 +715,10 @@ internal static class TUnit_TestProject_Bugs__7107_SeveralInvalidClassRowsConstr
             FilePath = "",
             LineNumber = 91,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute()
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'", "Type 'DayOfWeek' does not implement interface 'IEquatable`1' required for generic parameter 'T'", "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
@@ -736,6 +764,10 @@ internal static class TUnit_TestProject_Bugs__7107_SeveralInvalidClassRowsConstr
             FilePath = "",
             LineNumber = 94,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute()
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'", "Type 'DayOfWeek' does not implement interface 'IEquatable`1' required for generic parameter 'T'", "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
@@ -1224,6 +1256,12 @@ internal static class TUnit_TestProject_Bugs__7107_TypeParameterConstraintTests_
             FilePath = "",
             LineNumber = 145,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute(),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::System.IO.MemoryStream), typeof(global::System.IO.Stream)),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(string), typeof(global::System.IO.Stream))
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'String' does not satisfy the base type constraint 'Stream' for generic parameter 'T'" },
         },
     };
@@ -1308,6 +1346,12 @@ internal static class TUnit_TestProject_Bugs__7107_NewConstraintTests_T_Run_Test
             FilePath = "",
             LineNumber = 154,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute(),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(object)),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(global::TUnit.TestProject.Bugs._7107.NoParameterlessConstructor))
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type arguments 'NoParameterlessConstructor' do not satisfy the generic constraints of type 'NewConstraintTests`1'" },
         },
     };
@@ -1392,6 +1436,12 @@ internal static class TUnit_TestProject_Bugs__7107_NullableStructConstraintTests
             FilePath = "",
             LineNumber = 163,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute(),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int)),
+                new global::TUnit.Core.GenerateGenericTestAttribute(typeof(int?))
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'Nullable`1' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
@@ -2052,6 +2102,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             FilePath = "",
             LineNumber = 284,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute()
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'Object' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
@@ -2097,6 +2151,10 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
             FilePath = "",
             LineNumber = 291,
             MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute()
+            }, static attribute => attribute is not null),
             Messages = new string[] { "Type 'Type' does not satisfy the 'struct' constraint for generic parameter 'T'" },
         },
     };
@@ -2104,6 +2162,59 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new 
 internal static partial class TUnit_TestRegistration
 {
     static readonly int _r_TUnit_TestProject_Bugs__7107_TypeValueMethodRowInfersClassConstraintTests_T_Run__T_TestSource_ConstraintViolations = global::TUnit.Core.SourceRegistrar.RegisterGenericConstraintViolations(typeof(global::TUnit.TestProject.Bugs._7107.TypeValueMethodRowInfersClassConstraintTests<>), static () => TUnit_TestProject_Bugs__7107_TypeValueMethodRowInfersClassConstraintTests_T_Run__T_TestSource.ConstraintViolations);
+}
+
+
+// ===== FILE SEPARATOR =====
+
+// <auto-generated/>
+#pragma warning disable
+
+#nullable enable
+namespace TUnit.Generated;
+[global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
+[global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
+internal static class TUnit_TestProject_Bugs__7107_PartialConstructorMethodConstraintTests_T_U_Run__T_U_TestSource
+{
+    private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7107.PartialConstructorMethodConstraintTests<,>", new global::TUnit.Core.ClassMetadata
+    {
+        Type = typeof(global::TUnit.TestProject.Bugs._7107.PartialConstructorMethodConstraintTests<,>),
+        TypeInfo = new global::TUnit.Core.ConstructedGeneric(typeof(global::TUnit.TestProject.Bugs._7107.PartialConstructorMethodConstraintTests<,>), [new global::TUnit.Core.GenericParameter(0, false, "T"), new global::TUnit.Core.GenericParameter(1, false, "U")]),
+        Name = "PartialConstructorMethodConstraintTests",
+        Namespace = "TUnit.TestProject.Bugs._7107",
+        Assembly = global::TUnit.Core.AssemblyMetadata.GetOrAdd("TestsBase`1", "TestsBase`1"),
+        Parameters = global::TUnit.Core.ParameterMetadataFactory.ForConstructor(typeof(global::TUnit.TestProject.Bugs._7107.PartialConstructorMethodConstraintTests<,>), true, new global::TUnit.Core.ParameterMetadata[]
+        {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "seed", new global::TUnit.Core.GenericParameter(0, false, "T"), false)
+        }),
+        Properties = global::System.Array.Empty<global::TUnit.Core.PropertyMetadata>(),
+        Parent = null
+    });
+    private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7107.PartialConstructorMethodConstraintTests<,>);
+    private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Run", __classType, typeof(void), __classMetadata, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7107.PartialConstructorMethodConstraintTests<,>), "Run", false, 0, new global::TUnit.Core.ParameterMetadata[]
+{
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "value", new global::TUnit.Core.GenericParameter(0, false, "T"), false),
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "other", new global::TUnit.Core.GenericParameter(1, false, "U"), false)
+}));
+    public static readonly global::TUnit.Core.GenericConstraintViolationEntry[] ConstraintViolations = new global::TUnit.Core.GenericConstraintViolationEntry[]
+    {
+        new global::TUnit.Core.GenericConstraintViolationEntry
+        {
+            MethodName = "Run",
+            FilePath = "",
+            LineNumber = 300,
+            MethodMetadata = __mm_0,
+            AttributeFactory = static () => global::System.Array.FindAll(new global::System.Attribute[]
+            {
+                new global::TUnit.Core.TestAttribute()
+            }, static attribute => attribute is not null),
+            Messages = new string[] { "Type 'String' does not satisfy the 'struct' constraint for generic parameter 'T'" },
+        },
+    };
+}
+internal static partial class TUnit_TestRegistration
+{
+    static readonly int _r_TUnit_TestProject_Bugs__7107_PartialConstructorMethodConstraintTests_T_U_Run__T_U_TestSource_ConstraintViolations = global::TUnit.Core.SourceRegistrar.RegisterGenericConstraintViolations(typeof(global::TUnit.TestProject.Bugs._7107.PartialConstructorMethodConstraintTests<,>), static () => TUnit_TestProject_Bugs__7107_PartialConstructorMethodConstraintTests_T_U_Run__T_U_TestSource.ConstraintViolations);
 }
 
 

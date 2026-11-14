@@ -8,7 +8,7 @@ public class TestCountVerificationTests(int value)
     [Test]
     public async Task SimpleTest()
     {
-        await Task.CompletedTask;
+        await Assert.That(value).IsIn(1, 2, 10);
     }
 
     public class TestDataSource

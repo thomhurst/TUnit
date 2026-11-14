@@ -32,7 +32,7 @@ public class AssertionResultExceptionPropagationTests
         AssertionException? caught = null;
         try
         {
-            await Assert.That(value).Satisfies(v => v.Length, length => length.IsEqualTo(99));
+            await Assert.That(value).Satisfies(v => v!.Length, length => length.IsEqualTo(99));
         }
         catch (AssertionException ex)
         {

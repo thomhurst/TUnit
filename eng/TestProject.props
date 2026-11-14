@@ -9,7 +9,7 @@
         Condition="'$(MSBuildProjectExtension)' == '.fsproj'" />
 
     <PropertyGroup>
-        <!-- Test projects multi-target net8.0;net9.0;net10.0 (the repo default also set in
+        <!-- Test projects multi-target net10.0;net11.0 (the repo default also set in
              Directory.Build.props). We re-assert it here gated ONLY on TargetFrameworks being
              empty (NOT on TargetFramework=='') so it survives Visual Studio's design-time
              evaluation: CPS probes each candidate TFM by passing TargetFramework=netX as a
@@ -19,7 +19,7 @@
              unconditional-when-empty mirrors Library.props, which never hit the bug.
              Projects needing a different set (e.g. TUnit.PublicAPI with net472) assign
              <TargetFrameworks> before this import; the guard below then leaves them untouched. -->
-        <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net8.0;net9.0;net10.0</TargetFrameworks>
+        <TargetFrameworks Condition="'$(TargetFrameworks)' == ''">net10.0;net11.0</TargetFrameworks>
 
         <OutputType>Exe</OutputType>
 

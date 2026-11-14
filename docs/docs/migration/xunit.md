@@ -113,7 +113,7 @@ dotnet format analyzers --severity info --diagnostics TUXU0001
 This command applies all available fixes for the `TUXU0001` diagnostic. You'll see output indicating which files were modified.
 
 :::warning Multi-targeting Projects
-If your project targets multiple .NET versions (e.g., `net8.0;net9.0;net10.0`), you **must** specify a single target framework when running the code fixer. Multi-targeting can cause the code fixer to crash with the error `Changes must be within bounds of SourceText` due to a limitation in Roslyn's linked file handling.
+If your project targets multiple .NET versions (e.g., `net10.0;net11.0`), you **must** specify a single target framework when running the code fixer. Multi-targeting can cause the code fixer to crash with the error `Changes must be within bounds of SourceText` due to a limitation in Roslyn's linked file handling.
 
 **Option 1:** Specify a single framework via command line:
 ```bash
@@ -124,7 +124,7 @@ dotnet format analyzers --severity info --diagnostics TUXU0001 --framework net10
 ```xml
 <!-- Before migration -->
 <TargetFramework>net10.0</TargetFramework>
-<!-- <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks> -->
+<!-- <TargetFrameworks>net10.0;net11.0</TargetFrameworks> -->
 ```
 
 Run the code fixer, then restore multi-targeting afterward. Replace `net10.0` with your project's highest supported target framework.

@@ -21,7 +21,7 @@ internal static class CompileChecker
     // .NET Framework). The test's reference set cannot supply them: Polyfill embeds its
     // copies in the test assembly as internal types, so they are invisible to this
     // compilation. Declare them here the same way Polyfill does for a consumer.
-    private const string NetFrameworkPolyfills =
+    internal const string NetFrameworkPolyfills =
         """
         namespace System.Runtime.CompilerServices
         {

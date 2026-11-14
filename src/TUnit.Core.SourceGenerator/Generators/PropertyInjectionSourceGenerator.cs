@@ -25,17 +25,11 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
     public const string ConcreteGenericTypesStep = "PropertyInjection_ConcreteGenericTypes";
 
     // Generated code lives in namespace TUnit.Core, so type names need global:: and keyword escaping (@event)
-    private static readonly SymbolDisplayFormat GlobalTypeNameFormat = DisplayFormats.FullyQualifiedGenericWithGlobalPrefix
-        .AddMiscellaneousOptions(SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+    private static readonly SymbolDisplayFormat GlobalTypeNameFormat = DisplayFormats.CSharpType;
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var enabledProvider = context.AnalyzerConfigOptionsProvider
-            .Select((options, _) =>
-            {
-                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
-                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
-            });
+        var enabledProvider = GenerationEnabled.CreateProvider(context);
 
         // Pipeline 1: Find properties with IDataSourceAttribute and group by containing class
         // Partial properties can receive attributes from their other declaration.
@@ -1152,7 +1146,8 @@ public sealed class PropertyInjectionSourceGenerator : IIncrementalGenerator
 
     private static string GetSafeClassName(INamedTypeSymbol classSymbol)
     {
-        var fullyQualified = classSymbol.GloballyQualified();
+        // Identifier fragments need raw names; keyword escapes belong only in type expressions.
+        var fullyQualified = classSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
         return fullyQualified
             .Replace("global::", "")
             .Replace(".", "_")

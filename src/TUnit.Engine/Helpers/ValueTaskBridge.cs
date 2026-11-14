@@ -50,10 +50,8 @@ internal static class ValueTaskBridge
     /// </summary>
     internal static readonly MethodInfo ToTaskGenericMethodDefinition = ResolveToTaskGenericMethodDefinition();
 
-#if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("AOT", "IL3050",
         Justification = "MakeGenericType is called on ValueTask<> with a generic method parameter placeholder at startup to find the MethodInfo for ToTask<T>; the shared generic-type vtable is always available, and the resolved MethodInfo is then instantiated per-element-type in the same expression tree paths that already require dynamic code (AOT paths use direct delegates).")]
-#endif
     private static MethodInfo ResolveToTaskGenericMethodDefinition()
     {
 #if NET8_0_OR_GREATER

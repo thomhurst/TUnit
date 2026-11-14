@@ -78,7 +78,7 @@ public class PlaywrightVideoTests
         try
         {
             await Assert.That(teardown.IsCompleted).IsFalse();
-            await Assert.That(() => scope.Test.NewContext(new BrowserNewContextOptions()))
+            await Assert.That(async () => { await scope.Test.NewContext(new BrowserNewContextOptions()); })
                 .Throws<InvalidOperationException>().WithMessageContaining("after teardown has started");
             await scope.Browser.Received(1).NewContextAsync(Arg.Any<BrowserNewContextOptions>());
         }
@@ -88,7 +88,7 @@ public class PlaywrightVideoTests
             await teardown;
         }
 
-        await Assert.That(() => scope.Test.NewContext(new BrowserNewContextOptions())).Throws<InvalidOperationException>();
+        await Assert.That(async () => { await scope.Test.NewContext(new BrowserNewContextOptions()); }).Throws<InvalidOperationException>();
     }
 
     [Test]

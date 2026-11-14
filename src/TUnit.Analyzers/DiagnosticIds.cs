@@ -67,4 +67,5 @@ public static class DiagnosticIds
     public const string RedundantHookAttributeOnOverride = "TUnit0074";
     public const string UseHookCancellationToken = "TUnit0075";
     public const string AmbiguousMethodDataSourceOverload = "TUnit0076";
+    public const string UnsupportedSpanParams = "TUnit0077";
 }

@@ -70,8 +70,10 @@ public class MyTests(ServiceProviderFactory factory)
     public required IFirebaseClient FirebaseClient { get; init; }
 
     [Test]
-    public void Test()
+    public async Task Test()
     {
+        await Assert.That(DbContext).IsSameReferenceAs(factory.ServiceProvider.GetRequiredService<DbContext>());
+        await Assert.That(FirebaseClient).IsSameReferenceAs(factory.ServiceProvider.GetRequiredService<IFirebaseClient>());
     }
 }
 

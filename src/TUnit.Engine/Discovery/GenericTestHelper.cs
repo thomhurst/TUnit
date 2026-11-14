@@ -11,9 +11,7 @@ internal static class GenericTestHelper
     /// <summary>
     /// Safely creates an instance of a test class, handling generic types
     /// </summary>
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Test instance creation uses reflection on constructors")]
-#endif
     public static object? CreateTestClassInstance([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)] Type testClass)
     {
         try
@@ -54,9 +52,7 @@ internal static class GenericTestHelper
     /// <summary>
     /// Gets the method on the actual implementation class, handling inherited generic methods
     /// </summary>
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Method lookup traverses type hierarchy using reflection")]
-#endif
     public static MethodInfo? GetMethodOnImplementationType([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type implementationType, string methodName, Type[] parameterTypes)
     {
         // First try exact match on implementation type
@@ -164,9 +160,7 @@ internal static class GenericTestHelper
     /// <summary>
     /// Helper method to get method from type with proper AOT attribution
     /// </summary>
-#if NET8_0_OR_GREATER
     [RequiresUnreferencedCode("Method lookup uses Type.GetMethod")]
-#endif
     private static MethodInfo? GetMethodFromType(
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods | DynamicallyAccessedMemberTypes.NonPublicMethods)] Type type,
         string methodName,

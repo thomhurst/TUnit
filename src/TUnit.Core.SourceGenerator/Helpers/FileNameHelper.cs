@@ -64,7 +64,17 @@ internal static class FileNameHelper
         sb.Append('_');
 
         // Add method name
-        sb.Append(SanitizeForFileName(methodSymbol.Name));
+        // Reserve "_Generic<N>" for arity suffixes. Escape its prefix in literal
+        // method names so Foo_Generic1 cannot collide with Foo<U>.
+        sb.Append(SanitizeForFileName(methodSymbol.Name).Replace("_Generic", "_Generic_"));
+
+        // Include arity when overloads share a name and parameter count. Preserve
+        // existing names for methods without those overloads.
+        if (methodSymbol.Arity > 0 && HasDifferentArityOverload(typeSymbol, methodSymbol))
+        {
+            sb.Append("_Generic");
+            sb.Append(methodSymbol.Arity.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
 
         // Add parameters with double underscore separator
         if (methodSymbol.Parameters.Length > 0)
@@ -89,6 +99,23 @@ internal static class FileNameHelper
         }
 
         return baseName + ".g.cs";
+    }
+
+    private static bool HasDifferentArityOverload(INamedTypeSymbol typeSymbol, IMethodSymbol methodSymbol)
+    {
+        for (var current = typeSymbol; current != null; current = current.BaseType)
+        {
+            foreach (var member in current.GetMembers(methodSymbol.Name))
+            {
+                if (member is IMethodSymbol candidate && candidate.Arity != methodSymbol.Arity
+                    && candidate.Parameters.Length == methodSymbol.Parameters.Length)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -134,6 +161,15 @@ internal static class FileNameHelper
                 if (i > 0) sb.Append('_');
                 sb.Append(SanitizeForFileName(typeSymbol.TypeArguments[i].Name));
             }
+        }
+
+        // Escaped namespace identifiers lose information during sanitization. Hash the
+        // original identity so @event.Subject cannot collide with _event.Subject.
+        var identity = typeSymbol.ToDisplayString(DisplayFormats.CSharpType);
+        if (identity.Contains('@'))
+        {
+            sb.Append('_');
+            sb.Append($"{GetStableHashCode(identity):X8}");
         }
 
         var baseName = sb.ToString();
@@ -199,7 +235,7 @@ internal static class FileNameHelper
                 // Replace invalid filename characters and special type characters with underscore
                 if (c == '<' || c == '>' || c == ':' || c == '"' || c == '/' || c == '\\' ||
                     c == '|' || c == '?' || c == '*' || c == '.' || c == ',' || c == ' ' ||
-                    c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}')
+                    c == '@' || c == '(' || c == ')' || c == '[' || c == ']' || c == '{' || c == '}')
                 {
                     span[index] = '_';
                 }

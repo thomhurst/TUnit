@@ -123,6 +123,7 @@ public static class TypeExtensions
         return false;
     }
 
+    /// <summary>Formats a type for use in generated C# expressions, including keyword escapes.</summary>
     public static string GloballyQualified(this ISymbol typeSymbol)
     {
         // `dynamic` is `object` at runtime, and `typeof(dynamic)` does not compile (CS1962). Rendering it as `object`
@@ -155,7 +156,7 @@ public static class TypeExtensions
                 }
 
                 // General case for other open generic types
-                var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedNonGenericWithGlobalPrefix));
+                var typeBuilder = new StringBuilder(typeSymbol.ToDisplayString(DisplayFormats.CSharpNonGenericType));
                 typeBuilder.Append('<');
                 typeBuilder.Append(new string(',', namedTypeSymbol.TypeArguments.Length - 1));
                 typeBuilder.Append('>');
@@ -164,7 +165,7 @@ public static class TypeExtensions
             }
         }
 
-        return typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+        return typeSymbol.ToDisplayString(DisplayFormats.CSharpType);
     }
 
     /// <summary>

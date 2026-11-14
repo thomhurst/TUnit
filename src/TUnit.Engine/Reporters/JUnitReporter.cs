@@ -93,7 +93,8 @@ public class JUnitReporter(IExtension extension) : IDataConsumer, ITestHostAppli
         }
 
         // Generate JUnit XML
-        var xmlContent = JUnitXmlWriter.GenerateXml(lastUpdates, Filter, _unobservedTaskExceptions.ToArray());
+        var xmlContent = JUnitXmlWriter.GenerateXml(lastUpdates, Filter, _unobservedTaskExceptions.ToArray(),
+            SourceControlContext.Detect(Environment.GetEnvironmentVariable));
 
         if (string.IsNullOrEmpty(xmlContent))
         {

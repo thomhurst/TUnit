@@ -385,7 +385,7 @@ public class FailedClassRowScopeTests(ProbeService? service = null)
 {
     [Test]
     [Arguments("not a struct")]
-    public Task Run<T>(T value) where T : struct => Task.CompletedTask;
+    public async Task Run<T>(T value) where T : struct => await Assert.That(service).IsNotNull();
 }
 
 [EngineTest(ExpectedResult.Failure)]

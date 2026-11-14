@@ -32,8 +32,8 @@
     .\scripts\profile-tunit.ps1 -Project benchmarks/TUnit.PerformanceBenchmarks -Dump
 
 .EXAMPLE
-    # Use GC-verbose tracing on net9.0
-    .\scripts\profile-tunit.ps1 -TraceProfile gc-verbose -Framework net9.0
+    # Use GC-verbose tracing on net10.0
+    .\scripts\profile-tunit.ps1 -TraceProfile gc-verbose -Framework net10.0
 
 .EXAMPLE
     # Show top 50 hot functions
@@ -43,7 +43,7 @@
 [CmdletBinding()]
 param(
     [string]$Project = "benchmarks/TUnit.Profile",
-    [string]$Framework = "net10.0",
+    [string]$Framework = "net11.0",
     [string]$Configuration = "Release",
     [string]$Filter = "",
     [string]$OutputDir = "",

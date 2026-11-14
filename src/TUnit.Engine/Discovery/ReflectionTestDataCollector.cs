@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using Microsoft.Testing.Platform.Requests;
 using TUnit.Core;
+using TUnit.Core.Exceptions;
 using TUnit.Core.Helpers;
 using TUnit.Engine.Building;
 using TUnit.Engine.Building.Interfaces;
@@ -153,21 +154,153 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return CollectTestsAsync(testSessionId);
     }
 
-    private static IEnumerable<MethodInfo> GetAllTestMethods([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type)
+    private static MethodInfo[] GetAllTestMethods([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] Type type)
     {
         return _typeMethodsCache.GetOrAdd(type, static t =>
         {
             var methods = new List<MethodInfo>(20);
+            // Hiding is decided on the declaration, before class type arguments can
+            // make distinct overloads (for example Foo(T) and Foo(string)) coincide.
+            // ConcurrentDictionary invokes this factory outside its locks, so looking up
+            // the generic definition in the same cache is safe.
+            var definitionMethods = t.IsConstructedGenericType ? GetAllTestMethods(t.GetGenericTypeDefinition()) : null;
+            var nearerDeclarations = definitionMethods == null ? new List<MethodInfo>(20) : null;
             var currentType = t;
 
             while (currentType != null && currentType != typeof(object))
             {
-                methods.AddRange(currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly));
+                var declarations = currentType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+                foreach (var method in declarations)
+                {
+                    // Walk from nearest to furthest declarations: overrides at every level
+                    // suppress base tests even without [Test]; hiding requires [Test].
+                    if (definitionMethods != null
+                        ? !ContainsMethodDefinition(definitionMethods, method)
+                        : currentType != t && IsSuppressedByDeclaredMethod(method, nearerDeclarations!))
+                    {
+                        continue;
+                    }
+
+                    methods.Add(method);
+                }
+                // Suppressed tests still hide older declarations further up the hierarchy.
+                nearerDeclarations?.AddRange(declarations);
                 currentType = currentType.BaseType;
             }
 
             return methods.ToArray();
         });
+    }
+
+    private static bool ContainsMethodDefinition(MethodInfo[] methods, MethodInfo method)
+    {
+        foreach (var candidate in methods)
+        {
+            if (candidate.MetadataToken == method.MetadataToken && candidate.Module == method.Module)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsSuppressedByDeclaredMethod(MethodInfo baseMethod, List<MethodInfo> methods)
+    {
+        foreach (var derived in methods)
+        {
+            if (derived.DeclaringType != baseMethod.DeclaringType
+                && (OverridesBaseMethod(derived, baseMethod)
+                    || (derived.IsDefined(typeof(TestAttribute), inherit: false) && HidesBaseMethod(derived, baseMethod))))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool OverridesBaseMethod(MethodInfo derivedMethod, MethodInfo baseMethod)
+    {
+        if (!derivedMethod.IsVirtual || !baseMethod.IsVirtual)
+        {
+            return false;
+        }
+
+        var derivedDefinition = derivedMethod.GetBaseDefinition();
+        var baseDefinition = baseMethod.GetBaseDefinition();
+        return derivedDefinition.MetadataToken == baseDefinition.MetadataToken
+            && derivedDefinition.Module == baseDefinition.Module;
+    }
+
+    private static bool HidesBaseMethod(MethodInfo derivedMethod, MethodInfo baseMethod)
+    {
+        if (derivedMethod.Name != baseMethod.Name
+            || derivedMethod.GetGenericArguments().Length != baseMethod.GetGenericArguments().Length
+            || derivedMethod.GetBaseDefinition() != derivedMethod)
+        {
+            return false;
+        }
+
+        var derivedParameters = derivedMethod.GetParameters();
+        var baseParameters = baseMethod.GetParameters();
+        if (derivedParameters.Length != baseParameters.Length)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < derivedParameters.Length; i++)
+        {
+            if (!HaveSameSignatureType(derivedParameters[i].ParameterType, baseParameters[i].ParameterType))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static bool HaveSameSignatureType(Type derivedType, Type baseType)
+    {
+        if (derivedType == baseType)
+        {
+            return true;
+        }
+
+        // Method type parameter names do not form part of a signature. Class type
+        // parameters have already been substituted by the constructed base hierarchy.
+        if (derivedType.IsGenericParameter && baseType.IsGenericParameter)
+        {
+            return derivedType.DeclaringMethod != null && baseType.DeclaringMethod != null
+                && derivedType.GenericParameterPosition == baseType.GenericParameterPosition;
+        }
+
+        if (derivedType.HasElementType && baseType.HasElementType)
+        {
+            return derivedType.IsArray == baseType.IsArray
+                && derivedType.IsByRef == baseType.IsByRef
+                && derivedType.IsPointer == baseType.IsPointer
+                && (!derivedType.IsArray || derivedType.GetArrayRank() == baseType.GetArrayRank())
+                && HaveSameSignatureType(derivedType.GetElementType()!, baseType.GetElementType()!);
+        }
+
+        if (!derivedType.IsGenericType || !baseType.IsGenericType
+            || derivedType.GetGenericTypeDefinition() != baseType.GetGenericTypeDefinition())
+        {
+            return false;
+        }
+
+        var derivedArguments = derivedType.GetGenericArguments();
+        var baseArguments = baseType.GetGenericArguments();
+        for (var i = 0; i < derivedArguments.Length; i++)
+        {
+            if (!HaveSameSignatureType(derivedArguments[i], baseArguments[i]))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     // Read-many during reflection discovery (one Contains per assembly).
@@ -497,9 +630,11 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // Get test methods from the generic type definition first (needed for both data sources and GenerateGenericTest)
         // Optimize: Manual filtering instead of LINQ Where().ToArray()
-        var declaredMethods = genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-        var testMethodsList = new List<MethodInfo>(declaredMethods.Length);
-        foreach (var method in declaredMethods)
+        var methods = genericTypeDefinition.IsDefined(typeof(InheritsTestsAttribute), inherit: false)
+            ? GetAllTestMethods(genericTypeDefinition)
+            : genericTypeDefinition.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        var testMethodsList = new List<MethodInfo>();
+        foreach (var method in methods)
         {
             if (method.IsDefined(typeof(TestAttribute), inherit: false) && !method.IsAbstract)
             {
@@ -563,7 +698,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         // infer (#7118)
         var methodRowClassTypeArguments = methodRowTests == null
             ? InferClassTypeArgumentsOfMethodRows(genericTypeDefinition, testMethods, classDataSources.Length + (typeFreeClassRows?.Length ?? 0),
-                nullValuesArrayInfersObject: GenericClassInferencePolicy.NullMethodRowInfersObject(classDataSources.Length > 0, generateGenericTestAttributes.Length > 0))
+                nullValuesArrayInfersObject: GenericClassInferencePolicy.NullMethodRowInfersObject(classDataSources.Length > 0, generateGenericTestAttributes.Length > 0),
+                inferMethodSources: classDataSources.Length == 0 && typeFreeClassRows != null)
             : null;
 
         // [GenerateGenericTest] types' class constraint violations are reported before the class rows'
@@ -617,8 +753,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         {
             try
             {
-                // Class data sources hold only the rows that inferred this instantiation
-                AddTestsForInstantiation(discoveredTests, genericTypeDefinition, typeArguments, testMethods, classRowSources, methodRowTypeArguments: null, methodRowClassTypeArguments);
+                // Type-free rows also join methods that infer the types established by this class row.
+                AddTestsForInstantiation(discoveredTests, genericTypeDefinition, typeArguments, testMethods, classRowSources, methodRowTypeArguments: null, methodRowClassTypeArguments, typeFreeClassRows);
             }
             catch (Exception ex)
             {
@@ -657,7 +793,8 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         MethodInfo[] testMethods,
         IDataSourceAttribute[]? classRowSources,
         Dictionary<MethodInfo, List<Type[]>>? methodRowTypeArguments,
-        Type[]?[]?[]? methodRowClassTypeArguments)
+        Type[]?[]?[]? methodRowClassTypeArguments,
+        IDataSourceAttribute[]? typeFreeClassRows = null)
     {
         // Create concrete type with validation
         var concreteType = ReflectionGenericTypeResolver.CreateConcreteType(genericTypeDefinition, typeArguments);
@@ -673,6 +810,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             }
 
             var rowTypeArguments = methodRowClassTypeArguments?[methodIndex];
+            // A method-inferred instantiation also uses type-free constructor rows when another
+            // class row already established the same types, matching generated discovery (#7387).
+            var methodClassRowSources = classRowSources;
+            if (classRowSources != null && typeFreeClassRows != null && InfersTypeArguments(rowTypeArguments, typeArguments))
+            {
+                methodClassRowSources = [.. classRowSources, .. typeFreeClassRows];
+            }
 
             // Resolve method-level generic instantiations
             foreach (var (resolvedMethod, methodFailedMetadata, methodArguments) in ResolveMethodInstantiations(concreteType, concreteMethod))
@@ -720,7 +864,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     }
                 }
 
-                discoveredTests.Add(BuildTestMetadata(concreteType, resolvedMethod, classRowSources, methodRows));
+                discoveredTests.Add(BuildTestMetadata(concreteType, resolvedMethod, methodClassRowSources, methodRows));
             }
         }
     }
@@ -974,13 +1118,13 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     }
 
     /// <summary>
-    /// Finds the method on a constructed generic type that corresponds to a method of its generic type
+    /// Finds the method on a constructed generic type or its bases that corresponds to a method of its generic type
     /// definition. Matches by metadata identity rather than name so overloaded test methods resolve to
     /// their own counterpart instead of throwing <see cref="AmbiguousMatchException"/>.
     /// </summary>
     private static MethodInfo? FindConcreteMethod(Type concreteType, MethodInfo genericMethod)
     {
-        foreach (var method in concreteType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+        foreach (var method in GetAllTestMethods(concreteType))
         {
             if (method.MetadataToken == genericMethod.MetadataToken && method.Module == genericMethod.Module)
             {
@@ -1024,7 +1168,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     /// <summary>
     /// For a generic class without class-level data sources, infers the class's type arguments from the
-    /// method-level [Arguments] rows of each non-generic test method whose parameters use them, and builds
+    /// method-level [Arguments] rows and declared method source row types of each non-generic test method whose parameters use them, and builds
     /// one test per inferred instantiation carrying only the rows that inferred it, mirroring the source
     /// generator (#7106). An instantiation that a [GenerateGenericTest] also lists stands for that attribute's
     /// instantiation too, so it carries every method data source except rows inferring other type arguments:
@@ -1066,12 +1210,12 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 groupOfSource[i] = -1;
 
-                if (methodDataSources[i] is not ArgumentsAttribute arguments)
+                var typeArguments = methodDataSources[i] switch
                 {
-                    continue;
-                }
-
-                var typeArguments = InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject);
+                    ArgumentsAttribute arguments => InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject),
+                    MethodDataSourceAttribute methodDataSource => InferClassTypesFromMethodDataSource(genericTypeDefinition, methodDataSource, parameters, classGenericParameters),
+                    _ => null
+                };
                 if (typeArguments == null)
                 {
                     continue;
@@ -1156,14 +1300,15 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
     /// <summary>
     /// For each test method of a generic class with class-level data sources, the class type arguments
-    /// each of its method data sources' [Arguments] rows infers, indexed like the method's data sources (null
+    /// each of its method data sources' [Arguments] rows infers (also declared method-source row types when
+    /// every constructor row is type-free), indexed like the method's data sources (null
     /// for a source that infers none). A method's entry is null when none of its rows infers any, for example
     /// when it is a generic method or its parameters do not use the class's type parameters. Null when the
     /// class has no class-level data source. The source generator infers an instantiation from each such row
     /// whatever the class data sources are, since it cannot know the types a [MethodDataSource] or other
     /// run-time source yields (#7161).
     /// </summary>
-    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool nullValuesArrayInfersObject)
+    private static Type[]?[]?[]? InferClassTypeArgumentsOfMethodRows(Type genericTypeDefinition, MethodInfo[] testMethods, int classDataSourceCount, bool nullValuesArrayInfersObject, bool inferMethodSources)
     {
         if (classDataSourceCount == 0)
         {
@@ -1195,8 +1340,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             {
                 // Class rows supply the instantiations, so [Arguments(null)] infers none and runs on each (#7141),
                 // unless every class row goes to no type parameter (#7209)
-                if (methodDataSources[i] is ArgumentsAttribute arguments
-                    && InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject) is { } typeArguments)
+                // A type-free constructor row supplies values, but leaves class types to method rows.
+                var typeArguments = methodDataSources[i] switch
+                {
+                    ArgumentsAttribute arguments => InferClassTypeArgumentsFromMethodRow(classGenericParameters, parameters, arguments, nullValuesArrayInfersObject),
+                    MethodDataSourceAttribute source when inferMethodSources => InferClassTypesFromMethodDataSource(genericTypeDefinition, source, parameters, classGenericParameters),
+                    _ => null
+                };
+                if (typeArguments != null)
                 {
                     // A plain local, not `(rowTypeArguments ??= ...)[i] = ...`: the .NET 8 trim analyzer
                     // crashes (AD0001) on an array element write through a null-coalescing assignment.
@@ -1375,7 +1526,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// Removes from <paramref name="classDataSources"/> the class-level [Arguments] rows whose values all bind to
     /// constructor parameters that do not use the class's type parameters, as <c>[Arguments(42)]</c> on
     /// <c>C&lt;T&gt;(int number)</c>, or that have no values, and returns them, or null when there are none. Such a row supplies no class
-    /// type argument (#7209). Mirrors <c>TestMetadataGenerator.ClassRowSuppliesNoTypeArguments</c>.
+    /// type argument (#7209). Rows that mention only some class type parameters are also split off:
+    /// unless the existing row-value fallback can close them, they need method rows to infer their types. Mirrors
+    /// <c>TestMetadataGenerator.ClassRowSuppliesNoTypeArguments</c> with partial rows enabled.
     /// </summary>
     private static IDataSourceAttribute[]? SplitTypeFreeClassRows(Type genericTypeDefinition, ref IDataSourceAttribute[] classDataSources)
     {
@@ -1394,7 +1547,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         for (var i = 0; i < classDataSources.Length; i++)
         {
             var source = classDataSources[i];
-            if (ClassRowSuppliesNoTypeArguments(genericTypeDefinition, source))
+            if (ClassRowSuppliesNoTypeArguments(genericTypeDefinition, source, includePartialRows: true))
             {
                 if (rest == null)
                 {
@@ -1423,7 +1576,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
         return typeFree.ToArray();
     }
 
-    private static bool ClassRowSuppliesNoTypeArguments(Type genericTypeDefinition, IDataSourceAttribute dataSource)
+    private static bool ClassRowSuppliesNoTypeArguments(Type genericTypeDefinition, IDataSourceAttribute dataSource, bool includePartialRows = false)
     {
         int valueCount;
         if (dataSource is ArgumentsAttribute arguments)
@@ -1452,8 +1605,75 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
             hasClassTypeParameter |= parameters[i].ParameterType.ContainsGenericParameters;
         }
 
+        // Partial constructor rows cannot create a closed class, but still supply its constructor
+        // values when method rows infer all the types, matching source generation.
+        if (includePartialRows)
+        {
+            foreach (var typeParameter in genericTypeDefinition.GetGenericArguments())
+            {
+                var supplied = false;
+                for (var i = 0; i < boundCount; i++)
+                {
+                    supplied |= ContainsTypeParameter(parameters[i].ParameterType, typeParameter);
+                }
+
+                if (!supplied)
+                {
+                    // Preserve the row-value fallback used by DetermineGenericTypeArguments before
+                    // treating a partial constructor row as needing method inference.
+                    return !hasClassTypeParameter || dataSource is not ArgumentsAttribute row
+                        || !ClassRowHasValidValueTypeFallback(genericTypeDefinition, row.Values);
+                }
+            }
+        }
+
         return GenericClassInferencePolicy.ClassRowSuppliesNoTypeArguments(
             valueCount: valueCount, boundCount: boundCount, hasClassTypeParameter: hasClassTypeParameter);
+    }
+
+    private static bool ClassRowHasValidValueTypeFallback(Type genericTypeDefinition, object?[] values)
+    {
+        var types = GenericClassRowPartition.InferClassTypeArguments(values, genericTypeDefinition.GetGenericArguments().Length);
+        if (types is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            _ = genericTypeDefinition.MakeGenericType(types);
+            return true;
+        }
+        catch (ArgumentException)
+        {
+            return false;
+        }
+    }
+
+    private static bool ContainsTypeParameter(Type type, Type parameter)
+    {
+        if (type == parameter)
+        {
+            return true;
+        }
+
+        if (type.HasElementType)
+        {
+            return ContainsTypeParameter(type.GetElementType()!, parameter);
+        }
+
+        if (type.IsGenericType)
+        {
+            foreach (var argument in type.GetGenericArguments())
+            {
+                if (ContainsTypeParameter(argument, parameter))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -2277,6 +2497,14 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                     case GenericMethodInferencePolicy.Source.TypedDataSource when dataSource is not ArgumentsAttribute:
                         AddInstantiation(InferTypesFromTypedDataSource(dataSource, method, genericParameterCount, classGenericParameterCount), dataSource, source: rule.Source);
                         break;
+                    // Instance and derived static sources use the explicit method types, even when
+                    // another source already inferred that instantiation. Join them below in declaration order.
+                    case GenericMethodInferencePolicy.Source.MethodDataSource when dataSource is MethodDataSourceAttribute skippedMethodSource
+                        && skippedMethodSource.GetType() != typeof(MethodDataSourceAttribute)
+                        && !(skippedMethodSource.GetType().IsGenericType
+                            && skippedMethodSource.GetType().GetGenericTypeDefinition() == typeof(MethodDataSourceAttribute<>)):
+                        (skippedSources ??= []).Add(dataSource);
+                        break;
                     case GenericMethodInferencePolicy.Source.MethodDataSource when dataSource is MethodDataSourceAttribute methodDataSource:
                         dataParameters ??= Array.FindAll(parameters, static parameter => parameter.ParameterType != typeof(CancellationToken));
                         AddInstantiation(InferTypesFromMethodDataSource(testClass, methodDataSource, dataParameters, genericParameterCount), methodDataSource, source: rule.Source);
@@ -2725,16 +2953,123 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 #endif
     }
 
+    /// <summary>Infers class type arguments from a method source's declared row shape, like the generator.</summary>
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source methods")]
+    private static Type[]? InferClassTypesFromMethodDataSource(Type testClass, MethodDataSourceAttribute source, ParameterInfo[] parameters, Type[] classParameters)
+    {
+        // Only infer from sources declared on the test class; an external provider must never
+        // accidentally select a same-named member of the test class.
+        if (source.ClassProvidingDataSource is not null || source.Arguments is { Length: > 0 })
+        {
+            return null;
+        }
+
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly;
+#if NET
+        var dataMethod = testClass.GetMethod(source.MethodNameProvidingDataSource, genericParameterCount: 0,
+            flags, binder: null, Type.EmptyTypes, modifiers: null);
+#else
+        MethodInfo? dataMethod = null;
+        foreach (var candidate in testClass.GetMethods(flags))
+        {
+            if (candidate.Name == source.MethodNameProvidingDataSource
+                && !candidate.IsGenericMethodDefinition && candidate.GetParameters().Length == 0)
+            {
+                dataMethod = candidate;
+                break;
+            }
+        }
+#endif
+        if (dataMethod?.ReturnType is not { IsGenericType: true } returnType
+            || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>))
+        {
+            return null;
+        }
+
+        var rowType = UnwrapFunc(returnType.GetGenericArguments()[0]);
+        var tupleElements = GetValueTupleElementTypes(rowType);
+        var dataParameters = parameters.Where(static p => p.ParameterType != typeof(CancellationToken)).ToArray();
+        if (tupleElements is null)
+        {
+            // Match generated discovery: a scalar row supplies only the first data parameter.
+            // Required trailing parameters cannot be filled by that row; tuples map positionally.
+            for (var i = 1; i < dataParameters.Length; i++)
+            {
+                if (!dataParameters[i].IsOptional)
+                {
+                    return null;
+                }
+            }
+        }
+
+        var rowTypes = tupleElements ?? [rowType];
+        var inferred = new Type[classParameters.Length];
+        for (var i = 0; i < classParameters.Length; i++)
+        {
+            Type? match = null;
+            for (var j = 0; j < dataParameters.Length && j < rowTypes.Length; j++)
+            {
+                if (MatchClassRowType(dataParameters[j].ParameterType, rowTypes[j], classParameters[i]) is { } candidate)
+                {
+                    match = candidate;
+                }
+            }
+
+            if (match == null || match.ContainsGenericParameters)
+            {
+                return null;
+            }
+
+            inferred[i] = match;
+        }
+
+        return inferred;
+    }
+
+    private static Type? MatchClassRowType(Type parameterType, Type actualType, Type classParameter)
+    {
+        if (Nullable.GetUnderlyingType(parameterType) is { } underlyingParameter)
+        {
+            var underlyingActual = Nullable.GetUnderlyingType(actualType);
+            return actualType.IsValueType
+                ? MatchClassRowType(underlyingParameter, underlyingActual ?? actualType, classParameter)
+                : null;
+        }
+
+        if (parameterType == classParameter)
+        {
+            return actualType;
+        }
+
+        if (parameterType.IsGenericType && actualType.IsGenericType
+            && parameterType.GetGenericTypeDefinition() == actualType.GetGenericTypeDefinition())
+        {
+            var parameterArguments = parameterType.GetGenericArguments();
+            var actualArguments = actualType.GetGenericArguments();
+            Type? match = null;
+            for (var i = 0; i < parameterArguments.Length; i++)
+            {
+                match = MatchClassRowType(parameterArguments[i], actualArguments[i], classParameter) ?? match;
+            }
+
+            return match;
+        }
+
+        return parameterType.IsArray && actualType.IsArray && parameterType.GetArrayRank() == actualType.GetArrayRank()
+            ? MatchClassRowType(parameterType.GetElementType()!, actualType.GetElementType()!, classParameter)
+            : null;
+    }
+
     /// <summary>
     /// Mirrors the generator's <c>InferTypesFromMethodDataSource</c>. It only reads attributes whose first
     /// constructor argument is the member name (<c>[MethodDataSource("Rows")]</c> and
-    /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), looks for a static parameterless method of that name
-    /// declared on the test class (or on <c>T</c>), and requires its declared return type to be
-    /// <c>IEnumerable&lt;Func&lt;(...)&gt;&gt;</c>. Each tuple element is matched against the data parameter
+    /// <c>[MethodDataSource&lt;T&gt;("Rows")]</c>), resolves the member using the same lookup as source invocation
+    /// on the test class (or on <c>T</c>), and requires its declared type to be
+    /// a supported row source, including asynchronous wrappers. Each tuple element is matched against the data parameter
     /// at the same position, including type arguments nested in generic parameter types. The caller passes
     /// the parameters without any CancellationToken, as the generator's <c>GetDataParameters</c> does.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source methods")]
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = "Reflection mode requires dynamic access to data source members")]
     private static Type[]? InferTypesFromMethodDataSource(
         Type testClass,
         MethodDataSourceAttribute methodDataSource,
@@ -2752,26 +3087,53 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
 
         // [MethodDataSource<T>("Rows")] reads Rows from T, not from the test class
         var providerType = methodDataSource.ClassProvidingDataSource ?? testClass;
-        var dataMethod = providerType.GetMethod(
-            methodDataSource.MethodNameProvidingDataSource,
-            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly,
-            binder: null,
-            Type.EmptyTypes,
-            modifiers: null);
+        Type? memberType;
+        try
+        {
+            memberType = methodDataSource.GetDeclaredMemberType(providerType);
+        }
+        catch (AmbiguousMatchException)
+        {
+            // Invocation reports the invalid source later; inference must not abort assembly discovery.
+            return null;
+        }
 
-        if (dataMethod?.ReturnType is not { IsGenericType: true } returnType
-            || returnType.GetGenericTypeDefinition() != typeof(IEnumerable<>)
-            || returnType.GetGenericArguments()[0] is not { IsGenericType: true } funcType
-            || funcType.GetGenericTypeDefinition() != typeof(Func<>)
-            || GetValueTupleElementTypes(funcType.GetGenericArguments()[0]) is not { } tupleElements)
+        // Normalize the same asynchronous and sequence wrappers as runtime row reading before
+        // supplementing explicit method types. Retain the bounded outer/inner Func unwrapping.
+        if (memberType is null || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType
+            || GetTupleElementTypes(rowType) is not { } tupleElements)
         {
             return null;
         }
 
         var typeArguments = new Type?[genericParameterCount];
-        for (var i = 0; i < parameters.Length && i < tupleElements.Length; i++)
+        var receivesWholeTuple = parameters.Length > 0
+            && ((GetTupleElementTypes(parameters[0].ParameterType) is not null
+                    && parameters.Skip(1).All(parameter => parameter.IsOptional
+                        || parameter.IsDefined(typeof(ParamArrayAttribute), false)
+                        || IsParamCollection(parameter)
+                        || (parameter == parameters[^1] && IsSingleDimensionalZeroBasedArray(parameter.ParameterType)))
+                    && (parameters.Length == 1 || TupleHelper.MatchesOpenTuple(parameters[0].ParameterType, rowType)))
+                || (parameters.Length == 1 && parameters[0].ParameterType.IsGenericParameter && !rowType.IsValueType));
+        if (parameters.Length == 1 && GetTupleElementTypes(parameters[0].ParameterType) is not null)
         {
-            MapGenericParameters(parameters[i].ParameterType, tupleElements[i], typeArguments);
+            // Explicit method types supplement, rather than replace, declared-row inference.
+            // Reconstruct sole tuples using the same policy as generated discovery and runtime
+            // inference; optional/params tails retain strict whole-tuple mapping below.
+            var bindings = new Dictionary<Type, Type>();
+            if (!SoleTupleInference.TryInfer(parameters[0].ParameterType, rowType, bindings)) return null;
+            foreach (var binding in bindings)
+                if (binding.Key.IsGenericParameter && binding.Key.DeclaringMethod is not null)
+                    typeArguments[binding.Key.GenericParameterPosition] = binding.Value;
+        }
+        else if (receivesWholeTuple)
+        {
+            MapGenericParameters(parameters[0].ParameterType, rowType, typeArguments);
+        }
+        else
+        {
+            for (var i = 0; i < parameters.Length && i < tupleElements.Length; i++)
+                MapGenericParameters(parameters[i].ParameterType, tupleElements[i], typeArguments);
         }
 
         foreach (var typeArgument in typeArguments)
@@ -2812,8 +3174,18 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     private static Type[]? InferClassTypeArgumentsFromOwnMemberRowType(Type genericTypeDefinition, MethodDataSourceAttribute methodDataSource, out ConstructorInfo? constructor)
     {
         constructor = null;
-        if (methodDataSource.GetDeclaredMemberType(genericTypeDefinition) is not { } memberType
-            || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType)
+        Type? memberType;
+        try
+        {
+            memberType = methodDataSource.GetDeclaredMemberType(genericTypeDefinition);
+        }
+        catch (AmbiguousMatchException)
+        {
+            // Leave the invalid source to invocation instead of failing discovery for the assembly.
+            return null;
+        }
+
+        if (memberType is null || MethodDataSourceAttribute.GetDeclaredRowType(memberType) is not { } rowType)
         {
             return null;
         }
@@ -2936,6 +3308,19 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                 typeArguments[parameterType.GenericParameterPosition] = actualType;
             }
 
+            return;
+        }
+
+        // Ordinary spread columns retain last-column inference through nullable values and arrays.
+        if (Nullable.GetUnderlyingType(parameterType) is { } nullableParameter
+            && actualType.IsValueType && Nullable.GetUnderlyingType(actualType) is null)
+        {
+            MapGenericParameters(nullableParameter, actualType, typeArguments);
+            return;
+        }
+        if (parameterType.IsArray && actualType.IsArray && parameterType.GetArrayRank() == actualType.GetArrayRank())
+        {
+            MapGenericParameters(parameterType.GetElementType()!, actualType.GetElementType()!, typeArguments);
             return;
         }
 
@@ -3492,13 +3877,25 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
     /// <summary>
     /// Infers generic type mappings from parameter and argument types
     /// </summary>
-    private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping, bool isTopLevel = false)
+    private static void InferGenericTypeMapping(Type paramType, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] Type argType, Dictionary<Type, Type> typeMapping, bool isTopLevel = false, bool tupleElement = false)
     {
+        // Tuple reconstruction uses the same strict candidate selection as discovery. Ordinary
+        // parameters retain the existing nested/params-array inference policy below.
+        if (tupleElement)
+        {
+            if (!SoleTupleInference.TryInfer(paramType, argType, typeMapping))
+            {
+                throw new GenericTypeResolutionException(
+                    $"Type mismatch: Cannot use argument of type '{argType.Name}' for parameter of type '{paramType.Name}'");
+            }
+            return;
+        }
+
         // Match discovery inference when a nullable tuple element has been boxed as its value.
         if (Nullable.GetUnderlyingType(paramType) is { } underlyingParameter
             && argType.IsValueType && Nullable.GetUnderlyingType(argType) is null)
         {
-            InferGenericTypeMapping(underlyingParameter, argType, typeMapping, isTopLevel);
+            InferGenericTypeMapping(underlyingParameter, argType, typeMapping, isTopLevel, tupleElement);
             return;
         }
 
@@ -3838,6 +4235,9 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         ? Array.FindIndex(methodParams, static p => p.ParameterType != typeof(CancellationToken))
                         : 0;
                     var inferenceCount = flattenedTupleTypes?.Length ?? methodParams.Length;
+                    var reconstructTuple = flattenedTupleTypes is not null
+                        || GetSingleDataParameter(methodParams) is { ParameterType: var soleType }
+                            && TupleHelper.IsTupleType(soleType);
 
                     // Build type mapping from method parameters (or flattened tuple elements) and actual arguments.
                     for (var j = 0; j < inferenceCount && j + tupleOffset < args.Length; j++)
@@ -3847,7 +4247,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         {
                             var paramType = flattenedTupleTypes?[j] ?? methodParams[j].ParameterType;
                             var argType = GetArgumentInferenceType(arg);
-                            InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true);
+                            InferGenericTypeMapping(paramType, argType, typeMapping, isTopLevel: true, tupleElement: reconstructTuple);
                         }
                     }
 
@@ -3938,8 +4338,7 @@ internal sealed class ReflectionTestDataCollector : ITestDataCollector
                         || args[singleDataIndex] is { } singleValue
                             && !(DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue) is [null])
                             && !parameters[singleDataIndex].ParameterType.IsInstanceOfType(singleValue)
-                            && !(parameters[singleDataIndex].ParameterType.IsValueType
-                                && DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue).Length == 1)))
+                            && !(DataSourceHelpers.IsTuple(singleValue) && DataSourceHelpers.UnwrapTupleAot(singleValue).Length == 1)))
                 {
                     // DataUnwrapper spreads an incompatible tuple so each element can be
                     // converted before constructing the target, as the generated invoker does.

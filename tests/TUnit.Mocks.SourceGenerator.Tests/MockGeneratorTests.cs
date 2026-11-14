@@ -243,6 +243,7 @@ public class MockGeneratorTests : SnapshotTestBase
             }
             """;
 
+        AssertGeneratedCodeHasNoNullableWarnings(source);
         return VerifyGeneratorOutput(source);
     }
 
@@ -271,6 +272,7 @@ public class MockGeneratorTests : SnapshotTestBase
             }
             """;
 
+        AssertGeneratedCodeHasNoNullableWarnings(source);
         return VerifyGeneratorOutput(source);
     }
 
@@ -298,6 +300,7 @@ public class MockGeneratorTests : SnapshotTestBase
             }
             """;
 
+        AssertGeneratedCodeHasNoNullableWarnings(source);
         return VerifyGeneratorOutput(source);
     }
 
@@ -1865,7 +1868,7 @@ public class MockGeneratorTests : SnapshotTestBase
     public Task External_Interface_With_Indexer_Static_Extension_Discovery()
     {
         var externalSource = """
-            namespace Microsoft.Extensions.Configuration
+            namespace External.Configuration
             {
                 public interface IConfiguration
                 {
@@ -1875,10 +1878,12 @@ public class MockGeneratorTests : SnapshotTestBase
             }
             """;
 
-        var externalRef = CreateExternalAssemblyReference(externalSource, "Microsoft.Extensions.Configuration.Abstractions");
+        // Not named after a real assembly: .NET 11 ships Microsoft.Extensions.Configuration.Abstractions
+        // in the shared framework, and a stand-in with that name collides with it.
+        var externalRef = CreateExternalAssemblyReference(externalSource, "External.Configuration.Abstractions");
 
         var source = """
-            using Microsoft.Extensions.Configuration;
+            using External.Configuration;
             using TUnit.Mocks;
 
             public class MyService
@@ -1902,12 +1907,12 @@ public class MockGeneratorTests : SnapshotTestBase
         AssertContains(
             generated,
             "sealed class IConfigurationMock : "
-            + "global::TUnit.Mocks.Mock<global::Microsoft.Extensions.Configuration.IConfiguration>, "
-            + "global::Microsoft.Extensions.Configuration.IConfiguration");
-        AssertContains(generated, "string? global::Microsoft.Extensions.Configuration.IConfiguration.this[string key]");
+            + "global::TUnit.Mocks.Mock<global::External.Configuration.IConfiguration>, "
+            + "global::External.Configuration.IConfiguration");
+        AssertContains(generated, "string? global::External.Configuration.IConfiguration.this[string key]");
         AssertContains(
             generated,
-            "public static global::Microsoft.Extensions.Configuration.IConfigurationMock Mock"
+            "public static global::External.Configuration.IConfigurationMock Mock"
             + "(global::TUnit.Mocks.MockBehavior behavior)");
 
         return VerifyGeneratorOutput(source, [externalRef]);

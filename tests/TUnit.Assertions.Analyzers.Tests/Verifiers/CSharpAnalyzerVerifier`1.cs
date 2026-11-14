@@ -16,8 +16,6 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
     {
 #if NET472
         return ReferenceAssemblies.NetFramework.Net472.Default;
-#elif NET8_0
-        return ReferenceAssemblies.Net.Net80;
 #elif NET9_0 || NET10_0_OR_GREATER
         return ReferenceAssemblies.Net.Net90;
 #else
@@ -144,9 +142,6 @@ public static partial class CSharpAnalyzerVerifier<TAnalyzer>
                     TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Core", typeof(TUnitAttribute).Assembly),
                     TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions", typeof(Assert).Assembly),
                     TUnit.Tests.Shared.AnalyzerTestCompatibility.GetCompatibleDllPath("TUnit.Assertions.Should", typeof(TUnit.Assertions.Should.ShouldExtensions).Assembly),
-#if NET8_0
-                    TUnit.Tests.Shared.AnalyzerTestCompatibility.GetSystemTextJson9DllPath(),
-#endif
                 },
             },
             CompilerDiagnostics = CompilerDiagnostics.None

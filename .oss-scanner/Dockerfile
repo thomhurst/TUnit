@@ -20,12 +20,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY . /src
 WORKDIR /src
 
-# Install the SDK pinned by global.json, plus the net8.0/net9.0 runtimes so every
+# Install the SDK pinned by global.json, plus the net10.0 runtime so every
 # test target framework can run offline.
 RUN curl -sSL --retry 5 https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
     && chmod +x /tmp/dotnet-install.sh \
     && /tmp/dotnet-install.sh --jsonfile /src/global.json --install-dir "$DOTNET_ROOT" \
-    && for channel in 8.0 9.0; do \
+    && for channel in 10.0; do \
          /tmp/dotnet-install.sh --channel "$channel" --runtime dotnet --install-dir "$DOTNET_ROOT" || exit 1; \
          /tmp/dotnet-install.sh --channel "$channel" --runtime aspnetcore --install-dir "$DOTNET_ROOT" || exit 1; \
        done \

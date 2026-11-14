@@ -13,7 +13,8 @@ public class ComprehensiveCountTest(string classValue)
     [Arguments("B")]
     public async Task TestWithMultipleDataSources(string methodValue)
     {
-        await Task.CompletedTask;
+        await Assert.That(new[] { "X", "Y", "C1", "C2", "ClassDataImplicit" }).Contains(classValue);
+        await Assert.That(new[] { "A", "B", "M1", "M2" }).Contains(methodValue);
     }
 
     public static IEnumerable<string> GetMethodData()

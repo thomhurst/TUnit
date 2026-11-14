@@ -21,7 +21,7 @@ internal static class TUnit_TestProject_Bugs__7399_TypedArrayArgumentsTests_Arra
     private static readonly global::System.Type __classType = typeof(global::TUnit.TestProject.Bugs._7399.TypedArrayArgumentsTests);
     private static readonly global::TUnit.Core.MethodMetadata __mm_0 = global::TUnit.Core.MethodMetadataFactory.Create("Array", __classType, typeof(global::System.Threading.Tasks.Task), __classMetadata, genericTypeCount: 1, parameters: global::TUnit.Core.ParameterMetadataFactory.ForGenericMethod(typeof(global::TUnit.TestProject.Bugs._7399.TypedArrayArgumentsTests), "Array", false, 1, new global::TUnit.Core.ParameterMetadata[]
 {
-global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ConcreteType(typeof(object)), false)
+global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "values", new global::TUnit.Core.ArrayType(new global::TUnit.Core.GenericParameter(0, true, "T"), 1), false)
 }));
     private static global::TUnit.TestProject.Bugs._7399.TypedArrayArgumentsTests __CreateInstance_0(global::System.Type[] typeArgs, object?[] args)
     {

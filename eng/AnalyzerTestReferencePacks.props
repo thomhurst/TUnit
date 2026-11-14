@@ -11,12 +11,12 @@
     tripped the hang dump (#7575).
 
     Keep the versions in step with the ReferenceAssemblies the tests use: ReferenceAssemblies.Net.Net80
-    and .Net90 (8.0.0, 9.0.0), the explicit net10.0 pack (10.0.0), ReferenceAssemblies.NetFramework.Net472
+    and .Net90 (8.0.0, 9.0.0), the explicit net10.0 and net11.0 packs (10.0.0, 11.0.0), ReferenceAssemblies.NetFramework.Net472
     (1.0.2), the explicit net48 pack (1.0.3), and every PackageIdentity passed to AddPackages. A
     version missing here still works; it is just downloaded at test time again.
   -->
   <ItemGroup>
-    <PackageDownload Include="Microsoft.NETCore.App.Ref" Version="[8.0.0];[9.0.0];[10.0.0]" />
+    <PackageDownload Include="Microsoft.NETCore.App.Ref" Version="[8.0.0];[9.0.0];[10.0.0];[11.0.0]" />
     <PackageDownload Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="[1.0.2]" />
     <PackageDownload Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="[1.0.3]" />
 

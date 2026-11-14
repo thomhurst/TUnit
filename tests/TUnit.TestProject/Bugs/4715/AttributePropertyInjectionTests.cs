@@ -58,6 +58,6 @@ public class AttributePropertyInjectionFailureTests(object _)
     [Test]
     public void Test_Should_Fail_Not_Stall()
     {
-        throw new InvalidOperationException("This test should not have executed");
+        throw new InvalidOperationException($"This test should not have executed with injected value {_}");
     }
 }

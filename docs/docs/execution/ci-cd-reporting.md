@@ -120,7 +120,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
     
     - name: Run Tests with Collapsible Reporter
       run: dotnet test -- --output Detailed
@@ -214,6 +214,14 @@ test:
 ```
 
 The `trx2junit` tool converts TRX output to JUnit XML that GitLab can parse.
+
+### Source Locations in JUnit XML
+
+Each `<testcase>` in TUnit's JUnit report has `file` and `line` attributes that point to the test's source, so tools that read JUnit XML can show a failure at its source line. The XML format comes from the test reports of [JUnit](https://docs.junit.org/6.1.3/overview.html), the Java test framework.
+
+```xml
+<testcase name="Add_ReturnsSum" classname="Calculator.Tests.MathTests" time="0.012" file="tests/Calculator.Tests/MathTests.cs" line="12" />
+```
 
 ## Unobserved Task Exceptions
 

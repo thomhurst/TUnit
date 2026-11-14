@@ -65,10 +65,12 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET 9
+    - name: Setup .NET
       uses: actions/setup-dotnet@v6.1.0
       with:
-        dotnet-version: 10.0.403 
+        dotnet-version: |
+          10.0.x
+          11.0.x
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL

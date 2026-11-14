@@ -8,7 +8,7 @@ public class ClassDataSourceEnumerableTest(string value)
     [Test]
     public async Task SimpleTest()
     {
-        await Task.CompletedTask;
+        await Assert.That(new[] { "A", "B", "C", "FromImplicitOperator" }).Contains(value);
     }
 
     public class EnumerableDataSource : IEnumerable<string>

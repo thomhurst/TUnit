@@ -24,6 +24,13 @@ public class CrossCompilationAttributeTests
         [Retry(3)]
         public abstract class BaseTests
         {
+            private sealed class Hidden { }
+
+            [Test]
+            [Arguments(typeof(Hidden))]
+            [Arguments(typeof(Hidden[]))]
+            public void InheritedPrivateType(System.Type value) { }
+
             [Test]
             [Arguments(1, 2)]
             [Timeout(5_000)]

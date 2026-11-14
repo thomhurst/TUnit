@@ -1,22 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using ModularPipelines.Attributes;
-using ModularPipelines.Configuration;
+using ModularPipelines;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Git.Attributes;
-using ModularPipelines.Git.Extensions;
-using ModularPipelines.GitHub.Extensions;
-using ModularPipelines.Models;
-using ModularPipelines.Modules;
+using ModularPipelines.Git;
 using ModularPipelines.Options;
 using Octokit;
 
 namespace TUnit.Pipeline.Modules;
 
 [RunOnlyOnBranch("main")]
-[RunOnLinuxOnly]
+[RunIf<OnLinux>]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<PackTUnitFilesModule>]
 [DependsOn<TestNugetPackageModule>]
@@ -54,7 +48,7 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
     // cannot cut the wait short.
     private static readonly TimeSpan ModuleTimeout = AotWorkflowTimeout + TimeSpan.FromMinutes(30);
 
-    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
+    protected override void Configure(ModuleConfigurationBuilder module) => module
         .WithTimeout(ModuleTimeout)
         .WithSkipWhen(_ =>
         {
@@ -69,10 +63,9 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
             }
 
             return SkipDecision.DoNotSkip;
-        })
-        .Build();
+        });
 
-    protected override async Task<CommandResult[]?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
+    protected override async Task<CommandResult[]> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var versionResult = await context.GetModule<GenerateVersionModule>();
         var semVer = versionResult.ValueOrDefault?.SemVer;
@@ -86,7 +79,7 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
 
         await WaitForAotWorkflowAsync(context, cancellationToken);
 
-        var nupkgs = context.Git().RootDirectory
+        var nupkgs = (await context.Tools.Git.Information.GetRequiredInfoAsync(cancellationToken)).Root
             .GetFiles(x => x.NameWithoutExtension.Contains("TUnit") && x.Extension is ".nupkg")
             .ToArray();
 
@@ -100,14 +93,13 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
 
         for (var i = 0; i < nupkgs.Length; i++)
         {
-            results[i] = await context.DotNet().Nuget.Push(new DotNetNugetPushOptions
+            results[i] = await context.Tools.DotNet.NuGet.PushAsync(new DotNetNuGetPushOptions([nupkgs[i].Path])
             {
-                Path = nupkgs[i].Path,
                 Source = "https://api.nuget.org/v3/index.json",
                 ApiKey = options.Value.ApiKey,
             }, new CommandExecutionOptions
             {
-                LogSettings = new CommandLoggingOptions
+                Logging = new CommandLoggingOptions
                 {
                     ShowCommandArguments = true,
                     ShowStandardError = true,
@@ -127,7 +119,7 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
     // dotnet.yml publish dispatched on a commit with no aot.yml run fails closed.
     private static async Task WaitForAotWorkflowAsync(IModuleContext context, CancellationToken cancellationToken)
     {
-        var gitHub = context.GitHub();
+        var gitHub = context.Tools.GitHub;
         var repository = gitHub.EnvironmentVariables.Repository?.Split('/');
         var sha = gitHub.EnvironmentVariables.Sha;
 

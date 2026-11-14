@@ -24,11 +24,13 @@ public class NotInParallelExecutionTests
             }
         }
 
+        var context = TestContext.Current ?? throw new InvalidOperationException("No current test context.");
+
         // Use TestStart if available, otherwise use DateTime.Now
-        var startTime = TestContext.Current.Execution.TestStart?.DateTime ?? DateTime.Now;
+        var startTime = context.Execution.TestStart?.DateTime ?? DateTime.Now;
 
         ExecutionRecords.Add(new TestExecutionRecord(
-            TestContext.Current!.Metadata.TestDetails.TestName,
+            context.Metadata.TestDetails.TestName,
             startTime,
             null,
             CurrentlyRunning
@@ -43,14 +45,15 @@ public class NotInParallelExecutionTests
             CurrentlyRunning--;
         }
 
+        var context = TestContext.Current ?? throw new InvalidOperationException("No current test context.");
         var record = ExecutionRecords.FirstOrDefault(r =>
-            r.TestName == TestContext.Current!.Metadata.TestDetails.TestName &&
+            r.TestName == context.Metadata.TestDetails.TestName &&
             r.EndTime == null);
 
         if (record != null)
         {
             // Use Result.End if available, otherwise use DateTime.Now
-            record.EndTime = TestContext.Current.Execution.Result?.End?.DateTime ?? DateTime.Now;
+            record.EndTime = context.Execution.Result?.End?.DateTime ?? DateTime.Now;
         }
 
         await AssertNoParallelExecution();

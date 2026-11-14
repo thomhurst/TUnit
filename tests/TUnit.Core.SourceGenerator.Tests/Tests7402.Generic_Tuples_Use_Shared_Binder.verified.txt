@@ -5,7 +5,7 @@
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Single_Tuple_Infers_G_C5DE4A8A_TestSource
+internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Single_Tuple_Infers_G_FC488ABD_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests", new global::TUnit.Core.ClassMetadata
     {
@@ -94,7 +94,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Single_Tuple_Infers_G_C5DE4A8A_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Single_Tuple_Infers_G_C5DE4A8A_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Single_Tuple_Infers_G_FC488ABD_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Single_Tuple_Infers_G_FC488ABD_TestSource.Entries_0);
 }
 
 
@@ -107,7 +107,7 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Long_Tuple_Infers_Gen_4A10555D_TestSource
+internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Long_Tuple_Infers_Gen_327B91CE_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests", new global::TUnit.Core.ClassMetadata
     {
@@ -189,7 +189,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Long_Tuple_Infers_Gen_4A10555D_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Long_Tuple_Infers_Gen_4A10555D_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Long_Tuple_Infers_Gen_327B91CE_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Long_Tuple_Infers_Gen_327B91CE_TestSource.Entries_0);
 }
 
 
@@ -202,7 +202,7 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Tuple_Infers_Generic__32A747FD_TestSource
+internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Tuple_Infers_Generic__E1A153A2_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests", new global::TUnit.Core.ClassMetadata
     {
@@ -286,7 +286,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Tuple_Infers_Generic__32A747FD_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Tuple_Infers_Generic__32A747FD_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Tuple_Infers_Generic__E1A153A2_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Tuple_Infers_Generic__E1A153A2_TestSource.Entries_0);
 }
 
 
@@ -299,7 +299,7 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Value_Tuple_Infers_Ge_320515F2_TestSource
+internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Value_Tuple_Infers_Ge_58859147_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests", new global::TUnit.Core.ClassMetadata
     {
@@ -381,7 +381,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Value_Tuple_Infers_Ge_320515F2_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Value_Tuple_Infers_Ge_320515F2_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Value_Tuple_Infers_Ge_58859147_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Value_Tuple_Infers_Ge_58859147_TestSource.Entries_0);
 }
 
 
@@ -394,7 +394,7 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Tuple_Infer_2F747B8E_TestSource
+internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Tuple_Infer_EFA2985D_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests", new global::TUnit.Core.ClassMetadata
     {
@@ -478,7 +478,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Tuple_Infer_2F747B8E_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Tuple_Infer_2F747B8E_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Tuple_Infer_EFA2985D_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Tuple_Infer_EFA2985D_TestSource.Entries_0);
 }
 
 
@@ -586,7 +586,7 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Null_Element_Keeps_Ge_261FA609_TestSource
+internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Null_Element_Keeps_Ge_65062F6A_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests", new global::TUnit.Core.ClassMetadata
     {
@@ -668,7 +668,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Null_Element_Keeps_Ge_261FA609_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Null_Element_Keeps_Ge_261FA609_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Null_Element_Keeps_Ge_65062F6A_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Null_Element_Keeps_Ge_65062F6A_TestSource.Entries_0);
 }
 
 
@@ -681,7 +681,7 @@ internal static partial class TUnit_TestRegistration
 namespace TUnit.Generated;
 [global::System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute]
 [global::System.CodeDom.Compiler.GeneratedCode("TUnit", "VERSION_SCRUBBED")]
-internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Null_Elemen_87EE0D09_TestSource
+internal static class TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Null_Elemen_6A37D86C_TestSource
 {
     private static readonly global::TUnit.Core.ClassMetadata __classMetadata =     global::TUnit.Core.ClassMetadata.GetOrAdd("TestsBase`1:global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests", new global::TUnit.Core.ClassMetadata
     {
@@ -765,7 +765,7 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "row", new gl
 }
 internal static partial class TUnit_TestRegistration
 {
-    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Null_Elemen_87EE0D09_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Null_Elemen_87EE0D09_TestSource.Entries_0);
+    static readonly int _r_TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Null_Elemen_6A37D86C_TestSource_0 = global::TUnit.Core.SourceRegistrar.RegisterEntries<global::TUnit.TestProject.Bugs._7402.GenericMutableTupleInitializerTests>(static () => TUnit_TestProject_Bugs__7402_GenericMutableTupleInitializerTests_Reference_Null_Elemen_6A37D86C_TestSource.Entries_0);
 }
 
 

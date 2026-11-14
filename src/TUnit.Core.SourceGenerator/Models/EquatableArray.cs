@@ -6,8 +6,14 @@ namespace TUnit.Core.SourceGenerator.Models;
 /// A wrapper around arrays that provides value equality semantics.
 /// Essential for incremental source generators where proper caching depends on equality comparison.
 /// </summary>
+/// <remarks>
+/// A class, not a struct, on purpose. Incremental pipeline nodes are generic over their element type,
+/// and the runtime cannot share generic code across value-type arguments: as a struct, every pipeline
+/// stage carrying an <c>EquatableArray</c> made the compiler process JIT its own copy of Roslyn's node
+/// and state-table code (about 930 methods and 25 ms in a cold build of a small test project).
+/// </remarks>
 /// <typeparam name="T">The element type, which must implement IEquatable&lt;T&gt;</typeparam>
-public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerable<T>
+public sealed class EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnumerable<T>
     where T : IEquatable<T>
 {
     private readonly T[]? _array;
@@ -16,7 +22,7 @@ public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnume
 
     public EquatableArray(IEnumerable<T>? items) => _array = items?.ToArray();
 
-    public static EquatableArray<T> Empty => new(Array.Empty<T>());
+    public static EquatableArray<T> Empty { get; } = new(Array.Empty<T>());
 
     public T[] AsArray() => _array ?? Array.Empty<T>();
 
@@ -24,8 +30,18 @@ public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnume
 
     public T this[int index] => (_array ?? Array.Empty<T>())[index];
 
-    public bool Equals(EquatableArray<T> other)
+    public bool Equals(EquatableArray<T>? other)
     {
+        if (other is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         var left = _array ?? Array.Empty<T>();
         var right = other._array ?? Array.Empty<T>();
 
@@ -75,19 +91,20 @@ public readonly struct EquatableArray<T> : IEquatable<EquatableArray<T>>, IEnume
         return GetEnumerator();
     }
 
-    public static bool operator ==(EquatableArray<T> left, EquatableArray<T> right)
+    // A null reference compares equal to an empty array, as default(EquatableArray<T>) did as a struct.
+    public static bool operator ==(EquatableArray<T>? left, EquatableArray<T>? right)
     {
-        return left.Equals(right);
+        return (left ?? Empty).Equals(right ?? Empty);
     }
 
-    public static bool operator !=(EquatableArray<T> left, EquatableArray<T> right)
+    public static bool operator !=(EquatableArray<T>? left, EquatableArray<T>? right)
     {
-        return !left.Equals(right);
+        return !(left == right);
     }
 
     public static implicit operator EquatableArray<T>(T[]? array) => new(array);
 
-    public static implicit operator T[](EquatableArray<T> array) => array.AsArray();
+    public static implicit operator T[](EquatableArray<T>? array) => array?.AsArray() ?? Array.Empty<T>();
 }
 
 /// <summary>

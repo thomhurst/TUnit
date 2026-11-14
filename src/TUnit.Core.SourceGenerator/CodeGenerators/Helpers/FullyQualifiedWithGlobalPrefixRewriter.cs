@@ -147,6 +147,12 @@ public sealed class FullyQualifiedWithGlobalPrefixRewriter(SemanticModel semanti
             return base.VisitTypeOfExpression(node) ?? node;
         }
 
+        if (symbol is ITypeSymbol type
+            && !semanticModel.Compilation.IsSymbolAccessibleWithin(type, semanticModel.Compilation.Assembly))
+        {
+            return SyntaxFactory.ParseExpression(AttributeTypeExpression.Format(type)).WithTriviaFrom(node);
+        }
+
         return SyntaxFactory
             .TypeOfExpression(
                 SyntaxFactory.ParseTypeName(

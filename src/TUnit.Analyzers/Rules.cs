@@ -6,6 +6,9 @@ public static class Rules
 {
     private const string UsageCategory = "Usage";
 
+    public static readonly DiagnosticDescriptor UnsupportedSpanParams =
+        CreateDescriptor(DiagnosticIds.UnsupportedSpanParams, UsageCategory, DiagnosticSeverity.Error);
+
     public static readonly DiagnosticDescriptor WrongArgumentTypeTestData =
         CreateDescriptor(DiagnosticIds.WrongArgumentTypeTestData, UsageCategory, DiagnosticSeverity.Error);
 

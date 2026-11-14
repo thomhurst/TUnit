@@ -63,7 +63,8 @@ internal static class CodeGenerationHelpers
 
         if (type is INamedTypeSymbol { IsGenericType: true } namedType)
         {
-            return namedType.TypeArguments.Any(ContainsTypeParameter);
+            return namedType.TypeArguments.Any(ContainsTypeParameter)
+                || namedType.ContainingType is { } containingType && ContainsTypeParameter(containingType);
         }
 
         return false;
@@ -150,7 +151,7 @@ internal static class CodeGenerationHelpers
         {
             // This is a constructed generic type (e.g., List<int>, Dictionary<string, T>)
             // Check if all type arguments are concrete (no generic parameters)
-            var hasGenericParameters = namedType.TypeArguments.Any(ContainsTypeParameter);
+            var hasGenericParameters = ContainsTypeParameter(namedType);
 
             if (hasGenericParameters)
             {
@@ -160,7 +161,8 @@ internal static class CodeGenerationHelpers
                 var genericDefType = namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T
                     ? "typeof(global::System.Nullable<>)"
                     : GetTypeOfExpression(namedType.ConstructUnboundGenericType());
-                var genericArgs = namedType.TypeArguments.Select(GenerateTypeInfo).ToArray();
+                // Reflection flattens generic arguments from outermost to innermost type.
+                var genericArgs = GetAllTypeArguments(namedType).Select(GenerateTypeInfo).ToArray();
 
                 using var writer = new CodeWriter("", includeHeader: false);
                 writer.SetIndentLevel(1);
@@ -171,16 +173,24 @@ internal static class CodeGenerationHelpers
             // Fall through to regular typeof() handling
         }
 
-        if (typeSymbol is IArrayTypeSymbol && ContainsTypeParameter(typeSymbol))
+        if (typeSymbol is IArrayTypeSymbol array && ContainsTypeParameter(typeSymbol))
         {
-            // An array of a type parameter (e.g. `params T[]`) has no TypeInfo variant, and typeof(T[])
-            // does not compile outside T's scope. Erase it to object, as the parameter's Type already is.
-            return "new global::TUnit.Core.ConcreteType(typeof(object))";
+            // Preserve the recursive signature without constructing an open runtime array type.
+            return $"new global::TUnit.Core.ArrayType({GenerateTypeInfo(array.ElementType)}, {array.Rank.ToString(CultureInfo.InvariantCulture)})";
         }
 
         // Regular concrete type (including fully closed generic types like List<int>)
         var typeOfExpression = GetTypeOfExpression(typeSymbol);
         return $@"new global::TUnit.Core.ConcreteType({typeOfExpression})";
+    }
+
+    private static IEnumerable<ITypeSymbol> GetAllTypeArguments(INamedTypeSymbol type)
+    {
+        if (type.ContainingType is { } containingType)
+        {
+            foreach (var argument in GetAllTypeArguments(containingType)) yield return argument;
+        }
+        foreach (var argument in type.TypeArguments) yield return argument;
     }
 
     /// <summary>
@@ -191,7 +201,7 @@ internal static class CodeGenerationHelpers
         // typeof(dynamic) does not compile (CS1962); dynamic is object at runtime.
         var fullyQualifiedName = typeSymbol.TypeKind == TypeKind.Dynamic
             ? "object"
-            : typeSymbol.ToDisplayString(DisplayFormats.FullyQualifiedGenericWithGlobalPrefix);
+            : typeSymbol.ToDisplayString(DisplayFormats.CSharpType);
         return $"typeof({fullyQualifiedName})";
     }
 

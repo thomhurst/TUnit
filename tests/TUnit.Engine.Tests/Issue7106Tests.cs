@@ -73,9 +73,11 @@ public class Issue7106Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Arguments("SingleTypeClassDataSourceReadOnce")]
     public async Task Class_Data_Source_Is_Read_Once_And_Keeps_Its_Registration_Receiver(string className)
     {
-        // Source generation cannot infer type arguments from an untyped runtime data source, so the
-        // classes are only discovered in reflection mode
-        Skip.When(testMode != TestMode.Reflection, "Only reflection mode discovers these classes");
+        if (testMode != TestMode.Reflection)
+        {
+            await AssertInferenceFailure($"/*/TUnit.TestProject.Bugs._7106/{className}*/*");
+            return;
+        }
 
         await RunTestsWithFilter(
             $"/*/TUnit.TestProject.Bugs._7106/{className}*/*",
@@ -90,7 +92,11 @@ public class Issue7106Tests(TestMode testMode) : InvokableTestBase(testMode)
     [Test]
     public async Task Deferred_Class_Data_Source_Stays_Deferred_After_Type_Inference()
     {
-        Skip.When(testMode != TestMode.Reflection, "Only reflection mode discovers this class");
+        if (testMode != TestMode.Reflection)
+        {
+            await AssertInferenceFailure("/*/TUnit.TestProject.Bugs._7106/DeferredClassDataSourceReceiver*/*");
+            return;
+        }
 
         // 3 rows inferring one type => 3 cases + 1 placeholder container. Expanded during discovery, the
         // rows would produce 3 tests and no placeholder.
@@ -119,4 +125,12 @@ public class Issue7106Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.NotExecuted.ShouldBe(1)
             ]);
     }
+
+    private Task AssertInferenceFailure(string filter) => RunTestsWithFilter(filter,
+    [
+        result => result.ResultSummary.Counters.Total.ShouldBe(1),
+        result => result.ResultSummary.Counters.Failed.ShouldBe(1),
+        result => result.Results.Single(x => x.Outcome == "Failed").Output?.ErrorInfo?.Message
+            .ShouldContain("cannot be inferred at compile time")
+    ]);
 }

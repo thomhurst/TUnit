@@ -535,7 +535,9 @@ public static class DataSourceHelpers
                 // Keep a matching first tuple parameter whole, including when later parameters
                 // are omitted. A nested row of a different type still spreads into columns.
                 if (TupleHelper.IsTupleType(expectedTypes[0])
-                    && (expectedTypes.Length == 1 || expectedTypes[0].IsInstanceOfType(item)))
+                    && (expectedTypes.Length == 1 || expectedTypes[0].ContainsGenericParameters
+                        && TupleHelper.MatchesOpenTuple(expectedTypes[0], item.GetType())
+                        || expectedTypes[0].IsInstanceOfType(item)))
                 {
                     // A bare singleton value-tuple row exposes its TestDataRow before wrapper removal.
                     // Preserve the reference-tuple payload, rather than its outer row container.
@@ -665,12 +667,10 @@ public static class DataSourceHelpers
     /// This method handles all IDataSourceAttribute implementations generically.
     /// Only used in reflection mode - in AOT/source-gen mode, property injection is handled by generated code.
     /// </summary>
-    #if NET8_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access",
         Justification = "This method is only used in reflection mode. In AOT/source-gen mode, property injection uses compile-time generated code.")]
     [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling",
         Justification = "This method is only used in reflection mode. In AOT/source-gen mode, property injection uses compile-time generated code.")]
-    #endif
     public static async Task<object?> ResolveDataSourceForPropertyAsync([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type containingType, string propertyName, MethodMetadata testInformation, string testSessionId)
     {
         // Use PropertyInjectionService to resolve the data source attribute

@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class GreaterThanAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for GreaterThanAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.GreaterThanAssertion`1" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static GreaterThanAssertion<TValue> IsGreaterThan<TValue>(this IAssertionSource<TValue> source, TValue expected, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null)
         where TValue : System.IComparable<TValue>
     {

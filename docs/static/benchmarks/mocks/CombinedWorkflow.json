@@ -1,66 +1,66 @@
 {
-  "timestamp": "2026-11-01T02:27:32.250Z",
+  "timestamp": "2026-11-14T02:21:36.343Z",
   "category": "CombinedWorkflow",
   "description": "Full workflow: create → setup → invoke → verify",
   "environment": {
-    "benchmarkDotNetVersion": "BenchmarkDotNet v0.15.8, Linux Ubuntu 24.04.5 LTS (Noble Numbat)",
-    "sdk": ".NET SDK 10.0.403",
-    "host": ".NET 10.0.14 (10.0.14, 10.0.1426.52326), X64 RyuJIT x86-64-v3"
+    "benchmarkDotNetVersion": "BenchmarkDotNet v0.16.0-preview.2, Linux Ubuntu 26.04.1 LTS (Resolute Raccoon)",
+    "sdk": ".NET SDK 11.0.100",
+    "host": ".NET 11.0.0 (11.0.0, 11.0.26.53018), X64 RyuJIT x86-64-v4"
   },
   "results": [
     {
       "Method": "TUnit.Mocks",
-      "Mean": "1,539.1 ns",
-      "Error": "20.49 ns",
-      "StdDev": "16.00 ns",
+      "Mean": "1,810.6 ns",
+      "Error": "17.72 ns",
+      "StdDev": "16.57 ns",
       "Gen0": "0.3853",
       "Gen1": "0.0057",
       "Allocated": "6.31 KB"
     },
     {
       "Method": "Imposter",
-      "Mean": "977.2 ns",
-      "Error": "8.62 ns",
-      "StdDev": "7.65 ns",
-      "Gen0": "0.2518",
+      "Mean": "901.2 ns",
+      "Error": "11.60 ns",
+      "StdDev": "9.69 ns",
+      "Gen0": "0.2108",
       "Gen1": "0.0019",
-      "Allocated": "4.13 KB"
+      "Allocated": "3.45 KB"
     },
     {
       "Method": "Mockolate",
-      "Mean": "1,418.8 ns",
-      "Error": "28.17 ns",
-      "StdDev": "56.26 ns",
-      "Gen0": "0.4501",
+      "Mean": "1,559.9 ns",
+      "Error": "20.36 ns",
+      "StdDev": "19.04 ns",
+      "Gen0": "0.4406",
       "Gen1": "0.0076",
-      "Allocated": "7.36 KB"
+      "Allocated": "7.21 KB"
     },
     {
       "Method": "Moq",
-      "Mean": "242,821.2 ns",
-      "Error": "1,026.80 ns",
-      "StdDev": "857.43 ns",
+      "Mean": "439,558.4 ns",
+      "Error": "2,281.21 ns",
+      "StdDev": "2,133.85 ns",
       "Gen0": "1.9531",
       "Gen1": "1.4648",
-      "Allocated": "36.16 KB"
+      "Allocated": "36.39 KB"
     },
     {
       "Method": "NSubstitute",
-      "Mean": "14,373.7 ns",
-      "Error": "160.03 ns",
-      "StdDev": "149.69 ns",
-      "Gen0": "1.5869",
-      "Gen1": "-",
-      "Allocated": "26.72 KB"
+      "Mean": "18,353.9 ns",
+      "Error": "94.54 ns",
+      "StdDev": "88.43 ns",
+      "Gen0": "1.6174",
+      "Gen1": "0.0305",
+      "Allocated": "26.51 KB"
     },
     {
       "Method": "FakeItEasy",
-      "Mean": "13,641.0 ns",
-      "Error": "227.77 ns",
-      "StdDev": "213.06 ns",
-      "Gen0": "1.5564",
+      "Mean": "17,659.1 ns",
+      "Error": "154.09 ns",
+      "StdDev": "144.14 ns",
+      "Gen0": "1.4954",
       "Gen1": "0.0305",
-      "Allocated": "25.52 KB"
+      "Allocated": "24.8 KB"
     }
   ]
 }

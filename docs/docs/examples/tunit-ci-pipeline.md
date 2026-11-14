@@ -29,7 +29,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        dotnet-version: ['8.0.x', '9.0.x']
+        dotnet-version: ['10.0.x', '11.0.x']
       fail-fast: false  # Continue running other jobs if one fails
 
     steps:
@@ -102,7 +102,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
 
     - name: Restore
       run: dotnet restore
@@ -111,7 +111,7 @@ jobs:
       run: dotnet publish -c Release -p:PublishAot=true --use-current-runtime
 
     - name: Run AOT tests
-      run: ./bin/Release/net9.0/linux-x64/publish/YourTestProject
+      run: ./bin/Release/net10.0/linux-x64/publish/YourTestProject
 ```
 
 ### PR Comment with Test Results
@@ -137,7 +137,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '9.0.x'
+        dotnet-version: '10.0.x'
 
     - name: Run tests
       run: dotnet test --configuration Release --results-directory ./TestResults -- --report-trx
@@ -171,7 +171,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
-  dotnetSdkVersion: '9.0.x'
+  dotnetSdkVersion: '10.0.x'
 
 stages:
 - stage: Build
@@ -248,21 +248,21 @@ stages:
 ```yaml
 strategy:
   matrix:
-    linux_net8:
+    linux_net11:
       vmImage: 'ubuntu-latest'
-      dotnetVersion: '8.0.x'
-    linux_net9:
+      dotnetVersion: '11.0.x'
+    linux_net10:
       vmImage: 'ubuntu-latest'
-      dotnetVersion: '9.0.x'
-    windows_net8:
+      dotnetVersion: '10.0.x'
+    windows_net11:
       vmImage: 'windows-latest'
-      dotnetVersion: '8.0.x'
-    windows_net9:
+      dotnetVersion: '11.0.x'
+    windows_net10:
       vmImage: 'windows-latest'
-      dotnetVersion: '9.0.x'
-    macos_net9:
+      dotnetVersion: '10.0.x'
+    macos_net10:
       vmImage: 'macos-latest'
-      dotnetVersion: '9.0.x'
+      dotnetVersion: '10.0.x'
 
 pool:
   vmImage: $(vmImage)
@@ -281,7 +281,7 @@ steps:
 ### Complete Pipeline with Stages
 
 ```yaml
-image: mcr.microsoft.com/dotnet/sdk:9.0
+image: mcr.microsoft.com/dotnet/sdk:10.0
 
 variables:
   BUILD_CONFIGURATION: Release
@@ -365,13 +365,13 @@ coverage-report:
   script:
     - dotnet test --configuration Release -- --report-trx
 
-test:net8:
+test:net11:
   extends: .test-template
-  image: mcr.microsoft.com/dotnet/sdk:8.0
+  image: mcr.microsoft.com/dotnet/sdk:11.0
 
-test:net9:
+test:net10:
   extends: .test-template
-  image: mcr.microsoft.com/dotnet/sdk:9.0
+  image: mcr.microsoft.com/dotnet/sdk:10.0
 ```
 
 ## CircleCI
@@ -387,7 +387,7 @@ orbs:
 executors:
   dotnet-executor:
     docker:
-      - image: mcr.microsoft.com/dotnet/sdk:9.0
+      - image: mcr.microsoft.com/dotnet/sdk:10.0
 
 jobs:
   build:
@@ -457,11 +457,11 @@ workflows:
           requires:
             - build
       - test-matrix:
-          name: test-net8
-          dotnet-version: "8.0"
+          name: test-net11
+          dotnet-version: "11.0"
       - test-matrix:
-          name: test-net9
-          dotnet-version: "9.0"
+          name: test-net10
+          dotnet-version: "10.0"
 ```
 
 ## Docker
@@ -469,7 +469,7 @@ workflows:
 ### Dockerfile for Running Tests
 
 ```dockerfile
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy solution and project files

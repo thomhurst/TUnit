@@ -31,12 +31,7 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var enabledProvider = context.AnalyzerConfigOptionsProvider
-            .Select((options, _) =>
-            {
-                options.GlobalOptions.TryGetValue("build_property.EnableTUnitSourceGeneration", out var value);
-                return !string.Equals(value, "false", StringComparison.OrdinalIgnoreCase);
-            });
+        var enabledProvider = GenerationEnabled.CreateProvider(context);
 
         // Only classes that can contribute a static data-source property are inspected semantically:
         // classes declaring an attributed static property, classes with a base list (which may inherit
@@ -310,21 +305,24 @@ public class StaticPropertyInitializationGenerator : IIncrementalGenerator
         );
 
         var attr = staticProperty.DataSourceAttribute;
-        var attributeClassName = attr.AttributeClass?.Name;
 
         DataSourceAttribute sourceAttribute;
 
         // Generate data source logic based on attribute type
-        if (attributeClassName == "ArgumentsAttribute")
+        if (DataSourceAttributeHelper.IsArguments(attr.AttributeClass))
         {
-            sourceAttribute = ParseArgumentsDataSourceWithAssignment(attr);;
+            sourceAttribute = ParseArgumentsDataSourceWithAssignment(attr);
         }
-        else if (attributeClassName == "MethodDataSourceAttribute")
+        // Custom constructors may remap arguments; instantiate them through IDataSourceAttribute below.
+        else if (DataSourceAttributeHelper.IsBuiltIn(attr.AttributeClass, "MethodDataSourceAttribute"))
         {
             sourceAttribute = ParseMethodDataSourceWithAssignment(attr, staticProperty.Property.ContainingType);
         }
-        else if (attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncDataSourceGeneratorAttribute") == true ||
-                 attr.AttributeClass?.IsOrInherits("global::TUnit.Core.AsyncUntypedDataSourceGeneratorAttribute") == true)
+        // Preserve the supported source families; direct IDataSourceAttribute implementations
+        // retain their existing fallback behavior (including reflection-only fixture sources).
+        else if (DataSourceAttributeHelper.IsMethodSource(attr.AttributeClass)
+                 || DataSourceAttributeHelper.IsOrInheritsBuiltIn(attr.AttributeClass, "AsyncDataSourceGeneratorAttribute")
+                 || DataSourceAttributeHelper.IsOrInheritsBuiltIn(attr.AttributeClass, "AsyncUntypedDataSourceGeneratorAttribute"))
         {
             sourceAttribute = new DataSourceAttribute.AsyncDataSource(CodeGenerationHelpers.GenerateAttributeInstantiation(attr));
         }

@@ -17,9 +17,7 @@ namespace TUnit.Assertions.Extensions;
 public static partial class StringComparisonAssertionExtensions
 {
 
-    /// <summary>
-    /// Extension method for StringComparisonAssertion.
-    /// </summary>
+    /// <inheritdoc cref="T:TUnit.Assertions.Tests.TestData.StringComparisonAssertion" path="/*[self::summary or self::remarks or self::typeparam]"/>
     public static StringComparisonAssertion IsEqualToWithComparison(this IAssertionSource<string> source, string expected, System.StringComparison comparison = StringComparison.Ordinal, [CallerArgumentExpression(nameof(expected))] string? expectedExpression = null, [CallerArgumentExpression(nameof(comparison))] string? comparisonExpression = null)
     {
         source.Context.ExpressionBuilder.Append(".IsEqualToWithComparison(");

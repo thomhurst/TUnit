@@ -9,9 +9,9 @@ sidebar_position: 3
 > Full workflow: create → setup → invoke → verify — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
 
 :::info Last Updated
-This benchmark was automatically generated on **2026-11-01** from the latest CI run.
+This benchmark was automatically generated on **2026-11-14** from the latest CI run.
 
-**Environment:** Ubuntu Latest • .NET SDK 10.0.403
+**Environment:** Ubuntu Latest • .NET SDK 11.0.100
 :::
 
 ## 📊 Results
@@ -20,12 +20,12 @@ Full workflow: create → setup → invoke → verify:
 
 | Library | Mean | Error | StdDev | Allocated |
 |---------|------|-------|--------|-----------|
-| **TUnit.Mocks** | 1,539.1 ns | 20.49 ns | 16.00 ns | 6.31 KB |
-| Imposter | 977.2 ns | 8.62 ns | 7.65 ns | 4.13 KB |
-| Mockolate | 1,418.8 ns | 28.17 ns | 56.26 ns | 7.36 KB |
-| Moq | 242,821.2 ns | 1,026.80 ns | 857.43 ns | 36.16 KB |
-| NSubstitute | 14,373.7 ns | 160.03 ns | 149.69 ns | 26.72 KB |
-| FakeItEasy | 13,641.0 ns | 227.77 ns | 213.06 ns | 25.52 KB |
+| **TUnit.Mocks** | 1,810.6 ns | 17.72 ns | 16.57 ns | 6.31 KB |
+| Imposter | 901.2 ns | 11.60 ns | 9.69 ns | 3.45 KB |
+| Mockolate | 1,559.9 ns | 20.36 ns | 19.04 ns | 7.21 KB |
+| Moq | 439,558.4 ns | 2,281.21 ns | 2,133.85 ns | 36.39 KB |
+| NSubstitute | 18,353.9 ns | 94.54 ns | 88.43 ns | 26.51 KB |
+| FakeItEasy | 17,659.1 ns | 154.09 ns | 144.14 ns | 24.8 KB |
 
 ```mermaid
 %%{init: {
@@ -51,8 +51,8 @@ Full workflow: create → setup → invoke → verify:
 xychart-beta
   title "CombinedWorkflow Performance Comparison"
   x-axis ["TUnit.Mocks", "Imposter", "Mockolate", "Moq", "NSubstitute", "FakeItEasy"]
-  y-axis "Time (ns)" 0 --> 291386
-  bar [1539.1, 977.2, 1418.8, 242821.2, 14373.7, 13641]
+  y-axis "Time (ns)" 0 --> 527471
+  bar [1810.6, 901.2, 1559.9, 439558.4, 18353.9, 17659.1]
 ```
 
 ## 🎯 Key Insights
@@ -65,4 +65,4 @@ This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy
 View the [mock benchmarks overview](/docs/benchmarks/mocks) for methodology details and environment information.
 :::
 
-*Last generated: 2026-11-01T02:27:32.250Z*
+*Last generated: 2026-11-14T02:21:36.343Z*

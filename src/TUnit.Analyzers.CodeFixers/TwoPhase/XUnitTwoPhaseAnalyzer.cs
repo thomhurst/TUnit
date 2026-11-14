@@ -748,31 +748,39 @@ public class XUnitTwoPhaseAnalyzer : MigrationAnalyzer
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertProperSubset(SeparatedSyntaxList<ArgumentSyntax> args)
-    {
-        if (args.Count < 2) return (AssertionConversionKind.Contains, null, false, null);
-
-        // xUnit: Assert.ProperSubset(expectedSuperset, actual)
-        // actual should be a proper subset of expectedSuperset
-        // TUnit: Assert.That(first_arg).IsSubsetOf(second_arg) with TODO comment
-        var first = args[0].Expression.ToString();
-        var second = args[1].Expression.ToString();
-
-        var todoComment = "// TODO: TUnit migration - ProperSubset requires strict subset (not equal). Add additional assertion if needed.";
-        return (AssertionConversionKind.Contains, $"await Assert.That({first}).IsSubsetOf({second})", true, todoComment);
-    }
+        => ConvertProperSet(args, "IsProperSubsetOf");
 
     private (AssertionConversionKind, string?, bool, string?) ConvertProperSuperset(SeparatedSyntaxList<ArgumentSyntax> args)
+        => ConvertProperSet(args, "IsProperSupersetOf");
+
+    private (AssertionConversionKind, string?, bool, string?) ConvertProperSet(SeparatedSyntaxList<ArgumentSyntax> args, string relation)
     {
         if (args.Count < 2) return (AssertionConversionKind.Contains, null, false, null);
 
-        // xUnit: Assert.ProperSuperset(expectedSubset, actual)
-        // actual should be a proper superset of expectedSubset
-        // TUnit: Assert.That(first_arg).IsSupersetOf(second_arg) with TODO comment
-        var first = args[0].Expression.ToString();
-        var second = args[1].Expression.ToString();
+        // Capture in source order, then use actual's comparer for the strict relation.
+        // The inverse relation is not equivalent when the sets have different comparers.
+        var identifiers = _sourceIdentifiers ??= new HashSet<string>(args[0].SyntaxTree.GetRoot().DescendantTokens()
+            .Where(token => token.IsKind(SyntaxKind.IdentifierToken)).Select(token => token.ValueText));
+        var pair = "setArguments";
+        while (identifiers.Contains(pair)) pair += "_";
+        var actualFirst = args[0].NameColon?.Name.Identifier.ValueText == "actual";
+        var actual = $"{pair}.{(actualFirst ? "Item1" : "Item2")}";
+        var expected = $"{pair}.{(actualFirst ? "Item2" : "Item1")}";
 
-        var todoComment = "// TODO: TUnit migration - ProperSuperset requires strict superset (not equal). Add additional assertion if needed.";
-        return (AssertionConversionKind.Contains, $"await Assert.That({first}).IsSupersetOf({second})", true, todoComment);
+        // Preserve the parameter types for explicit interface methods and target-typed expressions.
+        string Capture(ArgumentSyntax argument)
+        {
+            var expression = argument.Expression;
+            if (SemanticModel.GetTypeInfo(expression).ConvertedType is { } type)
+            {
+                return $"({type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)})({expression})";
+            }
+            return expression.ToString();
+        }
+
+        return (AssertionConversionKind.Contains,
+            $"await Assert.That(({Capture(args[0])}, {Capture(args[1])})).Satisfies({pair} => {actual} != null && {actual}.{relation}({expected}))",
+            true, null);
     }
 
     private (AssertionConversionKind, string?, bool, string?) ConvertDistinct(SeparatedSyntaxList<ArgumentSyntax> args)

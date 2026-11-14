@@ -94,15 +94,15 @@ public class ParallelMapTests
     [Test]
     public async Task SelectorException_PropagatesToCaller()
     {
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            ParallelMap.ForParallelAsync<int>(
+        await Assert.That(async () =>
+        {
+            await ParallelMap.ForParallelAsync<int>(
                 100,
                 i => i == 5
                     ? throw new InvalidOperationException("boom")
                     : Task.FromResult(i),
-                Environment.ProcessorCount));
-
-        await Assert.That(exception.Message).IsEqualTo("boom");
+                Environment.ProcessorCount);
+        }).Throws<InvalidOperationException>().WithMessage("boom");
     }
 
     [Test]

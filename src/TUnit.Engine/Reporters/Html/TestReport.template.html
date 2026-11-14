@@ -1,9 +1,19 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>__REPORT_TITLE__</title>
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('tunit-report-theme'); } catch (e) {}
+    if (t !== 'light' && t !== 'dark') {
+      t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
 <style>
   /* ============================== tokens ============================== */
   :root[data-theme="light"] {
@@ -3292,14 +3302,14 @@ function init() {
   // theme
   const apply = (name) => {
     document.documentElement.dataset.theme = name;
-    localStorage.setItem('tunit-report-theme', name);
+    try {
+      localStorage.setItem('tunit-report-theme', name);
+    } catch (_) {}
     renderRun(); // re-render donut for var changes
   };
   $('#themeToggle').addEventListener('click', () => {
     apply(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
   });
-  const saved = localStorage.getItem('tunit-report-theme');
-  if (saved) apply(saved);
 
   document.body.dataset.pane = 'rail';
 

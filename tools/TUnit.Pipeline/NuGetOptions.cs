@@ -1,4 +1,5 @@
-﻿using ModularPipelines.Attributes;
+﻿using ModularPipelines;
+using ModularPipelines.Secrets;
 
 namespace TUnit.Pipeline;
 

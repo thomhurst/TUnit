@@ -62,6 +62,10 @@ internal static class ReflectionGenericTypeResolver
         var parameters = constructor.GetParameters();
         var typeArguments = new Type?[genericParameters.Length];
         var nullOnly = new bool[genericParameters.Length];
+        var collectsTrailingArguments = parameters.Length > 0
+            && parameters[parameters.Length - 1].ParameterType is { IsArray: true } trailingArray
+            && trailingArray.GetArrayRank() == 1
+            && trailingArray == trailingArray.GetElementType()!.MakeArrayType();
 
         // A T[] or List<T> value fixes T first, because it cannot bind to any other T: [Arguments((short)2, new[] { 1 })]
         // on C<T>(T count, T[] values) infers int, which the short also binds to. A bare T then takes the first
@@ -70,10 +74,20 @@ internal static class ReflectionGenericTypeResolver
         for (var pass = 0; pass < 2; pass++)
         {
             var bareParameters = pass == 1;
-            for (var i = 0; i < dataRow.Length && i < parameters.Length; i++)
+            for (var i = 0; i < dataRow.Length && (i < parameters.Length || collectsTrailingArguments); i++)
             {
-                var parameterType = parameters[i].ParameterType;
-                if (parameterType.IsGenericParameter != bareParameters)
+                var parameterType = parameters[Math.Min(i, parameters.Length - 1)].ParameterType;
+                // Only the trailing array collects loose values. Null remains an array argument and
+                // contributes no element type, matching source-generated constructor-row inference.
+                var isExpandedTrailingValue = collectsTrailingArguments && i >= parameters.Length - 1
+                    && dataRow[i] is { } trailingValue && !trailingValue.GetType().IsArray;
+                if (isExpandedTrailingValue)
+                {
+                    parameterType = parameterType.GetElementType()!;
+                }
+
+                // Expanded elements fix their array's element type before ordinary bare T parameters.
+                if ((parameterType.IsGenericParameter && !isExpandedTrailingValue) != bareParameters)
                 {
                     continue;
                 }

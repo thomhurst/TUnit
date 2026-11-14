@@ -357,6 +357,16 @@ public static class InstanceFactoryGenerator
                 }
                 arguments[arguments.Count - 1] = new InvocationArgument(trailingExpression);
             }
+            // Class rows can omit optional parameters even when the closed generic class is
+            // inferred from method data. Preserve their declared defaults before indexing the row.
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                if (!parameters[i].CollectsTrailingArguments()
+                    && TupleArgumentHelper.TryFormatDefaultValue(parameters[i], out var defaultExpression))
+                {
+                    arguments[i] = new InvocationArgument($"(args.Length > {i.ToString(CultureInfo.InvariantCulture)} ? {arguments[i].Expression} : {defaultExpression})");
+                }
+            }
             if (!useCachedConstructor && parameters.Any(static parameter => parameter.RefKind != RefKind.None))
             {
                 // By-reference arguments need assignable locals. Evaluate all conversions in

@@ -7,6 +7,9 @@ namespace TUnit.Core;
 [DebuggerDisplay("{Type}.{Name}")]
 public record MethodMetadata : IMemberMetadata
 {
+    // Reflection discovery already resolved the exact method, including closed generic arguments.
+    internal System.Reflection.MethodInfo? ReflectionInfo { get; init; }
+
     public required ParameterMetadata[] Parameters { get; init; }
 
     public required int GenericTypeCount { get; init; }

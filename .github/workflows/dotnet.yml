@@ -81,6 +81,11 @@ jobs:
       # then spent up to 3 minutes saving an entry that was evicted within the hour.
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+            11.0.x
 
       - name: Enable Long Paths on Windows
         if: matrix.os == 'windows-latest'
@@ -190,6 +195,18 @@ jobs:
         with:
           user: ${{ secrets.NUGET_USER }}
 
+      # Capture native runtime faults (including exit 139 before MTP reports tests).
+      # The pipeline and all dotnet children (including build tools) inherit these settings.
+      # Use an absolute path because the pipeline launches tests from several directories.
+      - name: Enable macOS crash dumps
+        if: runner.os == 'macOS' && vars.CRASH_DUMP_ENCRYPTION_CERT != ''
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/tunit-crash-dumps"
+          echo "DOTNET_DbgEnableMiniDump=1" >> "$GITHUB_ENV"
+          echo "DOTNET_DbgMiniDumpType=2" >> "$GITHUB_ENV"
+          echo "DOTNET_DbgMiniDumpName=$RUNNER_TEMP/tunit-crash-dumps/crash.%e.%p.dmp" >> "$GITHUB_ENV"
+
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
         with:
@@ -214,6 +231,34 @@ jobs:
           # suites, apart from the .NET Framework TFMs only Windows can run (see PipelineScope).
           # Manual runs, which publish, keep every suite on every OS.
           os-specific-only: ${{ github.event_name == 'pull_request' && matrix.os != 'ubuntu-latest' }}
+
+      # Never upload raw process memory: the pipeline and its children inherit credentials.
+      - name: Encrypt macOS crash dumps
+        if: always() && runner.os == 'macOS' && vars.CRASH_DUMP_ENCRYPTION_CERT != ''
+        shell: bash
+        env:
+          CRASH_DUMP_ENCRYPTION_CERT: ${{ vars.CRASH_DUMP_ENCRYPTION_CERT }}
+        run: |
+          set -euo pipefail
+          cert="$RUNNER_TEMP/tunit-crash-dump-recipient.pem"
+          trap 'rm -f "$cert" "$RUNNER_TEMP"/tunit-crash-dumps/*.dmp' EXIT
+          printf '%s\n' "$CRASH_DUMP_ENCRYPTION_CERT" > "$cert"
+          mkdir -p "$RUNNER_TEMP/tunit-crash-dumps-encrypted"
+          shopt -s nullglob
+          for dump in "$RUNNER_TEMP"/tunit-crash-dumps/*.dmp; do
+            encrypted="$RUNNER_TEMP/tunit-crash-dumps-encrypted/$(basename "$dump").cms"
+            openssl cms -encrypt -stream -binary -aes-256-cbc -in "$dump" -outform DER -out "$encrypted.tmp" "$cert"
+            mv "$encrypted.tmp" "$encrypted"
+          done
+
+      - name: Upload encrypted macOS crash dumps
+        uses: actions/upload-artifact@v7.0.2
+        if: always() && runner.os == 'macOS'
+        with:
+          name: EncryptedNativeCrashDumps-${{matrix.os}}
+          path: ${{ runner.temp }}/tunit-crash-dumps-encrypted/*.cms
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload Diagnostic Logs
         uses: actions/upload-artifact@v7.0.2
@@ -267,6 +312,10 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       # TUnit.Mocks.Aot.Tests sets TreatWarningsAsErrors, so any trim/AOT warning ILC reports
       # for everyday mock usage fails its publish (#7027). Every framework still runs after an
@@ -275,7 +324,7 @@ jobs:
         shell: bash
         run: |
           failed=()
-          for framework in net8.0 net9.0 net10.0; do
+          for framework in net10.0 net11.0; do
             for project in TUnit.Mocks.Tests TUnit.Mocks.Aot.Tests; do
               echo "::group::$project ($framework)"
               if dotnet publish "tests/$project/$project.csproj" -c Release --use-current-runtime \
@@ -324,6 +373,10 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       - name: Enable Long Paths
         run: |
@@ -400,6 +453,10 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v6.1.0
+        with:
+          dotnet-version: |
+            10.0.x
+            11.0.x
 
       # Packing reads the Roslyn analyzer/generator variants from their own bin folders, so build
       # every library project, not just the packed ones.

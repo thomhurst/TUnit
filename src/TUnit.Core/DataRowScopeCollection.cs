@@ -1,3 +1,6 @@
+using System.Runtime.CompilerServices;
+using TUnit.Core.Discovery;
+
 namespace TUnit.Core;
 
 /// <summary>
@@ -27,6 +30,7 @@ internal sealed class DataRowScopeCollection
             return;
         }
 
+        owner.RegisterObject(instance);
         lock (_lock)
         {
             if (!_objects.TryGetValue(instance, out var owners))
@@ -34,6 +38,16 @@ internal sealed class DataRowScopeCollection
             if (!owners.Contains(owner))
                 owners.Add(owner);
         }
+    }
+
+    internal ScopeOwner[] GetOwners()
+    {
+        lock (_lock) return _owners.ToArray();
+    }
+
+    internal void CaptureOwnership(IEnumerable<object?>? injectedRoots = null)
+    {
+        foreach (var owner in GetOwners()) owner.CaptureOwnership(injectedRoots ?? []);
     }
 
     internal DataRowScopeCollection Clone()
@@ -54,12 +68,18 @@ internal sealed class DataRowScopeCollection
             objects = scopes._objects.Select(pair =>
                 new KeyValuePair<object, ScopeOwner[]>(pair.Key, pair.Value.ToArray())).ToArray();
         }
+        // Owners already registered these roots in the source; copying lookup entries must not
+        // re-enter the tracker while holding the destination collection lock.
         lock (_lock)
         {
             _owners.AddRange(owners);
             foreach (var pair in objects)
+            {
+                if (!_objects.TryGetValue(pair.Key, out var registered))
+                    _objects.Add(pair.Key, registered = []);
                 foreach (var owner in pair.Value)
-                    RegisterObject(owner, pair.Key);
+                    if (!registered.Contains(owner)) registered.Add(owner);
+            }
         }
     }
 
@@ -97,9 +117,137 @@ internal sealed class DataRowScopeCollection
     }
 
     /// <summary>Shared by cloned rows; scope disposal is attempted once, including when it throws.</summary>
-    internal sealed class ScopeOwner(object? scope)
+    internal sealed class ScopeOwner
     {
+        private readonly object? _scope;
+        internal bool OwnsCreatedObjects { get; set; }
+        // Keep exclusions from wider graphs when a foreign row refreshes only an owned child.
+        private readonly ConditionalWeakTable<object, object> _injectedObjects = new();
+        private readonly List<WeakReference<object>> _injectedIdentities = [];
+        private readonly object _ownershipLock = new();
+        private readonly HashSet<object> _roots = new(Helpers.ReferenceEqualityComparer.Instance);
+        private readonly HashSet<object> _pinnedObjects = new(Helpers.ReferenceEqualityComparer.Instance);
+        private readonly ConditionalWeakTable<object, object> _ownedObjects = new();
+        private static readonly object Membership = new();
         private int _disposed;
+
+        internal ScopeOwner(object? scope)
+        {
+            _scope = scope;
+            OwnsCreatedObjects = scope is IDisposable or IAsyncDisposable;
+            // The row always disposes its scope, even when resolved services stay tracker-owned.
+            if (scope is IDisposable or IAsyncDisposable)
+            {
+                ExternalObjectOwnership.Register(scope, this);
+                RetainWhileCounted(scope);
+            }
+        }
+
+        internal void RegisterObject(object instance)
+        {
+            if (!OwnsCreatedObjects) return;
+            bool added;
+            lock (_ownershipLock) added = _roots.Add(instance);
+            if (added)
+            {
+                ExternalObjectOwnership.Register(instance, this);
+                RetainWhileCounted(instance);
+            }
+        }
+
+        internal bool Owns(object instance)
+        {
+            lock (_ownershipLock)
+                return ReferenceEquals(instance, _scope) || _roots.Contains(instance) || _ownedObjects.TryGetValue(instance, out _);
+        }
+
+        // Remember previously exposed identities weakly: the container owns their lifetime.
+        // A changed graph must not make this handle retain otherwise unreachable dependencies.
+        internal void CaptureOwnership(IEnumerable<object?> injectedRoots)
+        {
+            object[] roots;
+            lock (_ownershipLock) roots = _roots.ToArray();
+            CaptureOwnership(roots, injectedRoots);
+        }
+
+        // A foreign row consumes only this graph; other roots may already be disposed.
+        internal void CaptureOwnershipFor(object root, IEnumerable<object?> injectedRoots, bool retainPartialGraphOnError = false)
+            => CaptureOwnership([root], injectedRoots, retainPartialGraphOnError);
+
+        private void CaptureOwnership(object[] roots, IEnumerable<object?> injectedRoots, bool retainPartialGraphOnError = false)
+        {
+            if (!OwnsCreatedObjects || roots.Length == 0) return;
+            // Discover outside the ownership lock: user getters can enter tracker code.
+            // Publish after discovery (or best-effort failed-factory traversal), preserving concurrent exclusions.
+            var injected = new HashSet<object>(Helpers.ReferenceEqualityComparer.Instance);
+            lock (_ownershipLock)
+                CollectInjectedIdentities(injected);
+            var owned = ObjectGraphDiscoverer.DiscoverOwnedObjects(roots, injectedRoots, injected, retainPartialGraphOnError);
+            lock (_ownershipLock)
+            {
+                CollectInjectedIdentities(injected);
+                foreach (var instance in injected)
+                {
+                    if (!_injectedObjects.TryGetValue(instance, out _))
+                    {
+                        _injectedObjects.Add(instance, Membership);
+                        _injectedIdentities.Add(new WeakReference<object>(instance));
+                    }
+                    // Explicit scope and resolved roots always remain container-owned.
+                    if (ReferenceEquals(instance, _scope) || _roots.Contains(instance)) continue;
+                    if (_ownedObjects.Remove(instance))
+                        ExternalObjectOwnership.Unregister(instance, this);
+                }
+                owned.ExceptWith(injected);
+                foreach (var instance in owned)
+                {
+                    if (_ownedObjects.TryGetValue(instance, out _)) continue;
+                    _ownedObjects.Add(instance, Membership);
+                    ExternalObjectOwnership.Register(instance, this);
+                }
+            }
+            // Lock order is tracker counter -> ownership -> registry OwnerSet. Never enter
+            // a tracker counter while holding the ownership lock: callbacks can re-enter it.
+            foreach (var instance in owned) RetainWhileCounted(instance);
+        }
+
+        // Called under the ownership lock. Compact dead identities without retaining their targets.
+        private void CollectInjectedIdentities(HashSet<object> injected)
+        {
+            for (var i = _injectedIdentities.Count - 1; i >= 0; i--)
+            {
+                if (_injectedIdentities[i].TryGetTarget(out var instance)) injected.Add(instance);
+                else _injectedIdentities.RemoveAt(i);
+            }
+        }
+
+        // An unrelated source may already hold this service in another session. Its existing
+        // reference keeps the owner handle alive even after this row/session has completed.
+        // The generic count callback releases that handle with the last reference, not forever.
+        internal void RetainWhileCounted(object instance)
+            => Tracking.ObjectTracker.UpdateExternalOwnerPin(instance, this, release: false);
+
+        internal void RemoveCountedPin(object instance)
+        {
+            lock (_ownershipLock) _pinnedObjects.Remove(instance);
+        }
+
+        // Called under the tracker counter lock, so a retired counter cannot remove
+        // a pin being reused by a concurrent consumer of a replacement counter.
+        internal void RetainWhileCountedCore(object instance)
+        {
+            if (instance is not IDisposable and not IAsyncDisposable) return;
+            lock (_ownershipLock)
+            {
+                if (!_pinnedObjects.Add(instance)) return;
+            }
+            // Registration may invoke the callback immediately. Never hold the ownership lock
+            // while entering the counter, whose callbacks also run during tracker cleanup.
+            Tracking.ObjectTracker.OnDisposed(instance, () =>
+            {
+                Tracking.ObjectTracker.UpdateExternalOwnerPin(instance, this, release: true);
+            });
+        }
 
         internal async ValueTask DisposeAsync()
         {
@@ -108,11 +256,11 @@ internal sealed class DataRowScopeCollection
                 return;
             }
 
-            if (scope is IAsyncDisposable asyncDisposable)
+            if (_scope is IAsyncDisposable asyncDisposable)
             {
                 await asyncDisposable.DisposeAsync().ConfigureAwait(false);
             }
-            else if (scope is IDisposable disposable)
+            else if (_scope is IDisposable disposable)
             {
                 disposable.Dispose();
             }

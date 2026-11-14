@@ -47,16 +47,19 @@ internal static class TestDataRowUnwrapper
     }
 
     /// <summary>
-    /// Gets the inner data type from a <see cref="TestDataRow{T}"/> type.
+    /// Gets the inner data type from a <see cref="TestDataRow{T}"/> type or a derived record.
     /// </summary>
     public static Type? GetInnerDataType(Type testDataRowType)
     {
-        if (!IsTestDataRowType(testDataRowType))
+        for (var current = testDataRowType; current is not null; current = current.BaseType)
         {
-            return null;
+            if (IsTestDataRowType(current))
+            {
+                return current.GetGenericArguments()[0];
+            }
         }
 
-        return testDataRowType.GetGenericArguments()[0];
+        return null;
     }
 
     /// <summary>
@@ -96,8 +99,9 @@ internal static class TestDataRowUnwrapper
     /// </summary>
     /// <param name="values">The array of values to unwrap.</param>
     /// <param name="expectedTupleType">Preserve tuple payloads assignable to this parameter type.</param>
+    /// <param name="reconstructTuple">Preserve any tuple payload for a sole tuple parameter, whose elements are reconstructed at invocation.</param>
     /// <returns>A tuple of the unwrapped data array and any extracted metadata.</returns>
-    public static (object?[] Data, TestDataRowMetadata? Metadata) UnwrapArray(object?[] values, Type? expectedTupleType = null)
+    public static (object?[] Data, TestDataRowMetadata? Metadata) UnwrapArray(object?[] values, Type? expectedTupleType = null, bool reconstructTuple = false)
     {
         if (values.Length == 1 && TryUnwrap(values[0], out var data, out var metadata))
         {
@@ -115,7 +119,11 @@ internal static class TestDataRowUnwrapper
             }
 
             // Check if the data is a tuple that should be expanded
-            if (DataSourceHelpers.IsTuple(data) && (expectedTupleType is null || !expectedTupleType.IsInstanceOfType(data)))
+            if (DataSourceHelpers.IsTuple(data)
+                && !(expectedTupleType is not null
+                    && (reconstructTuple || expectedTupleType.IsInstanceOfType(data)
+                        || expectedTupleType.ContainsGenericParameters
+                            && TupleHelper.MatchesOpenTuple(expectedTupleType, data!.GetType()))))
             {
                 return (data.ToObjectArray(), metadata);
             }

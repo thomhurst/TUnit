@@ -192,7 +192,7 @@ sidebar_position: ${Object.keys(categories.runtime).indexOf(testClass) + 3}
 :::info Last Updated
 This benchmark was automatically generated on **${timestamp}** from the latest CI run.
 
-**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}
+**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 11'}
 :::
 
 ## 📊 Results
@@ -291,7 +291,7 @@ sidebar_position: ${Object.keys(categories.runtime).length + 3}
 :::info Last Updated
 This benchmark was automatically generated on **${timestamp}** from the latest CI run.
 
-**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}
+**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 11'}
 :::
 
 ## 📊 Results
@@ -385,7 +385,7 @@ sidebar_position: 1
 :::info Last Updated
 These benchmarks were automatically generated on **${timestamp}** from the latest CI run.
 
-**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}
+**Environment:** ${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 11'}
 :::
 
 ## 🚀 Runtime Benchmarks
@@ -429,8 +429,8 @@ The benchmarks measure real-world testing patterns:
 ### Environment
 
 - **OS**: ${environmentInfo.os || 'Ubuntu Latest (GitHub Actions)'}
-- **Runtime**: ${environmentInfo.host || '.NET 10'}
-- **SDK**: ${environmentInfo.sdk || '.NET 10 SDK'}
+- **Runtime**: ${environmentInfo.host || '.NET 11'}
+- **SDK**: ${environmentInfo.sdk || '.NET 11 SDK'}
 - **Hardware**: GitHub Actions Standard Runner (Ubuntu)
 - **Tool**: ${environmentInfo.benchmarkDotNetVersion || 'BenchmarkDotNet'}
 
@@ -448,7 +448,7 @@ All benchmark source code is available in the [\`tools/speed-comparison\`](https
 ---
 
 :::note Continuous Benchmarking
-These benchmarks run automatically daily via [GitHub Actions](https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml).
+These benchmarks run automatically every week via [GitHub Actions](https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml).
 
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 :::
@@ -507,7 +507,7 @@ const benchmarkSummary = {
   runtime: Object.keys(categories.runtime),
   build: Object.keys(categories.build),
   timestamp: timestamp,
-  environment: `${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 10'}`
+  environment: `${environmentInfo.os || 'Ubuntu Latest'} • ${environmentInfo.sdk || '.NET 11'}`
 };
 
 fs.writeFileSync(

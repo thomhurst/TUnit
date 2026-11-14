@@ -1,12 +1,7 @@
-using ModularPipelines.Attributes;
-using ModularPipelines.Configuration;
+using ModularPipelines;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
-using ModularPipelines.Models;
-using ModularPipelines.Modules;
+using ModularPipelines.FileSystem;
 using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
@@ -20,29 +15,27 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<CopyToLocalNuGetModule>]
 public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
 {
-    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
+    protected override void Configure(ModuleConfigurationBuilder module) => module
         .WithSkipWhen(_ => EnvironmentVariables.IsNetFramework
             ? SkipDecision.Skip("Running on .NET Framework")
-            : SkipDecision.DoNotSkip)
-        .Build();
+            : SkipDecision.DoNotSkip);
 
-    protected override async Task<IReadOnlyList<CommandResult>?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
+    protected override async Task<IReadOnlyList<CommandResult>> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var results = new List<CommandResult>();
         var version = await context.GetModule<GenerateVersionModule>();
 
-        var testProject = context.Git()
-            .RootDirectory
+        var testProject = (await context.Tools.Git.Information.GetRequiredInfoAsync(cancellationToken)).Root
             .AssertExists()
             .FindFile(x => x.Name == "TUnit.NugetTester.csproj")
             .AssertExists();
 
         // Test AOT publishing
-        foreach (var framework in new[] { "net8.0", "net9.0", "net10.0" })
+        foreach (var framework in new[] { "net8.0", "net10.0", "net11.0" })
         {
-            var result = await context.SubModule<CommandResult>($"AOT-{framework}", async () =>
+            var result = await context.RunSubModuleAsync<CommandResult>($"AOT-{framework}", async token =>
             {
-                return await context.DotNet().Publish(new DotNetPublishOptions
+                return await context.Tools.DotNet.PublishAsync(new DotNetPublishOptions
                 {
                     ProjectSolution = testProject.Path,
                     Runtime = RuntimeIdentifiers.Current,
@@ -56,15 +49,15 @@ public class PublishNugetTesterAOTModule : Module<IReadOnlyList<CommandResult>>
                     Framework = framework,
                 }, new CommandExecutionOptions
                 {
-                    LogSettings = new CommandLoggingOptions
+                    Logging = new CommandLoggingOptions
                     {
                         ShowCommandArguments = true,
                         ShowStandardError = true,
                         ShowExecutionTime = true,
                         ShowExitCode = true
                     }
-                }, cancellationToken);
-            });
+                }, token);
+            }, cancellationToken);
 
             results.Add(result);
         }

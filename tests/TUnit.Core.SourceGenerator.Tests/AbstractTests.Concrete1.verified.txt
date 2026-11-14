@@ -24,7 +24,7 @@ internal static class TUnit_TestProject_AbstractTests_ConcreteClass1_AssertClass
     {
         return new global::TUnit.TestProject.AbstractTests.ConcreteClass1();
     }
-    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.AbstractTests.ConcreteClass1 instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
+    private static global::System.Threading.Tasks.ValueTask __Invoke_0(global::TUnit.TestProject.AbstractTests.AbstractBaseClass instance, int methodIndex, object?[] args, global::System.Threading.CancellationToken cancellationToken)
     {
         try
         {

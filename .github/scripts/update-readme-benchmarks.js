@@ -14,8 +14,8 @@ const SCENARIOS = {
   SetupTeardownTests: 'Setup/teardown lifecycle',
 };
 
-const COLUMNS = ['TUnit_AOT', 'TUnit', 'xUnit3', 'NUnit', 'MSTest'];
-const COLUMN_LABELS = { TUnit_AOT: 'TUnit (AOT)', TUnit: 'TUnit', xUnit3: 'xUnit v3', NUnit: 'NUnit', MSTest: 'MSTest' };
+const COLUMNS = ['TUnit_AOT', 'xUnit3_AOT', 'TUnit', 'xUnit3', 'NUnit', 'MSTest'];
+const COLUMN_LABELS = { TUnit_AOT: 'TUnit (AOT)', xUnit3_AOT: 'xUnit v3 (AOT)', TUnit: 'TUnit', xUnit3: 'xUnit v3', NUnit: 'NUnit', MSTest: 'MSTest' };
 
 console.log('📝 Updating README benchmark section...');
 
