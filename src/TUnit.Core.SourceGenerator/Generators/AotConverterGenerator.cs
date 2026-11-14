@@ -938,7 +938,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         bool? found = null;
         foreach (var method in type.GetMembers("Parse").OfType<IMethodSymbol>())
         {
-            if (method is not { IsStatic: true, DeclaredAccessibility: Accessibility.Public } || IsObsoleteAsError(method)
+            if (method is not { IsStatic: true, IsGenericMethod: false, DeclaredAccessibility: Accessibility.Public } || IsObsoleteAsError(method)
                 || method.Parameters.Length == 0 || method.Parameters[0].Type.SpecialType != SpecialType.System_String
                 || method.Parameters.Any(static p => p.RefKind is RefKind.Ref or RefKind.Out)
                 || !SymbolEqualityComparer.Default.Equals(method.ReturnType, type))
