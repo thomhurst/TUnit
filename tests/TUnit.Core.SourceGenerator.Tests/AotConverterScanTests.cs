@@ -47,10 +47,54 @@ public class AotConverterScanTests
         const string source = """
             using System;
             using TUnit.Core;
+            public class Tests
+            {
+                [Test, Arguments("a", "b", "c", "d", "e")]
+                public void Parse(Guid guid, TimeSpan? timeSpan, DateTime dateTime, int number, string text) { }
+            }
+            """;
+        var generated = await GenerateParseConverters(source);
+
+#if NET
+        await Assert.That(generated).Contains("global::System.Guid converted = global::System.Guid.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+#else
+        // .NET Framework only has Guid.Parse(string).
+        await Assert.That(generated).Contains("global::System.Guid converted = global::System.Guid.Parse(sourceTypedValue);");
+#endif
+        await Assert.That(generated).Contains("global::System.TimeSpan converted = global::System.TimeSpan.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        await Assert.That(generated).Contains("global::System.DateTime converted = global::System.DateTime.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        // Primitives keep their IConvertible path.
+        await Assert.That(generated).DoesNotContain("int.Parse(");
+        await Assert.That(generated).DoesNotContain("string.Parse(");
+    }
+
+#if NET
+    [Test]
+    public async Task GeneratesParseConversionsOnlyWhereParseIsCallable()
+    {
+        const string source = """
+            using System;
+            using TUnit.Core;
+            public readonly struct Public : IParsable<Public>
+            {
+                public static Public Parse(string s, IFormatProvider? provider) => default;
+                public static bool TryParse(string? s, IFormatProvider? provider, out Public result) { result = default; return true; }
+            }
             public readonly struct Explicit : IParsable<Explicit>
             {
                 static Explicit IParsable<Explicit>.Parse(string s, IFormatProvider? provider) => default;
                 static bool IParsable<Explicit>.TryParse(string? s, IFormatProvider? provider, out Explicit result) { result = default; return true; }
+            }
+            public readonly struct Forbidden : IParsable<Forbidden>
+            {
+                [Obsolete("x", true)] public static Forbidden Parse(string s, IFormatProvider? provider) => default;
+                public static bool TryParse(string? s, IFormatProvider? provider, out Forbidden result) { result = default; return true; }
+            }
+            public readonly struct WithOperator : IParsable<WithOperator>
+            {
+                public static WithOperator Parse(string s, IFormatProvider? provider) => default;
+                public static bool TryParse(string? s, IFormatProvider? provider, out WithOperator result) { result = default; return true; }
+                public static implicit operator WithOperator(string value) => default;
             }
             public readonly struct Box<T> : IParsable<Box<T>>
             {
@@ -61,29 +105,33 @@ public class AotConverterScanTests
             {
                 [Test]
                 public void Generic<T>(Box<T> box) { }
-                [Test, Arguments("a", "b", "c", "d", "e", "f")]
-                public void Parse(Guid guid, TimeSpan? timeSpan, DateTime dateTime, int number, string text, Explicit explicitParse) { }
+                [Test, Arguments("a", "b", "c", "d")]
+                public void Parse(Public a, Explicit b, Forbidden c, WithOperator d) { }
             }
             """;
+        var generated = await GenerateParseConverters(source);
+
+        await Assert.That(generated).Contains("global::Public converted = global::Public.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        await Assert.That(generated).DoesNotContain("Explicit.Parse(");
+        await Assert.That(generated).DoesNotContain("Forbidden.Parse(");
+        await Assert.That(generated).DoesNotContain("WithOperator.Parse(");
+        await Assert.That(generated).DoesNotContain("global::Box<");
+    }
+#endif
+
+    private static async Task<string> GenerateParseConverters(string source)
+    {
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var compilation = CSharpCompilation.Create("ParseConverters",
             [CSharpSyntaxTree.ParseText(source, parseOptions)], ReferencesHelper.References,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
             [new AotConverterGenerator().AsSourceGenerator()], parseOptions: parseOptions);
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
 
         await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
         await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
-        var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
-        await Assert.That(generated).Contains("global::System.Guid converted = global::System.Guid.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
-        await Assert.That(generated).Contains("global::System.TimeSpan converted = global::System.TimeSpan.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
-        await Assert.That(generated).Contains("global::System.DateTime converted = global::System.DateTime.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
-        // Primitives keep their IConvertible path, and an explicitly implemented Parse cannot be called.
-        await Assert.That(generated).DoesNotContain("int.Parse(");
-        await Assert.That(generated).DoesNotContain("string.Parse(");
-        await Assert.That(generated).DoesNotContain("Explicit.Parse(");
-        await Assert.That(generated).DoesNotContain("global::Box<");
+        return string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
     }
 
     [Test]
