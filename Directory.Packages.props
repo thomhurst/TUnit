@@ -48,8 +48,8 @@
     <PackageVersion Include="FSharp.Core" Version="10.1.404" />
     <PackageVersion Include="Humanizer" Version="3.0.10" />
     <PackageVersion Include="MessagePack" Version="3.1.12" />
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
-    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="11.0.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.11.48" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" />
