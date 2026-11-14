@@ -27,6 +27,35 @@ public class CastHelperTypeConverterTests
         await Assert.That(result).IsEqualTo("abc");
     }
 
+#if NET
+    [Test]
+    public async Task Fallback_Is_Not_Used_When_Parse_Rejects_The_String()
+    {
+        // Generated code calls Parse directly for parsable types, so the converter must not rescue a rejected string.
+        var result = CastHelper.Cast(typeof(RejectingParsable), "abc");
+
+        await Assert.That(result).IsEqualTo("abc");
+    }
+
+    [TypeConverter(typeof(RejectingParsableConverter))]
+    public sealed record RejectingParsable(string Value) : IParsable<RejectingParsable>
+    {
+        public static RejectingParsable Parse(string s, IFormatProvider? provider) => throw new FormatException();
+
+        public static bool TryParse(string? s, IFormatProvider? provider, out RejectingParsable result)
+        {
+            result = null!;
+            return false;
+        }
+    }
+
+    public sealed class RejectingParsableConverter : TypeConverter
+    {
+        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+            => new RejectingParsable((string)value);
+    }
+#endif
+
     [TypeConverter(typeof(ConvertFromOnlyConverter))]
     public sealed record ConvertFromOnly(string Value);
 

@@ -456,6 +456,15 @@ public static class CastHelper
     {
         // Only declared converters that override ConvertFrom, matching what the source generator and analyzer
         // recognise. CanConvertFrom is not consulted because the generated converter does not call it either.
+#if NET
+        // A parsable type only converts through Parse, as in generated code, so a rejected string stays rejected.
+        if (ParseMethodCache.TryGetValue(targetType, out var parseMethod) && parseMethod is not null)
+        {
+            result = null;
+            return false;
+        }
+#endif
+
         if (targetType.IsDefined(typeof(System.ComponentModel.TypeConverterAttribute), inherit: true)
             && System.ComponentModel.TypeDescriptor.GetConverter(targetType) is { } converter
             && converter.GetType().GetMethod(nameof(System.ComponentModel.TypeConverter.ConvertFrom),
