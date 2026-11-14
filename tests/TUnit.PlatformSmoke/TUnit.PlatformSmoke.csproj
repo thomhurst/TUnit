@@ -25,6 +25,9 @@
     <RuntimeIdentifier Condition="'$(SmokePlatform)' == 'MacCatalyst'">maccatalyst-arm64</RuntimeIdentifier>
     <RunWithOpen>false</RunWithOpen>
     <MtouchLink Condition="'$(SmokePlatform)' != 'Android'">None</MtouchLink>
+    <!-- MT7199 requires a UIKit scene manifest from the 27.x SDKs. This app never starts UIKit
+         (its Main is the generated test platform entry point), so it has no scenes to declare. -->
+    <ValidateSceneManifest Condition="'$(SmokePlatform)' == 'iOS' or '$(SmokePlatform)' == 'MacCatalyst'">false</ValidateSceneManifest>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SmokePlatform)' == 'Android'">
