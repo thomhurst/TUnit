@@ -747,7 +747,10 @@ public class HtmlReporterConfigurationTests
                 File.Exists(Path.Combine(aggregationDirectory, ReportDataJson.MergedReportFileName)).ShouldBeTrue();
             }
 
-            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("timeout-publisher");
+            // Once the active publisher is done, its canonical sidecar is merged alongside
+            // the pending one rather than being replaced by it.
+            aggregator.ReadAllSidecars().Select(s => s.MachineName).OrderBy(n => n, StringComparer.Ordinal)
+                .ShouldBe(["active-publisher", "timeout-publisher"]);
 
             var newerReport = CreateReportData(reportData.AssemblyName, "newer-publisher");
             await reporter.TryWriteSidecarAndAggregateAsync(newerReport, htmlPath, cancellationToken);

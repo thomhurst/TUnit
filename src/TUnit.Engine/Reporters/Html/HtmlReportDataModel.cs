@@ -122,7 +122,7 @@ internal sealed class ReportSummary
 
     // Large counts from many suites must not wrap negative and read as "no failures".
     private static int SaturatingAdd(int a, int b)
-        => (int)Math.Max(int.MinValue, Math.Min(int.MaxValue, (long)a + b));
+        => (int)Math.Min(int.MaxValue, (long)a + b);
 }
 
 internal sealed class ReportTestGroup
