@@ -44,6 +44,20 @@ public class StringToParsableArgumentsTests
     {
         await Assert.That(time).IsEqualTo(new TimeOnly(14, 30, 0));
     }
+
+    [Test]
+    [Arguments("123")]
+    public async Task NInt_From_String(nint value)
+    {
+        await Assert.That(value).IsEqualTo((nint)123);
+    }
+
+    [Test]
+    [Arguments("123")]
+    public async Task NUInt_From_String(nuint value)
+    {
+        await Assert.That(value).IsEqualTo((nuint)123);
+    }
 #endif
 
     [Test]

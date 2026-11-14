@@ -42,6 +42,100 @@ public class AotConverterScanTests
     }
 
     [Test]
+    public async Task GeneratesParseConversionsFromString()
+    {
+        const string source = """
+            using System;
+            using TUnit.Core;
+            public class Tests
+            {
+                [Test, Arguments("a", "b", "c", "d", "e", "f", "g")]
+                public void Parse(Guid guid, TimeSpan? timeSpan, DateTime dateTime, nint nativeInt, nuint nativeUInt, int number, string text) { }
+            }
+            """;
+        var generated = await GenerateTypeConverters(source);
+
+#if NET
+        await Assert.That(generated).Contains("global::System.Guid converted = global::System.Guid.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        await Assert.That(generated).Contains("nint converted = nint.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        await Assert.That(generated).Contains("nuint converted = nuint.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+#else
+        // .NET Framework only has Guid.Parse(string).
+        await Assert.That(generated).Contains("global::System.Guid converted = global::System.Guid.Parse(sourceTypedValue);");
+#endif
+        await Assert.That(generated).Contains("global::System.TimeSpan converted = global::System.TimeSpan.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        await Assert.That(generated).Contains("global::System.DateTime converted = global::System.DateTime.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        // Primitives keep their IConvertible path.
+        await Assert.That(generated).DoesNotContain(" int.Parse(");
+        await Assert.That(generated).DoesNotContain(" string.Parse(");
+    }
+
+#if NET
+    [Test]
+    public async Task GeneratesParseConversionsOnlyWhereParseIsCallable()
+    {
+        const string source = """
+            using System;
+            using TUnit.Core;
+            public readonly struct Public : IParsable<Public>
+            {
+                public static Public Parse(string s, IFormatProvider? provider) => default;
+                public static bool TryParse(string? s, IFormatProvider? provider, out Public result) { result = default; return true; }
+            }
+            public readonly struct Explicit : IParsable<Explicit>
+            {
+                static Explicit IParsable<Explicit>.Parse(string s, IFormatProvider? provider) => default;
+                static bool IParsable<Explicit>.TryParse(string? s, IFormatProvider? provider, out Explicit result) { result = default; return true; }
+            }
+            public readonly struct Forbidden : IParsable<Forbidden>
+            {
+                [Obsolete("x", true)] public static Forbidden Parse(string s, IFormatProvider? provider) => default;
+                public static bool TryParse(string? s, IFormatProvider? provider, out Forbidden result) { result = default; return true; }
+            }
+            public readonly struct ByRef : IParsable<ByRef>
+            {
+                public static ByRef Parse(ref string s, IFormatProvider? provider) => default;
+                static ByRef IParsable<ByRef>.Parse(string s, IFormatProvider? provider) => default;
+                static bool IParsable<ByRef>.TryParse(string? s, IFormatProvider? provider, out ByRef result) { result = default; return true; }
+            }
+            public readonly struct GenericMethod : IParsable<GenericMethod>
+            {
+                public static GenericMethod Parse<T>(string s, IFormatProvider? provider) => default;
+                static GenericMethod IParsable<GenericMethod>.Parse(string s, IFormatProvider? provider) => default;
+                static bool IParsable<GenericMethod>.TryParse(string? s, IFormatProvider? provider, out GenericMethod result) { result = default; return true; }
+            }
+            public readonly struct WithOperator : IParsable<WithOperator>
+            {
+                public static WithOperator Parse(string s, IFormatProvider? provider) => default;
+                public static bool TryParse(string? s, IFormatProvider? provider, out WithOperator result) { result = default; return true; }
+                public static implicit operator WithOperator(string value) => default;
+            }
+            public readonly struct Box<T> : IParsable<Box<T>>
+            {
+                public static Box<T> Parse(string s, IFormatProvider? provider) => default;
+                public static bool TryParse(string? s, IFormatProvider? provider, out Box<T> result) { result = default; return true; }
+            }
+            public class Tests
+            {
+                [Test]
+                public void Generic<T>(Box<T> box) { }
+                [Test, Arguments("a", "b", "c", "d", "e", "f")]
+                public void Parse(Public a, Explicit b, Forbidden c, WithOperator d, ByRef e, GenericMethod f) { }
+            }
+            """;
+        var generated = await GenerateTypeConverters(source);
+
+        await Assert.That(generated).Contains("global::Public converted = global::Public.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        await Assert.That(generated).DoesNotContain("Explicit.Parse(");
+        await Assert.That(generated).DoesNotContain("Forbidden.Parse(");
+        await Assert.That(generated).DoesNotContain("WithOperator.Parse(");
+        await Assert.That(generated).DoesNotContain("ByRef.Parse(");
+        await Assert.That(generated).DoesNotContain("GenericMethod.Parse(");
+        await Assert.That(generated).DoesNotContain("global::Box<");
+    }
+#endif
+
+    [Test]
     public async Task GeneratesTypeConverterConversionsFromString()
     {
         const string source = """

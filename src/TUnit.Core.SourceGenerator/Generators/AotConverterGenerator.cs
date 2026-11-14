@@ -325,9 +325,29 @@ public class AotConverterGenerator : IIncrementalGenerator
                 }
             }
 
+            // Native AOT cannot rely on CastHelper finding Parse by reflection, so string arguments
+            // for parsable types get a converter that calls Parse directly.
+            // Primitives and decimal already convert identically in every mode through IConvertible.
+            // DateTime is the exception: IConvertible parses it with the current culture, Parse here is invariant.
+            // nint and nuint are not IConvertible, so they need Parse too.
+            if (namedType.SpecialType is SpecialType.None or SpecialType.System_DateTime or SpecialType.System_IntPtr or SpecialType.System_UIntPtr
+                && !TypeContainsGenericTypeParameters(namedType)
+                && namedType.IsParsableFromString() && IsAccessibleType(namedType, compilation)
+                && !((CSharpCompilation)compilation).ClassifyConversion(compilation.GetSpecialType(SpecialType.System_String), namedType).Exists
+                && FindPublicParse(namedType) is { } takesFormatProvider)
+            {
+                conversions.Add(ToConversionEntry(new ConversionInfo
+                {
+                    SourceType = compilation.GetSpecialType(SpecialType.System_String),
+                    TargetType = namedType,
+                    IsImplicit = false,
+                    ParseFromString = true,
+                    ParseTakesFormatProvider = takesFormatProvider,
+                }));
+            }
             // A string argument for a [TypeConverter] type is converted by constructing the declared
             // converter directly, so AOT never needs TypeDescriptor.
-            if (IsAccessibleType(namedType, compilation)
+            else if (IsAccessibleType(namedType, compilation)
                 && namedType.TryGetStringTypeConverter(compilation, out var converterType, out var passTargetType))
             {
                 conversions.Add(ToConversionEntry(new ConversionInfo
@@ -396,6 +416,8 @@ public class AotConverterGenerator : IIncrementalGenerator
                 conversion.TargetType.SpecialType is SpecialType.System_SByte or SpecialType.System_Byte or
                     SpecialType.System_Int16 or SpecialType.System_UInt16 or SpecialType.System_Int32 or
                     SpecialType.System_UInt32 or SpecialType.System_Int64 or SpecialType.System_UInt64,
+            ParseFromString = conversion.ParseFromString,
+            ParseTakesFormatProvider = conversion.ParseTakesFormatProvider,
             TypeConverter = conversion.TypeConverter?.GloballyQualified(),
             PassTargetTypeToConverter = conversion.PassTargetTypeToConverter,
         });
@@ -678,7 +700,12 @@ public class AotConverterGenerator : IIncrementalGenerator
                 writer.Indent();
                 // For explicit conversions, we need to use an explicit cast
                 // For implicit conversions, variable assignment works fine
-                if (conversion.TypeConverter is { } typeConverter)
+                if (conversion.ParseFromString)
+                {
+                    var formatProvider = conversion.ParseTakesFormatProvider ? ", global::System.Globalization.CultureInfo.InvariantCulture" : "";
+                    writer.AppendLine($"{targetTypeName} converted = {targetTypeName}.Parse(sourceTypedValue{formatProvider});");
+                }
+                else if (conversion.TypeConverter is { } typeConverter)
                 {
                     var converterArgument = conversion.PassTargetTypeToConverter ? $"typeof({targetTypeName})" : "";
                     writer.AppendLine($"{targetTypeName} converted = ({targetTypeName})new {typeConverter}({converterArgument}).ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
@@ -757,6 +784,8 @@ public class AotConverterGenerator : IIncrementalGenerator
         public required bool TypesAreDifferent { get; init; }
         public required bool IsImplicit { get; init; }
         public bool RoundsDecimalToIntegral { get; init; }
+        public bool ParseFromString { get; init; }
+        public bool ParseTakesFormatProvider { get; init; }
         public string? TypeConverter { get; init; }
         public bool PassTargetTypeToConverter { get; init; }
     }
@@ -920,7 +949,40 @@ public class AotConverterGenerator : IIncrementalGenerator
         public required ITypeSymbol SourceType { get; init; }
         public required ITypeSymbol TargetType { get; init; }
         public required bool IsImplicit { get; init; }
+        public bool ParseFromString { get; init; }
+        public bool ParseTakesFormatProvider { get; init; }
         public INamedTypeSymbol? TypeConverter { get; init; }
         public bool PassTargetTypeToConverter { get; init; }
+    }
+
+    /// <summary>
+    /// Returns whether the public static Parse overload to call takes an <see cref="IFormatProvider"/>, or null
+    /// when there is none (e.g. Parse implemented explicitly). Older frameworks lack Guid.Parse(string, IFormatProvider).
+    /// </summary>
+    private static bool? FindPublicParse(INamedTypeSymbol type)
+    {
+        bool? found = null;
+        foreach (var method in type.GetMembers("Parse").OfType<IMethodSymbol>())
+        {
+            if (method is not { IsStatic: true, IsGenericMethod: false, DeclaredAccessibility: Accessibility.Public } || IsObsoleteAsError(method)
+                || method.Parameters.Length == 0 || method.Parameters[0].Type.SpecialType != SpecialType.System_String
+                || method.Parameters.Any(static p => p.RefKind is RefKind.Ref or RefKind.Out)
+                || !SymbolEqualityComparer.Default.Equals(method.ReturnType, type))
+            {
+                continue;
+            }
+
+            if (method.Parameters is [_, { Type.Name: "IFormatProvider", Type.ContainingNamespace.Name: "System" }])
+            {
+                return true;
+            }
+
+            if (method.Parameters.Length == 1)
+            {
+                found = false;
+            }
+        }
+
+        return found;
     }
 }
