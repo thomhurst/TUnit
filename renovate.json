@@ -40,26 +40,28 @@
       "allowedVersions": "<18.12.0"
     },
     {
-      "description": "Per-TFM versions in Directory.Packages.props: keep the net8.0 entries on 8.x.",
+      "description": "Packages versioned with the .NET runtime stay on the major matching their target framework (per-TFM groups in Directory.Packages.props, plus net10.0 examples and templates): keep 8.x entries on 8.x.",
       "matchPackageNames": [
-        "Microsoft.AspNetCore.Mvc.Testing",
-        "Microsoft.Extensions.Http",
-        "Microsoft.Extensions.Logging",
-        "Microsoft.Extensions.Logging.Abstractions"
+        "/^Microsoft\\.(Extensions|AspNetCore|EntityFrameworkCore)(\\.|$)/"
       ],
       "matchCurrentVersion": "/^8\\./",
       "allowedVersions": "<9.0.0"
     },
     {
-      "description": "Per-TFM versions in Directory.Packages.props: keep the net10.0/default entries on 10.x; the net11.0 entries are uncapped.",
+      "description": "As above: keep 10.x entries (net10.0 and the default group) on 10.x.",
       "matchPackageNames": [
-        "Microsoft.AspNetCore.Mvc.Testing",
-        "Microsoft.Extensions.Http",
-        "Microsoft.Extensions.Logging",
-        "Microsoft.Extensions.Logging.Abstractions"
+        "/^Microsoft\\.(Extensions|AspNetCore|EntityFrameworkCore)(\\.|$)/"
       ],
       "matchCurrentVersion": "/^10\\./",
       "allowedVersions": "<11.0.0"
+    },
+    {
+      "description": "As above: keep 11.x entries (net11.0) on 11.x.",
+      "matchPackageNames": [
+        "/^Microsoft\\.(Extensions|AspNetCore|EntityFrameworkCore)(\\.|$)/"
+      ],
+      "matchCurrentVersion": "/^11\\./",
+      "allowedVersions": "<12.0.0"
     },
     {
       "description": "Per-TFM versions in Directory.Packages.props: keep the net8.0/net10.0 OpenTelemetry entries on 1.20.x (1.21 needs .NET 11 packages); the net11.0 entries are uncapped.",
