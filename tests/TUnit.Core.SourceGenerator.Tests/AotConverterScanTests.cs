@@ -42,6 +42,43 @@ public class AotConverterScanTests
     }
 
     [Test]
+    public async Task GeneratesParseConversionsFromString()
+    {
+        const string source = """
+            using System;
+            using TUnit.Core;
+            public readonly struct Explicit : IParsable<Explicit>
+            {
+                static Explicit IParsable<Explicit>.Parse(string s, IFormatProvider? provider) => default;
+                static bool IParsable<Explicit>.TryParse(string? s, IFormatProvider? provider, out Explicit result) { result = default; return true; }
+            }
+            public class Tests
+            {
+                [Test, Arguments("a", "b", "c", "d", "e", "f")]
+                public void Parse(Guid guid, TimeSpan? timeSpan, DateTime dateTime, int number, string text, Explicit explicitParse) { }
+            }
+            """;
+        var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
+        var compilation = CSharpCompilation.Create("ParseConverters",
+            [CSharpSyntaxTree.ParseText(source, parseOptions)], ReferencesHelper.References,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            [new AotConverterGenerator().AsSourceGenerator()], parseOptions: parseOptions);
+        driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
+
+        await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+        var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
+        await Assert.That(generated).Contains("global::System.Guid converted = global::System.Guid.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        await Assert.That(generated).Contains("global::System.TimeSpan converted = global::System.TimeSpan.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        await Assert.That(generated).Contains("global::System.DateTime converted = global::System.DateTime.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        // Primitives keep their IConvertible path, and an explicitly implemented Parse cannot be called.
+        await Assert.That(generated).DoesNotContain("int.Parse(");
+        await Assert.That(generated).DoesNotContain("string.Parse(");
+        await Assert.That(generated).DoesNotContain("Explicit.Parse(");
+    }
+
+    [Test]
     public async Task HandlesInheritedPropertyAndAmbiguousSources()
     {
         const string providerSource = """

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
@@ -323,6 +324,24 @@ public class AotConverterGenerator : IIncrementalGenerator
                     conversions.Add(ToConversionEntry(conversionInfo));
                 }
             }
+
+            // Native AOT cannot rely on CastHelper finding Parse by reflection, so string arguments
+            // for parsable types get a converter that calls Parse directly.
+            // Primitives and decimal already convert identically in every mode through IConvertible.
+            if (namedType.SpecialType is SpecialType.None or SpecialType.System_DateTime
+                && namedType.IsParsableFromString() && IsAccessibleType(namedType, compilation)
+                && !((CSharpCompilation)compilation).ClassifyConversion(compilation.GetSpecialType(SpecialType.System_String), namedType).Exists
+                && FindPublicParse(namedType) is { } takesFormatProvider)
+            {
+                conversions.Add(ToConversionEntry(new ConversionInfo
+                {
+                    SourceType = compilation.GetSpecialType(SpecialType.System_String),
+                    TargetType = namedType,
+                    IsImplicit = false,
+                    ParseFromString = true,
+                    ParseTakesFormatProvider = takesFormatProvider,
+                }));
+            }
         }
 
         if (namedType.IsGenericType)
@@ -380,6 +399,8 @@ public class AotConverterGenerator : IIncrementalGenerator
                 conversion.TargetType.SpecialType is SpecialType.System_SByte or SpecialType.System_Byte or
                     SpecialType.System_Int16 or SpecialType.System_UInt16 or SpecialType.System_Int32 or
                     SpecialType.System_UInt32 or SpecialType.System_Int64 or SpecialType.System_UInt64,
+            ParseFromString = conversion.ParseFromString,
+            ParseTakesFormatProvider = conversion.ParseTakesFormatProvider,
         });
     }
 
@@ -660,7 +681,12 @@ public class AotConverterGenerator : IIncrementalGenerator
                 writer.Indent();
                 // For explicit conversions, we need to use an explicit cast
                 // For implicit conversions, variable assignment works fine
-                if (conversion.RoundsDecimalToIntegral)
+                if (conversion.ParseFromString)
+                {
+                    var formatProvider = conversion.ParseTakesFormatProvider ? ", global::System.Globalization.CultureInfo.InvariantCulture" : "";
+                    writer.AppendLine($"{targetTypeName} converted = {targetTypeName}.Parse(sourceTypedValue{formatProvider});");
+                }
+                else if (conversion.RoundsDecimalToIntegral)
                 {
                     // Match CastHelper's primitive fallback while preserving registered-converter priority.
                     writer.AppendLine($"{targetTypeName} converted = ({targetTypeName})global::System.Convert.ChangeType(sourceTypedValue, typeof({targetTypeName}));");
@@ -734,6 +760,8 @@ public class AotConverterGenerator : IIncrementalGenerator
         public required bool TypesAreDifferent { get; init; }
         public required bool IsImplicit { get; init; }
         public bool RoundsDecimalToIntegral { get; init; }
+        public bool ParseFromString { get; init; }
+        public bool ParseTakesFormatProvider { get; init; }
     }
 
     /// <summary>
@@ -895,5 +923,37 @@ public class AotConverterGenerator : IIncrementalGenerator
         public required ITypeSymbol SourceType { get; init; }
         public required ITypeSymbol TargetType { get; init; }
         public required bool IsImplicit { get; init; }
+        public bool ParseFromString { get; init; }
+        public bool ParseTakesFormatProvider { get; init; }
+    }
+
+    /// <summary>
+    /// Returns whether the public static Parse overload to call takes an <see cref="IFormatProvider"/>, or null
+    /// when there is none (e.g. Parse implemented explicitly). Older frameworks lack Guid.Parse(string, IFormatProvider).
+    /// </summary>
+    private static bool? FindPublicParse(INamedTypeSymbol type)
+    {
+        bool? found = null;
+        foreach (var method in type.GetMembers("Parse").OfType<IMethodSymbol>())
+        {
+            if (method is not { IsStatic: true, DeclaredAccessibility: Accessibility.Public }
+                || method.Parameters.Length == 0 || method.Parameters[0].Type.SpecialType != SpecialType.System_String
+                || !SymbolEqualityComparer.Default.Equals(method.ReturnType, type))
+            {
+                continue;
+            }
+
+            if (method.Parameters is [_, { Type.Name: "IFormatProvider", Type.ContainingNamespace.Name: "System" }])
+            {
+                return true;
+            }
+
+            if (method.Parameters.Length == 1)
+            {
+                found = false;
+            }
+        }
+
+        return found;
     }
 }
