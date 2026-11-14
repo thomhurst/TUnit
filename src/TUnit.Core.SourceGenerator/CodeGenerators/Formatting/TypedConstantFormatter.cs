@@ -165,6 +165,15 @@ public class TypedConstantFormatter(Compilation? compilation = null) : ITypedCon
                 }
             }
 
+            // A string row for a numeric parameter stays a string, like same-project and reflection rows,
+            // so the runtime conversion handles it.
+            if (value is string numericText && targetType.SpecialType is SpecialType.System_Byte or SpecialType.System_SByte
+                    or SpecialType.System_Int16 or SpecialType.System_UInt16 or SpecialType.System_Int32 or SpecialType.System_UInt32
+                    or SpecialType.System_Int64 or SpecialType.System_UInt64 or SpecialType.System_Single or SpecialType.System_Double)
+            {
+                return SymbolDisplay.FormatLiteral(numericText, quote: true);
+            }
+
             // Handle numeric type conversions
             switch (targetType.SpecialType)
             {
