@@ -63,6 +63,38 @@ internal static class TestDataRowUnwrapper
     }
 
     /// <summary>
+    /// The first data parameter, when a single row value can bind to it alone: no later data parameter is
+    /// required. Injected <see cref="CancellationToken"/> parameters consume no row values.
+    /// </summary>
+    public static ParameterMetadata? GetSoleRequiredDataParameter(IMemberMetadata[]? parameters)
+    {
+        ParameterMetadata? first = null;
+        foreach (var member in parameters ?? [])
+        {
+            if (member is not ParameterMetadata parameter)
+            {
+                return null;
+            }
+
+            if (parameter.Type == typeof(CancellationToken))
+            {
+                continue;
+            }
+
+            if (first is null)
+            {
+                first = parameter;
+            }
+            else if (!parameter.IsOptional && !parameter.IsParams)
+            {
+                return null;
+            }
+        }
+
+        return first;
+    }
+
+    /// <summary>
     /// Unwraps an array of values, extracting TestDataRow metadata from single-element arrays.
     /// </summary>
     /// <param name="values">The array of values to unwrap.</param>

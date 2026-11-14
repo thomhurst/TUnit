@@ -335,7 +335,16 @@ public static class InstanceFactoryGenerator
             // Preserve an explicitly supplied trailing array, while packing loose row values.
             var parameters = constructor.Parameters.ToArray();
             var arguments = TupleArgumentHelper.GenerateArgumentAccessWithParams(parameters, "args", "args.Length");
-            if (parameters.Length > 0 && parameters[parameters.Length - 1].CollectsTrailingArguments())
+            var collectsTrailing = parameters.Length > 0 && parameters[parameters.Length - 1].CollectsTrailingArguments();
+            for (var i = 0; i < parameters.Length - (collectsTrailing ? 1 : 0); i++)
+            {
+                // Runtime class rows can omit optional parameters, as statically bound rows can.
+                if (TupleArgumentHelper.TryFormatDefaultValue(parameters[i], out var defaultValue))
+                {
+                    arguments[i] = arguments[i] with { Expression = $"(args.Length > {i.ToString(CultureInfo.InvariantCulture)} ? {arguments[i].Expression} : {defaultValue})" };
+                }
+            }
+            if (collectsTrailing)
             {
                 var singleValueArguments = TupleArgumentHelper.GenerateArgumentAccessWithParams(parameters, "args", parameters.Length);
                 var trailingArgument = arguments[arguments.Count - 1];
