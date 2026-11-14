@@ -329,6 +329,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             // for parsable types get a converter that calls Parse directly.
             // Primitives and decimal already convert identically in every mode through IConvertible.
             if (namedType.SpecialType is SpecialType.None or SpecialType.System_DateTime
+                && !TypeContainsGenericTypeParameters(namedType)
                 && namedType.IsParsableFromString() && IsAccessibleType(namedType, compilation)
                 && !((CSharpCompilation)compilation).ClassifyConversion(compilation.GetSpecialType(SpecialType.System_String), namedType).Exists
                 && FindPublicParse(namedType) is { } takesFormatProvider)

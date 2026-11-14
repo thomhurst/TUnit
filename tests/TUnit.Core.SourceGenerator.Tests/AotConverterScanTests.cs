@@ -52,8 +52,15 @@ public class AotConverterScanTests
                 static Explicit IParsable<Explicit>.Parse(string s, IFormatProvider? provider) => default;
                 static bool IParsable<Explicit>.TryParse(string? s, IFormatProvider? provider, out Explicit result) { result = default; return true; }
             }
+            public readonly struct Box<T> : IParsable<Box<T>>
+            {
+                public static Box<T> Parse(string s, IFormatProvider? provider) => default;
+                public static bool TryParse(string? s, IFormatProvider? provider, out Box<T> result) { result = default; return true; }
+            }
             public class Tests
             {
+                [Test]
+                public void Generic<T>(Box<T> box) { }
                 [Test, Arguments("a", "b", "c", "d", "e", "f")]
                 public void Parse(Guid guid, TimeSpan? timeSpan, DateTime dateTime, int number, string text, Explicit explicitParse) { }
             }
@@ -76,6 +83,7 @@ public class AotConverterScanTests
         await Assert.That(generated).DoesNotContain("int.Parse(");
         await Assert.That(generated).DoesNotContain("string.Parse(");
         await Assert.That(generated).DoesNotContain("Explicit.Parse(");
+        await Assert.That(generated).DoesNotContain("global::Box<");
     }
 
     [Test]
