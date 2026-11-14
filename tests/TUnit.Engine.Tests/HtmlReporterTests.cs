@@ -465,6 +465,36 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public void GenerateHtml_InitializesThemeFromSavedChoiceOrSystemPreference()
+    {
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+        });
+
+        var themeStorageKeyIndex = html.IndexOf("'tunit-report-theme'", StringComparison.Ordinal);
+        var stylesheetIndex = html.IndexOf("<style>", StringComparison.Ordinal);
+
+        themeStorageKeyIndex.ShouldBeGreaterThanOrEqualTo(0);
+        themeStorageKeyIndex.ShouldBeLessThan(stylesheetIndex);
+
+        var headScript = html[..stylesheetIndex];
+        headScript.ShouldContain("prefers-color-scheme: light");
+        headScript.ShouldContain("document.documentElement.dataset.theme");
+        headScript.ShouldContain("catch");
+
+        html.ShouldNotContain("<html lang=\"en\" data-theme=\"dark\">");
+    }
+
+    [Test]
     public void GenerateHtml_EmitsOutcomeTimelineOverflowCss()
     {
         var html = HtmlReportGenerator.GenerateHtml(new ReportData

@@ -103,7 +103,7 @@
     <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="2.1.6" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
-    <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="10.0.404" />
+    <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="11.0.100" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.5.3" />
     <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.5.3" />
@@ -161,14 +161,14 @@
     <PackageVersion Include="Testcontainers.Redis" Version="4.16.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
     <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.84.0" />
-    <PackageVersion Include="Verify" Version="33.3.4" />
-    <PackageVersion Include="Verify.NUnit" Version="33.3.4" />
+    <PackageVersion Include="Verify" Version="33.4.0" />
+    <PackageVersion Include="Verify.NUnit" Version="33.4.0" />
     <PackageVersion Include="TUnit" Version="1.84.0" />
     <PackageVersion Include="TUnit.AspNetCore" Version="1.84.0" />
     <PackageVersion Include="TUnit.Core" Version="1.84.0" />
     <PackageVersion Include="TUnit.Engine" Version="1.84.0" />
     <PackageVersion Include="TUnit.Assertions" Version="1.84.0" />
-    <PackageVersion Include="Verify.TUnit" Version="33.3.4" />
+    <PackageVersion Include="Verify.TUnit" Version="33.4.0" />
     <PackageVersion Include="Vogen" Version="8.0.7" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.assert" Version="2.9.3" />

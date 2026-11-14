@@ -344,6 +344,20 @@ public class AotConverterGenerator : IIncrementalGenerator
                     ParseTakesFormatProvider = takesFormatProvider,
                 }));
             }
+            // A string argument for a [TypeConverter] type is converted by constructing the declared
+            // converter directly, so AOT never needs TypeDescriptor.
+            else if (IsAccessibleType(namedType, compilation)
+                && namedType.TryGetStringTypeConverter(compilation, out var converterType, out var passTargetType))
+            {
+                conversions.Add(ToConversionEntry(new ConversionInfo
+                {
+                    SourceType = compilation.GetSpecialType(SpecialType.System_String),
+                    TargetType = namedType,
+                    IsImplicit = false,
+                    TypeConverter = converterType,
+                    PassTargetTypeToConverter = passTargetType,
+                }));
+            }
         }
 
         if (namedType.IsGenericType)
@@ -403,6 +417,8 @@ public class AotConverterGenerator : IIncrementalGenerator
                     SpecialType.System_UInt32 or SpecialType.System_Int64 or SpecialType.System_UInt64,
             ParseFromString = conversion.ParseFromString,
             ParseTakesFormatProvider = conversion.ParseTakesFormatProvider,
+            TypeConverter = conversion.TypeConverter?.GloballyQualified(),
+            PassTargetTypeToConverter = conversion.PassTargetTypeToConverter,
         });
     }
 
@@ -688,6 +704,11 @@ public class AotConverterGenerator : IIncrementalGenerator
                     var formatProvider = conversion.ParseTakesFormatProvider ? ", global::System.Globalization.CultureInfo.InvariantCulture" : "";
                     writer.AppendLine($"{targetTypeName} converted = {targetTypeName}.Parse(sourceTypedValue{formatProvider});");
                 }
+                else if (conversion.TypeConverter is { } typeConverter)
+                {
+                    var converterArgument = conversion.PassTargetTypeToConverter ? $"typeof({targetTypeName})" : "";
+                    writer.AppendLine($"{targetTypeName} converted = ({targetTypeName})new {typeConverter}({converterArgument}).ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
+                }
                 else if (conversion.RoundsDecimalToIntegral)
                 {
                     // Match CastHelper's primitive fallback while preserving registered-converter priority.
@@ -764,6 +785,8 @@ public class AotConverterGenerator : IIncrementalGenerator
         public bool RoundsDecimalToIntegral { get; init; }
         public bool ParseFromString { get; init; }
         public bool ParseTakesFormatProvider { get; init; }
+        public string? TypeConverter { get; init; }
+        public bool PassTargetTypeToConverter { get; init; }
     }
 
     /// <summary>
@@ -927,6 +950,8 @@ public class AotConverterGenerator : IIncrementalGenerator
         public required bool IsImplicit { get; init; }
         public bool ParseFromString { get; init; }
         public bool ParseTakesFormatProvider { get; init; }
+        public INamedTypeSymbol? TypeConverter { get; init; }
+        public bool PassTargetTypeToConverter { get; init; }
     }
 
     /// <summary>

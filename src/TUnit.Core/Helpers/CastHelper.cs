@@ -402,6 +402,12 @@ public static class CastHelper
             }
         }
 
+        // [TypeConverter] string conversions when no generated AOT converter is registered (e.g. source generation disabled)
+        if (!isAotMode && value is string stringValue && TryTypeConverterConvert(targetType, stringValue, out result))
+        {
+            return true;
+        }
+
         // Try IConvertible for non-primitives
         if (value is IConvertible)
         {
@@ -434,6 +440,39 @@ public static class CastHelper
         if (Environment.GetEnvironmentVariable("TUNIT_DIAGNOSTIC_CAST") == "true")
         {
             Console.WriteLine($"[CastHelper] No conversion found from {sourceType.FullName} to {targetType.FullName}");
+        }
+
+        result = null;
+        return false;
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2067:Target parameter argument does not satisfy 'DynamicallyAccessedMembersAttribute'",
+        Justification = "Not called in AOT mode; the source generator registers AOT converters that construct the declared converter directly.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075:'this' argument does not satisfy 'DynamicallyAccessedMembersAttribute' in call to target method",
+        Justification = "Not called in AOT mode; the source generator registers AOT converters that construct the declared converter directly.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
+        Justification = "Not called in AOT mode; the source generator registers AOT converters that construct the declared converter directly.")]
+    private static bool TryTypeConverterConvert(Type targetType, string value, out object? result)
+    {
+        // Only declared converters that override ConvertFrom, matching what the source generator and analyzer
+        // recognise. CanConvertFrom is not consulted because the generated converter does not call it either.
+#if NET
+        // A parsable type only converts through Parse, as in generated code, so a rejected string stays rejected.
+        if (ParseMethodCache.TryGetValue(targetType, out var parseMethod) && parseMethod is not null)
+        {
+            result = null;
+            return false;
+        }
+#endif
+
+        if (targetType.IsDefined(typeof(System.ComponentModel.TypeConverterAttribute), inherit: true)
+            && System.ComponentModel.TypeDescriptor.GetConverter(targetType) is { } converter
+            && converter.GetType().GetMethod(nameof(System.ComponentModel.TypeConverter.ConvertFrom),
+                [typeof(System.ComponentModel.ITypeDescriptorContext), typeof(System.Globalization.CultureInfo), typeof(object)])
+                ?.DeclaringType != typeof(System.ComponentModel.TypeConverter))
+        {
+            result = converter.ConvertFrom(null, System.Globalization.CultureInfo.InvariantCulture, value);
+            return true;
         }
 
         result = null;
