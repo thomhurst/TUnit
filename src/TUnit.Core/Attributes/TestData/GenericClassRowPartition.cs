@@ -385,7 +385,9 @@ public static class GenericClassRowPartition
         return true;
     }
 
-    // A wrapped tuple that fits the first data parameter stays whole, as typed unwrapping keeps it.
+    // A wrapped tuple that fits the first data parameter is kept as a candidate, as reflection discovery
+    // keeps it. Class rows are still spread by the untyped unwrap, so binding it fails visibly in both
+    // modes until #7680 makes class rows type-aware.
     // Compare the description rather than the parameter's Type, which generated metadata erases to object.
     private static object? GetWholeTuple(object?[] row, IMemberMetadata[] parameters, Type[] classTypeArguments)
     {
@@ -709,6 +711,8 @@ public static class GenericClassRowPartition
     private static bool HasErasedArray(TypeInfo type) => type switch
     {
         ConcreteType { Type: var concrete } => concrete == typeof(object),
+        // Generated metadata now describes T[] as ArrayType; match it through the same recovered shape.
+        ArrayType => true,
         ConstructedGeneric generic => generic.TypeArguments.Any(HasErasedArray),
         _ => false
     };
@@ -768,6 +772,15 @@ public static class GenericClassRowPartition
                 return false;
             }
             var element = actual.GetElementType()!;
+            // The CLR also assigns arrays whose enum elements share an underlying type (int[] to an
+            // int-backed enum array). Invariant generic arguments (direction 0) must still be equal.
+            if (direction != 0 && ResolveClosedType(array.Element, classTypeArguments) is { } expectedElement
+                && (expectedElement.IsEnum || element.IsEnum)
+                && (expectedElement.IsEnum ? Enum.GetUnderlyingType(expectedElement) : expectedElement)
+                    == (element.IsEnum ? Enum.GetUnderlyingType(element) : element))
+            {
+                return true;
+            }
             // Array covariance also applies only to reference elements.
             var elementDirection = element.IsValueType || IsValueType(array.Element) ? 0 : direction;
             return MatchesConstructorParameterType(array.Element, element, classTypeArguments, elementDirection);

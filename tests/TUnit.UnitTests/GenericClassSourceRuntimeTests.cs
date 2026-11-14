@@ -1273,6 +1273,43 @@ public class GenericClassSourceRuntimeTests
         await Assert.That(GenericClassRowPartition.MatchesConstructorRow([new long[] { 1 }], parameters, [typeof(RowEnum[]), typeof(string)])).IsFalse();
     }
 
+    public sealed class InvariantArrayConstructor<T, U>(List<T[]> first, U second = default!);
+
+    [Test]
+    [Arguments(typeof(ArrayConstructor<,>), typeof(ArrayConstructor<RowEnum, string>))]
+    [Arguments(typeof(NestedArrayConstructor<,>), typeof(NestedArrayConstructor<RowEnum, string>))]
+    [Arguments(typeof(InvariantArrayConstructor<,>), typeof(InvariantArrayConstructor<RowEnum, string>))]
+    public async Task Recovered_Generic_Arrays_Follow_Clr_Enum_Array_Assignment(Type open, Type closed)
+    {
+        var shape = open == typeof(ArrayConstructor<,>) ? 0 : open == typeof(NestedArrayConstructor<,>) ? 1 : 2;
+        // Generated metadata describes T[] as ArrayType (erased to object before that); the filter recovers
+        // the structural T[] description for either.
+        TypeInfo array = new ArrayType(new GenericParameter(0, false));
+        IMemberMetadata[] Generated(TypeInfo first) => ParameterMetadataFactory.ForConstructor(open, true,
+            new ParameterMetadata(typeof(object)) { Name = "first", TypeInfo = first, CachedIsOptional = false },
+            new ParameterMetadata(typeof(object)) { Name = "second", TypeInfo = new GenericParameter(1, false), CachedIsOptional = true });
+        var generated = Generated(shape switch { 0 => array, 1 => new ArrayType(array), _ => new ConstructedGeneric(typeof(List<>), [array]) });
+        var erased = Generated(shape == 2 ? new ConstructedGeneric(typeof(List<>), [new ConcreteType(typeof(object))]) : new ConcreteType(typeof(object)));
+        var reflected = closed.GetConstructors()[0].GetParameters().Select(p => (IMemberMetadata)new ParameterMetadata(p.ParameterType)
+        {
+            Name = p.Name!, TypeInfo = new ConcreteType(p.ParameterType), ReflectionInfo = p
+        }).ToArray();
+        object enums = shape switch { 0 => new[] { RowEnum.A }, 1 => new[] { new[] { RowEnum.A } }, _ => new List<RowEnum[]>() };
+        object integers = shape switch { 0 => new[] { 1 }, 1 => new[] { new[] { 1 } }, _ => new List<int[]>() };
+        object longs = shape switch { 0 => new[] { 1L }, 1 => new[] { new[] { 1L } }, _ => new List<long[]>() };
+        // The CLR assigns int[] to an int-backed enum array, but List<int[]> stays distinct from List<RowEnum[]>.
+        var acceptsIntegers = shape != 2;
+        Type[] arguments = [typeof(RowEnum), typeof(string)];
+
+        await Assert.That(closed.GetConstructors()[0].GetParameters()[0].ParameterType.IsInstanceOfType(integers)).IsEqualTo(acceptsIntegers);
+        foreach (var parameters in new IMemberMetadata[][] { generated, erased, reflected })
+        {
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([enums], parameters, arguments)).IsTrue();
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([integers], parameters, arguments)).IsEqualTo(acceptsIntegers);
+            await Assert.That(GenericClassRowPartition.MatchesConstructorRow([longs], parameters, arguments)).IsFalse();
+        }
+    }
+
     [Test]
     public async Task Trailing_Arrays_Keep_Their_Cast_Element_Rule()
     {

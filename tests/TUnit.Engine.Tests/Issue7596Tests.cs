@@ -22,4 +22,18 @@ public class Issue7596Tests(TestMode testMode) : InvokableTestBase(testMode)
                 result => result.ResultSummary.Counters.Failed.ShouldBe(0)
             ]);
     }
+
+    [Test]
+    public async Task Enum_Array_Rows_Run_On_The_Explicit_Instantiation()
+    {
+        // The [Arguments] row, an enum array row and an int array row
+        await RunTestsWithFilter(
+            "/*/TUnit.TestProject.Bugs._7596/EnumArrayRows*/*",
+            [
+                result => result.ResultSummary.Outcome.ShouldBe("Completed"),
+                result => result.ResultSummary.Counters.Total.ShouldBe(3),
+                result => result.ResultSummary.Counters.Passed.ShouldBe(3),
+                result => result.ResultSummary.Counters.Failed.ShouldBe(0)
+            ]);
+    }
 }

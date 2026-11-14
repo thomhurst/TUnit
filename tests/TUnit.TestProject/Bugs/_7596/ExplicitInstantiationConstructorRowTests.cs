@@ -45,3 +45,20 @@ public class CustomConvertibleEnumRows<T, U>(T first, U second = default!)
         await Assert.That(first).IsTypeOf<RowColor>();
     }
 }
+
+// The CLR assigns int[] to an int-backed enum array, so both array rows stay on the enum instantiation.
+[EngineTest(ExpectedResult.Pass)]
+[GenerateGenericTest(typeof(RowColor), typeof(string))]
+[Arguments(new[] { RowColor.Green }, "x")]
+[MethodDataSource(nameof(Rows))]
+public class EnumArrayRows<T, U>(T[] first, U second = default!)
+{
+    public static IEnumerable<object?[]> Rows() => [[new[] { RowColor.Red }], [new[] { 1 }]];
+
+    [Test]
+    public async Task Test()
+    {
+        await Assert.That(first).IsAssignableTo<RowColor[]>();
+        await Assert.That(first.Length).IsEqualTo(1);
+    }
+}
