@@ -91,7 +91,9 @@ jobs:
   apple-smoke:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     name: Apple smoke tests
-    # The .NET 11 Apple workloads (27.x) require Xcode 27, which only the xcode-27 image has.
+    # The .NET 11 Apple workloads require the Xcode minor they were built against (27.2 workloads
+    # need Xcode 27.2), which only the xcode-27 image has. The workloads are unpinned, so when a
+    # .NET servicing release moves them on, move the Xcode and iOS runtime below with them.
     runs-on: xcode-27
     timeout-minutes: 45
     steps:
@@ -105,12 +107,12 @@ jobs:
           key: platform-smoke-${{ runner.os }}-${{ runner.arch }}-Apple-${{ hashFiles('global.json', 'Directory.Packages.props', 'tests/TUnit.PlatformSmoke/TUnit.PlatformSmoke.csproj') }}
           restore-keys: platform-smoke-${{ runner.os }}-${{ runner.arch }}-Apple-
       - name: Select the installed Xcode
-        run: sudo xcode-select --switch /Applications/Xcode_27.0.app
+        run: sudo xcode-select --switch /Applications/Xcode_27.2.app
       # Boots in the background while the workloads install and the app builds.
       - name: Start the iOS simulator
         id: ios-simulator
         run: |
-          device=$(xcrun simctl list devices available --json | jq -er '.devices["com.apple.CoreSimulator.SimRuntime.iOS-27-0"] | map(select(.name == "iPhone 17")) | first | .udid // error("Required preinstalled simulator is missing")')
+          device=$(xcrun simctl list devices available --json | jq -er '.devices["com.apple.CoreSimulator.SimRuntime.iOS-27-2"] | map(select(.name == "iPhone 17")) | first | .udid // error("Required preinstalled simulator is missing")')
           xcrun simctl boot "$device"
           echo "IosDevice=$device" >> "$GITHUB_ENV"
       # Runs even when the iOS simulator fails to boot, so tvOS and Mac Catalyst still run.
