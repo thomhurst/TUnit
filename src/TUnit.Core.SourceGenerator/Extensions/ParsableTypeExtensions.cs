@@ -45,7 +45,8 @@ internal static class ParsableTypeExtensions
     /// <summary>
     /// Finds the <c>[TypeConverter]</c> that converts a string argument to <paramref name="type"/>, mirroring
     /// how <c>TypeDescriptor</c> picks a converter declared on the type or a base type. Types that already
-    /// convert from string through the language (built-ins or user-defined operators) are excluded.
+    /// convert from string through the language (built-ins or user-defined operators) or through
+    /// <see cref="IsParsableFromString"/> are excluded, so those keep their existing conversion.
     /// </summary>
     public static bool TryGetStringTypeConverter(this ITypeSymbol? type, Compilation compilation,
         out INamedTypeSymbol converterType, out bool passTargetType)
@@ -58,7 +59,8 @@ internal static class ParsableTypeExtensions
             type = nullableType.TypeArguments[0];
         }
 
-        if (type is null or ITypeParameterSymbol || type.SpecialType != SpecialType.None
+        if (type is null || type.SpecialType != SpecialType.None || ContainsTypeParameters(type)
+            || type.IsParsableFromString()
             || (compilation is CSharpCompilation csharp && csharp.ClassifyConversion(csharp.GetSpecialType(SpecialType.System_String), type).Exists))
         {
             return false;
@@ -79,7 +81,7 @@ internal static class ParsableTypeExtensions
             converter = attribute.ConstructorArguments[0].Value switch
             {
                 INamedTypeSymbol t => t,
-                string typeName when typeName.IndexOf('[') < 0 => compilation.GetTypeByMetadataName(typeName.Split(',')[0].Trim()),
+                string typeName => ResolveTypeName(typeName, compilation),
                 _ => null,
             };
 
@@ -90,17 +92,20 @@ internal static class ParsableTypeExtensions
             }
         }
 
-        if (converter is null || converter.IsAbstract || converter.IsUnboundGenericType
+        if (converter is null || converter.IsAbstract || converter.IsUnboundGenericType || ContainsTypeParameters(converter)
+            || IsObsoleteAsError(converter)
             || !compilation.IsSymbolAccessibleWithin(converter, compilation.Assembly)
-            || !InheritsFrom(converter, "System.ComponentModel.TypeConverter"))
+            || !OverridesConvertFrom(converter))
         {
             return false;
         }
 
-        var constructors = converter.InstanceConstructors.Where(c => c.DeclaredAccessibility == Accessibility.Public).ToArray();
+        var constructors = converter.InstanceConstructors
+            .Where(c => c.DeclaredAccessibility == Accessibility.Public && !IsObsoleteAsError(c))
+            .ToArray();
 
         // TypeDescriptor prefers a constructor that receives the target type.
-        if (constructors.Any(c => c.Parameters is [{ Type: var p }] && p.ToDisplayString() == "System.Type"))
+        if (constructors.Any(c => c.Parameters is [{ RefKind: RefKind.None, Type: var p }] && p.ToDisplayString() == "System.Type"))
         {
             passTargetType = true;
         }
@@ -113,16 +118,64 @@ internal static class ParsableTypeExtensions
         return true;
     }
 
-    private static bool InheritsFrom(INamedTypeSymbol type, string baseTypeName)
+    /// <summary>
+    /// Resolves <c>"Namespace.Type, Assembly"</c> within the named assembly, or the compilation when no assembly is given.
+    /// Names with generic arguments are not supported.
+    /// </summary>
+    private static INamedTypeSymbol? ResolveTypeName(string typeName, Compilation compilation)
     {
-        for (var current = type.BaseType; current is not null; current = current.BaseType)
+        if (typeName.IndexOf('[') >= 0)
         {
-            if (current.ToDisplayString() == baseTypeName)
+            return null;
+        }
+
+        var parts = typeName.Split(',');
+        var metadataName = parts[0].Trim();
+        if (parts.Length == 1)
+        {
+            return compilation.GetTypeByMetadataName(metadataName);
+        }
+
+        var assemblyName = parts[1].Trim();
+        if (compilation.Assembly.Identity.Name == assemblyName)
+        {
+            return compilation.Assembly.GetTypeByMetadataName(metadataName);
+        }
+
+        return compilation.SourceModule.ReferencedAssemblySymbols
+            .FirstOrDefault(a => a.Identity.Name == assemblyName)
+            ?.GetTypeByMetadataName(metadataName);
+    }
+
+    /// <summary>
+    /// The base <c>TypeConverter.ConvertFrom</c> always throws, so a converter that never overrides it cannot convert.
+    /// </summary>
+    private static bool OverridesConvertFrom(INamedTypeSymbol converter)
+    {
+        var overridden = false;
+        for (var current = converter; current is not null; current = current.BaseType)
+        {
+            if (current.ToDisplayString() == "System.ComponentModel.TypeConverter")
             {
-                return true;
+                return overridden;
             }
+
+            overridden |= current.GetMembers("ConvertFrom").OfType<IMethodSymbol>().Any(m => m.IsOverride);
         }
 
         return false;
     }
+
+    private static bool ContainsTypeParameters(ITypeSymbol type) => type switch
+    {
+        ITypeParameterSymbol => true,
+        IArrayTypeSymbol array => ContainsTypeParameters(array.ElementType),
+        INamedTypeSymbol named => named.TypeArguments.Any(ContainsTypeParameters)
+                                  || (named.ContainingType is { } containing && ContainsTypeParameters(containing)),
+        _ => false,
+    };
+
+    private static bool IsObsoleteAsError(ISymbol symbol)
+        => symbol.GetAttributes().Any(a => a.AttributeClass?.ToDisplayString() == "System.ObsoleteAttribute"
+                                           && a.ConstructorArguments is [_, { Value: true }]);
 }

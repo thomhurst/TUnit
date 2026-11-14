@@ -47,29 +47,65 @@ public class AotConverterScanTests
         const string source = """
             using System;
             using System.ComponentModel;
+            using System.Globalization;
             using TUnit.Core;
+            public abstract class BaseConverter : TypeConverter
+            {
+                public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) => null;
+            }
             [TypeConverter(typeof(PlainConverter))]
             public class Plain { }
             [TypeConverter(typeof(TypedConverter))]
             public struct Typed { }
             [TypeConverter("NamedConverter, TypeConverters")]
             public class Named { }
+            [TypeConverter("NamedConverter, MissingAssembly")]
+            public class WrongAssembly { }
+            [TypeConverter("GenericConverter`1")]
+            public class GenericByName { }
             [TypeConverter(typeof(PlainConverter))]
             public class WithOperator { public static implicit operator WithOperator(string value) => new(); }
-            public class PlainConverter : TypeConverter { }
-            public class TypedConverter : TypeConverter { public TypedConverter(Type type) { } }
-            public class NamedConverter : TypeConverter { }
+            [TypeConverter(typeof(PlainConverter))]
+            public readonly struct Parsable : IParsable<Parsable>
+            {
+                public static Parsable Parse(string s, IFormatProvider? provider) => default;
+                public static bool TryParse(string? s, IFormatProvider? provider, out Parsable result) { result = default; return true; }
+            }
+            [TypeConverter(typeof(PlainConverter))]
+            public class Box<T> { }
+            [TypeConverter(typeof(NoConvertFromConverter))]
+            public class NoConvertFrom { }
+            [TypeConverter(typeof(UnusableConstructorsConverter))]
+            public class UnusableConstructors { }
+            public class PlainConverter : BaseConverter { }
+            public class TypedConverter : BaseConverter
+            {
+                public TypedConverter(Type type) { }
+                public TypedConverter() { }
+            }
+            public class NamedConverter : BaseConverter { }
+            public class GenericConverter<T> : BaseConverter { }
+            public class NoConvertFromConverter : TypeConverter { }
+            public class UnusableConstructorsConverter : BaseConverter
+            {
+                public UnusableConstructorsConverter(ref Type type) { }
+                [Obsolete("x", true)] public UnusableConstructorsConverter() { }
+            }
             public class Tests
             {
                 public Tests(Named named) { }
-                [Test, Arguments("a", "b", "c")]
-                public void Convert(Plain plain, Typed? typed, WithOperator withOperator) { }
+                [Test, Arguments("a", "b", "c", "d")]
+                public void Convert(Plain plain, Typed? typed, WithOperator withOperator, Parsable parsable) { }
+                [Test]
+                public void Unsupported(WrongAssembly a, GenericByName b, NoConvertFrom c, UnusableConstructors d) { }
+                [Test]
+                public void Generic<T>(Box<T> box) { }
             }
             """;
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var compilation = CSharpCompilation.Create("TypeConverters",
             [CSharpSyntaxTree.ParseText(source, parseOptions)], ReferencesHelper.References,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, nullableContextOptions: NullableContextOptions.Enable));
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
             [new AotConverterGenerator().AsSourceGenerator()], parseOptions: parseOptions);
         driver = driver.RunGeneratorsAndUpdateCompilation(compilation, out var output, out var diagnostics);
@@ -80,8 +116,15 @@ public class AotConverterScanTests
         await Assert.That(generated).Contains("global::Plain converted = (global::Plain)new global::PlainConverter().ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
         await Assert.That(generated).Contains("global::Typed converted = (global::Typed)new global::TypedConverter(typeof(global::Typed)).ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
         await Assert.That(generated).Contains("global::Named converted = (global::Named)new global::NamedConverter().ConvertFrom(");
-        // The language conversion is kept rather than replaced by the converter.
-        await Assert.That(generated).DoesNotContain("(global::WithOperator)new global::PlainConverter()");
+        // Language conversions and Parse keep precedence over the converter.
+        await Assert.That(generated).DoesNotContain("(global::WithOperator)new");
+        await Assert.That(generated).DoesNotContain("(global::Parsable)new");
+        // Unresolvable, uncallable or non-converting converters, and open target types, are skipped.
+        await Assert.That(generated).DoesNotContain("(global::WrongAssembly)new");
+        await Assert.That(generated).DoesNotContain("(global::GenericByName)new");
+        await Assert.That(generated).DoesNotContain("(global::NoConvertFrom)new");
+        await Assert.That(generated).DoesNotContain("(global::UnusableConstructors)new");
+        await Assert.That(generated).DoesNotContain("global::Box<");
     }
 
     [Test]

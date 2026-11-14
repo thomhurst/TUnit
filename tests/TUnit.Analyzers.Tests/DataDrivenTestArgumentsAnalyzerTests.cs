@@ -365,13 +365,84 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 [TypeConverter(typeof(EmailConverter))]
                 public struct Code;
 
-                public class EmailConverter : TypeConverter;
+                public class EmailConverter : TypeConverter
+                {
+                    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) => value;
+                }
                 """
             );
     }
 
     [Test]
     public async Task TypeConverter_Without_Usable_Constructor_Is_Flagged()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.ComponentModel;
+                using System.Globalization;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [{|#0:Arguments("info@example.com")|}]
+                    public void MyTest(Email value)
+                    {
+                    }
+                }
+
+                [TypeConverter(typeof(EmailConverter))]
+                public class Email;
+
+                public class EmailConverter(int unused) : TypeConverter
+                {
+                    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) => value;
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("string", "Email")
+            );
+    }
+
+    [Test]
+    public async Task TypeConverter_Is_Not_Used_For_Non_String_Argument()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System.ComponentModel;
+                using System.Globalization;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [{|#0:Arguments(1)|}]
+                    public void MyTest(Email value)
+                    {
+                    }
+                }
+
+                [TypeConverter(typeof(EmailConverter))]
+                public class Email;
+
+                public class EmailConverter : TypeConverter
+                {
+                    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) => value;
+                }
+                """,
+
+                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
+                    .WithLocation(0)
+                    .WithArguments("int", "Email")
+            );
+    }
+
+    [Test]
+    public async Task TypeConverter_Without_ConvertFrom_Override_Is_Flagged()
     {
         await Verifier
             .VerifyAnalyzerAsync(
@@ -391,42 +462,12 @@ public class DataDrivenTestArgumentsAnalyzerTests
                 [TypeConverter(typeof(EmailConverter))]
                 public class Email;
 
-                public class EmailConverter(int unused) : TypeConverter;
-                """,
-
-                Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
-                    .WithLocation(0)
-                    .WithArguments("string", "Email")
-            );
-    }
-
-    [Test]
-    public async Task TypeConverter_Is_Not_Used_For_Non_String_Argument()
-    {
-        await Verifier
-            .VerifyAnalyzerAsync(
-                """
-                using System.ComponentModel;
-                using TUnit.Core;
-
-                public class MyClass
-                {
-                    [Test]
-                    [{|#0:Arguments(1)|}]
-                    public void MyTest(Email value)
-                    {
-                    }
-                }
-
-                [TypeConverter(typeof(EmailConverter))]
-                public class Email;
-
                 public class EmailConverter : TypeConverter;
                 """,
 
                 Verifier.Diagnostic(Rules.WrongArgumentTypeTestData)
                     .WithLocation(0)
-                    .WithArguments("int", "Email")
+                    .WithArguments("string", "Email")
             );
     }
 }

@@ -68,7 +68,7 @@ public class EmailTests
 }
 ```
 
-The converter is constructed directly by generated code, so this works with Native AOT. It needs a public parameterless constructor or a public constructor that takes the target `Type`. A converter declared on a base type is also used.
+The converter is constructed directly by generated code, so this works with Native AOT. It needs a public parameterless constructor or a public constructor that takes the target `Type`. A converter declared on a base type is also used. When a type supports both, `Parse` is used.
 
 ## Test Case Metadata
 
