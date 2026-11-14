@@ -452,10 +452,13 @@ public static class CastHelper
         Justification = "Not called in AOT mode; the source generator registers AOT converters that construct the declared converter directly.")]
     private static bool TryTypeConverterConvert(Type targetType, string value, out object? result)
     {
-        // Only declared converters, matching what the source generator and analyzer recognise.
+        // Only declared converters that override ConvertFrom, matching what the source generator and analyzer
+        // recognise. CanConvertFrom is not consulted because the generated converter does not call it either.
         if (targetType.IsDefined(typeof(System.ComponentModel.TypeConverterAttribute), inherit: true)
             && System.ComponentModel.TypeDescriptor.GetConverter(targetType) is { } converter
-            && converter.CanConvertFrom(typeof(string)))
+            && converter.GetType().GetMethod(nameof(System.ComponentModel.TypeConverter.ConvertFrom),
+                [typeof(System.ComponentModel.ITypeDescriptorContext), typeof(System.Globalization.CultureInfo), typeof(object)])
+                ?.DeclaringType != typeof(System.ComponentModel.TypeConverter))
         {
             result = converter.ConvertFrom(null, System.Globalization.CultureInfo.InvariantCulture, value);
             return true;

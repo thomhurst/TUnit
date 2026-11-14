@@ -48,6 +48,22 @@ public class TypeConverterArgumentsTests
         await Assert.That(value.Value).IsEqualTo("derived:abc");
     }
 
+    [Test]
+    [Arguments("abc")]
+    public async Task Converter_Overriding_Only_ConvertFrom(ConvertFromOnly value)
+    {
+        await Assert.That(value.Value).IsEqualTo("abc");
+    }
+
+    [TypeConverter(typeof(ConvertFromOnlyConverter))]
+    public sealed record ConvertFromOnly(string Value);
+
+    public sealed class ConvertFromOnlyConverter : TypeConverter
+    {
+        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+            => value is string s ? new ConvertFromOnly(s) : base.ConvertFrom(context, culture, value);
+    }
+
     [TypeConverter(typeof(EmailConverter))]
     public sealed record Email(string Value);
 
