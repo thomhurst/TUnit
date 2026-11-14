@@ -96,6 +96,48 @@ public sealed class String_ContainsQuoted_String_Char_Char_Assertion : Assertion
     }
 }
 
+/// <summary>
+/// Generated assertion for MatchesBraced
+/// </summary>
+public sealed class String_MatchesBraced_String_Assertion : Assertion<string>
+{
+    private static readonly Task<AssertionResult> _passedTask = Task.FromResult(AssertionResult.Passed);
+
+    private readonly string _needle;
+
+    public String_MatchesBraced_String_Assertion(AssertionContext<string> context, string needle)
+        : base(context)
+    {
+        _needle = needle;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+    {
+        var value = metadata.Value;
+        var exception = metadata.Exception;
+
+        if (exception != null)
+        {
+            return Task.FromResult(AssertionResult.Failed($"threw {exception.GetType().FullName}"));
+        }
+
+        if (value is null)
+        {
+            return Task.FromResult(AssertionResult.Failed("Actual value is null"));
+        }
+
+        var result = value!.MatchesBraced(_needle);
+        return result
+            ? _passedTask
+            : Task.FromResult(AssertionResult.Failed($"found {value}"));
+    }
+
+    protected override string GetExpectation()
+    {
+        return $"match \"{_needle.Replace("{", "(")}\" {{literal}}";
+    }
+}
+
 public static partial class EscapedLiteralsExtensions
 {
     /// <summary>
@@ -117,6 +159,15 @@ public static partial class EscapedLiteralsExtensions
     {
         source.Context.ExpressionBuilder.Append($".ContainsQuoted({needleExpression}, {separatorExpression}, {quoteExpression})");
         return new String_ContainsQuoted_String_Char_Char_Assertion(source.Context, needle, separator, quote);
+    }
+
+    /// <summary>
+    /// Generated extension method for MatchesBraced
+    /// </summary>
+    public static String_MatchesBraced_String_Assertion MatchesBraced(this IAssertionSource<string> source, string needle, [CallerArgumentExpression(nameof(needle))] string? needleExpression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".MatchesBraced({needleExpression})");
+        return new String_MatchesBraced_String_Assertion(source.Context, needle);
     }
 
 }

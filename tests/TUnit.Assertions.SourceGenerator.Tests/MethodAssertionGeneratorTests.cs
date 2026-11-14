@@ -291,6 +291,9 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             // Interpolation holes still evaluate; only the literal text is escaped.
             await Assert.That(mainFile).Contains("""return $"contain \"{_needle}\" \\ {_needle.Length} chars";""");
 
+            // Braces and quotes inside a hole's expression belong to the expression, not the text.
+            await Assert.That(mainFile).Contains("""return $"match \"{_needle.Replace("{", "(")}\" {{literal}}";""");
+
             await Assert.That(mainFile).Contains("""string needle = "a\"b\\c", char separator = '\\', char quote = '\''""");
 
             await CompileChecker.AssertNoErrors(generatedFiles);

@@ -20,5 +20,9 @@ public static partial class EscapedLiteralsExtensions
     [GenerateAssertion(ExpectationMessage = "contain \"{needle}\" \\ {_needle.Length} chars")]
     public static bool ContainsQuoted(this string value, string needle = "a\"b\\c", char separator = '\\', char quote = '\'')
         => value.Contains(needle);
+
+    [GenerateAssertion(ExpectationMessage = "match \"{_needle.Replace(\"{\", \"(\")}\" {{literal}}")]
+    public static bool MatchesBraced(this string value, string needle)
+        => value.Contains(needle);
 }
 #endif

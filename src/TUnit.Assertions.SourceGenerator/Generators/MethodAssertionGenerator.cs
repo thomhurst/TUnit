@@ -433,19 +433,67 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
     {
         var result = new StringBuilder(text.Length);
         var literalStart = 0;
+        var i = 0;
 
-        foreach (Match match in InterpolationTokenRegex.Matches(text))
+        while (i < text.Length)
         {
-            result.Append(EscapeLiteralText(text.Substring(literalStart, match.Index - literalStart)));
-            result.Append(match.Value);
-            literalStart = match.Index + match.Length;
+            var c = text[i];
+            var end = c is '{' or '}' && i + 1 < text.Length && text[i + 1] == c ? i + 1
+                : c == '{' ? FindHoleEnd(text, i + 1)
+                : -1;
+
+            if (end < 0)
+            {
+                i++;
+                continue;
+            }
+
+            result.Append(EscapeLiteralText(text.Substring(literalStart, i - literalStart)));
+            result.Append(text, i, end - i + 1);
+            i = literalStart = end + 1;
         }
 
         result.Append(EscapeLiteralText(text.Substring(literalStart)));
         return result.ToString();
     }
 
-    private static readonly Regex InterpolationTokenRegex = new(@"\{\{|\}\}|\{[^{}]*\}");
+    /// <summary>
+    /// The index of the <c>}</c> closing a hole whose expression starts at <paramref name="start"/>, skipping
+    /// nested brackets and string/char literals, or -1 if the hole is never closed.
+    /// </summary>
+    private static int FindHoleEnd(string text, int start)
+    {
+        var depth = 0;
+        for (var i = start; i < text.Length; i++)
+        {
+            switch (text[i])
+            {
+                case '"' or '\'':
+                    var quote = text[i];
+                    for (i++; i < text.Length && text[i] != quote; i++)
+                    {
+                        if (text[i] == '\\')
+                        {
+                            i++;
+                        }
+                    }
+                    break;
+                case '(' or '[' or '{':
+                    depth++;
+                    break;
+                case ')' or ']':
+                    depth--;
+                    break;
+                case '}' when depth == 0:
+                    return i;
+                case '}':
+                    depth--;
+                    break;
+            }
+        }
+
+        return -1;
+    }
 
     private static string EscapeLiteralText(string text)
     {
