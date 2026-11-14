@@ -2037,7 +2037,7 @@ function renderBanner() {
     $('#statusMeta').innerHTML = `<span class="v">${total}</span> tests <span class="sep">·</span><span class="v">${fmtDur(REPORT.wallMs)}</span>`;
   }
 
-  $('#bannerStrip').innerHTML = tests.map(t => `<div class="tick ${t.status}" data-id="${t.id}"></div>`).join('');
+  $('#bannerStrip').innerHTML = tests.map(t => `<div class="tick ${esc(t.status)}" data-id="${esc(t.id)}"></div>`).join('');
   $('#bannerStrip').querySelectorAll('.tick').forEach(el => {
     el.addEventListener('click', () => { selectTest(el.dataset.id); switchView('tests'); });
   });
@@ -2398,8 +2398,8 @@ function testItemHTML(t) {
     ? `<span class="retry-badge ${retryAllFailed?'fail':''}" title="${retries} attempts${retryAllFailed?'':' — passed on attempt '+retries}">↻${retries}</span>`
     : '';
   return `
-    <div class="test-item ${sel} ${fc}" data-id="${t.id}">
-      <span class="test-status-dot ${t.status}"></span>
+    <div class="test-item ${sel} ${fc}" data-id="${esc(t.id)}">
+      <span class="test-status-dot ${esc(t.status)}"></span>
       <span class="test-icon"></span>
       <span class="test-name" title="${esc(t.name)}">${retryBadge}${esc(displayName)}</span>
       <span class="test-dur">${fmtDur(t.duration)}</span>
@@ -2458,7 +2458,7 @@ function renderDetail() {
     <div class="same-failure-banner">
       <span class="ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg></span>
       <span class="txt">Same root cause as <b>${siblings.length}</b> other test${siblings.length===1?'':'s'} —</span>
-      <div class="siblings">${siblings.slice(0, 6).map(s => `<span class="sib" data-id="${s.id}" title="${esc(s.cls + ' → ' + s.name)}">${esc(s.name.length > 32 ? s.name.slice(0,32) + '…' : s.name)}</span>`).join('')}${siblings.length > 6 ? `<span class="sib" style="cursor:default">+${siblings.length - 6}</span>` : ''}</div>
+      <div class="siblings">${siblings.slice(0, 6).map(s => `<span class="sib" data-id="${esc(s.id)}" title="${esc(s.cls + ' → ' + s.name)}">${esc(s.name.length > 32 ? s.name.slice(0,32) + '…' : s.name)}</span>`).join('')}${siblings.length > 6 ? `<span class="sib" style="cursor:default">+${siblings.length - 6}</span>` : ''}</div>
     </div>` : '';
   const stderrLines = t.stderr ? t.stderr.split('\n').filter(Boolean).length : 0;
 
@@ -2468,7 +2468,7 @@ function renderDetail() {
       <div class="detail-breadcrumb">${esc(t.ns)}<span class="sep">›</span>${esc(t.cls)}</div>
       <h1 class="detail-title">${esc(namePart)}${argsPart ? `<span class="args">${esc(argsPart)}</span>` : ''}</h1>
       <div class="detail-meta">
-        <span class="status-badge ${t.status}"><span class="dot"></span>${t.status==='cancel'?'Cancelled':t.status==='pass'?'Passed':t.status==='fail'?'Failed':'Skipped'}</span>
+        <span class="status-badge ${esc(t.status)}"><span class="dot"></span>${t.status==='cancel'?'Cancelled':t.status==='pass'?'Passed':t.status==='fail'?'Failed':'Skipped'}</span>
         <span class="detail-sub"><span class="v">${fmtDur(t.duration)}</span><span class="sep">·</span>started <span class="v">${fmtTime(t.start, REPORT.startMs)}</span><span class="sep">·</span><span class="v">${esc(t.worker)}</span></span>
         ${t.traceId ? `<button class="trace-id-chip" data-copy-text="${esc(t.traceId)}" title="Copy trace ID"><span class="lbl">trace</span><span class="v">${esc(t.traceId.slice(0, 12))}</span></button>` : ''}
       </div>
@@ -2610,7 +2610,7 @@ function renderDetail() {
         `).join('')}` : '';
       showTooltip(e, `
         <div class="title">${esc(span.name)}</div>
-        <div class="row"><span>service</span><b style="color:${SERVICE_COLORS[span.service]||'var(--text)'}">${span.service}</b></div>
+        <div class="row"><span>service</span><b style="color:${SERVICE_COLORS[span.service]||'var(--text)'}">${esc(span.service)}</b></div>
         <div class="row"><span>duration</span><b>${fmtDur(span.dur)}</b></div>
         <div class="row"><span>start</span><b>+${fmtDur(span.start)}</b></div>
         ${attrLines}
@@ -2639,7 +2639,7 @@ function clusterCardHTML(c) {
       </div>
       <div class="cluster-body">
         ${c.tests.map(t => `
-          <div class="cluster-test" data-id="${t.id}">
+          <div class="cluster-test" data-id="${esc(t.id)}">
             <span class="d"></span>
             <span class="nm" title="${esc(t.name)}">${esc(t.name)}</span>
             <span class="cl">${esc(t.cls)}</span>
@@ -2672,7 +2672,7 @@ function attemptsHTML(attempts) {
       if (head) tipParts.push(head);
       if (a.error.stack) tipParts.push(a.error.stack);
     }
-    pills.push(`<span class="attempt ${a.status}" title="${esc(tipParts.join('\n\n'))}"><span class="num">${i+1}</span>${ico}<span class="dur">${fmtDur(a.duration)}</span>${isFinal && attempts.length > 1 ? `<span class="final">FINAL</span>` : ''}</span>`);
+    pills.push(`<span class="attempt ${esc(a.status)}" title="${esc(tipParts.join('\n\n'))}"><span class="num">${i+1}</span>${ico}<span class="dur">${fmtDur(a.duration)}</span>${isFinal && attempts.length > 1 ? `<span class="final">FINAL</span>` : ''}</span>`);
   });
   return `
     <div class="attempts ${allFailed?'all-failed':''}">
@@ -2748,12 +2748,12 @@ function renderInsights() {
 
   const stack = $('#serviceStack');
   stack.innerHTML = INSIGHTS.services.map(s =>
-    `<span style="flex:${s.self}; background:${SERVICE_COLORS[s.service] || 'var(--text-dim)'}" title="${s.service}: ${fmtDur(s.self)}"></span>`
+    `<span style="flex:${s.self}; background:${SERVICE_COLORS[s.service] || 'var(--text-dim)'}" title="${esc(s.service)}: ${fmtDur(s.self)}"></span>`
   ).join('');
 
   $('#serviceLegend').innerHTML = INSIGHTS.services.map(s => {
     const pct = Math.round((s.self / INSIGHTS.cpuSum) * 100);
-    return `<span><span class="sw" style="background:${SERVICE_COLORS[s.service] || 'var(--text-dim)'}"></span>${s.service} <b>${fmtDur(s.self)}</b> <span class="pct">· ${pct}%</span></span>`;
+    return `<span><span class="sw" style="background:${SERVICE_COLORS[s.service] || 'var(--text-dim)'}"></span>${esc(s.service)} <b>${fmtDur(s.self)}</b> <span class="pct">· ${pct}%</span></span>`;
   }).join('');
 
   const topEp = INSIGHTS.endpoints[0]?.total || 1;
@@ -2852,14 +2852,14 @@ function traceHTML(t) {
     rows.push(`
       <div class="span-row">
         <div class="span-label" title="${esc(span.name)}"><span class="depth">${'&nbsp;&nbsp;'.repeat(depth)}</span><span class="svc" style="background:${color}"></span>${esc(span.name)}</div>
-        <div class="span-track"><div class="span-bar${err}" data-id="${span.id}" style="left:${left}%; width:${width}%; background:${color}"></div></div>
+        <div class="span-track"><div class="span-bar${err}" data-id="${esc(span.id)}" style="left:${left}%; width:${width}%; background:${color}"></div></div>
         <div class="span-dur">${fmtDur(span.dur)}</div>
       </div>`);
     span._children.sort((a,b)=>a.start-b.start).forEach(c => walk(c, depth+1));
   }
   spans.filter(s => !s.parent).forEach(r => walk(r, 0));
   const svcs = [...new Set(spans.map(s => s.service))];
-  const legend = svcs.map(s => `<span class="legend-svc"><span class="sw" style="background:${SERVICE_COLORS[s]||'var(--text-muted)'}"></span>${s}</span>`).join('');
+  const legend = svcs.map(s => `<span class="legend-svc"><span class="sw" style="background:${SERVICE_COLORS[s]||'var(--text-muted)'}"></span>${esc(s)}</span>`).join('');
 
   const linkedCount = spans.filter(s => s.linked).length;
   const linkedTag = linkedCount > 0 ? `<span class="linked-tag" title="Spans from traces linked to this test, e.g. via [LinkedTrace] or background work">${linkedCount} linked</span>` : '';
@@ -2943,13 +2943,13 @@ function renderRun() {
 
   // strip
   const strip = $('#strip');
-  strip.innerHTML = tests.map(t => `<div class="tick ${t.status}" data-id="${t.id}"></div>`).join('');
+  strip.innerHTML = tests.map(t => `<div class="tick ${esc(t.status)}" data-id="${esc(t.id)}"></div>`).join('');
   strip.querySelectorAll('.tick').forEach(el => {
     const t = tests.find(x => x.id === el.dataset.id);
     el.addEventListener('mouseenter', (e) => showTooltip(e, `
       <div class="title">${esc(t.name)}</div>
       <div class="row"><span>class</span><b>${esc(t.cls)}</b></div>
-      <div class="row"><span>status</span><b style="color:var(--${t.status})">${t.status.toUpperCase()}</b></div>
+      <div class="row"><span>status</span><b style="color:var(--${esc(t.status)})">${esc(t.status.toUpperCase())}</b></div>
       <div class="row"><span>duration</span><b>${fmtDur(t.duration)}</b></div>
     `));
     el.addEventListener('mousemove', moveTooltip);
@@ -3010,7 +3010,7 @@ function renderRun() {
   const slow = [...tests].sort((a,b) => b.duration - a.duration).slice(0, 8);
   const maxD = slow[0]?.duration || 1;
   $('#slowestList').innerHTML = slow.map((t, i) => `
-    <div class="slow-row" data-id="${t.id}">
+    <div class="slow-row" data-id="${esc(t.id)}">
       <span class="slow-rank">#${i+1}</span>
       <div class="slow-name">
         <span class="nm">${esc(t.name.length > 50 ? t.name.slice(0,50)+'…' : t.name)}</span>
@@ -3036,7 +3036,7 @@ function renderRun() {
       const blocks = tests.filter(t => t.worker === w).map(t => {
         const left = (t.start / wall) * 100;
         const width = Math.max(0.1, (t.duration / wall) * 100);
-        return `<div class="gantt-block ${t.status}" data-id="${t.id}" style="left:${left}%; width:${width}%"></div>`;
+        return `<div class="gantt-block ${esc(t.status)}" data-id="${esc(t.id)}" style="left:${left}%; width:${width}%"></div>`;
       }).join('');
       return `<div class="gantt-row"><div class="gantt-label">${w}</div><div class="gantt-track">${blocks}</div></div>`;
     }).join('')}
@@ -3071,7 +3071,7 @@ function renderRun() {
       const f = t.attempts.filter(a => a.status === 'fail').length;
       const p = t.attempts.filter(a => a.status === 'pass').length;
       return `
-        <div class="flake-item" data-id="${t.id}">
+        <div class="flake-item" data-id="${esc(t.id)}">
           <div>
             <div class="flake-name">${esc(t.name)}</div>
             <div class="flake-class">${esc(t.cls)} · passed on attempt ${t.attempts.length}</div>
@@ -3159,7 +3159,7 @@ function timelineWaterfall(spans) {
     const color = SERVICE_COLORS[s.service] || 'var(--text-muted)';
     return `<div class="span-row">
       <div class="span-label" title="${esc(s.name)}"><span class="depth">${'&nbsp;&nbsp;'.repeat(d)}</span><span class="svc" style="background:${color}"></span>${esc(s.name)}</div>
-      <div class="span-track"><div class="span-bar" data-id="${s.id}" style="left:${left}%; width:${width}%; background:${color}"></div></div>
+      <div class="span-track"><div class="span-bar" data-id="${esc(s.id)}" style="left:${left}%; width:${width}%; background:${color}"></div></div>
       <div class="span-dur">${fmtDur(s.dur)}</div>
     </div>`;
   }).join('') + '</div>';

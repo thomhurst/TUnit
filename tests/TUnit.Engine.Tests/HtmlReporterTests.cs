@@ -519,6 +519,29 @@ public class HtmlReporterTests
     }
 
     [Test]
+    public void GenerateHtml_EscapesIdsAndServiceLabelsInRenderedMarkup()
+    {
+        // Ids come straight from sidecar JSON in merged reports and service labels come from
+        // span attributes, so the renderer must escape them like names and messages.
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-08-09T00:00:00.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Windows",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+        });
+
+        Regex.IsMatch(html, @"data-id=""\$\{(?!esc\()").ShouldBeFalse();
+        Regex.IsMatch(html, @"\$\{(s|span)\.service\}").ShouldBeFalse();
+        html.ShouldNotContain("</span>${s}</span>");
+    }
+
+    [Test]
     public void GenerateHtml_EmitsAttemptsArray_WhenTestWasRetried()
     {
         // Per-attempt status/duration drives the renderer's flaky panel + per-test
