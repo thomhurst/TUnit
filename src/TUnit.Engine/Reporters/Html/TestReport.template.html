@@ -2037,7 +2037,7 @@ function renderBanner() {
     $('#statusMeta').innerHTML = `<span class="v">${total}</span> tests <span class="sep">·</span><span class="v">${fmtDur(REPORT.wallMs)}</span>`;
   }
 
-  $('#bannerStrip').innerHTML = tests.map(t => `<div class="tick ${t.status}" data-id="${esc(t.id)}"></div>`).join('');
+  $('#bannerStrip').innerHTML = tests.map(t => `<div class="tick ${esc(t.status)}" data-id="${esc(t.id)}"></div>`).join('');
   $('#bannerStrip').querySelectorAll('.tick').forEach(el => {
     el.addEventListener('click', () => { selectTest(el.dataset.id); switchView('tests'); });
   });
@@ -2399,7 +2399,7 @@ function testItemHTML(t) {
     : '';
   return `
     <div class="test-item ${sel} ${fc}" data-id="${esc(t.id)}">
-      <span class="test-status-dot ${t.status}"></span>
+      <span class="test-status-dot ${esc(t.status)}"></span>
       <span class="test-icon"></span>
       <span class="test-name" title="${esc(t.name)}">${retryBadge}${esc(displayName)}</span>
       <span class="test-dur">${fmtDur(t.duration)}</span>
@@ -2468,7 +2468,7 @@ function renderDetail() {
       <div class="detail-breadcrumb">${esc(t.ns)}<span class="sep">›</span>${esc(t.cls)}</div>
       <h1 class="detail-title">${esc(namePart)}${argsPart ? `<span class="args">${esc(argsPart)}</span>` : ''}</h1>
       <div class="detail-meta">
-        <span class="status-badge ${t.status}"><span class="dot"></span>${t.status==='cancel'?'Cancelled':t.status==='pass'?'Passed':t.status==='fail'?'Failed':'Skipped'}</span>
+        <span class="status-badge ${esc(t.status)}"><span class="dot"></span>${t.status==='cancel'?'Cancelled':t.status==='pass'?'Passed':t.status==='fail'?'Failed':'Skipped'}</span>
         <span class="detail-sub"><span class="v">${fmtDur(t.duration)}</span><span class="sep">·</span>started <span class="v">${fmtTime(t.start, REPORT.startMs)}</span><span class="sep">·</span><span class="v">${esc(t.worker)}</span></span>
         ${t.traceId ? `<button class="trace-id-chip" data-copy-text="${esc(t.traceId)}" title="Copy trace ID"><span class="lbl">trace</span><span class="v">${esc(t.traceId.slice(0, 12))}</span></button>` : ''}
       </div>
@@ -2672,7 +2672,7 @@ function attemptsHTML(attempts) {
       if (head) tipParts.push(head);
       if (a.error.stack) tipParts.push(a.error.stack);
     }
-    pills.push(`<span class="attempt ${a.status}" title="${esc(tipParts.join('\n\n'))}"><span class="num">${i+1}</span>${ico}<span class="dur">${fmtDur(a.duration)}</span>${isFinal && attempts.length > 1 ? `<span class="final">FINAL</span>` : ''}</span>`);
+    pills.push(`<span class="attempt ${esc(a.status)}" title="${esc(tipParts.join('\n\n'))}"><span class="num">${i+1}</span>${ico}<span class="dur">${fmtDur(a.duration)}</span>${isFinal && attempts.length > 1 ? `<span class="final">FINAL</span>` : ''}</span>`);
   });
   return `
     <div class="attempts ${allFailed?'all-failed':''}">
@@ -2943,13 +2943,13 @@ function renderRun() {
 
   // strip
   const strip = $('#strip');
-  strip.innerHTML = tests.map(t => `<div class="tick ${t.status}" data-id="${esc(t.id)}"></div>`).join('');
+  strip.innerHTML = tests.map(t => `<div class="tick ${esc(t.status)}" data-id="${esc(t.id)}"></div>`).join('');
   strip.querySelectorAll('.tick').forEach(el => {
     const t = tests.find(x => x.id === el.dataset.id);
     el.addEventListener('mouseenter', (e) => showTooltip(e, `
       <div class="title">${esc(t.name)}</div>
       <div class="row"><span>class</span><b>${esc(t.cls)}</b></div>
-      <div class="row"><span>status</span><b style="color:var(--${t.status})">${t.status.toUpperCase()}</b></div>
+      <div class="row"><span>status</span><b style="color:var(--${esc(t.status)})">${esc(t.status.toUpperCase())}</b></div>
       <div class="row"><span>duration</span><b>${fmtDur(t.duration)}</b></div>
     `));
     el.addEventListener('mousemove', moveTooltip);
@@ -3036,7 +3036,7 @@ function renderRun() {
       const blocks = tests.filter(t => t.worker === w).map(t => {
         const left = (t.start / wall) * 100;
         const width = Math.max(0.1, (t.duration / wall) * 100);
-        return `<div class="gantt-block ${t.status}" data-id="${esc(t.id)}" style="left:${left}%; width:${width}%"></div>`;
+        return `<div class="gantt-block ${esc(t.status)}" data-id="${esc(t.id)}" style="left:${left}%; width:${width}%"></div>`;
       }).join('');
       return `<div class="gantt-row"><div class="gantt-label">${w}</div><div class="gantt-track">${blocks}</div></div>`;
     }).join('')}
