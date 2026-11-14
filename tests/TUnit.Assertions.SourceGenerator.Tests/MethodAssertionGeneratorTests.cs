@@ -268,6 +268,35 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
             await CompileChecker.AssertNoErrors(generatedFiles);
         });
 
+#if NET
+    // RequiresUnreferencedCode/RequiresDynamicCode don't exist on .NET Framework
+    [Test]
+    public Task EscapedLiterals() => RunTest(
+        Path.Combine(Git.TestsDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "EscapedLiteralsAssertion.cs"),
+        new RunTestOptions { PreprocessorSymbols = ["NET"] },
+        async generatedFiles =>
+        {
+            var mainFile = string.Join("\n", generatedFiles);
+
+            // Values from the compilation are already unescaped, so they must be re-escaped
+            // when written back out as C# literals.
+            await Assert.That(mainFile).Contains("""return "be \"quoted\" \\t here";""");
+            await Assert.That(mainFile).Contains("""[System.Obsolete("Use \"IsQuotedV2\" \\ instead", DiagnosticId = "ID\\1", UrlFormat = "https://example.com/\"{0}\"")]""");
+            await Assert.That(mainFile).Contains("""[System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Needs \"reflection\" \\ here", Url = "https://example.com/\"ruc\"")]""");
+            await Assert.That(mainFile).Contains("""[System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Needs \"dynamic\" \\ code", Url = "https://example.com/\\dyn")]""");
+
+            // Interpolation holes still evaluate; only the literal text is escaped.
+            await Assert.That(mainFile).Contains("""return $"contain \"{_needle}\" \\ {_needle.Length} chars";""");
+
+            await Assert.That(mainFile).Contains("""string needle = "a\"b\\c", char separator = '\\', char quote = '\''""");
+
+            await CompileChecker.AssertNoErrors(generatedFiles);
+        });
+#endif
+
 #if NET8_0_OR_GREATER
     [Test]
     public Task RefStructParameter() => RunTest(

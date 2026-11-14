@@ -245,14 +245,14 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 {
                     if (namedArg.Key == "Justification" && namedArg.Value.Value is string j)
                     {
-                        justification = $", Justification = \"{j}\"";
+                        justification = $", Justification = {SymbolDisplay.FormatLiteral(j, quote: true)}";
                         break;
                     }
                 }
 
                 if (!string.IsNullOrEmpty(category) && !string.IsNullOrEmpty(checkId))
                 {
-                    suppressionAttributesForCheckAsync.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"{category}\", \"{checkId}\"{justification})]");
+                    suppressionAttributesForCheckAsync.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage({SymbolDisplay.FormatLiteral(category, quote: true)}, {SymbolDisplay.FormatLiteral(checkId, quote: true)}{justification})]");
                 }
             }
             // Handle RequiresUnreferencedCode - goes to extension method AND add suppression to CheckAsync
@@ -265,7 +265,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 {
                     if (namedArg.Key == "Url" && namedArg.Value.Value is string url)
                     {
-                        urlPart = $", Url = \"{url}\"";
+                        urlPart = $", Url = {SymbolDisplay.FormatLiteral(url, quote: true)}";
                         break;
                     }
                 }
@@ -273,7 +273,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 if (!string.IsNullOrEmpty(message))
                 {
                     // Add to extension method so users see the warning
-                    diagnosticAttributesForExtensionMethod.Add($"[System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{message}\"{urlPart})]");
+                    diagnosticAttributesForExtensionMethod.Add($"[System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode({SymbolDisplay.FormatLiteral(message, quote: true)}{urlPart})]");
                     // Add suppression to CheckAsync to avoid IL2046 (can't override without matching attributes)
                     suppressionAttributesForCheckAsync.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"IL2026\", Justification = \"Caller is already warned via RequiresUnreferencedCode on extension method\")]");
                 }
@@ -288,7 +288,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 {
                     if (namedArg.Key == "Url" && namedArg.Value.Value is string url)
                     {
-                        urlPart = $", Url = \"{url}\"";
+                        urlPart = $", Url = {SymbolDisplay.FormatLiteral(url, quote: true)}";
                         break;
                     }
                 }
@@ -296,7 +296,7 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                 if (!string.IsNullOrEmpty(message))
                 {
                     // Add to extension method so users see the warning
-                    diagnosticAttributesForExtensionMethod.Add($"[System.Diagnostics.CodeAnalysis.RequiresDynamicCode(\"{message}\"{urlPart})]");
+                    diagnosticAttributesForExtensionMethod.Add($"[System.Diagnostics.CodeAnalysis.RequiresDynamicCode({SymbolDisplay.FormatLiteral(message, quote: true)}{urlPart})]");
                     // Add suppression to CheckAsync
                     suppressionAttributesForCheckAsync.Add($"[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"AOT\", \"IL3050\", Justification = \"Caller is already warned via RequiresDynamicCode on extension method\")]");
                 }
@@ -423,6 +423,34 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         // The member name exactly as the XML documentation file writes it, which is what an IDE looks up.
         var documentationId = methodSymbol.GetDocumentationCommentId();
         return string.IsNullOrEmpty(documentationId) ? null : documentationId;
+    }
+
+    /// <summary>
+    /// Escapes the literal text of an interpolated-string body, leaving <c>{expression}</c> holes and
+    /// <c>{{</c>/<c>}}</c> brace escapes as written.
+    /// </summary>
+    private static string EscapeInterpolatedText(string text)
+    {
+        var result = new StringBuilder(text.Length);
+        var literalStart = 0;
+
+        foreach (Match match in InterpolationTokenRegex.Matches(text))
+        {
+            result.Append(EscapeLiteralText(text.Substring(literalStart, match.Index - literalStart)));
+            result.Append(match.Value);
+            literalStart = match.Index + match.Length;
+        }
+
+        result.Append(EscapeLiteralText(text.Substring(literalStart)));
+        return result.ToString();
+    }
+
+    private static readonly Regex InterpolationTokenRegex = new(@"\{\{|\}\}|\{[^{}]*\}");
+
+    private static string EscapeLiteralText(string text)
+    {
+        var literal = SymbolDisplay.FormatLiteral(text, quote: true);
+        return literal.Substring(1, literal.Length - 2);
     }
 
     private static string FormatObsoleteAttribute(AttributeData attr)
@@ -818,12 +846,12 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
                     }
                 }
                 // Use interpolated string for parameter substitution
-                sb.AppendLine($"        return $\"{expectation}\";");
+                sb.AppendLine($"        return $\"{EscapeInterpolatedText(expectation!)}\";");
             }
             else
             {
                 // No parameters, just return the literal string
-                sb.AppendLine($"        return \"{expectation}\";");
+                sb.AppendLine($"        return {SymbolDisplay.FormatLiteral(expectation!, quote: true)};");
             }
         }
         else
