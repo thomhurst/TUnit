@@ -71,6 +71,8 @@ public class AotConverterScanTests
             public class NoConvertFrom { }
             [TypeConverter(typeof(UnusableConstructorsConverter))]
             public class UnusableConstructors { }
+            [TypeConverter(typeof(ObsoleteOverrideConverter))]
+            public class ObsoleteOverride { }
             public class PlainConverter : BaseConverter { }
             public class TypedConverter : BaseConverter
             {
@@ -85,11 +87,16 @@ public class AotConverterScanTests
                 public UnusableConstructorsConverter(ref Type type) { }
                 [Obsolete("x", true)] public UnusableConstructorsConverter() { }
             }
+            public class ObsoleteOverrideConverter : TypeConverter
+            {
+                [Obsolete("x", true)]
+                public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) => null;
+            }
             public class Tests
             {
                 public Tests(Named named) { }
-                [Test, Arguments("a", "b", "c")]
-                public void Convert(Plain plain, Typed? typed, WithOperator withOperator) { }
+                [Test, Arguments("a", "b", "c", "d")]
+                public void Convert(Plain plain, Typed? typed, WithOperator withOperator, ObsoleteOverride obsoleteOverride) { }
                 [Test]
                 public void Unsupported(WrongAssembly a, GenericByName b, NoConvertFrom c, UnusableConstructors d) { }
                 [Test]
@@ -100,6 +107,8 @@ public class AotConverterScanTests
         await Assert.That(generated).Contains("global::Plain converted = (global::Plain)new global::PlainConverter().ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
         await Assert.That(generated).Contains("global::Typed converted = (global::Typed)new global::TypedConverter(typeof(global::Typed)).ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
         await Assert.That(generated).Contains("global::Named converted = (global::Named)new global::NamedConverter().ConvertFrom(");
+        // An obsolete override is still callable: the call binds to the non-obsolete TypeConverter.ConvertFrom.
+        await Assert.That(generated).Contains("(global::ObsoleteOverride)new global::ObsoleteOverrideConverter().ConvertFrom(");
         // Language conversions keep precedence over the converter.
         await Assert.That(generated).DoesNotContain("(global::WithOperator)new");
         // Unresolvable, uncallable or non-converting converters, and open target types, are skipped.
@@ -137,6 +146,40 @@ public class AotConverterScanTests
             """;
         var generated = await GenerateTypeConverters(source);
         await Assert.That(generated).DoesNotContain("(global::Parsable)new");
+    }
+
+    [Test]
+    public async Task SkipsTypeConverterConstructorsLeavingRequiredMembersUnset()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using System.Diagnostics.CodeAnalysis;
+            using System.Globalization;
+            using TUnit.Core;
+            public abstract class BaseConverter : TypeConverter
+            {
+                public required string Name { get; set; }
+                public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) => null;
+            }
+            [TypeConverter(typeof(UnsetConverter))]
+            public class Unset { }
+            [TypeConverter(typeof(SetConverter))]
+            public class Set { }
+            public class UnsetConverter : BaseConverter { }
+            public class SetConverter : BaseConverter
+            {
+                [SetsRequiredMembers] public SetConverter() => Name = "";
+            }
+            public class Tests
+            {
+                [Test]
+                public void Convert(Unset unset, Set set) { }
+            }
+            """;
+        var generated = await GenerateTypeConverters(source);
+        await Assert.That(generated).DoesNotContain("(global::Unset)new");
+        await Assert.That(generated).Contains("(global::Set)new global::SetConverter().ConvertFrom(");
     }
 #endif
 

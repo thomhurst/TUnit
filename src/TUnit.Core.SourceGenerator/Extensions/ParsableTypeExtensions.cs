@@ -100,8 +100,12 @@ internal static class ParsableTypeExtensions
             return false;
         }
 
+        // The generated `new Converter(...)` has no object initializer, so required members must be set by the constructor.
+        var hasRequiredMembers = HasRequiredMembers(converter);
         var constructors = converter.InstanceConstructors
-            .Where(c => c.DeclaredAccessibility == Accessibility.Public && !IsObsoleteAsError(c))
+            .Where(c => c.DeclaredAccessibility == Accessibility.Public && !IsObsoleteAsError(c)
+                && (!hasRequiredMembers || c.GetAttributes().Any(a =>
+                    a.AttributeClass?.ToDisplayString() == "System.Diagnostics.CodeAnalysis.SetsRequiredMembersAttribute")))
             .ToArray();
 
         // TypeDescriptor prefers a constructor that receives the target type.
@@ -161,6 +165,19 @@ internal static class ParsableTypeExtensions
             }
 
             overridden |= current.GetMembers("ConvertFrom").OfType<IMethodSymbol>().Any(m => m.IsOverride);
+        }
+
+        return false;
+    }
+
+    private static bool HasRequiredMembers(INamedTypeSymbol type)
+    {
+        for (var current = type; current is not null; current = current.BaseType)
+        {
+            if (current.GetMembers().Any(m => m is IPropertySymbol { IsRequired: true } or IFieldSymbol { IsRequired: true }))
+            {
+                return true;
+            }
         }
 
         return false;
