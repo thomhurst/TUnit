@@ -56,6 +56,27 @@ public class CrossCompilationAttributeTests
             }
 
             [Test]
+            [Arguments("abc")]
+            [Arguments("0x10")]
+            [Arguments("say \"hi\"\\")]
+            public void InheritedIntFromString(int value)
+            {
+            }
+
+            [Test]
+            [Arguments(new object[] { new string[] { "1", "2" } })]
+            [Arguments(new object[] { new object[] { 3, "4" } })]
+            public void InheritedIntArrayFromStrings(int[] values)
+            {
+            }
+
+            [Test]
+            [Arguments("1.5")]
+            public void InheritedDoubleFromString(double value)
+            {
+            }
+
+            [Test]
             [Arguments(null)]
             public void InheritedNullable(decimal? value)
             {
@@ -240,6 +261,16 @@ public class CrossCompilationAttributeTests
 
         await Assert.That(generated).Contains("global::System.DayOfWeek.Monday");
         await Assert.That(generated).Contains("(global::System.DayOfWeek)99");
+
+        // String rows for numeric parameters stay strings, as in same-project and reflection mode,
+        // so the runtime conversion handles them.
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"abc\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"0x10\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"say \\\"hi\\\"\\\\\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"1.5\")");
+        await Assert.That(generated).DoesNotContain("(int)abc");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(new string[] { \"1\", \"2\" })");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(new object[] { 3, \"4\" })");
 
         // [Arguments(null)] binds null to the params array itself.
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(null)");

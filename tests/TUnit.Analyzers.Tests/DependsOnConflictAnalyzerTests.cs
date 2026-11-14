@@ -331,6 +331,63 @@ public class DependsOnConflictAnalyzerTests
     }
 
     [Test]
+    public async Task Array_Parameter_Types_Are_Matched()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments(new int[] { 1 })]
+                    public void Test(int[] values)
+                    {
+                    }
+
+                    [Test, DependsOn(nameof(Test), [typeof(int[])])]
+                    public void Test2()
+                    {
+                    }
+
+                    [Test, {|#0:DependsOn(nameof(Test), [typeof(string[])])|}]
+                    public void Test3()
+                    {
+                    }
+                }
+                """,
+
+                Verifier
+                    .Diagnostic(Rules.NoMethodFound)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
+    public async Task Array_Generic_Type_Raises_Not_Found()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test, {|#0:DependsOn<int[]>("Test")|}]
+                    public void Test2()
+                    {
+                    }
+                }
+                """,
+
+                Verifier
+                    .Diagnostic(Rules.NoMethodFound)
+                    .WithLocation(0)
+            );
+    }
+
+    [Test]
     public async Task Nested_Conflict_Raises_Error()
     {
         await Verifier

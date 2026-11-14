@@ -165,6 +165,13 @@ public class TypedConstantFormatter(Compilation? compilation = null) : ITypedCon
                 }
             }
 
+            // A string row for a numeric parameter stays a string, like same-project and reflection rows,
+            // so the runtime conversion handles it.
+            if (value is string numericText && KeepsStringsForRuntimeConversion(targetType))
+            {
+                return SymbolDisplay.FormatLiteral(numericText, quote: true);
+            }
+
             // Handle numeric type conversions
             switch (targetType.SpecialType)
             {
@@ -299,7 +306,10 @@ public class TypedConstantFormatter(Compilation? compilation = null) : ITypedCon
     {
         // For arrays, determine the element type from the target type if available
         ITypeSymbol? elementType = null;
-        if (targetType is IArrayTypeSymbol arrayTargetType)
+        // String elements for a numeric element type stay strings, so they can't go in an array of that type.
+        if (targetType is IArrayTypeSymbol arrayTargetType
+            && !(KeepsStringsForRuntimeConversion(arrayTargetType.ElementType)
+                 && constant.Values.Any(v => v is { Kind: TypedConstantKind.Primitive, Value: string })))
         {
             elementType = arrayTargetType.ElementType;
         }
@@ -312,6 +322,11 @@ public class TypedConstantFormatter(Compilation? compilation = null) : ITypedCon
         var elementTypeString = elementType?.GloballyQualified() ?? "object";
         return $"new {elementTypeString}[] {{ {string.Join(", ", elements)} }}";
     }
+
+    private static bool KeepsStringsForRuntimeConversion(ITypeSymbol type) => type.SpecialType is SpecialType.System_Byte
+        or SpecialType.System_SByte or SpecialType.System_Int16 or SpecialType.System_UInt16 or SpecialType.System_Int32
+        or SpecialType.System_UInt32 or SpecialType.System_Int64 or SpecialType.System_UInt64 or SpecialType.System_Single
+        or SpecialType.System_Double;
 
     private static string FormatPrimitive(object? value)
     {
