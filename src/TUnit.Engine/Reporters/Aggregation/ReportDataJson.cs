@@ -50,7 +50,17 @@ internal static class ReportDataJson
 
         try
         {
-            return File.ReadAllText(exclusionPath).Equals(generation, StringComparison.Ordinal);
+            // The marker lists every generation the suite had when it was excluded (its
+            // canonical and pending sidecars), one per line.
+            foreach (var excluded in File.ReadAllText(exclusionPath).Split('\n'))
+            {
+                if (excluded.Equals(generation, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -121,11 +131,6 @@ internal static class ReportDataJson
 
     internal static string GetPendingSidecarPath(string canonicalSidecarPath)
         => canonicalSidecarPath[..^SidecarExtension.Length] + SidecarPendingSegment + SidecarExtension;
-
-    internal static IEnumerable<string> SelectEffectiveSidecars(IEnumerable<string> sidecarPaths)
-        => sidecarPaths
-            .GroupBy(GetCanonicalSidecarPath, StringComparer.Ordinal)
-            .Select(group => group.FirstOrDefault(IsPendingSidecar) ?? group.First());
 
     /// <summary>
     /// Serializes straight to UTF-8 in pooled chunks — callers write the same payload to more
@@ -492,16 +497,20 @@ internal static class ReportDataJson
         };
     }
 
+    // Counts can't be negative; clamping keeps a bad value from cancelling out another
+    // suite's failures when summaries are added together.
     private static ReportSummary ReadSummary(JsonElement e) => new()
     {
-        Total = GetInt(e, "total"),
-        Passed = GetInt(e, "passed"),
-        Failed = GetInt(e, "failed"),
-        Skipped = GetInt(e, "skipped"),
-        Cancelled = GetInt(e, "cancelled"),
-        TimedOut = GetInt(e, "timedOut"),
-        Flaky = GetInt(e, "flaky"),
+        Total = GetCount(e, "total"),
+        Passed = GetCount(e, "passed"),
+        Failed = GetCount(e, "failed"),
+        Skipped = GetCount(e, "skipped"),
+        Cancelled = GetCount(e, "cancelled"),
+        TimedOut = GetCount(e, "timedOut"),
+        Flaky = GetCount(e, "flaky"),
     };
+
+    private static int GetCount(JsonElement e, string name) => Math.Max(0, GetInt(e, name));
 
     // Every array in the schema materializes the same way; the mapper is the only
     // per-type piece. AOT-safe — plain generic instantiation, no reflection.

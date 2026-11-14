@@ -165,28 +165,34 @@ internal sealed class ReportAggregator
         File.Delete(path);
     }
 
-    internal string? ReadEffectiveSidecarGeneration(string assemblyName, string suiteSalt)
+    /// <summary>
+    /// Returns the publication generations of the suite's canonical and pending sidecars,
+    /// one per line, or <see langword="null"/> when neither exists. Both are merged, so an
+    /// exclusion marker must cover both.
+    /// </summary>
+    internal string? ReadSidecarGenerations(string assemblyName, string suiteSalt)
     {
-        var pendingPath = GetPendingSidecarPath(assemblyName, suiteSalt);
-        var sidecarPath = File.Exists(pendingPath)
-            ? pendingPath
-            : GetSidecarPath(assemblyName, suiteSalt);
-        return File.Exists(sidecarPath)
-            ? ReportDataJson.GetPublicationGeneration(File.ReadAllBytes(sidecarPath))
-            : null;
+        var canonical = ReadGeneration(GetSidecarPath(assemblyName, suiteSalt));
+        var pending = ReadGeneration(GetPendingSidecarPath(assemblyName, suiteSalt));
+        return canonical is null ? pending
+            : pending is null ? canonical
+            : canonical + "\n" + pending;
+
+        static string? ReadGeneration(string path)
+            => File.Exists(path) ? ReportDataJson.GetPublicationGeneration(File.ReadAllBytes(path)) : null;
     }
 
     internal void ExcludeSidecar(string assemblyName, string suiteSalt)
     {
         System.IO.Directory.CreateDirectory(Directory);
-        var currentGeneration = ReadEffectiveSidecarGeneration(assemblyName, suiteSalt);
+        var currentGeneration = ReadSidecarGenerations(assemblyName, suiteSalt);
         AtomicFile.WriteAllText(GetExclusionMarkerPath(assemblyName, suiteSalt), currentGeneration ?? "");
     }
 
     internal void ExcludeSidecarIfGenerationMatches(string assemblyName, string suiteSalt, string? expectedGeneration)
     {
         System.IO.Directory.CreateDirectory(Directory);
-        var currentGeneration = ReadEffectiveSidecarGeneration(assemblyName, suiteSalt);
+        var currentGeneration = ReadSidecarGenerations(assemblyName, suiteSalt);
         if (expectedGeneration is null
             ? currentGeneration is not null
             : !expectedGeneration.Equals(currentGeneration, StringComparison.Ordinal))
@@ -266,9 +272,9 @@ internal sealed class ReportAggregator
         // as the tunit-report tool does.
         var seenDigests = new HashSet<string>(StringComparer.Ordinal);
         using var sha = SHA256.Create();
-        var effectiveSidecars = ReportDataJson.SelectEffectiveSidecars(
-            System.IO.Directory.GetFiles(Directory, SidecarSearchPattern));
-        foreach (var file in effectiveSidecars)
+        // A pending sidecar is read alongside the canonical one rather than replacing it,
+        // so a leftover pending file can never hide the suite's canonical results.
+        foreach (var file in System.IO.Directory.GetFiles(Directory, SidecarSearchPattern))
         {
             try
             {

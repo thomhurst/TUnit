@@ -102,23 +102,27 @@ internal sealed class ReportSummary
     public int CleanPassed => Passed - Flaky;
 
     [JsonIgnore]
-    public int TotalFailed => Failed + TimedOut;
+    public int TotalFailed => SaturatingAdd(Failed, TimedOut);
 
     /// <summary>Everything that should mark a suite/run as not-green, cancellations included.</summary>
     [JsonIgnore]
-    public int TotalUnsuccessful => Failed + TimedOut + Cancelled;
+    public int TotalUnsuccessful => SaturatingAdd(TotalFailed, Cancelled);
 
     /// <summary>Accumulates another summary into this one (used when merging suites).</summary>
     public void Add(ReportSummary other)
     {
-        Total += other.Total;
-        Passed += other.Passed;
-        Failed += other.Failed;
-        Skipped += other.Skipped;
-        Cancelled += other.Cancelled;
-        TimedOut += other.TimedOut;
-        Flaky += other.Flaky;
+        Total = SaturatingAdd(Total, other.Total);
+        Passed = SaturatingAdd(Passed, other.Passed);
+        Failed = SaturatingAdd(Failed, other.Failed);
+        Skipped = SaturatingAdd(Skipped, other.Skipped);
+        Cancelled = SaturatingAdd(Cancelled, other.Cancelled);
+        TimedOut = SaturatingAdd(TimedOut, other.TimedOut);
+        Flaky = SaturatingAdd(Flaky, other.Flaky);
     }
+
+    // Large counts from many suites must not wrap negative and read as "no failures".
+    private static int SaturatingAdd(int a, int b)
+        => (int)Math.Max(int.MinValue, Math.Min(int.MaxValue, (long)a + b));
 }
 
 internal sealed class ReportTestGroup

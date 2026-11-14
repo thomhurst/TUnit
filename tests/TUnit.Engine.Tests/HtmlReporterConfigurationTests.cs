@@ -424,7 +424,7 @@ public class HtmlReporterConfigurationTests
             var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
             var reportData = CreateReportData("DisabledSuiteMarker");
             aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(reportData), reportData.AssemblyName, "suite");
-            var staleGeneration = aggregator.ReadEffectiveSidecarGeneration(reportData.AssemblyName, "suite");
+            var staleGeneration = aggregator.ReadSidecarGenerations(reportData.AssemblyName, "suite");
 
             var replacement = CreateReportData(reportData.AssemblyName, "replacement-machine");
             aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(replacement), replacement.AssemblyName, "suite");

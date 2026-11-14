@@ -479,7 +479,7 @@ internal sealed class HtmlReporter(IExtension extension) : IDataConsumer, IBlock
 
         try
         {
-            var expectedGeneration = aggregator.ReadEffectiveSidecarGeneration(assemblyName, htmlOutputPath);
+            var expectedGeneration = aggregator.ReadSidecarGenerations(assemblyName, htmlOutputPath);
             using var publicationMarker = aggregator.TryAcquireSidecarPublication(assemblyName, htmlOutputPath);
             if (publicationMarker is null)
             {
