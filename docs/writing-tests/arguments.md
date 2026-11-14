@@ -56,6 +56,74 @@ public class MyTestClass
 }
 ```
 
+## Converting String Arguments[​](#converting-string-arguments "Direct link to Converting String Arguments")
+
+A string argument can be passed to a parameter of another type when that type implements `IParsable<TSelf>` (such as `DateTime`, `Guid` or `TimeSpan`) or declares a `[TypeConverter]` that converts from strings. Conversions use the invariant culture.
+
+```
+using System;
+
+using System.ComponentModel;
+
+using System.Globalization;
+
+using TUnit.Assertions;
+
+using TUnit.Assertions.Extensions;
+
+using TUnit.Core;
+
+
+
+namespace MyTestProject;
+
+
+
+[TypeConverter(typeof(EmailConverter))]
+
+public sealed record Email(string Value);
+
+
+
+public sealed class EmailConverter : TypeConverter
+
+{
+
+    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
+
+        => sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+
+
+
+    public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+
+        => value is string text ? new Email(text) : base.ConvertFrom(context, culture, value);
+
+}
+
+
+
+public class EmailTests
+
+{
+
+    [Test]
+
+    [Arguments("info@example.com")]
+
+    public async Task ParsesEmail(Email email)
+
+    {
+
+        await Assert.That(email.Value).IsEqualTo("info@example.com");
+
+    }
+
+}
+```
+
+The converter is constructed directly by generated code, so this works with Native AOT. It needs a public parameterless constructor or a public constructor that takes the target `Type`. A converter declared on a base type is also used. When a type supports both, `Parse` is used.
+
 ## Test Case Metadata[​](#test-case-metadata "Direct link to Test Case Metadata")
 
 The `[Arguments]` attribute supports optional properties to customize individual test cases:
