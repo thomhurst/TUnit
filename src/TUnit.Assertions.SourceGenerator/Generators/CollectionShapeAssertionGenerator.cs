@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TUnit.Assertions.SourceGenerator.Models;
 using static TUnit.Assertions.SourceGenerator.Generators.CollectionShapeRegistry;
@@ -232,7 +233,7 @@ public sealed class CollectionShapeAssertionGenerator : IIncrementalGenerator
         var cae = p.GetAttributes().FirstOrDefault(a => a.AttributeClass?.Name == "CallerArgumentExpressionAttribute");
         if (cae is { ConstructorArguments.Length: > 0 } && cae.ConstructorArguments[0].Value is string target)
         {
-            sb.Append($"[global::System.Runtime.CompilerServices.CallerArgumentExpression(\"{target}\")] ");
+            sb.Append($"[global::System.Runtime.CompilerServices.CallerArgumentExpression({SymbolDisplay.FormatLiteral(target, quote: true)})] ");
         }
 
         switch (p.RefKind)

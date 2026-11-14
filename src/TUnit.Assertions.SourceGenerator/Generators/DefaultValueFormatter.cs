@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace TUnit.Assertions.SourceGenerator.Generators;
 
@@ -75,7 +76,7 @@ internal static class DefaultValueFormatter
 
         if (defaultValue is string str)
         {
-            return $"\"{str.Replace("\"", "\\\"")}\"";
+            return SymbolDisplay.FormatLiteral(str, quote: true);
         }
 
         if (defaultValue is bool b)
@@ -85,7 +86,7 @@ internal static class DefaultValueFormatter
 
         if (defaultValue is char c)
         {
-            return $"'{c}'";
+            return SymbolDisplay.FormatLiteral(c, quote: true);
         }
 
         return defaultValue.ToString() ?? "null";

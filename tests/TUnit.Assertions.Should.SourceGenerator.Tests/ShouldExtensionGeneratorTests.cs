@@ -244,6 +244,44 @@ public class ShouldExtensionGeneratorTests
     }
 
     [Test]
+    public async Task String_values_are_emitted_as_escaped_literals()
+    {
+        // Attribute arguments and defaults come back from Roslyn unescaped, so quotes and
+        // backslashes must be re-escaped when they're written into generated source.
+        var output = await RunGenerator("""
+            using System;
+            using System.Diagnostics.CodeAnalysis;
+            using TUnit.Assertions.Core;
+
+            namespace MyNamespace;
+
+            public class QuotedAssertion : Assertion<string>
+            {
+                public QuotedAssertion(AssertionContext<string> context, string text, char separator) : base(context) { }
+                protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<string> metadata)
+                    => Task.FromResult(AssertionResult.Passed);
+                protected override string GetExpectation() => "to be quoted";
+            }
+
+            public static class QuotedExtensions
+            {
+                [Obsolete("Use \"IsQuotedV2\" \\ instead", DiagnosticId = "ID\\1")]
+                [RequiresUnreferencedCode("Needs \"reflection\" \\ here")]
+                [UnconditionalSuppressMessage("Trimming", "IL\\2026")]
+                public static QuotedAssertion IsQuoted(this IAssertionSource<string> source, string text = "a\"b\\c", char separator = '\\')
+                    => new(source.Context, text, separator);
+            }
+            """);
+
+        await Assert.That(output).Contains("""Obsolete("Use \"IsQuotedV2\" \\ instead", DiagnosticId = "ID\\1")""");
+        await Assert.That(output).Contains("""RequiresUnreferencedCode("Needs \"reflection\" \\ here")""");
+        await Assert.That(output).Contains("""UnconditionalSuppressMessage("Trimming", "IL\\2026",""");
+        await Assert.That(output).Contains("""string text = "a\"b\\c", char separator = '\\'""");
+
+        await Assert.That(CSharpSyntaxTree.ParseText(output).GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
+    }
+
+    [Test]
     public async Task Wrapper_generation_deduplicates_overridden_instance_methods()
     {
         var output = await RunGenerator("""

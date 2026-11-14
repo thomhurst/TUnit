@@ -434,8 +434,7 @@ public sealed class AssertionExtensionGenerator : IIncrementalGenerator
         // Add RequiresUnreferencedCode attribute if present (from constructor or class level)
         if (!string.IsNullOrEmpty(requiresUnreferencedCodeMessage))
         {
-            var escapedMessage = requiresUnreferencedCodeMessage!.Replace("\"", "\\\"");
-            sourceBuilder.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{escapedMessage}\")]");
+            sourceBuilder.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode({SymbolDisplay.FormatLiteral(requiresUnreferencedCodeMessage!, quote: true)})]");
         }
 
         // Add OverloadResolutionPriority attribute if specified
