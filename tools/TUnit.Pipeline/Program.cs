@@ -29,16 +29,10 @@ var osSpecificOnlyOption = new Option<bool>(
     Description = "Run only what can differ by operating system: PlatformNeutral suites keep just their .NET Framework TFMs, which Ubuntu cannot run.",
 };
 
-var validateOnlyOption = new Option<bool>("--validate-only")
-{
-    Description = "Validate the complete pipeline without executing modules.",
-};
-
 var rootCommand = new RootCommand("The pipeline for building, testing and packaging TUnit");
 rootCommand.Add(categoryOption);
 rootCommand.Add(ignoreCategoryOption);
 rootCommand.Add(osSpecificOnlyOption);
-rootCommand.Add(validateOnlyOption);
 rootCommand.Validators.Add(result =>
 {
     if (result.GetValue(categoryOption) is { Length: > 0 } && result.GetValue(ignoreCategoryOption) is { Length: > 0 })
@@ -77,12 +71,6 @@ rootCommand.SetAction(async parseResult =>
             ? new[] { PipelineCategories.PlatformNeutral }
             : [];
         builder.ConfigureOptions(options => options with { IgnoreCategories = [.. ignoreCategories, .. platformNeutral] });
-    }
-
-    if (parseResult.GetValue(validateOnlyOption))
-    {
-        await using var pipeline = await builder.BuildAsync();
-        return;
     }
 
     await builder.RunAsync();
