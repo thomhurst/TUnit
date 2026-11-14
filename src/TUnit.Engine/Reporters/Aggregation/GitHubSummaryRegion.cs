@@ -79,7 +79,7 @@ internal static class GitHubSummaryRegion
     /// </summary>
     internal static string Splice(string existing, string content)
     {
-        var block = $"{StartMarker}\n{content}\n{EndMarker}\n";
+        var block = $"{StartMarker}\n{NeutralizeMarkers(content)}\n{EndMarker}\n";
 
         var end = existing.IndexOf(EndMarker, StringComparison.Ordinal);
         var start = end >= 0 ? existing.LastIndexOf(StartMarker, end, StringComparison.Ordinal) : -1;
@@ -101,4 +101,14 @@ internal static class GitHubSummaryRegion
 
         return existing.Substring(0, start) + block + existing.Substring(afterEnd);
     }
+
+    /// <summary>
+    /// Breaks any copy of the region markers inside <paramref name="content"/> (e.g. from a
+    /// test name), so the only markers in the summary file are the ones TUnit writes around
+    /// its block and <see cref="Splice"/> always finds the right span.
+    /// </summary>
+    internal static string NeutralizeMarkers(string content)
+        => content
+            .Replace(StartMarker, "&lt;" + StartMarker.Substring(1))
+            .Replace(EndMarker, "&lt;" + EndMarker.Substring(1));
 }

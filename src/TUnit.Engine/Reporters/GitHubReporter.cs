@@ -178,18 +178,19 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
 
-        if (!string.IsNullOrEmpty(ArtifactUrl))
+        var heading = $"{AggregatedSummaryWriter.Text(assemblyName)} ({AggregatedSummaryWriter.Text(targetFramework)})";
+        if (AggregatedSummaryWriter.SafeUrl(ArtifactUrl) is { } artifactUrl)
         {
-            stringBuilder.AppendLine($"### {statusEmoji} {assemblyName} ({targetFramework}) [(View Report)]({ArtifactUrl})");
+            stringBuilder.AppendLine($"### {statusEmoji} {heading} [(View Report)]({artifactUrl})");
         }
         else
         {
-            stringBuilder.AppendLine($"### {statusEmoji} {assemblyName} ({targetFramework})");
+            stringBuilder.AppendLine($"### {statusEmoji} {heading}");
         }
 
         if (!string.IsNullOrEmpty(Filter))
         {
-            stringBuilder.AppendLine($"#### Filter: `{Filter}`");
+            stringBuilder.AppendLine($"#### Filter: `{AggregatedSummaryWriter.Code(Filter, inTable: false)}`");
         }
 
         var totalCount = last.Count;
@@ -254,7 +255,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             stringBuilder.AppendLine($"> **\u26a0\ufe0f {flakyTests.Count} flaky {(flakyTests.Count == 1 ? "test" : "tests")}** passed after retry:");
             foreach (var (name, attempts, duration) in flakyTests)
             {
-                stringBuilder.AppendLine($"> - `{name}` \u2014 {attempts} attempts ({FormatDuration(duration)})");
+                stringBuilder.AppendLine($"> - `{AggregatedSummaryWriter.Code(name, inTable: false)}` \u2014 {attempts} attempts ({FormatDuration(duration)})");
             }
         }
 
@@ -272,7 +273,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             stringBuilder.AppendLine();
             foreach (var group in skipGroups)
             {
-                stringBuilder.AppendLine($"- **{group.Count()}** \u2014 {group.Key}");
+                stringBuilder.AppendLine($"- **{group.Count()}** \u2014 {AggregatedSummaryWriter.Text(group.Key)}");
             }
             stringBuilder.AppendLine();
             stringBuilder.AppendLine("</details>");
@@ -336,7 +337,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             var diagParts = failureGroups.Select(g =>
             {
                 var topClass = g.GroupBy(x => x.ClassName).OrderByDescending(c => c.Count()).First();
-                return $"{g.Count()} \u00d7 `{g.Key}` in `{topClass.Key}`";
+                return $"{g.Count()} \u00d7 `{AggregatedSummaryWriter.Code(g.Key, inTable: false)}` in `{AggregatedSummaryWriter.Code(topClass.Key, inTable: false)}`";
             });
 
             stringBuilder.AppendLine();
@@ -368,7 +369,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             {
                 var entries = group.ToList();
                 var count = entries.Count;
-                var label = $"{group.Key} ({count} {(count == 1 ? "test" : "tests")})";
+                var label = $"{AggregatedSummaryWriter.Text(group.Key)} ({count} {(count == 1 ? "test" : "tests")})";
 
                 if (_reporterStyle == GitHubReporterStyle.Collapsible)
                 {
@@ -389,7 +390,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                 {
                     var entry = entries[i];
                     var sourcePart = entry.SourceLink is not null ? $" {entry.SourceLink}" : "";
-                    stringBuilder.AppendLine($"| `{entry.Name}`{sourcePart} | {entry.Duration} |");
+                    stringBuilder.AppendLine($"| `{AggregatedSummaryWriter.Code(entry.Name)}`{sourcePart} | {entry.Duration} |");
                 }
 
                 if (count > maxTestsPerGroup)
@@ -433,7 +434,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             foreach (var (name, status, details, duration) in otherMessages)
             {
                 detailsBuilder.AppendLine("<tr>");
-                detailsBuilder.AppendLine($"<td>{name}</td>");
+                detailsBuilder.AppendLine($"<td>{AggregatedSummaryWriter.Text(name)}</td>");
                 detailsBuilder.AppendLine($"<td>{status}</td>");
                 detailsBuilder.AppendLine($"<td>{details}</td>");
                 detailsBuilder.AppendLine($"<td>{duration}</td>");
@@ -499,7 +500,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             suites,
             collapsible: _reporterStyle == GitHubReporterStyle.Collapsible,
             serverUrl: serverUrl,
-            mergedReportHint: $"📄 Combined HTML report: `{mergedReportPath}` — upload it as an artifact to keep it after the job.");
+            mergedReportHint: $"📄 Combined HTML report: `{AggregatedSummaryWriter.Code(mergedReportPath, inTable: false)}` — upload it as an artifact to keep it after the job.");
 
         GitHubSummaryRegion.ReplaceOrAppend(_outputSummaryFilePath, content, MaxFileSizeInBytes);
     }
@@ -514,6 +515,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     private async Task WriteFile(string contents)
     {
+        // Appended after any aggregated block, so marker text in a test name must not
+        // be mistaken for that block's boundaries on a later rewrite.
+        contents = GitHubSummaryRegion.NeutralizeMarkers(contents);
         var fileInfo = new FileInfo(_outputSummaryFilePath);
         var currentFileSize = fileInfo.Exists ? fileInfo.Length : 0;
         long newContentSize = Encoding.UTF8.GetByteCount(contents);
@@ -568,12 +572,14 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             or CancelledTestNodeStateProperty)
 #pragma warning restore CS0618, MTP0001
         {
-            return $"<pre>{GetError(stateProperty)}</pre>";
+            return $"<pre>{AggregatedSummaryWriter.Text(GetError(stateProperty))}</pre>";
         }
 
         if (stateProperty is SkippedTestNodeStateProperty skippedTestNodeStateProperty)
         {
-            return skippedTestNodeStateProperty.Explanation ?? "Skipped (No reason provided)";
+            return skippedTestNodeStateProperty.Explanation is { } explanation
+                ? AggregatedSummaryWriter.Text(explanation)
+                : "Skipped (No reason provided)";
         }
 
         if (stateProperty is InProgressTestNodeStateProperty)
@@ -665,7 +671,8 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
         // Normalise first: an assembly built on Windows and run on Linux carries a backslash-separated
         // path, which Path.GetFileName does not split there.
         var fileName = Path.GetFileName(fileLocation.FilePath.Replace('\\', '/'));
-        return $"[{fileName}:{line}]({serverUrl}/{repo}/blob/{sha}/{filePath}#L{line})";
+        var url = AggregatedSummaryWriter.SafeUrl($"{serverUrl}/{repo}/blob/{sha}/{filePath}#L{line}");
+        return url is null ? null : $"[{AggregatedSummaryWriter.Text(fileName)}:{line}]({url})";
     }
 
     public string? Filter { get; set; }
