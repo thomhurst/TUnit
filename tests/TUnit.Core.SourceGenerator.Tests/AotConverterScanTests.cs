@@ -66,12 +66,6 @@ public class AotConverterScanTests
             [TypeConverter(typeof(PlainConverter))]
             public class WithOperator { public static implicit operator WithOperator(string value) => new(); }
             [TypeConverter(typeof(PlainConverter))]
-            public readonly struct Parsable : IParsable<Parsable>
-            {
-                public static Parsable Parse(string s, IFormatProvider? provider) => default;
-                public static bool TryParse(string? s, IFormatProvider? provider, out Parsable result) { result = default; return true; }
-            }
-            [TypeConverter(typeof(PlainConverter))]
             public class Box<T> { }
             [TypeConverter(typeof(NoConvertFromConverter))]
             public class NoConvertFrom { }
@@ -94,14 +88,60 @@ public class AotConverterScanTests
             public class Tests
             {
                 public Tests(Named named) { }
-                [Test, Arguments("a", "b", "c", "d")]
-                public void Convert(Plain plain, Typed? typed, WithOperator withOperator, Parsable parsable) { }
+                [Test, Arguments("a", "b", "c")]
+                public void Convert(Plain plain, Typed? typed, WithOperator withOperator) { }
                 [Test]
                 public void Unsupported(WrongAssembly a, GenericByName b, NoConvertFrom c, UnusableConstructors d) { }
                 [Test]
                 public void Generic<T>(Box<T> box) { }
             }
             """;
+        var generated = await GenerateTypeConverters(source);
+        await Assert.That(generated).Contains("global::Plain converted = (global::Plain)new global::PlainConverter().ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
+        await Assert.That(generated).Contains("global::Typed converted = (global::Typed)new global::TypedConverter(typeof(global::Typed)).ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
+        await Assert.That(generated).Contains("global::Named converted = (global::Named)new global::NamedConverter().ConvertFrom(");
+        // Language conversions keep precedence over the converter.
+        await Assert.That(generated).DoesNotContain("(global::WithOperator)new");
+        // Unresolvable, uncallable or non-converting converters, and open target types, are skipped.
+        await Assert.That(generated).DoesNotContain("(global::WrongAssembly)new");
+        await Assert.That(generated).DoesNotContain("(global::GenericByName)new");
+        await Assert.That(generated).DoesNotContain("(global::NoConvertFrom)new");
+        await Assert.That(generated).DoesNotContain("(global::UnusableConstructors)new");
+        await Assert.That(generated).DoesNotContain("global::Box<");
+    }
+
+#if NET
+    [Test]
+    public async Task ParseTakesPrecedenceOverTypeConverter()
+    {
+        const string source = """
+            using System;
+            using System.ComponentModel;
+            using System.Globalization;
+            using TUnit.Core;
+            [TypeConverter(typeof(PlainConverter))]
+            public readonly struct Parsable : IParsable<Parsable>
+            {
+                public static Parsable Parse(string s, IFormatProvider? provider) => default;
+                public static bool TryParse(string? s, IFormatProvider? provider, out Parsable result) { result = default; return true; }
+            }
+            public class PlainConverter : TypeConverter
+            {
+                public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) => null;
+            }
+            public class Tests
+            {
+                [Test, Arguments("a")]
+                public void Convert(Parsable parsable) { }
+            }
+            """;
+        var generated = await GenerateTypeConverters(source);
+        await Assert.That(generated).DoesNotContain("(global::Parsable)new");
+    }
+#endif
+
+    private static async Task<string> GenerateTypeConverters(string source)
+    {
         var parseOptions = new CSharpParseOptions(LanguageVersion.Preview);
         var compilation = CSharpCompilation.Create("TypeConverters",
             [CSharpSyntaxTree.ParseText(source, parseOptions)], ReferencesHelper.References,
@@ -112,19 +152,7 @@ public class AotConverterScanTests
 
         await Assert.That(diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
         await Assert.That(output.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error)).IsEmpty();
-        var generated = string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
-        await Assert.That(generated).Contains("global::Plain converted = (global::Plain)new global::PlainConverter().ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
-        await Assert.That(generated).Contains("global::Typed converted = (global::Typed)new global::TypedConverter(typeof(global::Typed)).ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
-        await Assert.That(generated).Contains("global::Named converted = (global::Named)new global::NamedConverter().ConvertFrom(");
-        // Language conversions and Parse keep precedence over the converter.
-        await Assert.That(generated).DoesNotContain("(global::WithOperator)new");
-        await Assert.That(generated).DoesNotContain("(global::Parsable)new");
-        // Unresolvable, uncallable or non-converting converters, and open target types, are skipped.
-        await Assert.That(generated).DoesNotContain("(global::WrongAssembly)new");
-        await Assert.That(generated).DoesNotContain("(global::GenericByName)new");
-        await Assert.That(generated).DoesNotContain("(global::NoConvertFrom)new");
-        await Assert.That(generated).DoesNotContain("(global::UnusableConstructors)new");
-        await Assert.That(generated).DoesNotContain("global::Box<");
+        return string.Join("\n", driver.GetRunResult().GeneratedTrees.Select(t => t.ToString()));
     }
 
     [Test]
