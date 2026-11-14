@@ -329,7 +329,8 @@ public class AotConverterGenerator : IIncrementalGenerator
             // for parsable types get a converter that calls Parse directly.
             // Primitives and decimal already convert identically in every mode through IConvertible.
             // DateTime is the exception: IConvertible parses it with the current culture, Parse here is invariant.
-            if (namedType.SpecialType is SpecialType.None or SpecialType.System_DateTime
+            // nint and nuint are not IConvertible, so they need Parse too.
+            if (namedType.SpecialType is SpecialType.None or SpecialType.System_DateTime or SpecialType.System_IntPtr or SpecialType.System_UIntPtr
                 && !TypeContainsGenericTypeParameters(namedType)
                 && namedType.IsParsableFromString() && IsAccessibleType(namedType, compilation)
                 && !((CSharpCompilation)compilation).ClassifyConversion(compilation.GetSpecialType(SpecialType.System_String), namedType).Exists

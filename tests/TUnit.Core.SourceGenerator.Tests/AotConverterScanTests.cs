@@ -49,14 +49,16 @@ public class AotConverterScanTests
             using TUnit.Core;
             public class Tests
             {
-                [Test, Arguments("a", "b", "c", "d", "e")]
-                public void Parse(Guid guid, TimeSpan? timeSpan, DateTime dateTime, int number, string text) { }
+                [Test, Arguments("a", "b", "c", "d", "e", "f", "g")]
+                public void Parse(Guid guid, TimeSpan? timeSpan, DateTime dateTime, nint nativeInt, nuint nativeUInt, int number, string text) { }
             }
             """;
         var generated = await GenerateTypeConverters(source);
 
 #if NET
         await Assert.That(generated).Contains("global::System.Guid converted = global::System.Guid.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        await Assert.That(generated).Contains("nint converted = nint.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
+        await Assert.That(generated).Contains("nuint converted = nuint.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
 #else
         // .NET Framework only has Guid.Parse(string).
         await Assert.That(generated).Contains("global::System.Guid converted = global::System.Guid.Parse(sourceTypedValue);");
@@ -64,8 +66,8 @@ public class AotConverterScanTests
         await Assert.That(generated).Contains("global::System.TimeSpan converted = global::System.TimeSpan.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
         await Assert.That(generated).Contains("global::System.DateTime converted = global::System.DateTime.Parse(sourceTypedValue, global::System.Globalization.CultureInfo.InvariantCulture);");
         // Primitives keep their IConvertible path.
-        await Assert.That(generated).DoesNotContain("int.Parse(");
-        await Assert.That(generated).DoesNotContain("string.Parse(");
+        await Assert.That(generated).DoesNotContain(" int.Parse(");
+        await Assert.That(generated).DoesNotContain(" string.Parse(");
     }
 
 #if NET
