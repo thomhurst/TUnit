@@ -1,9 +1,12 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>__REPORT_TITLE__</title>
+<script>
+  document.documentElement.dataset.theme = localStorage.getItem('tunit-report-theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+</script>
 <style>
   /* ============================== tokens ============================== */
   :root[data-theme="light"] {

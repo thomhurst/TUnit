@@ -463,6 +463,33 @@ public class HtmlReporterTests
         html.ShouldContain("<title>Test Report — MyProject.Tests</title>");
         html.ShouldContain("id=\"projectName\">MyProject.Tests<");
     }
+    
+    [Test]
+    public void GenerateHtml_InitializesThemeFromSavedChoiceOrSystemPreference()
+    {
+        var html = HtmlReportGenerator.GenerateHtml(new ReportData
+        {
+            AssemblyName = "Tests",
+            MachineName = "machine",
+            Timestamp = "2026-05-07T09:26:24.0000000Z",
+            TUnitVersion = "1.0.0",
+            OperatingSystem = "Linux",
+            RuntimeVersion = ".NET 10.0",
+            TotalDurationMs = 0,
+            Summary = new ReportSummary(),
+            Groups = [],
+        });
+
+        var themeInitialization = html.IndexOf("document.documentElement.dataset.theme = localStorage.getItem('tunit-report-theme')", StringComparison.Ordinal);
+        var stylesheet = html.IndexOf("<style>", StringComparison.Ordinal);
+
+        themeInitialization.ShouldBeGreaterThanOrEqualTo(0);
+        themeInitialization.ShouldBeLessThan(stylesheet);
+        html.ShouldContain("window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'");
+        html.ShouldContain("localStorage.setItem('tunit-report-theme', name);");
+        html.ShouldNotContain("<html lang=\"en\" data-theme=\"dark\">");
+    }
+
 
     [Test]
     public void GenerateHtml_EmitsOutcomeTimelineOverflowCss()
