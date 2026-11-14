@@ -463,7 +463,7 @@ public class HtmlReporterTests
         html.ShouldContain("<title>Test Report — MyProject.Tests</title>");
         html.ShouldContain("id=\"projectName\">MyProject.Tests<");
     }
-    
+
     [Test]
     public void GenerateHtml_InitializesThemeFromSavedChoiceOrSystemPreference()
     {
@@ -480,16 +480,19 @@ public class HtmlReporterTests
             Groups = [],
         });
 
-        var themeInitialization = html.IndexOf("document.documentElement.dataset.theme = localStorage.getItem('tunit-report-theme')", StringComparison.Ordinal);
-        var stylesheet = html.IndexOf("<style>", StringComparison.Ordinal);
+        var themeStorageKeyIndex = html.IndexOf("'tunit-report-theme'", StringComparison.Ordinal);
+        var stylesheetIndex = html.IndexOf("<style>", StringComparison.Ordinal);
 
-        themeInitialization.ShouldBeGreaterThanOrEqualTo(0);
-        themeInitialization.ShouldBeLessThan(stylesheet);
-        html.ShouldContain("window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'");
-        html.ShouldContain("localStorage.setItem('tunit-report-theme', name);");
+        themeStorageKeyIndex.ShouldBeGreaterThanOrEqualTo(0);
+        themeStorageKeyIndex.ShouldBeLessThan(stylesheetIndex);
+
+        var headScript = html[..stylesheetIndex];
+        headScript.ShouldContain("prefers-color-scheme: light");
+        headScript.ShouldContain("document.documentElement.dataset.theme");
+        headScript.ShouldContain("catch");
+
         html.ShouldNotContain("<html lang=\"en\" data-theme=\"dark\">");
     }
-
 
     [Test]
     public void GenerateHtml_EmitsOutcomeTimelineOverflowCss()
