@@ -328,6 +328,7 @@ public class AotConverterGenerator : IIncrementalGenerator
             // Native AOT cannot rely on CastHelper finding Parse by reflection, so string arguments
             // for parsable types get a converter that calls Parse directly.
             // Primitives and decimal already convert identically in every mode through IConvertible.
+            // DateTime is the exception: IConvertible parses it with the current culture, Parse here is invariant.
             if (namedType.SpecialType is SpecialType.None or SpecialType.System_DateTime
                 && !TypeContainsGenericTypeParameters(namedType)
                 && namedType.IsParsableFromString() && IsAccessibleType(namedType, compilation)
@@ -939,6 +940,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         {
             if (method is not { IsStatic: true, DeclaredAccessibility: Accessibility.Public } || IsObsoleteAsError(method)
                 || method.Parameters.Length == 0 || method.Parameters[0].Type.SpecialType != SpecialType.System_String
+                || method.Parameters.Any(static p => p.RefKind is RefKind.Ref or RefKind.Out)
                 || !SymbolEqualityComparer.Default.Equals(method.ReturnType, type))
             {
                 continue;

@@ -90,6 +90,12 @@ public class AotConverterScanTests
                 [Obsolete("x", true)] public static Forbidden Parse(string s, IFormatProvider? provider) => default;
                 public static bool TryParse(string? s, IFormatProvider? provider, out Forbidden result) { result = default; return true; }
             }
+            public readonly struct ByRef : IParsable<ByRef>
+            {
+                public static ByRef Parse(ref string s, IFormatProvider? provider) => default;
+                static ByRef IParsable<ByRef>.Parse(string s, IFormatProvider? provider) => default;
+                static bool IParsable<ByRef>.TryParse(string? s, IFormatProvider? provider, out ByRef result) { result = default; return true; }
+            }
             public readonly struct WithOperator : IParsable<WithOperator>
             {
                 public static WithOperator Parse(string s, IFormatProvider? provider) => default;
@@ -105,8 +111,8 @@ public class AotConverterScanTests
             {
                 [Test]
                 public void Generic<T>(Box<T> box) { }
-                [Test, Arguments("a", "b", "c", "d")]
-                public void Parse(Public a, Explicit b, Forbidden c, WithOperator d) { }
+                [Test, Arguments("a", "b", "c", "d", "e")]
+                public void Parse(Public a, Explicit b, Forbidden c, WithOperator d, ByRef e) { }
             }
             """;
         var generated = await GenerateParseConverters(source);
@@ -115,6 +121,7 @@ public class AotConverterScanTests
         await Assert.That(generated).DoesNotContain("Explicit.Parse(");
         await Assert.That(generated).DoesNotContain("Forbidden.Parse(");
         await Assert.That(generated).DoesNotContain("WithOperator.Parse(");
+        await Assert.That(generated).DoesNotContain("ByRef.Parse(");
         await Assert.That(generated).DoesNotContain("global::Box<");
     }
 #endif
