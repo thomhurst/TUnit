@@ -190,7 +190,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
         if (!string.IsNullOrEmpty(Filter))
         {
-            stringBuilder.AppendLine($"#### Filter: `{AggregatedSummaryWriter.Code(Filter)}`");
+            stringBuilder.AppendLine($"#### Filter: `{AggregatedSummaryWriter.Code(Filter, inTable: false)}`");
         }
 
         var totalCount = last.Count;
@@ -255,7 +255,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             stringBuilder.AppendLine($"> **\u26a0\ufe0f {flakyTests.Count} flaky {(flakyTests.Count == 1 ? "test" : "tests")}** passed after retry:");
             foreach (var (name, attempts, duration) in flakyTests)
             {
-                stringBuilder.AppendLine($"> - `{AggregatedSummaryWriter.Code(name)}` \u2014 {attempts} attempts ({FormatDuration(duration)})");
+                stringBuilder.AppendLine($"> - `{AggregatedSummaryWriter.Code(name, inTable: false)}` \u2014 {attempts} attempts ({FormatDuration(duration)})");
             }
         }
 
@@ -337,7 +337,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             var diagParts = failureGroups.Select(g =>
             {
                 var topClass = g.GroupBy(x => x.ClassName).OrderByDescending(c => c.Count()).First();
-                return $"{g.Count()} \u00d7 `{AggregatedSummaryWriter.Code(g.Key)}` in `{AggregatedSummaryWriter.Code(topClass.Key)}`";
+                return $"{g.Count()} \u00d7 `{AggregatedSummaryWriter.Code(g.Key, inTable: false)}` in `{AggregatedSummaryWriter.Code(topClass.Key, inTable: false)}`";
             });
 
             stringBuilder.AppendLine();
@@ -500,7 +500,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
             suites,
             collapsible: _reporterStyle == GitHubReporterStyle.Collapsible,
             serverUrl: serverUrl,
-            mergedReportHint: $"📄 Combined HTML report: `{AggregatedSummaryWriter.Code(mergedReportPath)}` — upload it as an artifact to keep it after the job.");
+            mergedReportHint: $"📄 Combined HTML report: `{AggregatedSummaryWriter.Code(mergedReportPath, inTable: false)}` — upload it as an artifact to keep it after the job.");
 
         GitHubSummaryRegion.ReplaceOrAppend(_outputSummaryFilePath, content, MaxFileSizeInBytes);
     }

@@ -492,6 +492,13 @@ public class AggregatedSummaryWriterTests
     }
 
     [Test]
+    public async Task Code_Escapes_Pipes_Only_In_Table_Cells()
+    {
+        await Assert.That(AggregatedSummaryWriter.Code("T(\"a|b`c\")")).IsEqualTo("T(\"a\\|b'c\")");
+        await Assert.That(AggregatedSummaryWriter.Code("T(\"a|b`c\")", inTable: false)).IsEqualTo("T(\"a|b'c\")");
+    }
+
+    [Test]
     public async Task Text_Encodes_Html_And_Table_Syntax()
     {
         await Assert.That(AggregatedSummaryWriter.Text("a|b\r\n<c>&[d]\u0085e"))

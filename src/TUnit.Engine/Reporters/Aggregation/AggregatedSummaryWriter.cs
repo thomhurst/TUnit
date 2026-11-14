@@ -145,7 +145,7 @@ internal static class AggregatedSummaryWriter
         sb.AppendLine($"> **⚠️ {flakyTests.Count} flaky {(flakyTests.Count == 1 ? "test" : "tests")}** passed after retry:");
         foreach (var (suite, name, attempts, durationMs) in flakyTests)
         {
-            sb.AppendLine($"> - `{Code(name)}` ({Text(suite)}) — {attempts} attempts ({FormatDuration(durationMs)})");
+            sb.AppendLine($"> - `{Code(name, inTable: false)}` ({Text(suite)}) — {attempts} attempts ({FormatDuration(durationMs)})");
         }
         sb.AppendLine();
     }
@@ -181,7 +181,7 @@ internal static class AggregatedSummaryWriter
         var diagParts = grouped.Take(3).Select(static g =>
         {
             var topSuite = g.GroupBy(static x => x.Suite).OrderByDescending(static c => c.Count()).First();
-            return $"{g.Count()} × `{Code(g.Key)}` in `{Code(topSuite.Key)}`";
+            return $"{g.Count()} × `{Code(g.Key, inTable: false)}` in `{Code(topSuite.Key, inTable: false)}`";
         });
         sb.AppendLine($"> **Quick diagnosis:** {string.Join(", ", diagParts)}");
         sb.AppendLine();
@@ -284,10 +284,14 @@ internal static class AggregatedSummaryWriter
     /// <summary>
     /// Makes test-derived text (display names, class names, suite labels) safe inside a
     /// backtick code span in a Markdown table cell. HTML is inert inside a code span, so
-    /// only line breaks, pipes and backticks need handling.
+    /// only line breaks, backticks and (in a table cell) pipes need handling. Outside a
+    /// table the pipe is left alone: a code span would show the escaping backslash.
     /// </summary>
-    internal static string Code(string? value)
-        => CollapseLineBreaks(value).Replace("|", "\\|").Replace('`', '\'');
+    internal static string Code(string? value, bool inTable = true)
+    {
+        var code = CollapseLineBreaks(value).Replace('`', '\'');
+        return inTable ? code.Replace("|", "\\|") : code;
+    }
 
     /// <summary>
     /// Makes test-derived text safe as plain text in a Markdown table cell, list item or
