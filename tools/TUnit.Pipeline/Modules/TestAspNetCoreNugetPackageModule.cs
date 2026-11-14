@@ -1,10 +1,7 @@
-using ModularPipelines.Attributes;
-using ModularPipelines.Configuration;
+using ModularPipelines;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
-using ModularPipelines.Models;
+using ModularPipelines.FileSystem;
 using ModularPipelines.Options;
 using TUnit.Pipeline.Modules.Abstract;
 
@@ -15,9 +12,8 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<CopyToLocalNuGetModule>]
 public class TestAspNetCoreNugetPackageModule : TestBaseModule
 {
-    protected override ModuleConfiguration Configure() => ModuleConfiguration.Create()
-        .WithRetryCount(3)
-        .Build();
+    protected override void Configure(ModuleConfigurationBuilder module) => module
+        .WithRetry(3);
 
     // ASP.NET Core only supports .NET Core frameworks, not .NET Framework
     protected override IEnumerable<string> TestableFrameworks => ModernFrameworks;
@@ -27,8 +23,7 @@ public class TestAspNetCoreNugetPackageModule : TestBaseModule
     {
         var version = await context.GetModule<GenerateVersionModule>();
 
-        var project = context.Git()
-            .RootDirectory
+        var project = (await context.Tools.Git.Information.GetRequiredInfoAsync(cancellationToken)).Root
             .AssertExists()
             .FindFile(x => x.Name == "TUnit.AspNetCore.NugetTester.csproj")
             .AssertExists();

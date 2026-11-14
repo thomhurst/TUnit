@@ -119,9 +119,9 @@
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
     <PackageVersion Include="Moq" Version="4.21.0" />
     <PackageVersion Include="System.Threading.Channels" Version="9.0.0" />
-    <PackageVersion Include="ModularPipelines.DotNet" Version="3.2.8" />
-    <PackageVersion Include="ModularPipelines.Git" Version="3.2.8" />
-    <PackageVersion Include="ModularPipelines.GitHub" Version="3.2.8" />
+    <PackageVersion Include="ModularPipelines.DotNet" Version="4.0.0" />
+    <PackageVersion Include="ModularPipelines.Git" Version="4.0.0" />
+    <PackageVersion Include="ModularPipelines.GitHub" Version="4.0.0" />
     <PackageVersion Include="MSTest" Version="4.5.3" />
     <PackageVersion Include="MSTest.TestAdapter" Version="4.5.3" />
     <PackageVersion Include="MSTest.TestFramework" Version="4.5.3" />

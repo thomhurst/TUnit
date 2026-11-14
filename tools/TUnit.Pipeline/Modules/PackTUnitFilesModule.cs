@@ -1,9 +1,6 @@
-﻿using ModularPipelines.Attributes;
+﻿using ModularPipelines;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Models;
-using ModularPipelines.Modules;
 using ModularPipelines.Options;
 
 namespace TUnit.Pipeline.Modules;
@@ -29,7 +26,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
         "TUnit.Assertions.Should"
     ];
 
-    protected override async Task<List<PackedProject>?> ExecuteAsync(IModuleContext context,
+    protected override async Task<List<PackedProject>> ExecuteAsync(IModuleContext context,
         CancellationToken cancellationToken)
     {
         var projects = await context.GetModule<GetPackageProjectsModule>();
@@ -55,8 +52,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                 new KeyValue("Version", version.SemVer!),
             };
 
-            await context.DotNet()
-                .Pack(
+            await context.Tools.DotNet.PackAsync(
                     new DotNetPackOptions
                     {
                         ProjectSolution = project.Path,
@@ -70,7 +66,7 @@ public class PackTUnitFilesModule : Module<List<PackedProject>>
                         NoBuild = projectName != "TUnit.Reporting.Tool",
                     }, new CommandExecutionOptions
                     {
-                        LogSettings = new CommandLoggingOptions
+                        Logging = new CommandLoggingOptions
                         {
                             ShowCommandArguments = true,
                             ShowStandardError = true,

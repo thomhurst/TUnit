@@ -1,11 +1,7 @@
-using ModularPipelines.Attributes;
+using ModularPipelines;
 using ModularPipelines.Context;
-using ModularPipelines.DotNet.Extensions;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
-using ModularPipelines.Models;
-using ModularPipelines.Modules;
+using ModularPipelines.FileSystem;
 using ModularPipelines.Options;
 using TUnit.Pipeline.Modules.Abstract;
 
@@ -14,17 +10,17 @@ namespace TUnit.Pipeline.Modules;
 [NotInParallel]
 public class RunOpenTelemetryTestsModule : Module<CommandResult>
 {
-    protected override async Task<CommandResult?> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
+    protected override async Task<CommandResult> ExecuteAsync(IModuleContext context, CancellationToken cancellationToken)
     {
-        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.OpenTelemetry.Tests.csproj").AssertExists();
+        var project = (await context.Tools.Git.Information.GetRequiredInfoAsync(cancellationToken)).Root.FindFile(x => x.Name == "TUnit.OpenTelemetry.Tests.csproj").AssertExists();
 
-        return await context.DotNet().Run(new DotNetRunOptions
+        return await context.Tools.DotNet.RunAsync(new DotNetRunOptions
         {
             Project = project.Name,
             NoBuild = true,
             Configuration = "Release",
             Framework = "net10.0",
-            Arguments = [..HangDumpArguments.Create("hangdump.opentelemetry-tests.dmp", "5m")],
+            Arguments = [.. HangDumpArguments.Create("hangdump.opentelemetry-tests.dmp", "5m")],
         }, new CommandExecutionOptions
         {
             WorkingDirectory = project.Folder!.Path,
@@ -32,7 +28,7 @@ public class RunOpenTelemetryTestsModule : Module<CommandResult>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
             },
-            LogSettings = new CommandLoggingOptions
+            Logging = new CommandLoggingOptions
             {
                 ShowCommandArguments = true,
                 ShowStandardError = true,

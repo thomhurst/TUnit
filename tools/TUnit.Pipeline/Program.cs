@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ModularPipelines;
-using ModularPipelines.Extensions;
 using ModularPipelines.Options;
 using TUnit.Pipeline;
 
@@ -47,15 +46,23 @@ rootCommand.SetAction(async parseResult =>
     var ignoreCategories = parseResult.GetValue(ignoreCategoryOption)!;
     PipelineScope.OsSpecificOnly = parseResult.GetValue(osSpecificOnlyOption);
 
-    var builder = Pipeline.CreateBuilder();
+    var builder = Pipeline.CreateBuilder(new PipelineBuilderSettings
+    {
+        EnableCommandLineOptions = false,
+        WorkingDirectory = Environment.CurrentDirectory,
+    });
     builder.Configuration.AddEnvironmentVariables();
     builder.Services.Configure<NuGetOptions>(builder.Configuration.GetSection("NuGet"));
-    builder.Services.AddModulesFromAssembly(typeof(Program).Assembly);
-    builder.Options.ExecutionMode = ExecutionMode.WaitForAllModules;
+    builder.AddModulesFromAssembly(typeof(Program).Assembly);
+    builder.ConfigureOptions(options => options with
+    {
+        FailureMode = FailureMode.ContinueOnFailure,
+        ThrowOnPipelineFailure = true,
+    });
 
     if (categories.Length > 0)
     {
-        builder.RunCategories(categories);
+        builder.ConfigureOptions(options => options with { RunOnlyCategories = categories });
     }
     else
     {
@@ -63,10 +70,10 @@ rootCommand.SetAction(async parseResult =>
         var platformNeutral = PipelineScope.OsSpecificOnly && !OperatingSystem.IsWindows()
             ? new[] { PipelineCategories.PlatformNeutral }
             : [];
-        builder.IgnoreCategories(["ReadMe", ..ignoreCategories, ..platformNeutral]);
+        builder.ConfigureOptions(options => options with { IgnoreCategories = [.. ignoreCategories, .. platformNeutral] });
     }
 
-    await builder.Build().RunAsync();
+    await builder.RunAsync();
 });
 
 return await rootCommand.Parse(args).InvokeAsync();

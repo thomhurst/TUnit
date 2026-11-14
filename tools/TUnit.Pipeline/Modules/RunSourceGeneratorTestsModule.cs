@@ -1,8 +1,7 @@
-﻿using ModularPipelines.Attributes;
+﻿using ModularPipelines;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Extensions;
-using ModularPipelines.Git.Extensions;
+using ModularPipelines.FileSystem;
 using ModularPipelines.Options;
 using TUnit.Pipeline.Modules.Abstract;
 
@@ -16,11 +15,11 @@ public class RunSourceGeneratorTestsModule : TestBaseModule
     // <TargetFrameworks> in TUnit.Core.SourceGenerator.Tests.csproj.
     protected override IEnumerable<string> TestableFrameworks => ModernAndNetFrameworks;
 
-    protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
+    protected override async Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
-        var project = context.Git().RootDirectory.FindFile(x => x.Name == "TUnit.Core.SourceGenerator.Tests.csproj").AssertExists();
+        var project = (await context.Tools.Git.Information.GetRequiredInfoAsync(cancellationToken)).Root.FindFile(x => x.Name == "TUnit.Core.SourceGenerator.Tests.csproj").AssertExists();
 
-        return Task.FromResult<(DotNetRunOptions, CommandExecutionOptions?)>((
+        return (
             new DotNetRunOptions
             {
                 NoBuild = true,
@@ -35,6 +34,6 @@ public class RunSourceGeneratorTestsModule : TestBaseModule
                     ["DISABLE_GITHUB_REPORTER"] = "true",
                 }
             }
-        ));
+        );
     }
 }

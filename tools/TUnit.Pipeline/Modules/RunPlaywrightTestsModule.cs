@@ -1,7 +1,6 @@
-﻿using ModularPipelines.Attributes;
+﻿using ModularPipelines;
 using ModularPipelines.Context;
 using ModularPipelines.DotNet.Options;
-using ModularPipelines.Git.Extensions;
 using ModularPipelines.Options;
 using TUnit.Pipeline.Modules.Abstract;
 
@@ -11,17 +10,17 @@ namespace TUnit.Pipeline.Modules;
 [DependsOn<InstallPlaywrightModule>]
 public class RunPlaywrightTestsModule : TestBaseModule
 {
-    protected override Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
+    protected override async Task<(DotNetRunOptions Options, CommandExecutionOptions? ExecutionOptions)> GetTestOptions(IModuleContext context, string framework, CancellationToken cancellationToken)
     {
         var project = Path.Combine(
-            context.Git().RootDirectory.Path,
+            (await context.Tools.Git.Information.GetRequiredInfoAsync(cancellationToken)).Root.Path,
             "src",
             "TUnit.Templates",
             "content",
             "TUnit.Playwright",
             "TestProject.csproj");
 
-        return Task.FromResult<(DotNetRunOptions, CommandExecutionOptions?)>((
+        return (
             new DotNetRunOptions
             {
                 Project = project,
@@ -37,6 +36,6 @@ public class RunPlaywrightTestsModule : TestBaseModule
                     ["TUNIT_DISABLE_HTML_REPORTER"] = "true",
                 }
             }
-        ));
+        );
     }
 }

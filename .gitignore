@@ -469,3 +469,6 @@ specs/
 /*-comment.md
 /issue.md
 /*-issue.md
+
+# Local ModularPipelines run reports and history.
+.modularpipelines/

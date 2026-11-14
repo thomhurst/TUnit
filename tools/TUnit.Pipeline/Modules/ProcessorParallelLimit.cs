@@ -1,4 +1,5 @@
-﻿using ModularPipelines.Interfaces;
+﻿using ModularPipelines;
+using ModularPipelines.Interfaces;
 
 namespace TUnit.Pipeline.Modules;
 
