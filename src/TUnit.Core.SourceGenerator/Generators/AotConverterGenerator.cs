@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TUnit.Analyzers.Extensions;
 using TUnit.Core.SourceGenerator.CodeGenerators.Helpers;
 using TUnit.Core.SourceGenerator.Extensions;
 using TUnit.Core.SourceGenerator.Models;
@@ -323,6 +324,21 @@ public class AotConverterGenerator : IIncrementalGenerator
                     conversions.Add(ToConversionEntry(conversionInfo));
                 }
             }
+
+            // A string argument for a [TypeConverter] type is converted by constructing the declared
+            // converter directly, so AOT never needs TypeDescriptor.
+            if (IsAccessibleType(namedType, compilation)
+                && namedType.TryGetStringTypeConverter(compilation, out var converterType, out var passTargetType))
+            {
+                conversions.Add(ToConversionEntry(new ConversionInfo
+                {
+                    SourceType = compilation.GetSpecialType(SpecialType.System_String),
+                    TargetType = namedType,
+                    IsImplicit = false,
+                    TypeConverter = converterType,
+                    PassTargetTypeToConverter = passTargetType,
+                }));
+            }
         }
 
         if (namedType.IsGenericType)
@@ -380,6 +396,8 @@ public class AotConverterGenerator : IIncrementalGenerator
                 conversion.TargetType.SpecialType is SpecialType.System_SByte or SpecialType.System_Byte or
                     SpecialType.System_Int16 or SpecialType.System_UInt16 or SpecialType.System_Int32 or
                     SpecialType.System_UInt32 or SpecialType.System_Int64 or SpecialType.System_UInt64,
+            TypeConverter = conversion.TypeConverter?.GloballyQualified(),
+            PassTargetTypeToConverter = conversion.PassTargetTypeToConverter,
         });
     }
 
@@ -660,7 +678,12 @@ public class AotConverterGenerator : IIncrementalGenerator
                 writer.Indent();
                 // For explicit conversions, we need to use an explicit cast
                 // For implicit conversions, variable assignment works fine
-                if (conversion.RoundsDecimalToIntegral)
+                if (conversion.TypeConverter is { } typeConverter)
+                {
+                    var converterArgument = conversion.PassTargetTypeToConverter ? $"typeof({targetTypeName})" : "";
+                    writer.AppendLine($"{targetTypeName} converted = ({targetTypeName})new {typeConverter}({converterArgument}).ConvertFrom(null, global::System.Globalization.CultureInfo.InvariantCulture, sourceTypedValue)!;");
+                }
+                else if (conversion.RoundsDecimalToIntegral)
                 {
                     // Match CastHelper's primitive fallback while preserving registered-converter priority.
                     writer.AppendLine($"{targetTypeName} converted = ({targetTypeName})global::System.Convert.ChangeType(sourceTypedValue, typeof({targetTypeName}));");
@@ -734,6 +757,8 @@ public class AotConverterGenerator : IIncrementalGenerator
         public required bool TypesAreDifferent { get; init; }
         public required bool IsImplicit { get; init; }
         public bool RoundsDecimalToIntegral { get; init; }
+        public string? TypeConverter { get; init; }
+        public bool PassTargetTypeToConverter { get; init; }
     }
 
     /// <summary>
@@ -895,5 +920,7 @@ public class AotConverterGenerator : IIncrementalGenerator
         public required ITypeSymbol SourceType { get; init; }
         public required ITypeSymbol TargetType { get; init; }
         public required bool IsImplicit { get; init; }
+        public INamedTypeSymbol? TypeConverter { get; init; }
+        public bool PassTargetTypeToConverter { get; init; }
     }
 }
