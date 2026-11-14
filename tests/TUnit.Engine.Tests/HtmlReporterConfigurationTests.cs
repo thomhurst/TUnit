@@ -424,7 +424,7 @@ public class HtmlReporterConfigurationTests
             var aggregator = ReportAggregator.TryCreateFromEnvironment(Environment.GetEnvironmentVariable)!;
             var reportData = CreateReportData("DisabledSuiteMarker");
             aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(reportData), reportData.AssemblyName, "suite");
-            var staleGeneration = aggregator.ReadEffectiveSidecarGeneration(reportData.AssemblyName, "suite");
+            var staleGeneration = aggregator.ReadSidecarGenerations(reportData.AssemblyName, "suite");
 
             var replacement = CreateReportData(reportData.AssemblyName, "replacement-machine");
             aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(replacement), replacement.AssemblyName, "suite");
@@ -747,7 +747,10 @@ public class HtmlReporterConfigurationTests
                 File.Exists(Path.Combine(aggregationDirectory, ReportDataJson.MergedReportFileName)).ShouldBeTrue();
             }
 
-            aggregator.ReadAllSidecars().Single().MachineName.ShouldBe("timeout-publisher");
+            // Once the active publisher is done, its canonical sidecar is merged alongside
+            // the pending one rather than being replaced by it.
+            aggregator.ReadAllSidecars().Select(s => s.MachineName).OrderBy(n => n, StringComparer.Ordinal)
+                .ShouldBe(["active-publisher", "timeout-publisher"]);
 
             var newerReport = CreateReportData(reportData.AssemblyName, "newer-publisher");
             await reporter.TryWriteSidecarAndAggregateAsync(newerReport, htmlPath, cancellationToken);

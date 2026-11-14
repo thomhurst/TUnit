@@ -137,6 +137,98 @@ public class ReportDataJsonTests
         await Assert.That(restored!.AssemblyName).IsEqualTo("A");
         await Assert.That(restored.Summary.Passed).IsEqualTo(1);
     }
+
+    [Test]
+    public async Task TryDeserialize_Clamps_Negative_Summary_Counts()
+    {
+        var json = """{"schemaVersion":1,"assemblyName":"A","summary":{"total":-5,"passed":-1,"failed":-1,"skipped":-1,"cancelled":-1,"timedOut":-1,"flaky":-1}}""";
+        var summary = ReportDataJson.TryDeserialize(json)!.Summary;
+
+        await Assert.That(summary.Total).IsEqualTo(0);
+        await Assert.That(summary.Passed).IsEqualTo(0);
+        await Assert.That(summary.Failed).IsEqualTo(0);
+        await Assert.That(summary.Skipped).IsEqualTo(0);
+        await Assert.That(summary.Cancelled).IsEqualTo(0);
+        await Assert.That(summary.TimedOut).IsEqualTo(0);
+        await Assert.That(summary.Flaky).IsEqualTo(0);
+    }
+}
+
+public class ReportSummaryTests
+{
+    [Test]
+    public async Task Negative_Count_From_One_Suite_Does_Not_Cancel_Another_Suites_Failure()
+    {
+        var bad = ReportDataJson.TryDeserialize("""{"schemaVersion":1,"assemblyName":"A","summary":{"failed":-1}}""")!;
+        var totals = new ReportSummary { Failed = 1 };
+        totals.Add(bad.Summary);
+
+        await Assert.That(totals.TotalFailed).IsEqualTo(1);
+        await Assert.That(totals.TotalUnsuccessful).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Sums_Saturate_Instead_Of_Overflowing()
+    {
+        var totals = new ReportSummary { Failed = 1, Cancelled = 1 };
+        totals.Add(new ReportSummary { Total = int.MaxValue, Failed = int.MaxValue, TimedOut = int.MaxValue });
+
+        await Assert.That(totals.Total).IsEqualTo(int.MaxValue);
+        await Assert.That(totals.Failed).IsEqualTo(int.MaxValue);
+        await Assert.That(totals.TotalFailed).IsEqualTo(int.MaxValue);
+        await Assert.That(totals.TotalUnsuccessful).IsEqualTo(int.MaxValue);
+    }
+}
+
+public class ReportAggregatorPendingSidecarTests
+{
+    [Test]
+    public async Task Pending_Sidecar_Is_Read_Alongside_Canonical_Sidecar()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "tunit-pending-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var aggregator = CreateAggregator(dir);
+            var failing = TestReportData.Build("Failing.Tests");
+            var passing = TestReportData.Build("Passing.Tests");
+            passing.Summary.Failed = 0;
+            aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(failing), "Suite", "suite");
+            aggregator.WritePendingSidecar(ReportDataJson.SerializeToBytes(passing), "Suite", "suite");
+
+            var suites = aggregator.ReadAllSidecars();
+
+            await Assert.That(suites.Select(s => s.AssemblyName))
+                .IsEquivalentTo(new[] { "Failing.Tests", "Passing.Tests" });
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    [Test]
+    public async Task Exclusion_Covers_Both_Canonical_And_Pending_Sidecars()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "tunit-pending-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            var aggregator = CreateAggregator(dir);
+            aggregator.WriteSidecar(ReportDataJson.SerializeToBytes(TestReportData.Build("A.Tests")), "Suite", "suite");
+            aggregator.WritePendingSidecar(ReportDataJson.SerializeToBytes(TestReportData.Build("B.Tests")), "Suite", "suite");
+
+            var generations = aggregator.ReadSidecarGenerations("Suite", "suite");
+            aggregator.ExcludeSidecarIfGenerationMatches("Suite", "suite", generations);
+
+            await Assert.That(aggregator.ReadAllSidecars()).IsEmpty();
+        }
+        finally
+        {
+            Directory.Delete(dir, recursive: true);
+        }
+    }
+
+    private static ReportAggregator CreateAggregator(string dir)
+        => ReportAggregator.TryCreateFromEnvironment(key => key == "TUNIT_AGGREGATE_DIR" ? dir : null)!;
 }
 
 public class ReportDataMergerTests
