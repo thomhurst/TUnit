@@ -62,14 +62,14 @@ Source generation shifts work from run time to build time: you pay a little up f
 <!-- benchmarks:start -->
 | Scenario | TUnit (AOT) | xUnit v3 (AOT) | TUnit | xUnit v3 | NUnit | MSTest |
 |----------|---|---|---|---|---|---|
-| Data-driven tests | 16.91 ms | 22.10 ms | 311.73 ms | 444.83 ms | 419.76 ms | 331.58 ms |
-| Async-heavy tests | 116.3 ms | 119.8 ms | 366.2 ms | 529.8 ms | 513.7 ms | 457.1 ms |
-| Matrix combinations | 161.5 ms | 266.9 ms | 426.9 ms | 673.4 ms | 1,377.7 ms | 1,296.2 ms |
-| Large suites (scale) | 14.58 ms | 22.85 ms | 336.89 ms | 479.92 ms | 482.72 ms | 327.76 ms |
-| Massive parallelism | 365.4 ms | 675.1 ms | 646.9 ms | 1,113.7 ms | 1,063.4 ms | 2,786.7 ms |
-| Setup/teardown lifecycle | 99.37 ms | 174.36 ms | 413.55 ms | 626.85 ms | 1,033.38 ms | 978.96 ms |
+| Data-driven tests | 14.25 ms | 17.24 ms | 299.49 ms | 443.57 ms | 405.36 ms | 307.09 ms |
+| Async-heavy tests | 115.9 ms | 121.2 ms | 399.5 ms | 535.1 ms | 571.3 ms | 490.7 ms |
+| Matrix combinations | 168.3 ms | 280.5 ms | 505.0 ms | 809.5 ms | 1,498.9 ms | 1,413.0 ms |
+| Large suites (scale) | 13.43 ms | 20.26 ms | 312.49 ms | 455.93 ms | 431.81 ms | 320.07 ms |
+| Massive parallelism | 367.2 ms | 672.5 ms | 676.6 ms | 1,126.3 ms | 1,092.8 ms | 2,808.9 ms |
+| Setup/teardown lifecycle | 97.65 ms | 174.69 ms | 394.82 ms | 606.14 ms | 1,014.65 ms | 905.35 ms |
 
-<sub>Mean wall-clock time to run the same test suite. TUnit (AOT) 1.84.0 · xUnit v3 (AOT) 4.0.3 · TUnit 1.84.0 · xUnit v3 4.0.3 · NUnit 5.0.0 · MSTest 4.5.3. .NET SDK 11.0.100, .NET 11.0.0 (11.0.0, 11.0.26.53018), X64 RyuJIT x86-64-v4. Updated 2026-11-12 — regenerated weekly by the [Speed Comparison workflow](https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml). Full results and methodology: [tunit.dev/docs/benchmarks](https://tunit.dev/docs/benchmarks/).</sub>
+<sub>Mean wall-clock time to run the same test suite. TUnit (AOT) 1.85.0 · xUnit v3 (AOT) 4.0.3 · TUnit 1.85.0 · xUnit v3 4.0.3 · NUnit 5.0.0 · MSTest 4.5.3. .NET SDK 11.0.100, .NET 11.0.0 (11.0.0, 11.0.26.53018), X64 RyuJIT x86-64-v4. Updated 2026-11-15 — regenerated weekly by the [Speed Comparison workflow](https://github.com/thomhurst/TUnit/actions/workflows/speed-comparison.yml). Full results and methodology: [tunit.dev/docs/benchmarks](https://tunit.dev/docs/benchmarks/).</sub>
 <!-- benchmarks:end -->
 
 ## Getting Started
