@@ -17,6 +17,16 @@ public abstract class MutableDictionaryConditionBase<TDictionary, TKey, TValue> 
     }
 
     /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// Keeps the typed <c>And</c>/<c>Or</c> continuations.
+    /// </summary>
+    public new MutableDictionaryConditionBase<TDictionary, TKey, TValue> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
+    /// <summary>
     /// Returns an And continuation that preserves dictionary type, key type, and value type.
     /// </summary>
     public new MutableDictionaryAndContinuation<TDictionary, TKey, TValue> And

@@ -16,6 +16,16 @@ public abstract class AsyncEnumerableConditionBase<TItem> : Assertion<IAsyncEnum
     }
 
     /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// Keeps the typed <c>And</c>/<c>Or</c> continuations.
+    /// </summary>
+    public new AsyncEnumerableConditionBase<TItem> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
+    /// <summary>
     /// Returns an And continuation that preserves the async enumerable type.
     /// </summary>
     public new AsyncEnumerableAndContinuation<TItem> And

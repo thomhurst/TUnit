@@ -16,6 +16,16 @@ public abstract class SetConditionBase<TSet, TItem> : CollectionConditionBase<TS
     {
     }
 
+    /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// Keeps the typed <c>And</c>/<c>Or</c> continuations.
+    /// </summary>
+    public new SetConditionBase<TSet, TItem> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
     protected abstract ISetAdapter<TItem> CreateSetAdapter(TSet value);
 
     /// <summary>

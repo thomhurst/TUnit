@@ -565,7 +565,7 @@ namespace .Collections
     {
         public MemoryHasSingleItemAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory) { }
         public .<TItem> Item { get; }
-        public .<TMemory, TItem> Because(string message) { }
+        public new .<TMemory, TItem> Because(string message) { }
         protected override .<.> CheckAsync(.<TMemory> metadata) { }
         protected override .<TItem> CreateAdapter(TMemory value) { }
         protected override string GetExpectation() { }
@@ -802,7 +802,7 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public CollectionContainsPredicateAssertion(.<TCollection> context, <TItem, bool> predicate) { }
-        public .<TCollection, TItem> Because(string message) { }
+        public new .<TCollection, TItem> Because(string message) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
@@ -1069,7 +1069,7 @@ namespace .Conditions
     {
         public DictionaryContainsKeyAssertion(.<TDictionary> context, TKey expectedKey, .<TKey>? comparer = null) { }
         public new .<TDictionary, TKey, TValue> And { get; }
-        public .<TDictionary, TKey, TValue> Because(string message) { }
+        public new .<TDictionary, TKey, TValue> Because(string message) { }
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
         public .<TDictionary, TKey, TValue> Using(.<TKey> comparer) { }
@@ -1336,7 +1336,7 @@ namespace .Conditions
     {
         public HasSingleItemAssertion(.<TCollection> context) { }
         public .<TItem> Item { get; }
-        public .<TCollection, TItem> Because(string message) { }
+        public new .<TCollection, TItem> Because(string message) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
@@ -1347,7 +1347,7 @@ namespace .Conditions
     {
         public HasSingleItemPredicateAssertion(.<TCollection> context, <TItem, bool> predicate, string predicateDescription) { }
         public .<TItem> Item { get; }
-        public .<TCollection, TItem> Because(string message) { }
+        public new .<TCollection, TItem> Because(string message) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
@@ -1699,7 +1699,7 @@ namespace .Conditions
     {
         public MutableDictionaryContainsKeyAssertion(.<TDictionary> context, TKey expectedKey, .<TKey>? comparer = null) { }
         public new .<TDictionary, TKey, TValue> And { get; }
-        public .<TDictionary, TKey, TValue> Because(string message) { }
+        public new .<TDictionary, TKey, TValue> Because(string message) { }
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
         public .<TDictionary, TKey, TValue> Using(.<TKey> comparer) { }
@@ -7221,6 +7221,7 @@ namespace .Sources
         protected AsyncEnumerableConditionBase(.<.<TItem>> context) { }
         public new .<TItem> And { get; }
         public new .<TItem> Or { get; }
+        public new .<TItem> Because(string message) { }
     }
     public class AsyncFuncAssertion<TValue> : ., .<TValue>, .<TValue>
     {
@@ -7304,6 +7305,7 @@ namespace .Sources
         protected CollectionConditionBase(.<TCollection> context) { }
         public new .<TCollection, TItem> And { get; }
         public new .<TCollection, TItem> Or { get; }
+        public new .<TCollection, TItem> Because(string message) { }
     }
     public class DelegateAssertion : ., .<object?>, .<object?>
     {
@@ -7359,6 +7361,7 @@ namespace .Sources
         protected DictionaryConditionBase(.<TDictionary> context) { }
         public new .<TDictionary, TKey, TValue> And { get; }
         public new .<TDictionary, TKey, TValue> Or { get; }
+        public new .<TDictionary, TKey, TValue> Because(string message) { }
     }
     public class FuncAssertion<TValue> : ., .<TValue>, .<TValue>
     {
@@ -7412,6 +7415,7 @@ namespace .Sources
         protected ListConditionBase(.<TList> context) { }
         public new .<TList, TItem> And { get; }
         public new .<TList, TItem> Or { get; }
+        public new .<TList, TItem> Because(string message) { }
     }
     public class MemoryAndContinuation<TMemory, TItem> : .<TMemory, TItem>
     {
@@ -7456,6 +7460,7 @@ namespace .Sources
         protected MemoryConditionBase(.<TMemory> context) { }
         public new .<TMemory, TItem> And { get; }
         public new .<TMemory, TItem> Or { get; }
+        public new .<TMemory, TItem> Because(string message) { }
         protected abstract .<TItem> CreateAdapter(TMemory value);
     }
     public class MemoryOrContinuation<TMemory, TItem> : .<TMemory, TItem>
@@ -7502,6 +7507,7 @@ namespace .Sources
         protected MutableDictionaryConditionBase(.<TDictionary> context) { }
         public new .<TDictionary, TKey, TValue> And { get; }
         public new .<TDictionary, TKey, TValue> Or { get; }
+        public new .<TDictionary, TKey, TValue> Because(string message) { }
     }
     public abstract class ReadOnlyListAssertionBase<TList, TItem> : .<TList, TItem>
         where TList : .<TItem>
@@ -7525,6 +7531,7 @@ namespace .Sources
         protected ReadOnlyListConditionBase(.<TList> context) { }
         public new .<TList, TItem> And { get; }
         public new .<TList, TItem> Or { get; }
+        public new .<TList, TItem> Because(string message) { }
     }
     public class ReadOnlyMemoryAssertion<TItem> : .<<TItem>, TItem>, ., .<<TItem>>
     {
@@ -7569,6 +7576,7 @@ namespace .Sources
         protected SetConditionBase(.<TSet> context) { }
         public new .<TSet, TItem> And { get; }
         public new .<TSet, TItem> Or { get; }
+        public new .<TSet, TItem> Because(string message) { }
         protected abstract .<TItem> CreateSetAdapter(TSet value);
     }
     public class SetOrContinuation<TSet, TItem> : .<TSet, TItem>

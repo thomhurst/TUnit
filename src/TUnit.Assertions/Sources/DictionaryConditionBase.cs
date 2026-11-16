@@ -17,6 +17,16 @@ public abstract class DictionaryConditionBase<TDictionary, TKey, TValue> : Colle
     }
 
     /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// Keeps the typed <c>And</c>/<c>Or</c> continuations.
+    /// </summary>
+    public new DictionaryConditionBase<TDictionary, TKey, TValue> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
+    /// <summary>
     /// Returns an And continuation that preserves dictionary type, key type, and value type.
     /// Hides the base Assertion.And to return a dictionary-specific continuation.
     /// </summary>

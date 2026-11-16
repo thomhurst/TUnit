@@ -16,6 +16,16 @@ public abstract class ListConditionBase<TList, TItem> : CollectionConditionBase<
     }
 
     /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// Keeps the typed <c>And</c>/<c>Or</c> continuations.
+    /// </summary>
+    public new ListConditionBase<TList, TItem> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
+    /// <summary>
     /// Returns an And continuation that preserves list type and item type.
     /// Overrides the base CollectionAssertionBase.And to return a list-specific continuation.
     /// </summary>

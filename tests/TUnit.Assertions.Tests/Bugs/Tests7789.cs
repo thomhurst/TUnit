@@ -44,6 +44,38 @@ public class Tests7789
         List<int> list = [1];
 
         await Assert.That(list).IsEmpty().Or.Contains(1);
+        await Assert.That(list).Contains(1).Or.IsEmpty();
+    }
+
+    [Test]
+    public async Task And_Fails_When_Second_Assertion_Fails()
+    {
+        List<int> list = [1];
+
+        await Assert.That(async () => await Assert.That(list).Contains(1).And.IsEmpty())
+            .Throws<AssertionException>();
+    }
+
+    [Test]
+    public async Task Because_Keeps_Typed_Continuations()
+    {
+        List<int> list = [1];
+        var dictionary = new Dictionary<string, int> { ["a"] = 1 };
+
+        await Assert.That(list).IsNotEmpty().Because("why").And.HasCount(1);
+        await Assert.That(list).IsNotNull().Because("why").And.HasItemAt(0, 1);
+        await Assert.That(dictionary).IsNotEmpty().Because("why").And.ContainsKey("a");
+    }
+
+    [Test]
+    public async Task Because_Message_Is_Reported()
+    {
+        List<int> list = [1];
+
+        var exception = await Assert.That(async () => await Assert.That(list).IsEmpty().Because("it was cleared").And.HasCount(1))
+            .Throws<AssertionException>();
+
+        await Assert.That(exception!.Message).Contains("because it was cleared");
     }
 
     private static bool IsAssertion(Type type)

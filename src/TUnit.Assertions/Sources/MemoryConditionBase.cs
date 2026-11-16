@@ -17,6 +17,16 @@ public abstract class MemoryConditionBase<TMemory, TItem> : Assertion<TMemory>
     {
     }
 
+    /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// Keeps the typed <c>And</c>/<c>Or</c> continuations.
+    /// </summary>
+    public new MemoryConditionBase<TMemory, TItem> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
     protected abstract ICollectionAdapter<TItem> CreateAdapter(TMemory value);
 
     public new MemoryAndContinuation<TMemory, TItem> And
