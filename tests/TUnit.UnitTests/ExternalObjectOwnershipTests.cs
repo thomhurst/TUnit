@@ -23,7 +23,7 @@ public class ExternalObjectOwnershipTests
 
         await tracker.ReleaseStaticLeaseObjectAsync(service.Child);
         await Task.Yield();
-        CollectOwner(owner);
+        await CollectOwnerAsync(owner);
         await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsFalse();
         await Assert.That(service.Child.DisposeCount).IsEqualTo(0);
     }
@@ -123,7 +123,7 @@ public class ExternalObjectOwnershipTests
         GC.Collect();
         await Assert.That(IsOwnerAlive(owner)).IsTrue();
         await tracker.ReleaseStaticLeaseObjectAsync(instance);
-        CollectOwner(owner);
+        await CollectOwnerAsync(owner);
         await Assert.That(owner.TryGetTarget(out _)).IsFalse();
         await Assert.That(instance.DisposeCount).IsEqualTo(0);
     }
@@ -214,7 +214,7 @@ public class ExternalObjectOwnershipTests
     {
         var service = new Service();
         var reference = RegisterTemporaryOwner(service);
-        CollectOwner(reference);
+        await CollectOwnerAsync(reference);
 
         await Assert.That(ExternalObjectOwnership.IsOwned(service)).IsFalse();
         await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsFalse();
@@ -229,7 +229,7 @@ public class ExternalObjectOwnershipTests
         scopes.RegisterObject(scopes.Register(new Scope()), service);
         scopes.CaptureOwnership();
         var temporary = RegisterTemporaryOwner(service);
-        CollectOwner(temporary);
+        await CollectOwnerAsync(temporary);
 
         await Assert.That(ExternalObjectOwnership.IsOwned(service)).IsTrue();
         await Assert.That(ExternalObjectOwnership.IsOwned(service.Child)).IsTrue();
@@ -248,13 +248,19 @@ public class ExternalObjectOwnershipTests
         return new(owner);
     }
 
-    private static void CollectOwner(WeakReference<DataRowScopeCollection.ScopeOwner> reference)
+    // A worker thread that just completed may still hold the owner in a frame it is unwinding,
+    // so one collection can see a transient root. Retry briefly: a real leak stays reachable.
+    private static async Task CollectOwnerAsync(WeakReference<DataRowScopeCollection.ScopeOwner> reference)
     {
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-        GC.Collect();
-        if (reference.TryGetTarget(out _))
-            throw new InvalidOperationException("The owner is retained by the ownership registry");
+        for (var attempt = 0; attempt < 50; attempt++)
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            if (!IsOwnerAlive(reference)) return;
+            await Task.Delay(20);
+        }
+        throw new InvalidOperationException("The owner is retained by the ownership registry");
     }
 
     [Test]
