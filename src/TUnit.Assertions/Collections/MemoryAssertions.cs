@@ -267,6 +267,16 @@ public class MemoryHasSingleItemAssertion<TMemory, TItem> : MemoryAssertionBase<
     protected override string GetExpectation() => "to have a single item";
 
     /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// The chain keeps <see cref="Item"/>.
+    /// </summary>
+    public new MemoryHasSingleItemAssertion<TMemory, TItem> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
+    /// <summary>
     /// Drills into the single item, allowing assertions to be chained directly against it.
     /// </summary>
     public SingleItemSource<TItem> Item

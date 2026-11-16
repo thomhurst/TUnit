@@ -516,6 +516,16 @@ public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAsse
     }
 
     /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// The chain keeps <see cref="Item"/>, and awaiting it still returns the single item.
+    /// </summary>
+    public new HasSingleItemAssertion<TCollection, TItem> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
+    /// <summary>
     /// Enables await syntax that returns the single item.
     /// This allows both chaining (.And) and item capture (await).
     /// </summary>
@@ -589,6 +599,16 @@ public class HasSingleItemPredicateAssertion<TCollection, TItem> : Sources.Colle
     }
 
     /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// The chain keeps <see cref="Item"/>, and awaiting it still returns the matching item.
+    /// </summary>
+    public new HasSingleItemPredicateAssertion<TCollection, TItem> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
+    /// <summary>
     /// Enables await syntax that returns the matching item.
     /// This allows both chaining (.And) and item capture (await).
     /// </summary>
@@ -643,6 +663,16 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Sources.
     }
 
     protected override string GetExpectation() => "to contain item matching predicate";
+
+    /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// Awaiting it still returns the found item.
+    /// </summary>
+    public new CollectionContainsPredicateAssertion<TCollection, TItem> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
 
     /// <summary>
     /// Enables await syntax that returns the found item.

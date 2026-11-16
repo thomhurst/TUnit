@@ -55,6 +55,16 @@ public sealed class IEnumerableString_ContainsMatch_String_Assertion : Assertion
         return $"to contain '{_needle}'";
     }
 
+    /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// Awaiting it still returns the result value.
+    /// </summary>
+    public new IEnumerableString_ContainsMatch_String_Assertion Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
     public new System.Runtime.CompilerServices.TaskAwaiter<string> GetAwaiter()
     {
         return ExecuteAndReturnResultAsync().GetAwaiter();

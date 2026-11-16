@@ -565,6 +565,7 @@ namespace .Collections
     {
         public MemoryHasSingleItemAssertion(.<TMemory> context, <TMemory, .<TItem>> adapterFactory) { }
         public .<TItem> Item { get; }
+        public .<TMemory, TItem> Because(string message) { }
         protected override .<.> CheckAsync(.<TMemory> metadata) { }
         protected override .<TItem> CreateAdapter(TMemory value) { }
         protected override string GetExpectation() { }
@@ -801,6 +802,7 @@ namespace .Conditions
         where TCollection : .<TItem>
     {
         public CollectionContainsPredicateAssertion(.<TCollection> context, <TItem, bool> predicate) { }
+        public .<TCollection, TItem> Because(string message) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
@@ -1067,6 +1069,7 @@ namespace .Conditions
     {
         public DictionaryContainsKeyAssertion(.<TDictionary> context, TKey expectedKey, .<TKey>? comparer = null) { }
         public new .<TDictionary, TKey, TValue> And { get; }
+        public .<TDictionary, TKey, TValue> Because(string message) { }
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
         public .<TDictionary, TKey, TValue> Using(.<TKey> comparer) { }
@@ -1333,6 +1336,7 @@ namespace .Conditions
     {
         public HasSingleItemAssertion(.<TCollection> context) { }
         public .<TItem> Item { get; }
+        public .<TCollection, TItem> Because(string message) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
@@ -1343,6 +1347,7 @@ namespace .Conditions
     {
         public HasSingleItemPredicateAssertion(.<TCollection> context, <TItem, bool> predicate, string predicateDescription) { }
         public .<TItem> Item { get; }
+        public .<TCollection, TItem> Because(string message) { }
         protected override .<.> CheckAsync(.<TCollection> metadata) { }
         public .<TItem> GetAwaiter() { }
         protected override string GetExpectation() { }
@@ -1694,6 +1699,7 @@ namespace .Conditions
     {
         public MutableDictionaryContainsKeyAssertion(.<TDictionary> context, TKey expectedKey, .<TKey>? comparer = null) { }
         public new .<TDictionary, TKey, TValue> And { get; }
+        public .<TDictionary, TKey, TValue> Because(string message) { }
         protected override .<.> CheckAsync(.<TDictionary> metadata) { }
         protected override string GetExpectation() { }
         public .<TDictionary, TKey, TValue> Using(.<TKey> comparer) { }
@@ -1769,6 +1775,7 @@ namespace .Conditions
     public class NotNullAssertion<TValue> : .<TValue>
     {
         public NotNullAssertion(.<TValue> context) { }
+        public new .<TValue> Because(string message) { }
         protected override .<.> CheckAsync(.<TValue> metadata) { }
         public new .<TValue> GetAwaiter() { }
         protected override string GetExpectation() { }
