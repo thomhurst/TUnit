@@ -10,11 +10,11 @@ namespace TUnit.Assertions.Sources;
 /// Async enumerables are materialized (consumed) once during assertion evaluation.
 /// </summary>
 /// <typeparam name="TItem">The type of items in the async enumerable</typeparam>
-public abstract class AsyncEnumerableAssertionBase<TItem> : Assertion<IAsyncEnumerable<TItem>>, IAssertionSource<IAsyncEnumerable<TItem>>
+public abstract class AsyncEnumerableAssertionBase<TItem> : IAssertionSource<IAsyncEnumerable<TItem>>
 {
     protected AsyncEnumerableAssertionBase(AssertionContext<IAsyncEnumerable<TItem>> context)
-        : base(context)
     {
+        Context = context;
     }
 
     /// <summary>
@@ -26,23 +26,21 @@ public abstract class AsyncEnumerableAssertionBase<TItem> : Assertion<IAsyncEnum
         Assertion<IAsyncEnumerable<TItem>> previousAssertion,
         string combinerExpression,
         CombinerType combinerType)
-        : base(context)
     {
+        Context = context;
         context.ExpressionBuilder.Append(combinerExpression);
         context.SetPendingLink(previousAssertion, combinerType);
     }
 
     /// <summary>
-    /// The assertion context, required by IAssertionSource.
+    /// The assertion context shared by all assertions in this chain.
     /// </summary>
-    public new AssertionContext<IAsyncEnumerable<TItem>> Context => base.Context;
-
-    protected override string GetExpectation() => "async enumerable assertion";
+    public AssertionContext<IAsyncEnumerable<TItem>> Context { get; }
 
     /// <summary>
     /// Asserts that the async enumerable is null while preserving async-enumerable-specific chaining.
     /// </summary>
-    public AsyncEnumerableAssertionBase<TItem> IsNull()
+    public AsyncEnumerableConditionBase<TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
         return new AsyncEnumerableNullAssertion<TItem>(Context, expectNull: true);
@@ -51,7 +49,7 @@ public abstract class AsyncEnumerableAssertionBase<TItem> : Assertion<IAsyncEnum
     /// <summary>
     /// Asserts that the async enumerable is not null while preserving async-enumerable-specific chaining.
     /// </summary>
-    public AsyncEnumerableAssertionBase<TItem> IsNotNull()
+    public AsyncEnumerableConditionBase<TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
         return new AsyncEnumerableNullAssertion<TItem>(Context, expectNull: false);
@@ -175,30 +173,6 @@ public abstract class AsyncEnumerableAssertionBase<TItem> : Assertion<IAsyncEnum
     {
         Context.ExpressionBuilder.Append($".Any({expression})");
         return new AsyncEnumerableAnyAssertion<TItem>(Context, predicate);
-    }
-
-    /// <summary>
-    /// Returns an And continuation that preserves the async enumerable type.
-    /// </summary>
-    public new AsyncEnumerableAndContinuation<TItem> And
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.OrAssertion<IAsyncEnumerable<TItem>>>();
-            return new AsyncEnumerableAndContinuation<TItem>(Context, InternalWrappedExecution ?? this);
-        }
-    }
-
-    /// <summary>
-    /// Returns an Or continuation that preserves the async enumerable type.
-    /// </summary>
-    public new AsyncEnumerableOrContinuation<TItem> Or
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.AndAssertion<IAsyncEnumerable<TItem>>>();
-            return new AsyncEnumerableOrContinuation<TItem>(Context, InternalWrappedExecution ?? this);
-        }
     }
 
     /// <inheritdoc />

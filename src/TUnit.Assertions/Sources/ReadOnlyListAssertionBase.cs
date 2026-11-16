@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using TUnit.Assertions.Chaining;
 using TUnit.Assertions.Conditions;
 using TUnit.Assertions.Core;
 
@@ -36,7 +35,7 @@ public abstract class ReadOnlyListAssertionBase<TList, TItem> : CollectionAssert
     /// <summary>
     /// Asserts that the list is null while preserving read-only-list-specific chaining.
     /// </summary>
-    public new ReadOnlyListAssertionBase<TList, TItem> IsNull()
+    public new ReadOnlyListConditionBase<TList, TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
         return new ReadOnlyListNullAssertion<TList, TItem>(Context, expectNull: true);
@@ -45,7 +44,7 @@ public abstract class ReadOnlyListAssertionBase<TList, TItem> : CollectionAssert
     /// <summary>
     /// Asserts that the list is not null while preserving read-only-list-specific chaining.
     /// </summary>
-    public new ReadOnlyListAssertionBase<TList, TItem> IsNotNull()
+    public new ReadOnlyListConditionBase<TList, TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
         return new ReadOnlyListNullAssertion<TList, TItem>(Context, expectNull: false);
@@ -98,27 +97,4 @@ public abstract class ReadOnlyListAssertionBase<TList, TItem> : CollectionAssert
         return new ReadOnlyListLastItemSource<TList, TItem>(Context);
     }
 
-    /// <summary>
-    /// Returns an And continuation that preserves the read-only list type.
-    /// </summary>
-    public new ReadOnlyListAndContinuation<TList, TItem> And
-    {
-        get
-        {
-            ThrowIfMixingCombiner<OrAssertion<TList>>();
-            return new ReadOnlyListAndContinuation<TList, TItem>(Context, InternalWrappedExecution ?? this);
-        }
-    }
-
-    /// <summary>
-    /// Returns an Or continuation that preserves the read-only list type.
-    /// </summary>
-    public new ReadOnlyListOrContinuation<TList, TItem> Or
-    {
-        get
-        {
-            ThrowIfMixingCombiner<AndAssertion<TList>>();
-            return new ReadOnlyListOrContinuation<TList, TItem>(Context, InternalWrappedExecution ?? this);
-        }
-    }
 }

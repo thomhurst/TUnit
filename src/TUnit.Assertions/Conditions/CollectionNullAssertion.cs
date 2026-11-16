@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Conditions;
 /// Extends CollectionAssertionBase to ensure .And and .Or return collection-specific continuations.
 /// </summary>
 internal class CollectionNullAssertion<TCollection, TItem>(AssertionContext<TCollection> context, bool expectNull)
-    : CollectionAssertionBase<TCollection, TItem>(context)
+    : CollectionConditionBase<TCollection, TItem>(context)
     where TCollection : IEnumerable<TItem>
 {
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TCollection> metadata)
@@ -20,7 +20,7 @@ internal class CollectionNullAssertion<TCollection, TItem>(AssertionContext<TCol
 }
 
 internal class ListNullAssertion<TList, TItem>(AssertionContext<TList> context, bool expectNull)
-    : ListAssertionBase<TList, TItem>(context)
+    : ListConditionBase<TList, TItem>(context)
     where TList : IList<TItem>
 {
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TList> metadata)
@@ -30,7 +30,7 @@ internal class ListNullAssertion<TList, TItem>(AssertionContext<TList> context, 
 }
 
 internal class ReadOnlyListNullAssertion<TList, TItem>(AssertionContext<TList> context, bool expectNull)
-    : ReadOnlyListAssertionBase<TList, TItem>(context)
+    : ReadOnlyListConditionBase<TList, TItem>(context)
     where TList : IReadOnlyList<TItem>
 {
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TList> metadata)
@@ -40,7 +40,7 @@ internal class ReadOnlyListNullAssertion<TList, TItem>(AssertionContext<TList> c
 }
 
 internal class DictionaryNullAssertion<TDictionary, TKey, TValue>(AssertionContext<TDictionary> context, bool expectNull)
-    : DictionaryAssertionBase<TDictionary, TKey, TValue>(context)
+    : DictionaryConditionBase<TDictionary, TKey, TValue>(context)
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -51,7 +51,7 @@ internal class DictionaryNullAssertion<TDictionary, TKey, TValue>(AssertionConte
 }
 
 internal class MutableDictionaryNullAssertion<TDictionary, TKey, TValue>(AssertionContext<TDictionary> context, bool expectNull)
-    : MutableDictionaryAssertionBase<TDictionary, TKey, TValue>(context)
+    : MutableDictionaryConditionBase<TDictionary, TKey, TValue>(context)
     where TDictionary : IDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -65,7 +65,7 @@ internal class SetNullAssertion<TSet, TItem>(
     AssertionContext<TSet> context,
     Func<TSet, ISetAdapter<TItem>> adapterFactory,
     bool expectNull)
-    : SetAssertionBase<TSet, TItem>(context)
+    : SetConditionBase<TSet, TItem>(context)
     where TSet : IEnumerable<TItem>
 {
     // adapterFactory is never invoked on the null-check path (the set is never materialized),

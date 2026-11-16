@@ -17,11 +17,13 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 /// <typeparam name="TMemory">The memory type (Memory&lt;TItem&gt; or ReadOnlyMemory&lt;TItem&gt;).</typeparam>
 /// <typeparam name="TItem">The type of items in the memory.</typeparam>
-public abstract class MemoryAssertionBase<TMemory, TItem> : Assertion<TMemory>, IAssertionSource<TMemory>
+public abstract class MemoryAssertionBase<TMemory, TItem> : IAssertionSource<TMemory>
 {
     /// <summary>
-    /// Explicit implementation of IAssertionSource.Context to expose the context publicly.
+    /// The assertion context shared by all assertions in this chain.
     /// </summary>
+    protected internal AssertionContext<TMemory> Context { get; }
+
     AssertionContext<TMemory> IAssertionSource<TMemory>.Context => Context;
 
     /// <summary>
@@ -30,8 +32,8 @@ public abstract class MemoryAssertionBase<TMemory, TItem> : Assertion<TMemory>, 
     protected abstract ICollectionAdapter<TItem> CreateAdapter(TMemory value);
 
     protected MemoryAssertionBase(AssertionContext<TMemory> context)
-        : base(context)
     {
+        Context = context;
     }
 
     /// <summary>
@@ -42,13 +44,11 @@ public abstract class MemoryAssertionBase<TMemory, TItem> : Assertion<TMemory>, 
         Assertion<TMemory> previousAssertion,
         string combinerExpression,
         CombinerType combinerType)
-        : base(context)
     {
+        Context = context;
         context.ExpressionBuilder.Append(combinerExpression);
         context.SetPendingLink(previousAssertion, combinerType);
     }
-
-    protected override string GetExpectation() => "memory assertion";
 
     // Type assertions
     public TypeOfAssertion<TMemory, TExpected> IsTypeOf<TExpected>()
@@ -283,23 +283,6 @@ public abstract class MemoryAssertionBase<TMemory, TItem> : Assertion<TMemory>, 
     }
 
     // And/Or continuations for chaining
-    public new MemoryAndContinuation<TMemory, TItem> And
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.OrAssertion<TMemory>>();
-            return new MemoryAndContinuation<TMemory, TItem>(Context, InternalWrappedExecution ?? this, CreateAdapter);
-        }
-    }
-
-    public new MemoryOrContinuation<TMemory, TItem> Or
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.AndAssertion<TMemory>>();
-            return new MemoryOrContinuation<TMemory, TItem>(Context, InternalWrappedExecution ?? this, CreateAdapter);
-        }
-    }
 }
 
 /// <summary>

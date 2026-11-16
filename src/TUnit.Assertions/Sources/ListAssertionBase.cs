@@ -34,7 +34,7 @@ public abstract class ListAssertionBase<TList, TItem> : CollectionAssertionBase<
     /// <summary>
     /// Asserts that the list is null while preserving list-specific chaining.
     /// </summary>
-    public new ListAssertionBase<TList, TItem> IsNull()
+    public new ListConditionBase<TList, TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
         return new ListNullAssertion<TList, TItem>(Context, expectNull: true);
@@ -43,7 +43,7 @@ public abstract class ListAssertionBase<TList, TItem> : CollectionAssertionBase<
     /// <summary>
     /// Asserts that the list is not null while preserving list-specific chaining.
     /// </summary>
-    public new ListAssertionBase<TList, TItem> IsNotNull()
+    public new ListConditionBase<TList, TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
         return new ListNullAssertion<TList, TItem>(Context, expectNull: false);
@@ -95,29 +95,4 @@ public abstract class ListAssertionBase<TList, TItem> : CollectionAssertionBase<
         return new ListLastItemSource<TList, TItem>(Context);
     }
 
-    /// <summary>
-    /// Returns an And continuation that preserves list type and item type.
-    /// Overrides the base CollectionAssertionBase.And to return a list-specific continuation.
-    /// </summary>
-    public new ListAndContinuation<TList, TItem> And
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.OrAssertion<TList>>();
-            return new ListAndContinuation<TList, TItem>(Context, InternalWrappedExecution ?? this);
-        }
-    }
-
-    /// <summary>
-    /// Returns an Or continuation that preserves list type and item type.
-    /// Overrides the base CollectionAssertionBase.Or to return a list-specific continuation.
-    /// </summary>
-    public new ListOrContinuation<TList, TItem> Or
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.AndAssertion<TList>>();
-            return new ListOrContinuation<TList, TItem>(Context, InternalWrappedExecution ?? this);
-        }
-    }
 }

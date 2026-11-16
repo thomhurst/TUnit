@@ -7,23 +7,25 @@ using TUnit.Assertions.Core;
 namespace TUnit.Assertions.Sources;
 
 /// <summary>
-/// Base class for all collection assertions that preserves type through And/Or chains.
+/// Base class for collection assertion sources and their And/Or continuations.
+/// Checks derive from the matching ConditionBase, so they cannot start a new assertion without And/Or.
 /// Implements IAssertionSource&lt;TCollection&gt; to enable all collection and value extension methods.
 /// All collection-specific operations (Contains, IsInOrder, etc.) are provided as instance methods.
 /// </summary>
 /// <typeparam name="TCollection">The concrete collection type (e.g., IEnumerable&lt;T&gt;, IReadOnlyDictionary&lt;K,V&gt;)</typeparam>
 /// <typeparam name="TItem">The type of items in the collection</typeparam>
-public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TCollection>, IAssertionSource<TCollection>
+public abstract class CollectionAssertionBase<TCollection, TItem> : IAssertionSource<TCollection>
     where TCollection : IEnumerable<TItem>
 {
     /// <summary>
-    /// Explicit implementation of IAssertionSource.Context to expose the context publicly.
+    /// The assertion context shared by all assertions in this chain.
     /// </summary>
-    AssertionContext<TCollection> IAssertionSource<TCollection>.Context => Context;
+    protected internal AssertionContext<TCollection> Context { get; }
 
+    AssertionContext<TCollection> IAssertionSource<TCollection>.Context => Context;
     protected CollectionAssertionBase(AssertionContext<TCollection> context)
-        : base(context)
     {
+        Context = context;
     }
 
     /// <summary>
@@ -36,23 +38,21 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
         Assertion<TCollection> previousAssertion,
         string combinerExpression,
         CombinerType combinerType)
-        : base(context)
     {
+        Context = context;
         context.ExpressionBuilder.Append(combinerExpression);
         context.SetPendingLink(previousAssertion, combinerType);
     }
 
-    protected override string GetExpectation() => "collection assertion";
-
     // Subclasses hide IsNull/IsNotNull with `public new` to narrow the return type to their own
-    // base (e.g. ListAssertionBase). This is the same idiom used by And/Or below; virtual+override
+    // base (e.g. ListAssertionBase). This is the same idiom the condition bases use for And/Or; virtual+override
     // with covariant returns is avoided because covariant returns are not honored at runtime on the
     // netstandard2.0 target consumed by .NET Framework.
 
     /// <summary>
     /// Asserts that the collection is null while preserving collection-specific chaining.
     /// </summary>
-    public CollectionAssertionBase<TCollection, TItem> IsNull()
+    public CollectionConditionBase<TCollection, TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
         return new CollectionNullAssertion<TCollection, TItem>(Context, expectNull: true);
@@ -61,7 +61,7 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
     /// <summary>
     /// Asserts that the collection is not null while preserving collection-specific chaining.
     /// </summary>
-    public CollectionAssertionBase<TCollection, TItem> IsNotNull()
+    public CollectionConditionBase<TCollection, TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
         return new CollectionNullAssertion<TCollection, TItem>(Context, expectNull: false);
@@ -504,29 +504,4 @@ public abstract class CollectionAssertionBase<TCollection, TItem> : Assertion<TC
         return new CollectionIsInDescendingOrderAssertion<TCollection, TItem>(Context);
     }
 
-    /// <summary>
-    /// Returns an And continuation that preserves collection type and item type.
-    /// Overrides the base Assertion.And to return a collection-specific continuation.
-    /// </summary>
-    public new CollectionAndContinuation<TCollection, TItem> And
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.OrAssertion<TCollection>>();
-            return new CollectionAndContinuation<TCollection, TItem>(Context, InternalWrappedExecution ?? this);
-        }
-    }
-
-    /// <summary>
-    /// Returns an Or continuation that preserves collection type and item type.
-    /// Overrides the base Assertion.Or to return a collection-specific continuation.
-    /// </summary>
-    public new CollectionOrContinuation<TCollection, TItem> Or
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.AndAssertion<TCollection>>();
-            return new CollectionOrContinuation<TCollection, TItem>(Context, InternalWrappedExecution ?? this);
-        }
-    }
 }

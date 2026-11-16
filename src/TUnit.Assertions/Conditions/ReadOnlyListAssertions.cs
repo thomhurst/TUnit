@@ -8,7 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that the item at the specified index equals the expected value.
 /// </summary>
-public class ReadOnlyListHasItemAtAssertion<TList, TItem> : ReadOnlyListAssertionBase<TList, TItem>
+public class ReadOnlyListHasItemAtAssertion<TList, TItem> : ReadOnlyListConditionBase<TList, TItem>
     where TList : IReadOnlyList<TItem>
 {
     private readonly int _index;
@@ -354,7 +354,7 @@ public class ReadOnlyListLastItemSource<TList, TItem> : IAssertionSource<TItem>
 /// <summary>
 /// Asserts that the item at a specific index equals the expected value.
 /// </summary>
-public class ReadOnlyListItemAtEqualsAssertion<TList, TItem> : ReadOnlyListAssertionBase<TList, TItem>
+public class ReadOnlyListItemAtEqualsAssertion<TList, TItem> : ReadOnlyListConditionBase<TList, TItem>
     where TList : IReadOnlyList<TItem>
 {
     private readonly int _index;
@@ -418,7 +418,7 @@ public class ReadOnlyListItemAtEqualsAssertion<TList, TItem> : ReadOnlyListAsser
 /// <summary>
 /// Asserts that the item at a specific index is null or not null.
 /// </summary>
-public class ReadOnlyListItemAtNullAssertion<TList, TItem> : ReadOnlyListAssertionBase<TList, TItem>
+public class ReadOnlyListItemAtNullAssertion<TList, TItem> : ReadOnlyListConditionBase<TList, TItem>
     where TList : IReadOnlyList<TItem>
 {
     private readonly int _index;
@@ -478,7 +478,7 @@ public class ReadOnlyListItemAtNullAssertion<TList, TItem> : ReadOnlyListAsserti
 /// <summary>
 /// Asserts that the item at a specific index satisfies a custom assertion.
 /// </summary>
-public class ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> : ReadOnlyListAssertionBase<TList, TItem>
+public class ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> : ReadOnlyListConditionBase<TList, TItem>
     where TList : IReadOnlyList<TItem>
 {
     private readonly int _index;
@@ -555,7 +555,7 @@ public class ReadOnlyListItemAtSatisfiesAssertion<TList, TItem> : ReadOnlyListAs
 /// <summary>
 /// Asserts that the last item equals the expected value.
 /// </summary>
-public class ReadOnlyListLastItemEqualsAssertion<TList, TItem> : ReadOnlyListAssertionBase<TList, TItem>
+public class ReadOnlyListLastItemEqualsAssertion<TList, TItem> : ReadOnlyListConditionBase<TList, TItem>
     where TList : IReadOnlyList<TItem>
 {
     private readonly TItem _expected;
@@ -615,7 +615,7 @@ public class ReadOnlyListLastItemEqualsAssertion<TList, TItem> : ReadOnlyListAss
 /// <summary>
 /// Asserts that the last item is null or not null.
 /// </summary>
-public class ReadOnlyListLastItemNullAssertion<TList, TItem> : ReadOnlyListAssertionBase<TList, TItem>
+public class ReadOnlyListLastItemNullAssertion<TList, TItem> : ReadOnlyListConditionBase<TList, TItem>
     where TList : IReadOnlyList<TItem>
 {
     private readonly bool _expectNull;
@@ -671,7 +671,7 @@ public class ReadOnlyListLastItemNullAssertion<TList, TItem> : ReadOnlyListAsser
 /// <summary>
 /// Asserts that the last item satisfies a custom assertion.
 /// </summary>
-public class ReadOnlyListLastItemSatisfiesAssertion<TList, TItem> : ReadOnlyListAssertionBase<TList, TItem>
+public class ReadOnlyListLastItemSatisfiesAssertion<TList, TItem> : ReadOnlyListConditionBase<TList, TItem>
     where TList : IReadOnlyList<TItem>
 {
     private readonly Func<TItem, IAssertion?> _assertion;

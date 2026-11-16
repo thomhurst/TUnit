@@ -1822,7 +1822,7 @@ public static partial class AssertionExtensions
         string? expression)
         where TCollection : IEnumerable<TItem>
     {
-        var context = source.InternalContext;
+        var context = source.Context;
         context.ExpressionBuilder.Append($".Count({expression})");
         return new CollectionCountSource<TCollection, TItem>(context, itemAssertionFactory);
     }

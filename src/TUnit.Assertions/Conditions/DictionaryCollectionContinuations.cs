@@ -10,7 +10,7 @@ namespace TUnit.Assertions.Conditions;
 /// And/Or pending link that must stay wired to this (dictionary-typed) assertion.
 /// </summary>
 internal sealed class DictionaryDelegatingAssertion<TDictionary, TKey, TValue>
-    : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+    : Sources.DictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -32,7 +32,7 @@ internal sealed class DictionaryDelegatingAssertion<TDictionary, TKey, TValue>
 /// Mutable-dictionary twin of <see cref="DictionaryDelegatingAssertion{TDictionary,TKey,TValue}"/>.
 /// </summary>
 internal sealed class MutableDictionaryDelegatingAssertion<TDictionary, TKey, TValue>
-    : Sources.MutableDictionaryAssertionBase<TDictionary, TKey, TValue>
+    : Sources.MutableDictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -65,7 +65,7 @@ public sealed class DictionaryCountSource<TDictionary, TKey, TValue>
 
     internal DictionaryCountSource(AssertionContext<TDictionary> context) => _context = context;
 
-    private Sources.DictionaryAssertionBase<TDictionary, TKey, TValue> Compare(
+    private Sources.DictionaryConditionBase<TDictionary, TKey, TValue> Compare(
         int expected, CountComparison comparison, string expressionFragment)
     {
         _context.ExpressionBuilder.Append(expressionFragment);
@@ -74,34 +74,34 @@ public sealed class DictionaryCountSource<TDictionary, TKey, TValue>
         return new DictionaryDelegatingAssertion<TDictionary, TKey, TValue>(_context, inner);
     }
 
-    public Sources.DictionaryAssertionBase<TDictionary, TKey, TValue> IsEqualTo(
+    public Sources.DictionaryConditionBase<TDictionary, TKey, TValue> IsEqualTo(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.Equal, $".IsEqualTo({expression})");
 
-    public Sources.DictionaryAssertionBase<TDictionary, TKey, TValue> IsNotEqualTo(
+    public Sources.DictionaryConditionBase<TDictionary, TKey, TValue> IsNotEqualTo(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.NotEqual, $".IsNotEqualTo({expression})");
 
-    public Sources.DictionaryAssertionBase<TDictionary, TKey, TValue> IsGreaterThan(
+    public Sources.DictionaryConditionBase<TDictionary, TKey, TValue> IsGreaterThan(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.GreaterThan, $".IsGreaterThan({expression})");
 
-    public Sources.DictionaryAssertionBase<TDictionary, TKey, TValue> IsGreaterThanOrEqualTo(
+    public Sources.DictionaryConditionBase<TDictionary, TKey, TValue> IsGreaterThanOrEqualTo(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.GreaterThanOrEqual, $".IsGreaterThanOrEqualTo({expression})");
 
-    public Sources.DictionaryAssertionBase<TDictionary, TKey, TValue> IsLessThan(
+    public Sources.DictionaryConditionBase<TDictionary, TKey, TValue> IsLessThan(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.LessThan, $".IsLessThan({expression})");
 
-    public Sources.DictionaryAssertionBase<TDictionary, TKey, TValue> IsLessThanOrEqualTo(
+    public Sources.DictionaryConditionBase<TDictionary, TKey, TValue> IsLessThanOrEqualTo(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.LessThanOrEqual, $".IsLessThanOrEqualTo({expression})");
 
-    public Sources.DictionaryAssertionBase<TDictionary, TKey, TValue> IsZero()
+    public Sources.DictionaryConditionBase<TDictionary, TKey, TValue> IsZero()
         => Compare(0, CountComparison.Equal, ".IsZero()");
 
-    public Sources.DictionaryAssertionBase<TDictionary, TKey, TValue> IsPositive()
+    public Sources.DictionaryConditionBase<TDictionary, TKey, TValue> IsPositive()
         => Compare(0, CountComparison.GreaterThan, ".IsPositive()");
 }
 
@@ -117,7 +117,7 @@ public sealed class MutableDictionaryCountSource<TDictionary, TKey, TValue>
 
     internal MutableDictionaryCountSource(AssertionContext<TDictionary> context) => _context = context;
 
-    private Sources.MutableDictionaryAssertionBase<TDictionary, TKey, TValue> Compare(
+    private Sources.MutableDictionaryConditionBase<TDictionary, TKey, TValue> Compare(
         int expected, CountComparison comparison, string expressionFragment)
     {
         _context.ExpressionBuilder.Append(expressionFragment);
@@ -126,33 +126,33 @@ public sealed class MutableDictionaryCountSource<TDictionary, TKey, TValue>
         return new MutableDictionaryDelegatingAssertion<TDictionary, TKey, TValue>(_context, inner);
     }
 
-    public Sources.MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsEqualTo(
+    public Sources.MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsEqualTo(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.Equal, $".IsEqualTo({expression})");
 
-    public Sources.MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNotEqualTo(
+    public Sources.MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsNotEqualTo(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.NotEqual, $".IsNotEqualTo({expression})");
 
-    public Sources.MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsGreaterThan(
+    public Sources.MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsGreaterThan(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.GreaterThan, $".IsGreaterThan({expression})");
 
-    public Sources.MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsGreaterThanOrEqualTo(
+    public Sources.MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsGreaterThanOrEqualTo(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.GreaterThanOrEqual, $".IsGreaterThanOrEqualTo({expression})");
 
-    public Sources.MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsLessThan(
+    public Sources.MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsLessThan(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.LessThan, $".IsLessThan({expression})");
 
-    public Sources.MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsLessThanOrEqualTo(
+    public Sources.MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsLessThanOrEqualTo(
         int expected, [CallerArgumentExpression(nameof(expected))] string? expression = null)
         => Compare(expected, CountComparison.LessThanOrEqual, $".IsLessThanOrEqualTo({expression})");
 
-    public Sources.MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsZero()
+    public Sources.MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsZero()
         => Compare(0, CountComparison.Equal, ".IsZero()");
 
-    public Sources.MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsPositive()
+    public Sources.MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsPositive()
         => Compare(0, CountComparison.GreaterThan, ".IsPositive()");
 }
