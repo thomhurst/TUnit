@@ -3228,6 +3228,14 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine(",");
             }
         }
+        else if (DataSourceRowMetadataReader.TryCreate(attrClass, compilationContext.Compilation) is { } rowMetadataReader)
+        {
+            // The engine reads these properties by name; a typed read keeps working when the trimmer drops
+            // the getters that nothing else calls (#7782).
+            writer.Append("global::TUnit.Core.Helpers.DataSourceRowMetadataReaders.Register(");
+            compilationContext.AttributeWriter.WriteAttribute(writer, attr);
+            writer.AppendLine($", {rowMetadataReader}),");
+        }
         else
         {
             compilationContext.AttributeWriter.WriteAttribute(writer, attr);

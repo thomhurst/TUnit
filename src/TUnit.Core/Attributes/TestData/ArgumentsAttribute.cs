@@ -37,7 +37,7 @@ namespace TUnit.Core;
 /// </example>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
-public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestRegisteredEventReceiver
+public sealed class ArgumentsAttribute : Attribute, IDataSourceAttribute, ITestRegisteredEventReceiver, IDataSourceRowMetadata
 {
     /// <summary>
     /// Gets the array of argument values to pass to the test method.
@@ -157,7 +157,7 @@ public ValueTask OnTestRegistered(TestRegisteredContext context)
 /// </code>
 /// </example>
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = true)]
-public sealed class ArgumentsAttribute<T>(T value) : TypedDataSourceAttribute<T>, ITestRegisteredEventReceiver
+public sealed class ArgumentsAttribute<T>(T value) : TypedDataSourceAttribute<T>, ITestRegisteredEventReceiver, IDataSourceRowMetadata
 {
     /// <summary>
     /// Gets or sets a reason to skip this specific test case.

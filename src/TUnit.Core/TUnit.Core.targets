@@ -23,6 +23,15 @@
         </ItemGroup>
     </Target>
 
+    <!--
+        TUnitReflectionFallback=false stops source-generated mode reflecting over types the source generator emitted
+        no metadata for (see TUnit.Core.ReflectionFallback), and lets the trimmer remove that code. For hosts
+        without run-time member metadata. Unset, the fallback stays on.
+    -->
+    <ItemGroup Condition="'$(TUnitReflectionFallback)' != ''">
+        <RuntimeHostConfigurationOption Include="TUnit.ReflectionFallback" Value="$(TUnitReflectionFallback)" Trim="true" />
+    </ItemGroup>
+
     <!-- Only root optional F# async support when the consuming application actually publishes it.
          A string-based DynamicDependency warns about missing FSharp.Core in C# applications. -->
     <Target Name="_TUnitPreserveFSharpAsync"

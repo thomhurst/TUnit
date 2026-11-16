@@ -2341,6 +2341,14 @@ namespace .Helpers
         public static object?[] UnwrapTuple<T1, T2, T3, T4, T5, T6, T7>(<T1, T2, T3, T4, T5, T6, T7> tuple) { }
         public static object?[] UnwrapTupleAot(object? value) { }
     }
+    public static class DataSourceRowMetadataReaders
+    {
+        public static T Register<T>(T dataSource, [.(new string[] {
+                "DisplayName",
+                "Skip",
+                "Categories"})] <T, <string?, string?, string[]?>> reader)
+            where T :  class, .IDataSourceAttribute { }
+    }
     public static class DecimalParsingHelper
     {
         public static decimal ParseDecimalWithCultureFallback(string value) { }

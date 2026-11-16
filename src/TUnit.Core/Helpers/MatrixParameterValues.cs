@@ -45,8 +45,12 @@ internal static class MatrixParameterValues
 
     public static object?[][] GetExclusions(DataGeneratorMetadata dataGeneratorMetadata)
     {
-        var attributes = dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
-            ? dataGeneratorMetadata.TestInformation!.GetCustomAttributes()
+        // A test's method, class and assembly attributes are the ones the builder already created for it (from
+        // generated metadata in source-generated mode), so its exclusions need no second attribute query.
+        // Constructor rows take only the class's own exclusions, which that combined array cannot tell apart.
+        IEnumerable<Attribute> attributes = dataGeneratorMetadata.Type == DataGeneratorType.TestParameters
+            ? dataGeneratorMetadata.TestBuilderContext.Current.InitializedAttributes
+                ?? dataGeneratorMetadata.TestInformation!.GetCustomAttributes()
             : dataGeneratorMetadata.TestInformation!.Class.Type.GetCustomAttributesSafe();
 
         List<object?[]>? exclusions = null;

@@ -45,10 +45,10 @@ internal class ClassDataSources
         return sharedType switch
         {
             SharedType.None => Create<T>(),
-            SharedType.PerTestSession => (T) TestDataContainer.GetGlobalInstance(typeof(T), _ => Create(typeof(T)))!,
-            SharedType.PerClass => (T) TestDataContainer.GetInstanceForClass(testClassType, typeof(T), _ => Create(typeof(T)))!,
-            SharedType.Keyed => (T) TestDataContainer.GetInstanceForKey(key, typeof(T), _ => CreateWithKey(typeof(T), key))!,
-            SharedType.PerAssembly => (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), _ => Create(typeof(T)))!,
+            SharedType.PerTestSession => (T) TestDataContainer.GetGlobalInstance(typeof(T), static _ => Create<T>()!)!,
+            SharedType.PerClass => (T) TestDataContainer.GetInstanceForClass(testClassType, typeof(T), static _ => Create<T>()!)!,
+            SharedType.Keyed => (T) TestDataContainer.GetInstanceForKey(key, typeof(T), _ => CreateWithKey<T>(key))!,
+            SharedType.PerAssembly => (T) TestDataContainer.GetInstanceForAssembly(testClassType.Assembly, typeof(T), static _ => Create<T>()!)!,
             _ => throw new ArgumentOutOfRangeException()
         };
     }
@@ -68,8 +68,16 @@ internal class ClassDataSources
 
     private static object CreateWithKey([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type type, string key)
     {
-        var instance = Create(type);
+        return SetKey(Create(type), key);
+    }
 
+    private static object CreateWithKey<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(string key)
+    {
+        return SetKey(Create<T>(), key);
+    }
+
+    private static object SetKey(object instance, string key)
+    {
         if (instance is IKeyedDataSource keyed)
         {
             keyed.Key = key;
@@ -81,7 +89,16 @@ internal class ClassDataSources
     [return: NotNull]
     private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>()
     {
-        return ((T) Create(typeof(T)))!;
+        try
+        {
+            // The compiler resolves T's constructor, so nothing depends on run-time constructor metadata.
+            return Activator.CreateInstance<T>()!;
+        }
+        catch (TargetInvocationException targetInvocationException) when (targetInvocationException.InnerException is { } innerException)
+        {
+            ExceptionDispatchInfo.Capture(innerException).Throw();
+            throw;
+        }
     }
 
     private static object Create([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] Type type)
