@@ -186,20 +186,6 @@ Then publish your project:
 dotnet publish -c Release
 ```
 
-### Reflection Fallback in Source Generation Mode
-
-In source generation mode TUnit uses generated metadata wherever the generator saw the type. For types it did not see, such as an object returned from a method data source whose class is declared in a library built without TUnit, it falls back to reflection to find injectable properties and `IAsyncInitializer` properties.
-
-A host that keeps no run-time member metadata can turn the fallback off, so that only generated metadata is used and the trimmer can remove the reflection code:
-
-```xml
-<PropertyGroup>
-    <TUnitReflectionFallback>false</TUnitReflectionFallback>
-</PropertyGroup>
-```
-
-This sets the `TUnit.ReflectionFallback` AppContext switch. It has no effect in reflection mode.
-
 ## Configuration
 
 TUnit uses optimized defaults for all features. The only configurable option is verbose diagnostics for troubleshooting source generation issues:

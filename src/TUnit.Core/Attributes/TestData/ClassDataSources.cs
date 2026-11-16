@@ -71,7 +71,7 @@ internal class ClassDataSources
         return SetKey(Create(type), key);
     }
 
-    private static object CreateWithKey<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(string key)
+    private static object CreateWithKey<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>(string key)
     {
         return SetKey(Create<T>(), key);
     }
@@ -87,7 +87,7 @@ internal class ClassDataSources
     }
 
     [return: NotNull]
-    private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>()
+    private static T Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T>()
     {
         try
         {

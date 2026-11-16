@@ -21,11 +21,6 @@ internal static class DataSourceMetadataExtractor
     /// attributes through the readers the source generator registers. Reflection is the fallback for reflection
     /// mode and for attribute types the generator did not see.
     /// </remarks>
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(ArgumentsAttribute))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, "TUnit.Core.ArgumentsAttribute`1", "TUnit.Core")]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(MethodDataSourceAttribute))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(ClassDataSourceAttribute<>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(MatrixAttribute))]
     [UnconditionalSuppressMessage("Trimming", "IL2075:Reflection on unknown types",
         Justification = "Fallback only: source-generated mode reads through generated readers, and a trimmed getter is skipped.")]
     public static TestDataRowMetadata? ExtractFromAttribute(IDataSourceAttribute? dataSource)
@@ -58,11 +53,6 @@ internal static class DataSourceMetadataExtractor
         if (DataSourceRowMetadataReaders.TryRead(dataSource, out var generatedMetadata))
         {
             return generatedMetadata;
-        }
-
-        if (SourceRegistrar.IsEnabled && !ReflectionFallback.IsSupported)
-        {
-            return null;
         }
 
         // Property lookups are cached per type: this runs for every generated test row.

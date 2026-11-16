@@ -407,10 +407,6 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         ClearDiscoveryErrors();
     }
 
-    // Reflection mode always reflects. Source-generated mode reflects over a type the generator registered
-    // nothing for unless the host turned the fallback off.
-    private static bool CanReflectOverUnregisteredTypes => !SourceRegistrar.IsEnabled || ReflectionFallback.IsSupported;
-
     // Memoized per type: whether DiscoverNestedObjects could find anything beneath an instance.
     private static readonly ConcurrentDictionary<Type, bool> MayHaveNestedObjectsCache = new();
 
@@ -439,11 +435,6 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
             if (flattened != null)
             {
                 return flattened.Length > 0;
-            }
-
-            if (!CanReflectOverUnregisteredTypes)
-            {
-                return false;
             }
 
             foreach (var property in PropertyCacheManager.GetCachedProperties(t))
@@ -644,11 +635,6 @@ internal sealed class ObjectGraphDiscoverer : IObjectGraphTracker
         }
 
         // No source-gen registration anywhere in the hierarchy → fall back to reflection.
-        if (!CanReflectOverUnregisteredTypes)
-        {
-            return;
-        }
-
         TraverseInitializerPropertiesViaReflection(obj, type, tryAdd, recurse, currentDepth, cancellationToken, retainPartialGraphOnError);
     }
 

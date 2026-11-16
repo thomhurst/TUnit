@@ -24,7 +24,7 @@ internal static class DataSourceRowMetadataReader
             return null;
         }
 
-        if (!CanEmitRead(displayName, compilation) || !CanEmitRead(skip, compilation) || !CanEmitRead(categories, compilation))
+        if (!CanCallGetter(displayName, compilation) || !CanCallGetter(skip, compilation) || !CanCallGetter(categories, compilation))
         {
             return null;
         }
@@ -32,15 +32,14 @@ internal static class DataSourceRowMetadataReader
         return $"static a => ({Read(attributeClass, displayName, "string")}, {Read(attributeClass, skip, "string")}, {Read(attributeClass, categories, "string[]")})";
     }
 
-    // Mirrors Type.GetProperty(name): the most derived public property of that name.
+    // Mirrors Type.GetProperty(name) for instance properties: the most derived public one of that name.
     private static IPropertySymbol? FindProperty(INamedTypeSymbol attributeClass, string name)
     {
         for (var type = attributeClass; type is not null; type = type.BaseType)
         {
             foreach (var member in type.GetMembers(name))
             {
-                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsIndexer: false } property
-                    && (!property.IsStatic || SymbolEqualityComparer.Default.Equals(type, attributeClass)))
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsIndexer: false, IsStatic: false } property)
                 {
                     return property;
                 }
@@ -50,34 +49,28 @@ internal static class DataSourceRowMetadataReader
         return null;
     }
 
-    // False only when reflection could read a value that generated code cannot express: a getter generated code
-    // cannot call, or a type that cannot be converted to object. A property without a getter reads as null,
-    // as the reflection fallback does.
-    private static bool CanEmitRead(IPropertySymbol? property, Compilation compilation)
+    // False only when reflection could read a getter that generated code cannot call. A property without a
+    // getter reads as null, as the reflection fallback does.
+    private static bool CanCallGetter(IPropertySymbol? property, Compilation compilation)
     {
-        if (property?.GetMethod is not { } getter)
-        {
-            return true;
-        }
-
-        return compilation.IsSymbolAccessibleWithin(getter, compilation.Assembly)
-            && property.Type is { IsRefLikeType: false, TypeKind: not (TypeKind.Pointer or TypeKind.FunctionPointer) };
+        return property?.GetMethod is not { } getter
+            || compilation.IsSymbolAccessibleWithin(getter, compilation.Assembly);
     }
 
     private static string Read(INamedTypeSymbol attributeClass, IPropertySymbol? property, string type)
     {
-        if (property?.GetMethod is null)
+        // A ref-like or pointer value cannot be converted to object, and is never the expected type.
+        if (property?.GetMethod is null
+            || property.Type is { IsRefLikeType: true } or { TypeKind: TypeKind.Pointer or TypeKind.FunctionPointer })
         {
             return "null";
         }
 
         // Read through the declaring type: a member of a more derived type (a field, say) can hide the property
         // from a plain member access, while reflection still finds it.
-        var access = property.IsStatic
-            ? $"{property.ContainingType.GloballyQualified()}.{property.Name}"
-            : SymbolEqualityComparer.Default.Equals(property.ContainingType, attributeClass)
-                ? $"a.{property.Name}"
-                : $"(({property.ContainingType.GloballyQualified()})a).{property.Name}";
+        var access = SymbolEqualityComparer.Default.Equals(property.ContainingType, attributeClass)
+            ? $"a.{property.Name}"
+            : $"(({property.ContainingType.GloballyQualified()})a).{property.Name}";
 
         var isExpectedType = type == "string"
             ? property.Type.SpecialType == SpecialType.System_String
