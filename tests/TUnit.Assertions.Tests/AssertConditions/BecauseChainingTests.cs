@@ -165,7 +165,8 @@ public class BecauseChainingTests
             await Assert.That(values).IsEmpty().And.ContainsKey("A").Using(StringComparer.OrdinalIgnoreCase);
         };
 
-        await Assert.That(action).Throws<AssertionException>();
+        // ContainsKey("A") passes with the comparer, so the failure can only come from IsEmpty().
+        await Assert.That(action).Throws<AssertionException>().WithMessageContaining("Expected to be empty");
     }
 
     [Test]
@@ -178,7 +179,8 @@ public class BecauseChainingTests
             await Assert.That(values).IsEmpty().And.ContainsKey("A").Using(StringComparer.OrdinalIgnoreCase);
         };
 
-        await Assert.That(action).Throws<AssertionException>();
+        // ContainsKey("A") passes with the comparer, so the failure can only come from IsEmpty().
+        await Assert.That(action).Throws<AssertionException>().WithMessageContaining("Expected to be empty");
     }
 
     [Test]
