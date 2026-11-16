@@ -236,6 +236,16 @@ var admin = await Assert.That(users).Contains(u => u.Role == "Admin");
 await Assert.That(admin.Permissions).IsNotEmpty();
 ```
 
+`.Because()` goes right after the assertion it explains, and these assertions keep their returned value with it:
+
+```
+var owner = await Assert.That(users).HasSingleItem(u => u.Role == "Owner")
+
+    .Because("every account has exactly one owner");
+
+await Assert.That(owner.Permissions).IsNotEmpty();
+```
+
 ## Custom Expectations[​](#custom-expectations "Direct link to Custom Expectations")
 
 Use `.Satisfies()` for custom conditions:
