@@ -847,6 +847,16 @@ public sealed class MethodAssertionGenerator : IIncrementalGenerator
         {
             var resultType = data.ReturnTypeInfo.ResultTypeFullName!;
             sb.AppendLine();
+            sb.AppendLine("    /// <summary>");
+            sb.AppendLine("    /// Adds a custom message explaining why this assertion should pass.");
+            sb.AppendLine("    /// Awaiting it still returns the result value.");
+            sb.AppendLine("    /// </summary>");
+            sb.AppendLine($"    public new {className}{genericDeclaration} Because(string message)");
+            sb.AppendLine("    {");
+            sb.AppendLine("        base.Because(message);");
+            sb.AppendLine("        return this;");
+            sb.AppendLine("    }");
+            sb.AppendLine();
             sb.AppendLine($"    public new System.Runtime.CompilerServices.TaskAwaiter<{resultType}> GetAwaiter()");
             sb.AppendLine("    {");
             sb.AppendLine("        return ExecuteAndReturnResultAsync().GetAwaiter();");

@@ -35,6 +35,16 @@ public class NotNullAssertion<TValue> : Assertion<TValue>
 
     protected override string GetExpectation() => "to not be null";
 
+    /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// Awaiting it still returns the value as non-null.
+    /// </summary>
+    public new NotNullAssertion<TValue> Because(string message)
+    {
+        base.Because(message);
+        return this;
+    }
+
     public new TaskAwaiter<TValue> GetAwaiter()
     {
         return GetNonNullValueAsync().GetAwaiter();

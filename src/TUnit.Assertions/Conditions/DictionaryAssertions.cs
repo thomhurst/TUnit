@@ -16,7 +16,7 @@ public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources
     where TKey : notnull
 {
     private readonly TKey _expectedKey;
-    private readonly IEqualityComparer<TKey>? _comparer;
+    private IEqualityComparer<TKey>? _comparer;
 
     public DictionaryContainsKeyAssertion(
         AssertionContext<TDictionary> context,
@@ -30,13 +30,24 @@ public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources
 
     public DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> Using(IEqualityComparer<TKey> comparer)
     {
-        return new DictionaryContainsKeyAssertion<TDictionary, TKey, TValue>(Context, _expectedKey, comparer);
+        _comparer = comparer;
+        return this;
     }
 
     public DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> Using(Func<TKey?, TKey?, bool> equalityPredicate)
     {
-        return new DictionaryContainsKeyAssertion<TDictionary, TKey, TValue>(
-            Context, _expectedKey, new FuncEqualityComparer<TKey>(equalityPredicate));
+        _comparer = new FuncEqualityComparer<TKey>(equalityPredicate);
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a custom message explaining why this assertion should pass.
+    /// The chain keeps <c>And.Value</c> for the value stored at the asserted key.
+    /// </summary>
+    public new DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> Because(string message)
+    {
+        base.Because(message);
+        return this;
     }
 
     /// <summary>
