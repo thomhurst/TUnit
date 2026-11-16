@@ -114,6 +114,54 @@ internal static class TUnit_TestProject_Bugs__7782_CustomDataSourceRowSettings__
                             throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
                     }
                 }
+                case 7:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.OtherTypes(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                case 8:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Retyped(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                case 9:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.Static(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
+                case 10:
+                {
+                    switch (args.Length)
+                    {
+                        case 1:
+                            {
+                                return new global::System.Threading.Tasks.ValueTask(instance.ObsoleteSkip(global::TUnit.Core.Helpers.CastHelper.Cast<int>(args[0])));
+                            }
+                        default:
+                            throw new global::System.ArgumentException($"Expected exactly 1 argument, but got {args.Length}");
+                    }
+                }
                 default:
                     throw new global::System.ArgumentOutOfRangeException(nameof(methodIndex));
             }
@@ -142,13 +190,21 @@ internal static class TUnit_TestProject_Bugs__7782_CustomDataSourceRowSettings__
     private static readonly global::System.Func<global::System.Type[], object?[], global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings> __createInstance = __CreateInstance;
     private static readonly global::System.Func<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings, int, object?[], global::System.Threading.CancellationToken, global::System.Threading.Tasks.ValueTask> __invoke = __Invoke;
     private static readonly global::System.Func<int, global::System.Attribute[]> __attributes = __Attributes;
-    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>[] Entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>[]
+    public static readonly global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>[] Entries = __CreateEntries();
+    private static global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>[] __CreateEntries()
     {
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+        var entries = new global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>[11];
+        __FillEntries0(entries);
+        __FillEntries1(entries);
+        return entries;
+    }
+    private static void __FillEntries0(global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>[] entries)
+    {
+        entries[0] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
             methodName: "Named",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.Named",
             filePath: "",
-            lineNumber: 72,
+            lineNumber: 134,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -165,12 +221,12 @@ internal static class TUnit_TestProject_Bugs__7782_CustomDataSourceRowSettings__
             invokeBody: __invoke,
             methodIndex: 0,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+            attributeGroupIndex: 0);
+        entries[1] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
             methodName: "Skipped",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.Skipped",
             filePath: "",
-            lineNumber: 78,
+            lineNumber: 140,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -186,12 +242,12 @@ internal static class TUnit_TestProject_Bugs__7782_CustomDataSourceRowSettings__
             invokeBody: __invoke,
             methodIndex: 1,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+            attributeGroupIndex: 0);
+        entries[2] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
             methodName: "Unset",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.Unset",
             filePath: "",
-            lineNumber: 84,
+            lineNumber: 146,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -207,12 +263,12 @@ internal static class TUnit_TestProject_Bugs__7782_CustomDataSourceRowSettings__
             invokeBody: __invoke,
             methodIndex: 2,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+            attributeGroupIndex: 0);
+        entries[3] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
             methodName: "Computed",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.Computed",
             filePath: "",
-            lineNumber: 91,
+            lineNumber: 153,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -229,12 +285,12 @@ internal static class TUnit_TestProject_Bugs__7782_CustomDataSourceRowSettings__
             invokeBody: __invoke,
             methodIndex: 3,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+            attributeGroupIndex: 0);
+        entries[4] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
             methodName: "Generic",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.Generic",
             filePath: "",
-            lineNumber: 97,
+            lineNumber: 159,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -251,12 +307,12 @@ internal static class TUnit_TestProject_Bugs__7782_CustomDataSourceRowSettings__
             invokeBody: __invoke,
             methodIndex: 4,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+            attributeGroupIndex: 0);
+        entries[5] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
             methodName: "HiddenByField",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.HiddenByField",
             filePath: "",
-            lineNumber: 103,
+            lineNumber: 165,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -272,12 +328,12 @@ internal static class TUnit_TestProject_Bugs__7782_CustomDataSourceRowSettings__
             invokeBody: __invoke,
             methodIndex: 5,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-        global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+            attributeGroupIndex: 0);
+        entries[6] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
             methodName: "WriteOnlySkip",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.WriteOnlySkip",
             filePath: "",
-            lineNumber: 109,
+            lineNumber: 171,
             hasDataSource: true,
             testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {
@@ -294,8 +350,97 @@ internal static class TUnit_TestProject_Bugs__7782_CustomDataSourceRowSettings__
             invokeBody: __invoke,
             methodIndex: 6,
             createAttributes: __attributes,
-            attributeGroupIndex: 0),
-    };
+            attributeGroupIndex: 0);
+        entries[7] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+            methodName: "OtherTypes",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.OtherTypes",
+            filePath: "",
+            lineNumber: 177,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.Helpers.DataSourceRowMetadataReaders.Register(new global::TUnit.TestProject.Bugs._7782.OtherTypedRowSettingsSourceAttribute()
+{DisplayName = "name held as an object",Skip = true,}, static a => ((object?)a.DisplayName as string, null, (object?)a.Categories as string[])),
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings), "OtherTypes", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 7,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[8] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+            methodName: "Retyped",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.Retyped",
+            filePath: "",
+            lineNumber: 183,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.Helpers.DataSourceRowMetadataReaders.Register(new global::TUnit.TestProject.Bugs._7782.RetypedRowSettingSourceAttribute(), static a => (a.DisplayName, null, null)),
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings), "Retyped", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 8,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+        entries[9] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+            methodName: "Static",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.Static",
+            filePath: "",
+            lineNumber: 189,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    global::TUnit.Core.Helpers.DataSourceRowMetadataReaders.Register(new global::TUnit.TestProject.Bugs._7782.StaticRowSettingSourceAttribute(), static a => (global::TUnit.TestProject.Bugs._7782.StaticRowSettingSourceAttribute.DisplayName, null, null)),
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings), "Static", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 9,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+    }
+    private static void __FillEntries1(global::TUnit.Core.TestEntry<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>[] entries)
+    {
+        entries[10] = global::TUnit.Core.TestEntryFactory.CreateWithClassMetadata<global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings>(
+            methodName: "ObsoleteSkip",
+            fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings.ObsoleteSkip",
+            filePath: "",
+            lineNumber: 195,
+            hasDataSource: true,
+            testDataSources: new global::TUnit.Core.IDataSourceAttribute[]
+{
+    new global::TUnit.TestProject.Bugs._7782.ObsoleteSkipSourceAttribute()
+{DisplayName = "name beside an obsolete setting",},
+},
+            returnType: typeof(global::System.Threading.Tasks.Task),
+            parameters: global::TUnit.Core.ParameterMetadataFactory.ForMethod(typeof(global::TUnit.TestProject.Bugs._7782.CustomDataSourceRowSettings), "ObsoleteSkip", false, new global::TUnit.Core.ParameterMetadata[]
+            {
+            global::TUnit.Core.ParameterMetadataFactory.Create(typeof(int), "value", new global::TUnit.Core.ConcreteType(typeof(int)), false)
+            }),
+            classMetadata: __classMetadata,
+            createInstance: __createInstance,
+            invokeBody: __invoke,
+            methodIndex: 10,
+            createAttributes: __attributes,
+            attributeGroupIndex: 0);
+    }
 }
 internal static partial class TUnit_TestRegistration
 {
@@ -379,7 +524,7 @@ internal static class TUnit_TestProject_Bugs__7782_CustomClassDataSourceRowSetti
             methodName: "Run",
             fullyQualifiedName: "TUnit.TestProject.Bugs._7782.CustomClassDataSourceRowSettings.Run",
             filePath: "",
-            lineNumber: 129,
+            lineNumber: 215,
             hasDataSource: true,
             classDataSources: new global::TUnit.Core.IDataSourceAttribute[]
 {

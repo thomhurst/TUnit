@@ -15,6 +15,16 @@ internal record TestDataRowMetadata(
 )
 {
     /// <summary>
+    /// The row settings read from a data source attribute, or <c>null</c> when it sets none of them.
+    /// </summary>
+    public static TestDataRowMetadata? FromDataSource(string? displayName, string? skip, string[]? categories)
+    {
+        return displayName is null && skip is null && categories is null
+            ? null
+            : new TestDataRowMetadata(displayName, null, skip, categories);
+    }
+
+    /// <summary>
     /// Returns true if any metadata property is set.
     /// </summary>
     public bool HasMetadata => DisplayName is not null || DataExpression is not null || Skip is not null || Categories is { Length: > 0 };

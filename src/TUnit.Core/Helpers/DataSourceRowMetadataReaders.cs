@@ -21,8 +21,8 @@ public static class DataSourceRowMetadataReaders
     public static T Register<T>(T dataSource, Func<T, (string? DisplayName, string? Skip, string[]? Categories)> reader)
         where T : class, IDataSourceAttribute
     {
-        // Runs for every data source the generated code creates; only the first of each type registers.
-        if (!Readers.ContainsKey(typeof(T)))
+        // Runs for every data source the generated code creates; all but the first of each type pay one static read.
+        if (!Registration<T>.Done)
         {
             Add(reader);
         }
@@ -34,25 +34,28 @@ public static class DataSourceRowMetadataReaders
     private static void Add<T>(Func<T, (string? DisplayName, string? Skip, string[]? Categories)> reader)
         where T : class, IDataSourceAttribute
     {
-        Readers.TryAdd(typeof(T), source =>
+        // Replaces a reflection reader the engine added for an instance it met before the generated code ran.
+        Readers[typeof(T)] = source =>
         {
             var (displayName, skip, categories) = reader((T) source);
 
-            return displayName is null && skip is null && categories is null
-                ? null
-                : new TestDataRowMetadata(displayName, null, skip, categories);
-        });
+            return TestDataRowMetadata.FromDataSource(displayName, skip, categories);
+        };
+
+        Registration<T>.Done = true;
     }
 
-    internal static bool TryRead(IDataSourceAttribute dataSource, out TestDataRowMetadata? metadata)
+    /// <summary>
+    /// The reader registered for <paramref name="type"/>, or the one <paramref name="fallback"/> creates, which
+    /// is then kept: a row costs one lookup whichever kind of reader its data source has.
+    /// </summary>
+    internal static Func<IDataSourceAttribute, TestDataRowMetadata?> GetOrAdd(Type type, Func<Type, Func<IDataSourceAttribute, TestDataRowMetadata?>> fallback)
     {
-        if (Readers.TryGetValue(dataSource.GetType(), out var reader))
-        {
-            metadata = reader(dataSource);
-            return true;
-        }
+        return Readers.GetOrAdd(type, fallback);
+    }
 
-        metadata = null;
-        return false;
+    private static class Registration<T>
+    {
+        public static bool Done;
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using TUnit.TestProject.Attributes;
 
 namespace TUnit.TestProject.Bugs._7782;
@@ -66,6 +67,67 @@ public class WriteOnlySkipSourceAttribute : DataSourceGeneratorAttribute<int>
     }
 }
 
+// Properties of other types do not stop the readable name from applying. An object can hold the setting.
+public class OtherTypedRowSettingsSourceAttribute : DataSourceGeneratorAttribute<int>
+{
+    public object? DisplayName { get; set; }
+
+    public bool Skip { get; set; }
+
+    public IReadOnlyList<string> Categories => new List<string> { "Issue7782Category" };
+
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () => 7;
+    }
+}
+
+public class ObjectNamedRowSettingsBaseAttribute : DataSourceGeneratorAttribute<int>
+{
+    public object DisplayName => "from the base property";
+
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () => 7;
+    }
+}
+
+// The most derived property wins, also when it hides a property of another type.
+public class RetypedRowSettingSourceAttribute : ObjectNamedRowSettingsBaseAttribute
+{
+    public new string DisplayName => "from the retyped property";
+}
+
+public class StaticRowSettingSourceAttribute : DataSourceGeneratorAttribute<int>
+{
+    public static string DisplayName => "from a static property";
+
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () => 7;
+    }
+}
+
+// Generated code cannot read Skip, so a usage that never mentions it must still compile. The attribute is then
+// read by reflection, which under Native AOT needs the getters kept.
+public class ObsoleteSkipSourceAttribute : DataSourceGeneratorAttribute<int>
+{
+    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(ObsoleteSkipSourceAttribute))]
+    public ObsoleteSkipSourceAttribute()
+    {
+    }
+
+    public string? DisplayName { get; set; }
+
+    [Obsolete("Use DisplayName", error: true)]
+    public string? Skip { get; set; }
+
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () => 7;
+    }
+}
+
 [EngineTest(ExpectedResult.Pass)]
 public class CustomDataSourceRowSettings
 {
@@ -110,6 +172,30 @@ public class CustomDataSourceRowSettings
     public async Task WriteOnlySkip(int value)
     {
         await AssertRow(value, "readable name", hasCategory: false);
+    }
+
+    [Test, OtherTypedRowSettingsSource(DisplayName = "name held as an object", Skip = true)]
+    public async Task OtherTypes(int value)
+    {
+        await AssertRow(value, "name held as an object", hasCategory: false);
+    }
+
+    [Test, RetypedRowSettingSource]
+    public async Task Retyped(int value)
+    {
+        await AssertRow(value, "from the retyped property", hasCategory: false);
+    }
+
+    [Test, StaticRowSettingSource]
+    public async Task Static(int value)
+    {
+        await AssertRow(value, "from a static property", hasCategory: false);
+    }
+
+    [Test, ObsoleteSkipSource(DisplayName = "name beside an obsolete setting")]
+    public async Task ObsoleteSkip(int value)
+    {
+        await AssertRow(value, "name beside an obsolete setting", hasCategory: false);
     }
 
     private static async Task AssertRow(int value, string displayName, bool hasCategory, int expectedValue = 7)

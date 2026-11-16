@@ -11,7 +11,8 @@ internal static class DataSourceRowMetadataReader
 {
     /// <summary>
     /// Returns a lambda reading the row settings of <paramref name="attributeClass"/>, or <c>null</c> when it
-    /// declares none of them or one of them is not a plain typed read (the engine then falls back to reflection).
+    /// declares none of them or generated code cannot refer to one of them (the engine then falls back to
+    /// reflection).
     /// </summary>
     public static string? TryCreate(INamedTypeSymbol attributeClass, Compilation compilation)
     {
@@ -24,17 +25,18 @@ internal static class DataSourceRowMetadataReader
             return null;
         }
 
-        if (!IsPlainRead(displayName, isArray: false, compilation)
-            || !IsPlainRead(skip, isArray: false, compilation)
-            || !IsPlainRead(categories, isArray: true, compilation))
+        // The lambda reads every setting, including the ones a usage does not set, so one getter it cannot
+        // call leaves the whole attribute to reflection, which can.
+        if (!CanRead(displayName, compilation) || !CanRead(skip, compilation) || !CanRead(categories, compilation))
         {
             return null;
         }
 
-        return $"static a => ({Read(attributeClass, displayName)}, {Read(attributeClass, skip)}, {Read(attributeClass, categories)})";
+        return $"static a => ({Read(attributeClass, displayName, isArray: false)}, {Read(attributeClass, skip, isArray: false)}, {Read(attributeClass, categories, isArray: true)})";
     }
 
-    // The most derived public property of that name, which is the one Type.GetProperty(name) reads.
+    // The most derived public property of that name, instance or static, which is the one the engine's
+    // reflection fallback reads.
     private static IPropertySymbol? FindProperty(INamedTypeSymbol attributeClass, string name)
     {
         for (var type = attributeClass; type is not null; type = type.BaseType)
@@ -51,28 +53,63 @@ internal static class DataSourceRowMetadataReader
         return null;
     }
 
-    // False for anything reflection handles in its own way: a static property, a property of another type, or
-    // a getter generated code cannot call. A property without a getter reads as null, as the reflection
-    // fallback does.
-    private static bool IsPlainRead(IPropertySymbol? property, bool isArray, Compilation compilation)
+    // False for a getter generated code cannot call: an inaccessible one, or one that [Obsolete(error: true)] makes
+    // a compile error no pragma suppresses. A property without a getter reads as null, as it does by reflection.
+    private static bool CanRead(IPropertySymbol? property, Compilation compilation)
     {
         if (property?.GetMethod is not { } getter)
         {
             return true;
         }
 
-        var isExpectedType = isArray
-            ? property.Type is IArrayTypeSymbol { Rank: 1, ElementType.SpecialType: SpecialType.System_String }
-            : property.Type.SpecialType == SpecialType.System_String;
+        return compilation.IsSymbolAccessibleWithin(getter, compilation.Assembly) && !IsObsoleteError(property) && !IsObsoleteError(getter);
 
-        return !property.IsStatic && isExpectedType && compilation.IsSymbolAccessibleWithin(getter, compilation.Assembly);
+        static bool IsObsoleteError(ISymbol symbol)
+        {
+            foreach (var attribute in symbol.GetAttributes())
+            {
+                if (attribute.AttributeClass is { Name: "ObsoleteAttribute", ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } }
+                    && attribute.ConstructorArguments is [_, { Value: true }])
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 
-    private static string Read(INamedTypeSymbol attributeClass, IPropertySymbol? property)
+    // Mirrors the reflection fallback, which takes the value `as` the expected type.
+    private static string Read(INamedTypeSymbol attributeClass, IPropertySymbol? property, bool isArray)
     {
         if (property?.GetMethod is null)
         {
             return "null";
+        }
+
+        var read = Access(attributeClass, property);
+
+        var isExpectedType = isArray
+            ? property.Type is IArrayTypeSymbol { Rank: 1, ElementType.SpecialType: SpecialType.System_String }
+            : property.Type.SpecialType == SpecialType.System_String;
+
+        if (isExpectedType)
+        {
+            return read;
+        }
+
+        // A value of another reference type (object, say) can still be the expected type at run time; a value
+        // type or pointer never is.
+        return property.Type.IsReferenceType || property.Type.TypeKind == TypeKind.TypeParameter
+            ? $"(object?){read} as {(isArray ? "string[]" : "string")}"
+            : "null";
+    }
+
+    private static string Access(INamedTypeSymbol attributeClass, IPropertySymbol property)
+    {
+        if (property.IsStatic)
+        {
+            return $"{property.ContainingType.GloballyQualified()}.{property.Name}";
         }
 
         // Read through the declaring type: a member of a more derived type (a field, say) can hide the property

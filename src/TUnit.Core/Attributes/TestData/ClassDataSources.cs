@@ -94,9 +94,9 @@ internal class ClassDataSources
             // The compiler resolves T's constructor, so nothing depends on run-time constructor metadata.
             return Activator.CreateInstance<T>()!;
         }
-        catch (TargetInvocationException targetInvocationException) when (targetInvocationException.InnerException is { } innerException)
+        catch (TargetInvocationException targetInvocationException)
         {
-            ExceptionDispatchInfo.Capture(innerException).Throw();
+            ThrowInnerException(targetInvocationException);
             throw;
         }
     }
@@ -110,12 +110,17 @@ internal class ClassDataSources
         }
         catch (TargetInvocationException targetInvocationException)
         {
-            if (targetInvocationException.InnerException != null)
-            {
-                ExceptionDispatchInfo.Capture(targetInvocationException.InnerException).Throw();
-            }
-
+            ThrowInnerException(targetInvocationException);
             throw;
+        }
+    }
+
+    // A constructor's own exception, not the reflection wrapper, is what the test should report.
+    private static void ThrowInnerException(TargetInvocationException targetInvocationException)
+    {
+        if (targetInvocationException.InnerException is { } innerException)
+        {
+            ExceptionDispatchInfo.Capture(innerException).Throw();
         }
     }
 }

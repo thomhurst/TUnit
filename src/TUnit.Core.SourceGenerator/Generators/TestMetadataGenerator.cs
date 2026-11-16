@@ -3228,7 +3228,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 writer.AppendLine(",");
             }
         }
-        else if (DataSourceRowMetadataReader.TryCreate(attrClass, compilationContext.Compilation) is { } rowMetadataReader)
+        else if (compilationContext.GetRowMetadataReader(attrClass) is { } rowMetadataReader)
         {
             // The engine reads these properties by name; a typed read keeps working when the trimmer drops
             // the getters that nothing else calls (#7782).
