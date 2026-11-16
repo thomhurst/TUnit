@@ -11,7 +11,7 @@ internal static class DataSourceRowMetadataReader
 {
     /// <summary>
     /// Returns a lambda reading the row settings of <paramref name="attributeClass"/>, or <c>null</c> when it
-    /// declares none of them or generated code cannot express one of the reads (the engine then falls back to reflection).
+    /// declares none of them or one of them is not a plain typed read (the engine then falls back to reflection).
     /// </summary>
     public static string? TryCreate(INamedTypeSymbol attributeClass, Compilation compilation)
     {
@@ -24,22 +24,24 @@ internal static class DataSourceRowMetadataReader
             return null;
         }
 
-        if (!CanCallGetter(displayName, compilation) || !CanCallGetter(skip, compilation) || !CanCallGetter(categories, compilation))
+        if (!IsPlainRead(displayName, isArray: false, compilation)
+            || !IsPlainRead(skip, isArray: false, compilation)
+            || !IsPlainRead(categories, isArray: true, compilation))
         {
             return null;
         }
 
-        return $"static a => ({Read(attributeClass, displayName, "string")}, {Read(attributeClass, skip, "string")}, {Read(attributeClass, categories, "string[]")})";
+        return $"static a => ({Read(attributeClass, displayName)}, {Read(attributeClass, skip)}, {Read(attributeClass, categories)})";
     }
 
-    // Mirrors Type.GetProperty(name) for instance properties: the most derived public one of that name.
+    // The most derived public property of that name, which is the one Type.GetProperty(name) reads.
     private static IPropertySymbol? FindProperty(INamedTypeSymbol attributeClass, string name)
     {
         for (var type = attributeClass; type is not null; type = type.BaseType)
         {
             foreach (var member in type.GetMembers(name))
             {
-                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsIndexer: false, IsStatic: false } property)
+                if (member is IPropertySymbol { DeclaredAccessibility: Accessibility.Public, IsIndexer: false } property)
                 {
                     return property;
                 }
@@ -49,34 +51,34 @@ internal static class DataSourceRowMetadataReader
         return null;
     }
 
-    // False only when reflection could read a getter that generated code cannot call. A property without a
-    // getter reads as null, as the reflection fallback does.
-    private static bool CanCallGetter(IPropertySymbol? property, Compilation compilation)
+    // False for anything reflection handles in its own way: a static property, a property of another type, or
+    // a getter generated code cannot call. A property without a getter reads as null, as the reflection
+    // fallback does.
+    private static bool IsPlainRead(IPropertySymbol? property, bool isArray, Compilation compilation)
     {
-        return property?.GetMethod is not { } getter
-            || compilation.IsSymbolAccessibleWithin(getter, compilation.Assembly);
+        if (property?.GetMethod is not { } getter)
+        {
+            return true;
+        }
+
+        var isExpectedType = isArray
+            ? property.Type is IArrayTypeSymbol { Rank: 1, ElementType.SpecialType: SpecialType.System_String }
+            : property.Type.SpecialType == SpecialType.System_String;
+
+        return !property.IsStatic && isExpectedType && compilation.IsSymbolAccessibleWithin(getter, compilation.Assembly);
     }
 
-    private static string Read(INamedTypeSymbol attributeClass, IPropertySymbol? property, string type)
+    private static string Read(INamedTypeSymbol attributeClass, IPropertySymbol? property)
     {
-        // A ref-like or pointer value cannot be converted to object, and is never the expected type.
-        if (property?.GetMethod is null
-            || property.Type is { IsRefLikeType: true } or { TypeKind: TypeKind.Pointer or TypeKind.FunctionPointer })
+        if (property?.GetMethod is null)
         {
             return "null";
         }
 
         // Read through the declaring type: a member of a more derived type (a field, say) can hide the property
         // from a plain member access, while reflection still finds it.
-        var access = SymbolEqualityComparer.Default.Equals(property.ContainingType, attributeClass)
+        return SymbolEqualityComparer.Default.Equals(property.ContainingType, attributeClass)
             ? $"a.{property.Name}"
             : $"(({property.ContainingType.GloballyQualified()})a).{property.Name}";
-
-        var isExpectedType = type == "string"
-            ? property.Type.SpecialType == SpecialType.System_String
-            : property.Type is IArrayTypeSymbol { Rank: 1, ElementType.SpecialType: SpecialType.System_String };
-
-        // Reflection reads the value as an object and keeps it only when it is the expected type.
-        return isExpectedType ? access : $"(object?){access} as {type}";
     }
 }
