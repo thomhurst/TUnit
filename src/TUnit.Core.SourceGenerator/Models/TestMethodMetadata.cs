@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -15,6 +16,22 @@ public record CompilationContext(CSharpCompilation Compilation, AttributeWriter 
     /// on first use. A race only repeats the lookups: both instances hold the same symbols.
     /// </summary>
     public MethodDataSourceRowTypes MethodDataSourceRowTypes => _methodDataSourceRowTypes ??= new MethodDataSourceRowTypes(Compilation);
+
+    /// <summary>
+    /// The row settings reader of each data source attribute class, which depends on the class alone and would
+    /// otherwise be worked out again for every usage. Keyed including nullability because it holds type names.
+    /// </summary>
+    private readonly ConcurrentDictionary<INamedTypeSymbol, string?> _rowMetadataReaders = new(SymbolEqualityComparer.IncludeNullability);
+
+    public string? GetRowMetadataReader(INamedTypeSymbol attributeClass)
+    {
+        if (!_rowMetadataReaders.TryGetValue(attributeClass, out var reader))
+        {
+            reader = _rowMetadataReaders.GetOrAdd(attributeClass, DataSourceRowMetadataReader.TryCreate(attributeClass, Compilation));
+        }
+
+        return reader;
+    }
 }
 
 /// <summary>

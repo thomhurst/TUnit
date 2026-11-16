@@ -425,8 +425,8 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 },
             classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(int) }, global::TUnit.Core.GenericClassRowFallback.AllRows, new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.TestProject.Bugs._7210.SkippedMixedRowsAttribute()
-{Skip = "Skipped by its class data source",},
+    global::TUnit.Core.Helpers.DataSourceRowMetadataReaders.Register(new global::TUnit.TestProject.Bugs._7210.SkippedMixedRowsAttribute()
+{Skip = "Skipped by its class data source",}, static a => (null, a.Skip, null)),
 }, 0),
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_0,
@@ -476,8 +476,8 @@ global::TUnit.Core.ParameterMetadataFactory.Create(typeof(object), "arg", new gl
 },
             classDataSources: global::TUnit.Core.GenericClassRowPartition.Create(new global::System.Type[] { typeof(string) }, global::TUnit.Core.GenericClassRowFallback.AllRows, new global::TUnit.Core.IDataSourceAttribute[]
 {
-    new global::TUnit.TestProject.Bugs._7210.SkippedMixedRowsAttribute()
-{Skip = "Skipped by its class data source",},
+    global::TUnit.Core.Helpers.DataSourceRowMetadataReaders.Register(new global::TUnit.TestProject.Bugs._7210.SkippedMixedRowsAttribute()
+{Skip = "Skipped by its class data source",}, static a => (null, a.Skip, null)),
 }, 0),
             methodMetadata: __mm_0,
             createInstance: __CreateInstance_1,

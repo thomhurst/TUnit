@@ -1,7 +1,8 @@
-using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TUnit.Core;
+using TUnit.Core.Helpers;
 
 namespace TUnit.Engine.Helpers;
 
@@ -10,23 +11,16 @@ namespace TUnit.Engine.Helpers;
 /// </summary>
 internal static class DataSourceMetadataExtractor
 {
-    private static readonly ConcurrentDictionary<Type, (PropertyInfo? DisplayName, PropertyInfo? Skip, PropertyInfo? Categories)> MetadataProperties = new();
+    private const BindingFlags DeclaredPublicProperties = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
     /// <summary>
     /// Extracts metadata from a data source attribute if it has the relevant properties.
     /// </summary>
     /// <remarks>
-    /// Uses DynamicDependency to ensure the trimmer preserves public properties on known TUnit data source types.
-    /// Custom data source attributes need to ensure their DisplayName/Skip/Categories properties are preserved
-    /// if they want these features to work in trimmed/AOT scenarios.
+    /// Every attribute type has one cached reader: the typed one the source generator registered, or one built
+    /// here for reflection mode and for attribute types the generator did not see. Both resolve a setting to the
+    /// most derived public property of that name.
     /// </remarks>
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(ArgumentsAttribute))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, "TUnit.Core.ArgumentsAttribute`1", "TUnit.Core")]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(MethodDataSourceAttribute))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(ClassDataSourceAttribute<>))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(MatrixAttribute))]
-    [UnconditionalSuppressMessage("Trimming", "IL2075:Reflection on unknown types",
-        Justification = "Known TUnit data source types are preserved via DynamicDependency. Custom data sources must preserve their own properties.")]
     public static TestDataRowMetadata? ExtractFromAttribute(IDataSourceAttribute? dataSource)
     {
         if (dataSource is null or NoDataSource)
@@ -44,43 +38,86 @@ internal static class DataSourceMetadataExtractor
                 return ExtractFromAttribute(partition.InnerDataSource);
         }
 
-        // ArgumentsAttribute is sealed, so these reads have the same semantics as reflection.
+        // The most common row source. It is sealed, so this check is cheap and the reads match reflection.
         if (dataSource is ArgumentsAttribute arguments)
         {
-            return arguments.DisplayName is null && arguments.Skip is null && arguments.Categories is null
-                ? null
-                : new TestDataRowMetadata(arguments.DisplayName, null, arguments.Skip, arguments.Categories);
+            return TestDataRowMetadata.FromDataSource(arguments.DisplayName, arguments.Skip, arguments.Categories);
         }
 
-        // Property lookups are cached per type: this runs for every generated test row.
-        var (displayNameProp, skipProp, categoriesProp) = MetadataProperties.GetOrAdd(dataSource.GetType(), LookupMetadataProperties);
+        // One lookup per row: this runs for every generated test row.
+        return DataSourceRowMetadataReaders.GetOrAdd(dataSource.GetType(), CreateReader)(dataSource);
+    }
 
-        // Try to get DisplayName property
-        var displayName = displayNameProp?.GetValue(dataSource) as string;
+    private static Func<IDataSourceAttribute, TestDataRowMetadata?> CreateReader(Type type)
+    {
+        if (typeof(IDataSourceRowMetadata).IsAssignableFrom(type))
+        {
+            return static dataSource =>
+            {
+                var rowSource = (IDataSourceRowMetadata) dataSource;
 
-        // Try to get Skip property
-        var skip = skipProp?.GetValue(dataSource) as string;
+                return TestDataRowMetadata.FromDataSource(rowSource.DisplayName, rowSource.Skip, rowSource.Categories);
+            };
+        }
 
-        // Try to get Categories property
-        var categories = categoriesProp?.GetValue(dataSource) as string[];
+        var displayName = FindReadableProperty(type, "DisplayName");
+        var skip = FindReadableProperty(type, "Skip");
+        var categories = FindReadableProperty(type, "Categories");
 
         if (displayName is null && skip is null && categories is null)
         {
+            return static _ => null;
+        }
+
+        return dataSource => TestDataRowMetadata.FromDataSource(
+            displayName?.GetValue(dataSource) as string,
+            skip?.GetValue(dataSource) as string,
+            categories?.GetValue(dataSource) as string[]);
+    }
+
+    // The most derived public property of that name, as the source generator resolves it, or null when it has no
+    // getter. Type.GetProperty(name) would throw when a derived property hides one of another type.
+    [UnconditionalSuppressMessage("Trimming", "IL2070:Reflection on unknown types",
+        Justification = "Fallback only: source-generated mode reads through generated readers, and a trimmed getter is reported.")]
+    [UnconditionalSuppressMessage("Trimming", "IL2075:Reflection on unknown types",
+        Justification = "Fallback only: source-generated mode reads through generated readers, and a trimmed getter is reported.")]
+    private static PropertyInfo? FindReadableProperty(Type type, string name)
+    {
+        for (var current = type; current is not null; current = current.BaseType)
+        {
+            // Type.EmptyTypes leaves out indexers.
+            if (current.GetProperty(name, DeclaredPublicProperties, binder: null, returnType: null, Type.EmptyTypes, modifiers: null) is not { } property)
+            {
+                continue;
+            }
+
+            if (property.CanRead)
+            {
+                return property;
+            }
+
+#if NET
+            // A write-only property is ignored. Native AOT cannot tell one from a property whose getter the trimmer
+            // removed, and ignoring that would silently run a row its data source skips, so it fails instead.
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                throw new InvalidOperationException(
+                    $"The getter of '{current}.{name}' is not available, so the setting cannot be applied to the rows of '{type}'. "
+                    + "Native AOT removes a getter that no code calls. Keep it by adding "
+                    + $"[DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof({current.Name}))] to the attribute's constructors.");
+            }
+#endif
+
             return null;
         }
 
-        return new TestDataRowMetadata(displayName, null, skip, categories);
+        return null;
     }
 
     /// <summary>
     /// Merges metadata from TestDataRow wrapper with metadata from the data source attribute.
     /// TestDataRow metadata takes precedence over attribute metadata.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2070:Reflection on unknown types",
-        Justification = "Known TUnit data source types are preserved via DynamicDependency on ExtractFromAttribute. Custom data sources must preserve their own properties.")]
-    private static (PropertyInfo? DisplayName, PropertyInfo? Skip, PropertyInfo? Categories) LookupMetadataProperties(Type type)
-        => (type.GetProperty("DisplayName"), type.GetProperty("Skip"), type.GetProperty("Categories"));
-
     public static TestDataRowMetadata? Merge(TestDataRowMetadata? rowMetadata, TestDataRowMetadata? attributeMetadata)
     {
         if (rowMetadata is null && attributeMetadata is null)

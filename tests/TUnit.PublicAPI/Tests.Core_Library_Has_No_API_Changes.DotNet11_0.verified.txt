@@ -2399,6 +2399,14 @@ namespace .Helpers
         public static .<<bool, object?>> TryCreateWithInitializerAsync( type, .MethodMetadata testInformation, string testSessionId) { }
         public static object?[] UnwrapTupleAot(object? value) { }
     }
+    public static class DataSourceRowMetadataReaders
+    {
+        public static T Register<T>(T dataSource, [.(new string[] {
+                "DisplayName",
+                "Skip",
+                "Categories"})] <T, <string?, string?, string[]?>> reader)
+            where T :  class, .IDataSourceAttribute { }
+    }
     public static class DecimalParsingHelper
     {
         public static decimal ParseDecimalWithCultureFallback(string value) { }
