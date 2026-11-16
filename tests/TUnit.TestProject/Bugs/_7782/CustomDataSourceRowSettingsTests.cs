@@ -37,6 +37,35 @@ public class GenericRowSettingsSourceAttribute<T> : DataSourceGeneratorAttribute
     }
 }
 
+public class HiddenRowSettingsBaseAttribute : DataSourceGeneratorAttribute<int>
+{
+    public string? DisplayName => "from the hidden base property";
+
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () => 7;
+    }
+}
+
+// A field hides the base property from a member access, but not from Type.GetProperty.
+public class FieldHidesRowSettingSourceAttribute : HiddenRowSettingsBaseAttribute
+{
+    public new int DisplayName = 1;
+}
+
+// A property without a getter is ignored; the readable one still applies.
+public class WriteOnlySkipSourceAttribute : DataSourceGeneratorAttribute<int>
+{
+    public string? DisplayName { get; set; }
+
+    public string? Skip { set { } }
+
+    protected override IEnumerable<Func<int>> GenerateDataSources(DataGeneratorMetadata dataGeneratorMetadata)
+    {
+        yield return () => 7;
+    }
+}
+
 [EngineTest(ExpectedResult.Pass)]
 public class CustomDataSourceRowSettings
 {
@@ -69,6 +98,18 @@ public class CustomDataSourceRowSettings
     public async Task Generic(int value)
     {
         await AssertRow(value, "generic source", hasCategory: false, expectedValue: 0);
+    }
+
+    [Test, FieldHidesRowSettingSource]
+    public async Task HiddenByField(int value)
+    {
+        await AssertRow(value, "from the hidden base property", hasCategory: false);
+    }
+
+    [Test, WriteOnlySkipSource(DisplayName = "readable name")]
+    public async Task WriteOnlySkip(int value)
+    {
+        await AssertRow(value, "readable name", hasCategory: false);
     }
 
     private static async Task AssertRow(int value, string displayName, bool hasCategory, int expectedValue = 7)
