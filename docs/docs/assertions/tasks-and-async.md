@@ -260,6 +260,13 @@ public async Task Task_Returns_Expected_Result()
 }
 ```
 
+A method that returns a task can also go into a lambda: the assertion awaits it and checks its result.
+
+```csharp
+await Assert.That(() => GetUserAsync(42)).IsNotNull();
+await Assert.That(() => FetchDataAsync()).IsEqualTo("data");
+```
+
 ### Parallel Task Execution
 
 ```csharp

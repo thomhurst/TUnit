@@ -324,13 +324,17 @@ public static class Assert
 
     /// <summary>
     /// Creates an assertion for an asynchronous function.
+    /// This method accepts both nullable and non-nullable Task results seamlessly, also from a lambda
+    /// that returns the task without awaiting it.
     /// Example: await Assert.That(async () => await GetValueAsync()).IsEqualTo(expected);
+    /// Example: await Assert.That(() => GetValueAsync()).IsEqualTo(expected);
     /// </summary>
     public static AsyncFuncAssertion<TValue> That<TValue>(
-        Func<Task<TValue?>> func,
+        Func<Task<TValue>> func,
         [CallerArgumentExpression(nameof(func))] string? expression = null)
     {
-        return new AsyncFuncAssertion<TValue>(func, expression);
+        // Task<TValue> and Task<TValue?> differ only in their nullable annotation, so the delegate is passed on as it is.
+        return new AsyncFuncAssertion<TValue>(func!, expression);
     }
 
     /// <summary>
