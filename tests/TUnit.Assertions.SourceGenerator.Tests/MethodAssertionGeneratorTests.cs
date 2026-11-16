@@ -324,6 +324,28 @@ internal class MethodAssertionGeneratorTests : TestsBase<MethodAssertionGenerato
         });
 
     [Test]
+    public Task AssertionResultOfValueTypeMethod() => RunTest(
+        Path.Combine(Git.TestsDirectory.FullName,
+            "TUnit.Assertions.SourceGenerator.Tests",
+            "TestData",
+            "AssertionResultOfValueTypeAssertion.cs"),
+        async generatedFiles =>
+        {
+            await Assert.That(generatedFiles).Count().IsEqualTo(1);
+
+            var mainFile = generatedFiles.First();
+            // A value-type result keeps its type, so the awaiter can return it (T? would be Nullable<T>)
+            await Assert.That(mainFile).Contains("private int _result;");
+            await Assert.That(mainFile).Contains("public new System.Runtime.CompilerServices.TaskAwaiter<int> GetAwaiter()");
+            // A nullable value-type result stays Nullable<T>
+            await Assert.That(mainFile).Contains("private int? _result;");
+            await Assert.That(mainFile).Contains("public new System.Runtime.CompilerServices.TaskAwaiter<int?> GetAwaiter()");
+            // A type parameter constrained to struct is a value type too
+            await Assert.That(mainFile).Contains("private T _result;");
+            await Assert.That(mainFile).Contains("public new System.Runtime.CompilerServices.TaskAwaiter<T> GetAwaiter()");
+        });
+
+    [Test]
     public Task AsyncAssertionResultOfTMethod() => RunTest(
         Path.Combine(Git.TestsDirectory.FullName,
             "TUnit.Assertions.SourceGenerator.Tests",
