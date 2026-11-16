@@ -8,7 +8,8 @@ using TUnit.Assertions.Core;
 namespace TUnit.Assertions.Sources;
 
 /// <summary>
-/// Base class for dictionary assertions that preserves type through And/Or chains.
+/// Base class for dictionary assertion sources and their And/Or continuations.
+/// Checks derive from the matching ConditionBase, so they cannot start a new assertion without And/Or.
 /// Inherits from CollectionAssertionBase to automatically get all collection methods (HasSingleItem, IsInOrder, etc.)
 /// since dictionaries are collections of KeyValuePair items.
 /// </summary>
@@ -38,12 +39,11 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     {
     }
 
-    protected override string GetExpectation() => "dictionary assertion";
 
     /// <summary>
     /// Asserts that the dictionary is null while preserving dictionary-specific chaining.
     /// </summary>
-    public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsNull()
+    public new DictionaryConditionBase<TDictionary, TKey, TValue> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
         return new DictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: true);
@@ -52,7 +52,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     /// <summary>
     /// Asserts that the dictionary is not null while preserving dictionary-specific chaining.
     /// </summary>
-    public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsNotNull()
+    public new DictionaryConditionBase<TDictionary, TKey, TValue> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
         return new DictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: false);
@@ -64,13 +64,13 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     // Each reuses the existing collection assertion's check logic via a delegating wrapper; the inner
     // assertion is built on Context.CreateDetached() so its construction doesn't consume our pending link.
 
-    private DictionaryAssertionBase<TDictionary, TKey, TValue> Delegate(Assertion<TDictionary> inner)
+    private DictionaryConditionBase<TDictionary, TKey, TValue> Delegate(Assertion<TDictionary> inner)
         => new DictionaryDelegatingAssertion<TDictionary, TKey, TValue>(Context, inner);
 
     /// <summary>
     /// Asserts that the dictionary is empty while preserving dictionary-specific chaining.
     /// </summary>
-    public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsEmpty()
+    public new DictionaryConditionBase<TDictionary, TKey, TValue> IsEmpty()
     {
         Context.ExpressionBuilder.Append(".IsEmpty()");
         return Delegate(new CollectionIsEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
@@ -79,7 +79,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     /// <summary>
     /// Asserts that the dictionary is not empty while preserving dictionary-specific chaining.
     /// </summary>
-    public new DictionaryAssertionBase<TDictionary, TKey, TValue> IsNotEmpty()
+    public new DictionaryConditionBase<TDictionary, TKey, TValue> IsNotEmpty()
     {
         Context.ExpressionBuilder.Append(".IsNotEmpty()");
         return Delegate(new CollectionIsNotEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
@@ -98,7 +98,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     /// <summary>
     /// Asserts that the dictionary contains exactly one entry while preserving dictionary-specific chaining.
     /// </summary>
-    public new DictionaryAssertionBase<TDictionary, TKey, TValue> HasSingleItem()
+    public new DictionaryConditionBase<TDictionary, TKey, TValue> HasSingleItem()
     {
         Context.ExpressionBuilder.Append(".HasSingleItem()");
         return Delegate(new HasSingleItemAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
@@ -107,7 +107,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     /// <summary>
     /// Asserts that the dictionary contains exactly one entry matching the predicate while preserving chaining.
     /// </summary>
-    public new DictionaryAssertionBase<TDictionary, TKey, TValue> HasSingleItem(
+    public new DictionaryConditionBase<TDictionary, TKey, TValue> HasSingleItem(
         Func<KeyValuePair<TKey, TValue>, bool> predicate,
         [CallerArgumentExpression(nameof(predicate))] string? expression = null)
     {
@@ -119,7 +119,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     /// <summary>
     /// Asserts that the dictionary has at least the specified number of entries while preserving chaining.
     /// </summary>
-    public new DictionaryAssertionBase<TDictionary, TKey, TValue> HasAtLeast(
+    public new DictionaryConditionBase<TDictionary, TKey, TValue> HasAtLeast(
         int minCount,
         [CallerArgumentExpression(nameof(minCount))] string? expression = null)
     {
@@ -130,7 +130,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     /// <summary>
     /// Asserts that the dictionary has at most the specified number of entries while preserving chaining.
     /// </summary>
-    public new DictionaryAssertionBase<TDictionary, TKey, TValue> HasAtMost(
+    public new DictionaryConditionBase<TDictionary, TKey, TValue> HasAtMost(
         int maxCount,
         [CallerArgumentExpression(nameof(maxCount))] string? expression = null)
     {
@@ -141,7 +141,7 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
     /// <summary>
     /// Asserts that the dictionary entry count is between min and max (inclusive) while preserving chaining.
     /// </summary>
-    public new DictionaryAssertionBase<TDictionary, TKey, TValue> HasCountBetween(
+    public new DictionaryConditionBase<TDictionary, TKey, TValue> HasCountBetween(
         int min,
         int max,
         [CallerArgumentExpression(nameof(min))] string? minExpression = null,
@@ -278,29 +278,4 @@ public abstract class DictionaryAssertionBase<TDictionary, TKey, TValue> : Colle
         return new DictionaryAnyValueAssertion<TDictionary, TKey, TValue>(Context, predicate);
     }
 
-    /// <summary>
-    /// Returns an And continuation that preserves dictionary type, key type, and value type.
-    /// Overrides the base Assertion.And to return a dictionary-specific continuation.
-    /// </summary>
-    public new DictionaryAndContinuation<TDictionary, TKey, TValue> And
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.OrAssertion<TDictionary>>();
-            return new DictionaryAndContinuation<TDictionary, TKey, TValue>(Context, InternalWrappedExecution ?? this);
-        }
-    }
-
-    /// <summary>
-    /// Returns an Or continuation that preserves dictionary type, key type, and value type.
-    /// Overrides the base Assertion.Or to return a dictionary-specific continuation.
-    /// </summary>
-    public new DictionaryOrContinuation<TDictionary, TKey, TValue> Or
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.AndAssertion<TDictionary>>();
-            return new DictionaryOrContinuation<TDictionary, TKey, TValue>(Context, InternalWrappedExecution ?? this);
-        }
-    }
 }

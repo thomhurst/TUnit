@@ -6,7 +6,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Base class for async enumerable assertions that handles materialization.
 /// </summary>
-public abstract class AsyncEnumerableAssertionConditionBase<TItem> : AsyncEnumerableAssertionBase<TItem>
+public abstract class AsyncEnumerableAssertionConditionBase<TItem> : AsyncEnumerableConditionBase<TItem>
 {
     protected AsyncEnumerableAssertionConditionBase(AssertionContext<IAsyncEnumerable<TItem>> context)
         : base(context)
@@ -44,7 +44,7 @@ public abstract class AsyncEnumerableAssertionConditionBase<TItem> : AsyncEnumer
 }
 
 internal class AsyncEnumerableNullAssertion<TItem>(AssertionContext<IAsyncEnumerable<TItem>> context, bool expectNull)
-    : AsyncEnumerableAssertionBase<TItem>(context)
+    : AsyncEnumerableConditionBase<TItem>(context)
 {
     protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<IAsyncEnumerable<TItem>> metadata)
         => NullCheck.Check(metadata, expectNull);

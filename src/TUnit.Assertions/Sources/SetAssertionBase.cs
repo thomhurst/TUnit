@@ -8,7 +8,8 @@ using TUnit.Assertions.Core;
 namespace TUnit.Assertions.Sources;
 
 /// <summary>
-/// Base class for set assertions that preserves type through And/Or chains.
+/// Base class for set assertion sources and their And/Or continuations.
+/// Checks derive from the matching ConditionBase, so they cannot start a new assertion without And/Or.
 /// Inherits from CollectionAssertionBase to automatically get all collection methods.
 /// Adds set-specific methods like IsSubsetOf, IsSupersetOf, Overlaps, etc.
 /// </summary>
@@ -41,12 +42,11 @@ public abstract class SetAssertionBase<TSet, TItem> : CollectionAssertionBase<TS
     {
     }
 
-    protected override string GetExpectation() => "set assertion";
 
     /// <summary>
     /// Asserts that the set is null while preserving set-specific chaining.
     /// </summary>
-    public new SetAssertionBase<TSet, TItem> IsNull()
+    public new SetConditionBase<TSet, TItem> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
         return new SetNullAssertion<TSet, TItem>(Context, CreateSetAdapter, expectNull: true);
@@ -55,7 +55,7 @@ public abstract class SetAssertionBase<TSet, TItem> : CollectionAssertionBase<TS
     /// <summary>
     /// Asserts that the set is not null while preserving set-specific chaining.
     /// </summary>
-    public new SetAssertionBase<TSet, TItem> IsNotNull()
+    public new SetConditionBase<TSet, TItem> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
         return new SetNullAssertion<TSet, TItem>(Context, CreateSetAdapter, expectNull: false);
@@ -151,29 +151,6 @@ public abstract class SetAssertionBase<TSet, TItem> : CollectionAssertionBase<TS
         return new SetEqualsAssertion<TSet, TItem>(Context, CreateSetAdapter, other);
     }
 
-    /// <summary>
-    /// Returns an And continuation that preserves set type and item type.
-    /// </summary>
-    public new SetAndContinuation<TSet, TItem> And
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.OrAssertion<TSet>>();
-            return new SetAndContinuation<TSet, TItem>(Context, InternalWrappedExecution ?? this, CreateSetAdapter);
-        }
-    }
-
-    /// <summary>
-    /// Returns an Or continuation that preserves set type and item type.
-    /// </summary>
-    public new SetOrContinuation<TSet, TItem> Or
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.AndAssertion<TSet>>();
-            return new SetOrContinuation<TSet, TItem>(Context, InternalWrappedExecution ?? this, CreateSetAdapter);
-        }
-    }
 }
 
 /// <summary>

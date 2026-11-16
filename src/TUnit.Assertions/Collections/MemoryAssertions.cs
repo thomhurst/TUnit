@@ -12,7 +12,7 @@ namespace TUnit.Assertions.Collections;
 /// <summary>
 /// Asserts that a memory is empty.
 /// </summary>
-public class MemoryIsEmptyAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryIsEmptyAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
 
@@ -48,7 +48,7 @@ public class MemoryIsEmptyAssertion<TMemory, TItem> : MemoryAssertionBase<TMemor
 /// <summary>
 /// Asserts that a memory is not empty.
 /// </summary>
-public class MemoryIsNotEmptyAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryIsNotEmptyAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
 
@@ -84,7 +84,7 @@ public class MemoryIsNotEmptyAssertion<TMemory, TItem> : MemoryAssertionBase<TMe
 /// <summary>
 /// Asserts that a memory contains the expected item.
 /// </summary>
-public class MemoryContainsAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryContainsAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
     private readonly TItem _expected;
@@ -126,7 +126,7 @@ public class MemoryContainsAssertion<TMemory, TItem> : MemoryAssertionBase<TMemo
 /// <summary>
 /// Asserts that a memory does not contain the expected item.
 /// </summary>
-public class MemoryDoesNotContainAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryDoesNotContainAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
     private readonly TItem _expected;
@@ -168,7 +168,7 @@ public class MemoryDoesNotContainAssertion<TMemory, TItem> : MemoryAssertionBase
 /// <summary>
 /// Asserts that a memory is equivalent to an expected collection.
 /// </summary>
-public class MemoryIsEquivalentToAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryIsEquivalentToAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
     private readonly IEnumerable<TItem> _expected;
@@ -233,7 +233,7 @@ public class MemoryIsEquivalentToAssertion<TMemory, TItem> : MemoryAssertionBase
 /// <summary>
 /// Asserts that a memory has exactly one item.
 /// </summary>
-public class MemoryHasSingleItemAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryHasSingleItemAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
     private TItem? _singleItem;
@@ -294,7 +294,7 @@ public class MemoryHasSingleItemAssertion<TMemory, TItem> : MemoryAssertionBase<
 /// <summary>
 /// Asserts that all items in a memory satisfy the predicate.
 /// </summary>
-public class MemoryAllAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryAllAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
     private readonly Func<TItem, bool> _predicate;
@@ -336,7 +336,7 @@ public class MemoryAllAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, T
 /// <summary>
 /// Asserts that any item in a memory satisfies the predicate.
 /// </summary>
-public class MemoryAnyAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryAnyAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
     private readonly Func<TItem, bool> _predicate;
@@ -375,7 +375,7 @@ public class MemoryAnyAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, T
 /// <summary>
 /// Asserts that a memory is in ascending order.
 /// </summary>
-public class MemoryIsInOrderAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryIsInOrderAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
     private readonly IComparer<TItem>? _comparer;
@@ -414,7 +414,7 @@ public class MemoryIsInOrderAssertion<TMemory, TItem> : MemoryAssertionBase<TMem
 /// <summary>
 /// Asserts that a memory is in descending order.
 /// </summary>
-public class MemoryIsInDescendingOrderAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryIsInDescendingOrderAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
     private readonly IComparer<TItem>? _comparer;
@@ -453,7 +453,7 @@ public class MemoryIsInDescendingOrderAssertion<TMemory, TItem> : MemoryAssertio
 /// <summary>
 /// Asserts that all items in a memory are distinct.
 /// </summary>
-public class MemoryHasDistinctItemsAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryHasDistinctItemsAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
     private readonly IEqualityComparer<TItem>? _comparer;
@@ -611,7 +611,7 @@ internal enum MemoryCountComparison
 /// <summary>
 /// Memory-aware count assertion that preserves the memory type for further chaining.
 /// </summary>
-public class MemoryCountEqualsAssertion<TMemory, TItem> : MemoryAssertionBase<TMemory, TItem>
+public class MemoryCountEqualsAssertion<TMemory, TItem> : MemoryConditionBase<TMemory, TItem>
 {
     private readonly Func<TMemory, ICollectionAdapter<TItem>> _adapterFactory;
     private readonly int _expected;

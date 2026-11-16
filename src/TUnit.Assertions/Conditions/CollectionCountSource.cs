@@ -158,9 +158,9 @@ internal enum CountComparison
 
 /// <summary>
 /// Collection-aware count assertion that preserves the collection type for further chaining.
-/// Inherits from CollectionAssertionBase to enable .And.Contains(), .And.IsNotEmpty(), etc.
+/// Inherits from CollectionConditionBase to enable .And.Contains(), .And.IsNotEmpty(), etc.
 /// </summary>
-public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
+public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, int, IAssertion?>? _itemAssertionFactory;
@@ -279,7 +279,7 @@ public class CollectionCountEqualsAssertion<TCollection, TItem> : CollectionAsse
 /// Preserves the collection type for further chaining.
 /// Example: Assert.That(list).Count(c => c.IsEqualTo(5)).And.Contains(1)
 /// </summary>
-public class CollectionCountWithInlineAssertionAssertion<TCollection, TItem> : CollectionAssertionBase<TCollection, TItem>
+public class CollectionCountWithInlineAssertionAssertion<TCollection, TItem> : CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<IAssertionSource<int>, Assertion<int>?> _countAssertion;

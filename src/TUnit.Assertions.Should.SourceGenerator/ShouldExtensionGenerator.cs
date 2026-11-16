@@ -607,7 +607,8 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
 
             var closed = CloseWrappedType(declared, type);
             if (closed is null) continue;
-            if (!DerivesFromAssertion(closed, assertionBase, out var typeArg)) continue;
+            if (!DerivesFromAssertion(closed, assertionBase, out var typeArg)
+                && !TryGetAssertionSourceValueType(closed, out typeArg)) continue;
 
             wrappedType = closed;
             wrappedAssertionTypeArg = typeArg;
@@ -1232,6 +1233,33 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         }
         assertionTypeArg = null!;
         return false;
+    }
+
+    /// <summary>
+    /// Collection sources are not assertions themselves (only their checks are), so a wrapped
+    /// source is recognised by the single <c>IAssertionSource&lt;T&gt;</c> it implements.
+    /// </summary>
+    private static bool TryGetAssertionSourceValueType(INamedTypeSymbol type, out ITypeSymbol valueType)
+    {
+        valueType = null!;
+        foreach (var iface in type.AllInterfaces)
+        {
+            if (iface.TypeArguments.Length != 1
+                || iface.OriginalDefinition.ToDisplayString(NameWithoutTypeArgsFormat) != "TUnit.Assertions.Core.IAssertionSource")
+            {
+                continue;
+            }
+
+            if (valueType is not null && !SymbolEqualityComparer.Default.Equals(valueType, iface.TypeArguments[0]))
+            {
+                valueType = null!;
+                return false;
+            }
+
+            valueType = iface.TypeArguments[0];
+        }
+
+        return valueType is not null;
     }
 
     private static string? TryGetCallerArgumentExpressionTarget(IParameterSymbol parameter)

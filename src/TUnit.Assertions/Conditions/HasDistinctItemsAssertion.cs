@@ -8,7 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a collection contains only distinct (unique) items.
 /// Delegates to CollectionChecks for the actual logic.
 /// </summary>
-public class HasDistinctItemsAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class HasDistinctItemsAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly IEqualityComparer<TItem>? _comparer;

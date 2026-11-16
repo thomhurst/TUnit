@@ -8,7 +8,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that a set is a subset of another collection.
 /// </summary>
-public class SetIsSubsetOfAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
+public class SetIsSubsetOfAssertion<TSet, TItem> : SetConditionBase<TSet, TItem>
     where TSet : IEnumerable<TItem>
 {
     private readonly Func<TSet, ISetAdapter<TItem>> _adapterFactory;
@@ -48,7 +48,7 @@ public class SetIsSubsetOfAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
 /// <summary>
 /// Asserts that a set is a superset of another collection.
 /// </summary>
-public class SetIsSupersetOfAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
+public class SetIsSupersetOfAssertion<TSet, TItem> : SetConditionBase<TSet, TItem>
     where TSet : IEnumerable<TItem>
 {
     private readonly Func<TSet, ISetAdapter<TItem>> _adapterFactory;
@@ -88,7 +88,7 @@ public class SetIsSupersetOfAssertion<TSet, TItem> : SetAssertionBase<TSet, TIte
 /// <summary>
 /// Asserts that a set is a proper subset of another collection.
 /// </summary>
-public class SetIsProperSubsetOfAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
+public class SetIsProperSubsetOfAssertion<TSet, TItem> : SetConditionBase<TSet, TItem>
     where TSet : IEnumerable<TItem>
 {
     private readonly Func<TSet, ISetAdapter<TItem>> _adapterFactory;
@@ -128,7 +128,7 @@ public class SetIsProperSubsetOfAssertion<TSet, TItem> : SetAssertionBase<TSet, 
 /// <summary>
 /// Asserts that a set is a proper superset of another collection.
 /// </summary>
-public class SetIsProperSupersetOfAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
+public class SetIsProperSupersetOfAssertion<TSet, TItem> : SetConditionBase<TSet, TItem>
     where TSet : IEnumerable<TItem>
 {
     private readonly Func<TSet, ISetAdapter<TItem>> _adapterFactory;
@@ -168,7 +168,7 @@ public class SetIsProperSupersetOfAssertion<TSet, TItem> : SetAssertionBase<TSet
 /// <summary>
 /// Asserts that a set overlaps with another collection.
 /// </summary>
-public class SetOverlapsAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
+public class SetOverlapsAssertion<TSet, TItem> : SetConditionBase<TSet, TItem>
     where TSet : IEnumerable<TItem>
 {
     private readonly Func<TSet, ISetAdapter<TItem>> _adapterFactory;
@@ -208,7 +208,7 @@ public class SetOverlapsAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
 /// <summary>
 /// Asserts that a set does not overlap with another collection.
 /// </summary>
-public class SetDoesNotOverlapAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
+public class SetDoesNotOverlapAssertion<TSet, TItem> : SetConditionBase<TSet, TItem>
     where TSet : IEnumerable<TItem>
 {
     private readonly Func<TSet, ISetAdapter<TItem>> _adapterFactory;
@@ -248,7 +248,7 @@ public class SetDoesNotOverlapAssertion<TSet, TItem> : SetAssertionBase<TSet, TI
 /// <summary>
 /// Asserts that a set equals another collection (same elements).
 /// </summary>
-public class SetEqualsAssertion<TSet, TItem> : SetAssertionBase<TSet, TItem>
+public class SetEqualsAssertion<TSet, TItem> : SetConditionBase<TSet, TItem>
     where TSet : IEnumerable<TItem>
 {
     private readonly Func<TSet, ISetAdapter<TItem>> _adapterFactory;

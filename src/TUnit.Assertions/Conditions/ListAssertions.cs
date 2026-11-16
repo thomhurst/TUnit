@@ -9,7 +9,7 @@ namespace TUnit.Assertions.Conditions;
 /// <summary>
 /// Asserts that the item at the specified index equals the expected value.
 /// </summary>
-public class ListHasItemAtAssertion<TList, TItem> : ListAssertionBase<TList, TItem>
+public class ListHasItemAtAssertion<TList, TItem> : ListConditionBase<TList, TItem>
     where TList : IList<TItem>
 {
     private readonly int _index;
@@ -352,7 +352,7 @@ public class ListLastItemSource<TList, TItem> : IAssertionSource<TItem>
 /// <summary>
 /// Asserts that the item at a specific index equals the expected value.
 /// </summary>
-public class ListItemAtEqualsAssertion<TList, TItem> : ListAssertionBase<TList, TItem>
+public class ListItemAtEqualsAssertion<TList, TItem> : ListConditionBase<TList, TItem>
     where TList : IList<TItem>
 {
     private readonly int _index;
@@ -416,7 +416,7 @@ public class ListItemAtEqualsAssertion<TList, TItem> : ListAssertionBase<TList, 
 /// <summary>
 /// Asserts that the item at a specific index is null or not null.
 /// </summary>
-public class ListItemAtNullAssertion<TList, TItem> : ListAssertionBase<TList, TItem>
+public class ListItemAtNullAssertion<TList, TItem> : ListConditionBase<TList, TItem>
     where TList : IList<TItem>
 {
     private readonly int _index;
@@ -476,7 +476,7 @@ public class ListItemAtNullAssertion<TList, TItem> : ListAssertionBase<TList, TI
 /// <summary>
 /// Asserts that the item at a specific index satisfies a custom assertion.
 /// </summary>
-public class ListItemAtSatisfiesAssertion<TList, TItem> : ListAssertionBase<TList, TItem>
+public class ListItemAtSatisfiesAssertion<TList, TItem> : ListConditionBase<TList, TItem>
     where TList : IList<TItem>
 {
     private readonly int _index;
@@ -553,7 +553,7 @@ public class ListItemAtSatisfiesAssertion<TList, TItem> : ListAssertionBase<TLis
 /// <summary>
 /// Asserts that the last item equals the expected value.
 /// </summary>
-public class ListLastItemEqualsAssertion<TList, TItem> : ListAssertionBase<TList, TItem>
+public class ListLastItemEqualsAssertion<TList, TItem> : ListConditionBase<TList, TItem>
     where TList : IList<TItem>
 {
     private readonly TItem _expected;
@@ -613,7 +613,7 @@ public class ListLastItemEqualsAssertion<TList, TItem> : ListAssertionBase<TList
 /// <summary>
 /// Asserts that the last item is null or not null.
 /// </summary>
-public class ListLastItemNullAssertion<TList, TItem> : ListAssertionBase<TList, TItem>
+public class ListLastItemNullAssertion<TList, TItem> : ListConditionBase<TList, TItem>
     where TList : IList<TItem>
 {
     private readonly bool _expectNull;
@@ -669,7 +669,7 @@ public class ListLastItemNullAssertion<TList, TItem> : ListAssertionBase<TList, 
 /// <summary>
 /// Asserts that the last item satisfies a custom assertion.
 /// </summary>
-public class ListLastItemSatisfiesAssertion<TList, TItem> : ListAssertionBase<TList, TItem>
+public class ListLastItemSatisfiesAssertion<TList, TItem> : ListConditionBase<TList, TItem>
     where TList : IList<TItem>
 {
     private readonly Func<TItem, IAssertion?> _assertion;

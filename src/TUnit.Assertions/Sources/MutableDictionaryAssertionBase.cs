@@ -7,7 +7,8 @@ using TUnit.Assertions.Core;
 namespace TUnit.Assertions.Sources;
 
 /// <summary>
-/// Base class for mutable dictionary (IDictionary) assertions that preserves type through And/Or chains.
+/// Base class for mutable dictionary (IDictionary) assertion sources and their And/Or continuations.
+/// Checks derive from the matching ConditionBase, so they cannot start a new assertion without And/Or.
 /// Inherits from CollectionAssertionBase to automatically get all collection methods (HasSingleItem, IsInOrder, etc.)
 /// since dictionaries are collections of KeyValuePair items.
 /// </summary>
@@ -36,12 +37,11 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     {
     }
 
-    protected override string GetExpectation() => "dictionary assertion";
 
     /// <summary>
     /// Asserts that the dictionary is null while preserving mutable-dictionary-specific chaining.
     /// </summary>
-    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNull()
+    public new MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsNull()
     {
         Context.ExpressionBuilder.Append(".IsNull()");
         return new MutableDictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: true);
@@ -50,7 +50,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     /// <summary>
     /// Asserts that the dictionary is not null while preserving mutable-dictionary-specific chaining.
     /// </summary>
-    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNotNull()
+    public new MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsNotNull()
     {
         Context.ExpressionBuilder.Append(".IsNotNull()");
         return new MutableDictionaryNullAssertion<TDictionary, TKey, TValue>(Context, expectNull: false);
@@ -60,13 +60,13 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     // mutable-dictionary-typed assertion (preserving .And.ContainsKey, etc.) and reuse the existing
     // collection check logic via a delegating wrapper built on a detached context.
 
-    private MutableDictionaryAssertionBase<TDictionary, TKey, TValue> Delegate(Assertion<TDictionary> inner)
+    private MutableDictionaryConditionBase<TDictionary, TKey, TValue> Delegate(Assertion<TDictionary> inner)
         => new MutableDictionaryDelegatingAssertion<TDictionary, TKey, TValue>(Context, inner);
 
     /// <summary>
     /// Asserts that the dictionary is empty while preserving mutable-dictionary-specific chaining.
     /// </summary>
-    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsEmpty()
+    public new MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsEmpty()
     {
         Context.ExpressionBuilder.Append(".IsEmpty()");
         return Delegate(new CollectionIsEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
@@ -75,7 +75,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     /// <summary>
     /// Asserts that the dictionary is not empty while preserving mutable-dictionary-specific chaining.
     /// </summary>
-    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> IsNotEmpty()
+    public new MutableDictionaryConditionBase<TDictionary, TKey, TValue> IsNotEmpty()
     {
         Context.ExpressionBuilder.Append(".IsNotEmpty()");
         return Delegate(new CollectionIsNotEmptyAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
@@ -94,7 +94,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     /// <summary>
     /// Asserts that the dictionary contains exactly one entry while preserving mutable-dictionary chaining.
     /// </summary>
-    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasSingleItem()
+    public new MutableDictionaryConditionBase<TDictionary, TKey, TValue> HasSingleItem()
     {
         Context.ExpressionBuilder.Append(".HasSingleItem()");
         return Delegate(new HasSingleItemAssertion<TDictionary, KeyValuePair<TKey, TValue>>(Context.CreateDetached()));
@@ -103,7 +103,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     /// <summary>
     /// Asserts that the dictionary contains exactly one entry matching the predicate while preserving chaining.
     /// </summary>
-    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasSingleItem(
+    public new MutableDictionaryConditionBase<TDictionary, TKey, TValue> HasSingleItem(
         Func<KeyValuePair<TKey, TValue>, bool> predicate,
         [CallerArgumentExpression(nameof(predicate))] string? expression = null)
     {
@@ -115,7 +115,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     /// <summary>
     /// Asserts that the dictionary has at least the specified number of entries while preserving chaining.
     /// </summary>
-    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasAtLeast(
+    public new MutableDictionaryConditionBase<TDictionary, TKey, TValue> HasAtLeast(
         int minCount,
         [CallerArgumentExpression(nameof(minCount))] string? expression = null)
     {
@@ -126,7 +126,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     /// <summary>
     /// Asserts that the dictionary has at most the specified number of entries while preserving chaining.
     /// </summary>
-    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasAtMost(
+    public new MutableDictionaryConditionBase<TDictionary, TKey, TValue> HasAtMost(
         int maxCount,
         [CallerArgumentExpression(nameof(maxCount))] string? expression = null)
     {
@@ -137,7 +137,7 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
     /// <summary>
     /// Asserts that the dictionary entry count is between min and max (inclusive) while preserving chaining.
     /// </summary>
-    public new MutableDictionaryAssertionBase<TDictionary, TKey, TValue> HasCountBetween(
+    public new MutableDictionaryConditionBase<TDictionary, TKey, TValue> HasCountBetween(
         int min,
         int max,
         [CallerArgumentExpression(nameof(min))] string? minExpression = null,
@@ -271,27 +271,4 @@ public abstract class MutableDictionaryAssertionBase<TDictionary, TKey, TValue> 
         return new MutableDictionaryAnyValueAssertion<TDictionary, TKey, TValue>(Context, predicate);
     }
 
-    /// <summary>
-    /// Returns an And continuation that preserves dictionary type, key type, and value type.
-    /// </summary>
-    public new MutableDictionaryAndContinuation<TDictionary, TKey, TValue> And
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.OrAssertion<TDictionary>>();
-            return new MutableDictionaryAndContinuation<TDictionary, TKey, TValue>(Context, InternalWrappedExecution ?? this);
-        }
-    }
-
-    /// <summary>
-    /// Returns an Or continuation that preserves dictionary type, key type, and value type.
-    /// </summary>
-    public new MutableDictionaryOrContinuation<TDictionary, TKey, TValue> Or
-    {
-        get
-        {
-            ThrowIfMixingCombiner<Chaining.AndAssertion<TDictionary>>();
-            return new MutableDictionaryOrContinuation<TDictionary, TKey, TValue>(Context, InternalWrappedExecution ?? this);
-        }
-    }
 }

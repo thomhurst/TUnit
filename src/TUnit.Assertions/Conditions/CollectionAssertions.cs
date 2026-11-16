@@ -14,7 +14,7 @@ namespace TUnit.Assertions.Conditions;
 /// Asserts that a collection/enumerable is empty.
 /// Delegates to CollectionChecks for the actual logic.
 /// </summary>
-public class CollectionIsEmptyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionIsEmptyAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     public CollectionIsEmptyAssertion(
@@ -46,7 +46,7 @@ public class CollectionIsEmptyAssertion<TCollection, TItem> : Sources.Collection
 /// Asserts that a collection/enumerable is NOT empty.
 /// Delegates to CollectionChecks for the actual logic.
 /// </summary>
-public class CollectionIsNotEmptyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionIsNotEmptyAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     public CollectionIsNotEmptyAssertion(
@@ -79,7 +79,7 @@ public class CollectionIsNotEmptyAssertion<TCollection, TItem> : Sources.Collect
 /// </summary>
 // Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("Contains")]
-public class CollectionContainsAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionContainsAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly TItem _expected;
@@ -119,7 +119,7 @@ public class CollectionContainsAssertion<TCollection, TItem> : Sources.Collectio
 /// </summary>
 // Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("DoesNotContain")]
-public class CollectionDoesNotContainAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionDoesNotContainAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly TItem _expected;
@@ -159,7 +159,7 @@ public class CollectionDoesNotContainAssertion<TCollection, TItem> : Sources.Col
 /// </summary>
 // Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("DoesNotContain")]
-public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
@@ -198,7 +198,7 @@ public class CollectionDoesNotContainPredicateAssertion<TCollection, TItem> : So
 /// Asserts that a collection has a specific count/length.
 /// Delegates to CollectionChecks for the actual logic.
 /// </summary>
-public class CollectionCountAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionCountAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly int _expectedCount;
@@ -234,7 +234,7 @@ public class CollectionCountAssertion<TCollection, TItem> : Sources.CollectionAs
 /// Asserts that a collection has at least the specified minimum number of items (count >= minCount).
 /// Delegates to CollectionChecks for the actual logic.
 /// </summary>
-public class CollectionHasAtLeastAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionHasAtLeastAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly int _minCount;
@@ -270,7 +270,7 @@ public class CollectionHasAtLeastAssertion<TCollection, TItem> : Sources.Collect
 /// Asserts that a collection has at most the specified maximum number of items (count <= maxCount).
 /// Delegates to CollectionChecks for the actual logic.
 /// </summary>
-public class CollectionHasAtMostAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionHasAtMostAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly int _maxCount;
@@ -306,7 +306,7 @@ public class CollectionHasAtMostAssertion<TCollection, TItem> : Sources.Collecti
 /// Asserts that a collection count is between the specified minimum and maximum (inclusive).
 /// Delegates to CollectionChecks for the actual logic.
 /// </summary>
-public class CollectionHasCountBetweenAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionHasCountBetweenAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly int _min;
@@ -389,7 +389,7 @@ public class CollectionAllSatisfyHelper<TCollection, TItem>
 /// </summary>
 // Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("All")]
-public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
@@ -429,7 +429,7 @@ public class CollectionAllAssertion<TCollection, TItem> : Sources.CollectionAsse
 /// </summary>
 // Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("Any")]
-public class CollectionAnyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionAnyAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
@@ -470,7 +470,7 @@ public class CollectionAnyAssertion<TCollection, TItem> : Sources.CollectionAsse
 /// </summary>
 // Delegates to CollectionChecks for the count check, but captures the item for return.
 [AssertionExtension("HasSingleItem")]
-public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private TItem? _singleItem;
@@ -548,7 +548,7 @@ public class HasSingleItemAssertion<TCollection, TItem> : Sources.CollectionAsse
 /// </summary>
 // Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("HasSingleItem")]
-public class HasSingleItemPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class HasSingleItemPredicateAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
@@ -631,7 +631,7 @@ public class HasSingleItemPredicateAssertion<TCollection, TItem> : Sources.Colle
 /// </summary>
 // Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("Contains")]
-public class CollectionContainsPredicateAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionContainsPredicateAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, bool> _predicate;
@@ -693,9 +693,9 @@ public class CollectionContainsPredicateAssertion<TCollection, TItem> : Sources.
 
 /// <summary>
 /// Asserts that all items in the collection satisfy a custom assertion.
-/// Inherits from CollectionAssertionBase to enable chaining of collection methods.
+/// Inherits from CollectionConditionBase so <c>And</c>/<c>Or</c> keep the collection methods.
 /// </summary>
-public class CollectionAllSatisfyAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionAllSatisfyAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<IAssertionSource<TItem>, IAssertion?> _assertion;
@@ -753,9 +753,9 @@ public class CollectionAllSatisfyAssertion<TCollection, TItem> : Sources.Collect
 
 /// <summary>
 /// Asserts that all items in the collection, when mapped, satisfy a custom assertion.
-/// Inherits from CollectionAssertionBase to enable chaining of collection methods.
+/// Inherits from CollectionConditionBase so <c>And</c>/<c>Or</c> keep the collection methods.
 /// </summary>
-public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, TMapped> _mapper;
@@ -823,7 +823,7 @@ public class CollectionAllSatisfyMappedAssertion<TCollection, TItem, TMapped> : 
 /// </summary>
 // Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("IsInOrder")]
-public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     public CollectionIsInOrderAssertion(
@@ -856,7 +856,7 @@ public class CollectionIsInOrderAssertion<TCollection, TItem> : Sources.Collecti
 /// </summary>
 // Delegates to CollectionChecks for the actual logic.
 [AssertionExtension("IsInDescendingOrder")]
-public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     public CollectionIsInDescendingOrderAssertion(
@@ -886,10 +886,10 @@ public class CollectionIsInDescendingOrderAssertion<TCollection, TItem> : Source
 
 /// <summary>
 /// Asserts that a collection is ordered by a key selector in ascending order.
-/// Inherits from CollectionAssertionBase to enable chaining of collection methods.
+/// Inherits from CollectionConditionBase so <c>And</c>/<c>Or</c> keep the collection methods.
 /// Available as an instance method on CollectionAssertionBase for proper type inference.
 /// </summary>
-public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, TKey> _keySelector;
@@ -952,10 +952,10 @@ public class CollectionIsOrderedByAssertion<TCollection, TItem, TKey> : Sources.
 
 /// <summary>
 /// Asserts that a collection is ordered by a key selector in descending order.
-/// Inherits from CollectionAssertionBase to enable chaining of collection methods.
+/// Inherits from CollectionConditionBase so <c>And</c>/<c>Or</c> keep the collection methods.
 /// Available as an instance method on CollectionAssertionBase for proper type inference.
 /// </summary>
-public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> : Sources.CollectionAssertionBase<TCollection, TItem>
+public class CollectionIsOrderedByDescendingAssertion<TCollection, TItem, TKey> : Sources.CollectionConditionBase<TCollection, TItem>
     where TCollection : IEnumerable<TItem>
 {
     private readonly Func<TItem, TKey> _keySelector;

@@ -8,10 +8,10 @@ namespace TUnit.Assertions.Conditions;
 
 /// <summary>
 /// Asserts that a dictionary contains a specific key.
-/// Inherits from DictionaryAssertionBase to enable chaining of dictionary methods.
+/// Inherits from DictionaryConditionBase so <c>And</c>/<c>Or</c> keep the dictionary methods.
 /// Available as an instance method on DictionaryAssertionBase for proper type inference.
 /// </summary>
-public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources.DictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -105,10 +105,10 @@ public class DictionaryContainsKeyAssertion<TDictionary, TKey, TValue> : Sources
 
 /// <summary>
 /// Asserts that a dictionary does NOT contain a specific key.
-/// Inherits from DictionaryAssertionBase to enable chaining of dictionary methods.
+/// Inherits from DictionaryConditionBase so <c>And</c>/<c>Or</c> keep the dictionary methods.
 /// Available as an instance method on DictionaryAssertionBase for proper type inference.
 /// </summary>
-public class DictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+public class DictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue> : Sources.DictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -152,7 +152,7 @@ public class DictionaryDoesNotContainKeyAssertion<TDictionary, TKey, TValue> : S
 /// Asserts that a dictionary contains a specific value.
 /// Uses CollectionChecks for the actual logic.
 /// </summary>
-public class DictionaryContainsValueAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+public class DictionaryContainsValueAssertion<TDictionary, TKey, TValue> : Sources.DictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -192,7 +192,7 @@ public class DictionaryContainsValueAssertion<TDictionary, TKey, TValue> : Sourc
 /// Asserts that a dictionary does NOT contain a specific value.
 /// Uses CollectionChecks for the actual logic.
 /// </summary>
-public class DictionaryDoesNotContainValueAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+public class DictionaryDoesNotContainValueAssertion<TDictionary, TKey, TValue> : Sources.DictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -232,7 +232,7 @@ public class DictionaryDoesNotContainValueAssertion<TDictionary, TKey, TValue> :
 /// Asserts that a dictionary contains a key with a specific value.
 /// Uses CollectionChecks for the actual logic.
 /// </summary>
-public class DictionaryContainsKeyWithValueAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+public class DictionaryContainsKeyWithValueAssertion<TDictionary, TKey, TValue> : Sources.DictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -275,7 +275,7 @@ public class DictionaryContainsKeyWithValueAssertion<TDictionary, TKey, TValue> 
 /// Asserts that all keys in the dictionary satisfy a predicate.
 /// Uses CollectionChecks for the actual logic.
 /// </summary>
-public class DictionaryAllKeysAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+public class DictionaryAllKeysAssertion<TDictionary, TKey, TValue> : Sources.DictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -312,7 +312,7 @@ public class DictionaryAllKeysAssertion<TDictionary, TKey, TValue> : Sources.Dic
 /// Asserts that all values in the dictionary satisfy a predicate.
 /// Uses CollectionChecks for the actual logic.
 /// </summary>
-public class DictionaryAllValuesAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+public class DictionaryAllValuesAssertion<TDictionary, TKey, TValue> : Sources.DictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -349,7 +349,7 @@ public class DictionaryAllValuesAssertion<TDictionary, TKey, TValue> : Sources.D
 /// Asserts that any key in the dictionary satisfies a predicate.
 /// Uses CollectionChecks for the actual logic.
 /// </summary>
-public class DictionaryAnyKeyAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+public class DictionaryAnyKeyAssertion<TDictionary, TKey, TValue> : Sources.DictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
@@ -386,7 +386,7 @@ public class DictionaryAnyKeyAssertion<TDictionary, TKey, TValue> : Sources.Dict
 /// Asserts that any value in the dictionary satisfies a predicate.
 /// Uses CollectionChecks for the actual logic.
 /// </summary>
-public class DictionaryAnyValueAssertion<TDictionary, TKey, TValue> : Sources.DictionaryAssertionBase<TDictionary, TKey, TValue>
+public class DictionaryAnyValueAssertion<TDictionary, TKey, TValue> : Sources.DictionaryConditionBase<TDictionary, TKey, TValue>
     where TDictionary : IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {

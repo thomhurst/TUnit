@@ -7189,17 +7189,14 @@ namespace .Sources
         public .<TException> ThrowsExactly<TException>(string parameterName)
             where TException :  { }
     }
-    public abstract class AsyncEnumerableAssertionBase<TItem> : .<.<TItem>>, ., .<.<TItem>>
+    public abstract class AsyncEnumerableAssertionBase<TItem> : ., .<.<TItem>>
     {
         protected AsyncEnumerableAssertionBase(.<.<TItem>> context) { }
-        public new .<TItem> And { get; }
         public .<.<TItem>> Context { get; }
-        public new .<TItem> Or { get; }
         public .<TItem> All(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TItem> Any(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TItem> Contains(TItem expected, .<TItem>? comparer = null, [.("expected")] string? expression = null) { }
         public .<TItem> DoesNotContain(TItem expected, .<TItem>? comparer = null, [.("expected")] string? expression = null) { }
-        protected override string GetExpectation() { }
         public .<TItem> HasAtLeast(int minCount, [.("minCount")] string? expression = null) { }
         public .<TItem> HasAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
         public .<TItem> HasCount(int expected, [.("expected")] string? expression = null) { }
@@ -7218,6 +7215,12 @@ namespace .Sources
     public class AsyncEnumerableAssertion<TItem> : .<TItem>
     {
         public AsyncEnumerableAssertion(.<TItem> value, string? expression) { }
+    }
+    public abstract class AsyncEnumerableConditionBase<TItem> : .<.<TItem>>
+    {
+        protected AsyncEnumerableConditionBase(.<.<TItem>> context) { }
+        public new .<TItem> And { get; }
+        public new .<TItem> Or { get; }
     }
     public class AsyncFuncAssertion<TValue> : ., .<TValue>, .<TValue>
     {
@@ -7242,12 +7245,11 @@ namespace .Sources
         public .<TException> ThrowsExactly<TException>()
             where TException :  { }
     }
-    public abstract class CollectionAssertionBase<TCollection, TItem> : .<TCollection>, ., .<TCollection>
+    public abstract class CollectionAssertionBase<TCollection, TItem> : ., .<TCollection>
         where TCollection : .<TItem>
     {
         protected CollectionAssertionBase(.<TCollection> context) { }
-        public new .<TCollection, TItem> And { get; }
-        public new .<TCollection, TItem> Or { get; }
+        protected .<TCollection> Context { get; }
         public .<TCollection, TItem> All() { }
         public .<TCollection, TItem> All(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> Any(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
@@ -7262,7 +7264,6 @@ namespace .Sources
         public .<TCollection, TItem> DoesNotContain(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }
         public .<TCollection, TItem> DoesNotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
-        protected override string GetExpectation() { }
         public .<TCollection, TItem> HasAtLeast(int minCount, [.("minCount")] string? expression = null) { }
         public .<TCollection, TItem> HasAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
         [("Use Count() instead, which provides all numeric assertion methods. Example: Asser" +
@@ -7297,6 +7298,13 @@ namespace .Sources
         public CollectionAssertion(.<TItem> value, string? expression) { }
         public static .<TItem> Create(.<TItem> item, string label) { }
     }
+    public abstract class CollectionConditionBase<TCollection, TItem> : .<TCollection>
+        where TCollection : .<TItem>
+    {
+        protected CollectionConditionBase(.<TCollection> context) { }
+        public new .<TCollection, TItem> And { get; }
+        public new .<TCollection, TItem> Or { get; }
+    }
     public class DelegateAssertion : ., .<object?>, .<object?>
     {
         public DelegateAssertion( action, string? expression) { }
@@ -7317,8 +7325,6 @@ namespace .Sources
         where TKey :  notnull
     {
         protected DictionaryAssertionBase(.<TDictionary> context) { }
-        public new .<TDictionary, TKey, TValue> And { get; }
-        public new .<TDictionary, TKey, TValue> Or { get; }
         public .<TDictionary, TKey, TValue> AllKeys(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> AllValues(<TValue, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> AnyKey(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
@@ -7330,7 +7336,6 @@ namespace .Sources
         public new .<TDictionary, TKey, TValue> Count() { }
         public .<TDictionary, TKey, TValue> DoesNotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
-        protected override string GetExpectation() { }
         public new .<TDictionary, TKey, TValue> HasAtLeast(int minCount, [.("minCount")] string? expression = null) { }
         public new .<TDictionary, TKey, TValue> HasAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
         public new .<TDictionary, TKey, TValue> HasCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
@@ -7346,6 +7351,14 @@ namespace .Sources
     {
         public DictionaryAssertion(.<TKey, TValue>? value, string? expression) { }
         public static .<TKey, TValue> Create(.<TKey, TValue> item, string label) { }
+    }
+    public abstract class DictionaryConditionBase<TDictionary, TKey, TValue> : .<TDictionary, .<TKey, TValue>>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        protected DictionaryConditionBase(.<TDictionary> context) { }
+        public new .<TDictionary, TKey, TValue> And { get; }
+        public new .<TDictionary, TKey, TValue> Or { get; }
     }
     public class FuncAssertion<TValue> : ., .<TValue>, .<TValue>
     {
@@ -7380,8 +7393,6 @@ namespace .Sources
         where TList : .<TItem>
     {
         protected ListAssertionBase(.<TList> context) { }
-        public new .<TList, TItem> And { get; }
-        public new .<TList, TItem> Or { get; }
         public .<TList, TItem> FirstItem() { }
         public .<TList, TItem> HasItemAt(int index, TItem expected, [.("index")] string? indexExpression = null, [.("expected")] string? expectedExpression = null) { }
         public new .<TList, TItem> IsNotNull() { }
@@ -7395,15 +7406,21 @@ namespace .Sources
         public static .<TItem> Create(.<TItem> item, string label) { }
         public static .<TItem> Create(.<TItem> item, string label) { }
     }
+    public abstract class ListConditionBase<TList, TItem> : .<TList, TItem>
+        where TList : .<TItem>
+    {
+        protected ListConditionBase(.<TList> context) { }
+        public new .<TList, TItem> And { get; }
+        public new .<TList, TItem> Or { get; }
+    }
     public class MemoryAndContinuation<TMemory, TItem> : .<TMemory, TItem>
     {
         protected override .<TItem> CreateAdapter(TMemory value) { }
     }
-    public abstract class MemoryAssertionBase<TMemory, TItem> : .<TMemory>, ., .<TMemory>
+    public abstract class MemoryAssertionBase<TMemory, TItem> : ., .<TMemory>
     {
         protected MemoryAssertionBase(.<TMemory> context) { }
-        public new .<TMemory, TItem> And { get; }
-        public new .<TMemory, TItem> Or { get; }
+        protected .<TMemory> Context { get; }
         public .<TMemory, TItem> All(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TMemory, TItem> Any(<TItem, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TMemory, TItem> Contains(TItem expected, [.("expected")] string? expression = null) { }
@@ -7412,7 +7429,6 @@ namespace .Sources
         protected abstract .<TItem> CreateAdapter(TMemory value);
         public .<TMemory, TItem> DoesNotContain(TItem expected, [.("expected")] string? expression = null) { }
         public .<TMemory, TItem> DoesNotContain(TItem expected, .<TItem> comparer, [.("expected")] string? expectedExpression = null, [.("comparer")] string? comparerExpression = null) { }
-        protected override string GetExpectation() { }
         public .<TMemory, TItem> HasDistinctItems() { }
         public .<TMemory, TItem> HasSingleItem() { }
         public .<TSource, TMemory> IsAssignableFrom<TSource>() { }
@@ -7435,6 +7451,13 @@ namespace .Sources
         public MemoryAssertion(<TItem> value, string expression) { }
         protected override .<TItem> CreateAdapter(<TItem> value) { }
     }
+    public abstract class MemoryConditionBase<TMemory, TItem> : .<TMemory>
+    {
+        protected MemoryConditionBase(.<TMemory> context) { }
+        public new .<TMemory, TItem> And { get; }
+        public new .<TMemory, TItem> Or { get; }
+        protected abstract .<TItem> CreateAdapter(TMemory value);
+    }
     public class MemoryOrContinuation<TMemory, TItem> : .<TMemory, TItem>
     {
         protected override .<TItem> CreateAdapter(TMemory value) { }
@@ -7444,8 +7467,6 @@ namespace .Sources
         where TKey :  notnull
     {
         protected MutableDictionaryAssertionBase(.<TDictionary> context) { }
-        public new .<TDictionary, TKey, TValue> And { get; }
-        public new .<TDictionary, TKey, TValue> Or { get; }
         public .<TDictionary, TKey, TValue> AllKeys(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> AllValues(<TValue, bool> predicate, [.("predicate")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> AnyKey(<TKey, bool> predicate, [.("predicate")] string? expression = null) { }
@@ -7457,7 +7478,6 @@ namespace .Sources
         public new .<TDictionary, TKey, TValue> Count() { }
         public .<TDictionary, TKey, TValue> DoesNotContainKey(TKey expectedKey, [.("expectedKey")] string? expression = null) { }
         public .<TDictionary, TKey, TValue> DoesNotContainValue(TValue expectedValue, [.("expectedValue")] string? expression = null) { }
-        protected override string GetExpectation() { }
         public new .<TDictionary, TKey, TValue> HasAtLeast(int minCount, [.("minCount")] string? expression = null) { }
         public new .<TDictionary, TKey, TValue> HasAtMost(int maxCount, [.("maxCount")] string? expression = null) { }
         public new .<TDictionary, TKey, TValue> HasCountBetween(int min, int max, [.("min")] string? minExpression = null, [.("max")] string? maxExpression = null) { }
@@ -7475,12 +7495,18 @@ namespace .Sources
         public static .<TKey, TValue> Create(.<TKey, TValue> item, string label) { }
         public static .<TKey, TValue> Create(.<TKey, TValue> item, string label) { }
     }
+    public abstract class MutableDictionaryConditionBase<TDictionary, TKey, TValue> : .<TDictionary, .<TKey, TValue>>
+        where TDictionary : .<TKey, TValue>
+        where TKey :  notnull
+    {
+        protected MutableDictionaryConditionBase(.<TDictionary> context) { }
+        public new .<TDictionary, TKey, TValue> And { get; }
+        public new .<TDictionary, TKey, TValue> Or { get; }
+    }
     public abstract class ReadOnlyListAssertionBase<TList, TItem> : .<TList, TItem>
         where TList : .<TItem>
     {
         protected ReadOnlyListAssertionBase(.<TList> context) { }
-        public new .<TList, TItem> And { get; }
-        public new .<TList, TItem> Or { get; }
         public .<TList, TItem> FirstItem() { }
         public .<TList, TItem> HasItemAt(int index, TItem expected, .<TItem>? comparer = null, [.("index")] string? indexExpression = null, [.("expected")] string? expectedExpression = null) { }
         public new .<TList, TItem> IsNotNull() { }
@@ -7492,6 +7518,13 @@ namespace .Sources
     {
         public ReadOnlyListAssertion(.<TItem>? value, string? expression) { }
         public static .<TItem> Create(.<TItem> item, string label) { }
+    }
+    public abstract class ReadOnlyListConditionBase<TList, TItem> : .<TList, TItem>
+        where TList : .<TItem>
+    {
+        protected ReadOnlyListConditionBase(.<TList> context) { }
+        public new .<TList, TItem> And { get; }
+        public new .<TList, TItem> Or { get; }
     }
     public class ReadOnlyMemoryAssertion<TItem> : .<<TItem>, TItem>, ., .<<TItem>>
     {
@@ -7513,11 +7546,8 @@ namespace .Sources
         where TSet : .<TItem>
     {
         protected SetAssertionBase(.<TSet> context) { }
-        public new .<TSet, TItem> And { get; }
-        public new .<TSet, TItem> Or { get; }
         protected abstract .<TItem> CreateSetAdapter(TSet value);
         public .<TSet, TItem> DoesNotOverlap(.<TItem> other, [.("other")] string? expression = null) { }
-        protected override string GetExpectation() { }
         public new .<TSet, TItem> IsNotNull() { }
         public new .<TSet, TItem> IsNull() { }
         public .<TSet, TItem> IsProperSubsetOf(.<TItem> other, [.("other")] string? expression = null) { }
@@ -7532,6 +7562,14 @@ namespace .Sources
         public SetAssertion(.<TItem>? value, string expression) { }
         protected override .<TItem> CreateSetAdapter(.<TItem> value) { }
         public static .<TItem> Create(.<TItem> item, string label) { }
+    }
+    public abstract class SetConditionBase<TSet, TItem> : .<TSet, TItem>
+        where TSet : .<TItem>
+    {
+        protected SetConditionBase(.<TSet> context) { }
+        public new .<TSet, TItem> And { get; }
+        public new .<TSet, TItem> Or { get; }
+        protected abstract .<TItem> CreateSetAdapter(TSet value);
     }
     public class SetOrContinuation<TSet, TItem> : .<TSet, TItem>
         where TSet : .<TItem>
