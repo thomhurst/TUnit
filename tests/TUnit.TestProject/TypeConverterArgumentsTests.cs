@@ -76,6 +76,21 @@ public class TypeConverterArgumentsTests
         await Assert.That(version).IsEqualTo(new Version(1, 2, 3));
     }
 
+    [Test]
+    [Arguments("en-GB")]
+    [Arguments(null)]
+    public async Task Built_In_Converter_For_Nullable_CultureInfo(CultureInfo? culture)
+    {
+        if (culture is not null)
+        {
+            await Assert.That(culture.Name).IsEqualTo("en-GB");
+        }
+        else
+        {
+            await Assert.That(culture).IsNull();
+        }
+    }
+
     [TypeConverter(typeof(ConvertFromOnlyConverter))]
     public sealed record ConvertFromOnly(string Value);
 

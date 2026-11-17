@@ -127,15 +127,18 @@ internal static class ParsableTypeExtensions
 
     /// <summary>
     /// <c>TypeDescriptor</c> supplies converters for these types itself, as they declare no <c>[TypeConverter]</c>.
-    /// Built-in types that are parsable already convert through <c>Parse</c>.
+    /// They are the entries of its built-in table (<c>ReflectTypeDescriptionProvider.s_intrinsicTypeConverters</c>)
+    /// that do not already convert from string through <c>Parse</c> or the language. Keep in sync with
+    /// <c>CastHelper.TryTypeConverterConvert</c>.
     /// </summary>
     private static INamedTypeSymbol? GetBuiltInConverter(ITypeSymbol type, Compilation compilation)
     {
-        var converterName = type.ToDisplayString() switch
+        // The fully qualified format omits nullable annotations, so CultureInfo? matches too.
+        var converterName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) switch
         {
-            "System.Globalization.CultureInfo" => "System.ComponentModel.CultureInfoConverter",
-            "System.Uri" => "System.UriTypeConverter",
-            "System.Version" => "System.ComponentModel.VersionConverter",
+            "global::System.Globalization.CultureInfo" => "System.ComponentModel.CultureInfoConverter",
+            "global::System.Uri" => "System.UriTypeConverter",
+            "global::System.Version" => "System.ComponentModel.VersionConverter",
             _ => null,
         };
 

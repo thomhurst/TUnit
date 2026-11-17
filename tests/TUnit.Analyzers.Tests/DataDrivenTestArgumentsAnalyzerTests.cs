@@ -390,6 +390,13 @@ public class DataDrivenTestArgumentsAnalyzerTests
                     public void MyTest(CultureInfo culture, Uri uri, Version version)
                     {
                     }
+
+                    [Test]
+                    [Arguments("en-GB", "https://example.com", "1.2.3")]
+                    [Arguments(null, null, null)]
+                    public void NullableTest(CultureInfo? culture, Uri? uri, Version? version)
+                    {
+                    }
                 }
                 """
             );
