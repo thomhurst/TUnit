@@ -22,6 +22,11 @@ public class AsyncDelegateNullabilitySuppressorTests
     [Arguments("await Assert.That(func: () => {|#0:GetNameAsync()|}).IsEqualTo(\"Alice\");")]
     [Arguments("await Assert.That<string>(() => {|#0:GetNameAsync()|}).IsEqualTo(\"Alice\");")]
     [Arguments("await Assert.That(() => {|#0:GetNumbersAsync()|}).Contains(1);")]
+    [Arguments("await Assert.That(static () => {|#0:GetNameAsync()|}).IsEqualTo(\"Alice\");")]
+    [Arguments("await That(() => {|#0:GetNameAsync()|}).IsEqualTo(\"Alice\");")]
+    [Arguments("await global::TUnit.Assertions.Assert.That(() => {|#0:GetNameAsync()|}).IsEqualTo(\"Alice\");")]
+    // Only the top-level annotation differs: List<string?> for List<string?>?.
+    [Arguments("await Assert.That(() => {|#0:GetMaybeNamesAsync()|}).IsNotNull();")]
     public async Task Suppresses_A_Lambda_Returning_A_Non_Nullable_Task_Result(string statement)
     {
         await AnalyzerTestHelpers
@@ -37,6 +42,9 @@ public class AsyncDelegateNullabilitySuppressorTests
     [Arguments("await Assert.That({|#0:GetNameAsync|}).IsEqualTo(\"Alice\");")]
     [Arguments("await Assert.That<string>({|#0:GetNameAsync|}).IsEqualTo(\"Alice\");")]
     [Arguments("await Assert.That(({|#0:GetNameAsync|})).IsEqualTo(\"Alice\");")]
+    [Arguments("await Assert.That({|#0:this.GetInstanceNameAsync|}).IsEqualTo(\"Alice\");")]
+    [Arguments("await Assert.That({|#0:GetNewAsync<List<int>>|}).IsNotNull();")]
+    [Arguments("await Assert.That({|#0:GetNumbersAsync|}).Contains(1);")]
     public async Task Suppresses_A_Method_Group_Returning_A_Non_Nullable_Task_Result(string statement)
     {
         await AnalyzerTestHelpers
@@ -57,6 +65,7 @@ public class AsyncDelegateNullabilitySuppressorTests
     [Arguments("await Assert.That<Task<string?>>(() => {|#0:GetNameAsync()|}).IsNotNull();")]
     // List<string> for List<string?>?: the element annotation differs too, which this suppressor leaves alone.
     [Arguments("await Assert.That<List<string?>>(() => {|#0:GetNamesAsync()|}).IsNotNull();")]
+    [Arguments("await Assert.That(() => ({|#0:GetMaybeNameAsync() as Task<string>|})).IsNotNull();")]
     public async Task Does_Not_Suppress_Other_CS8619(string statement)
     {
         await AnalyzerTestHelpers
@@ -73,6 +82,8 @@ public class AsyncDelegateNullabilitySuppressorTests
     [Arguments("Func<Task<string?>> name = {|#0:GetNameAsync|}; await name();")]
     // A task that may itself be null: the assertion would await null.
     [Arguments("await Assert.That<string>({|#0:GetMaybeTaskAsync|}).IsNotNull();")]
+    // A cast of the method group: the warning belongs to the cast.
+    [Arguments("await Assert.That({|#0:(Func<Task<string?>>)GetNameAsync|}).IsEqualTo(\"Alice\");")]
     public async Task Does_Not_Suppress_Other_CS8621(string statement)
     {
         await AnalyzerTestHelpers
@@ -85,12 +96,15 @@ public class AsyncDelegateNullabilitySuppressorTests
     }
 
     [Test]
-    // The conditional and the switch expression take the type of their first branch, Task<string>: the warning on the
-    // whole expression (to the lambda's Task<string?>) is suppressed, the one on the other branch (Task<string?> to
-    // Task<string>) is a real mismatch and stays.
+    // The conditional and the switch expression take the non-nullable type Task<string>: the warning on the whole
+    // expression (to the lambda's Task<string?>) is suppressed, the one on the Task<string?> branch is a real mismatch
+    // and stays.
     [Arguments("await Assert.That(() => {|#0:Flag ? GetNameAsync() : {|#1:GetMaybeNameAsync()|}|}).IsNotNull();")]
+    [Arguments("await Assert.That(() => {|#0:Flag ? {|#1:GetMaybeNameAsync()|} : GetNameAsync()|}).IsNotNull();")]
+    // Another warning in the same lambda stays.
+    [Arguments("await Assert.That(() => { List<string?> names = {|#1:new List<string>()|}; return {|#0:GetNameAsync()|}; }).IsNotNull();")]
     [Arguments("await Assert.That(() => {|#0:Flag switch { true => GetNameAsync(), _ => {|#1:GetMaybeNameAsync()|} }|}).IsNotNull();")]
-    public async Task Suppresses_Only_The_Conversion_To_The_Lambda_Result_In_A_Conditional(string statement)
+    public async Task Suppresses_Only_The_Conversion_To_The_Lambda_Result(string statement)
     {
         await AnalyzerTestHelpers
             .CreateSuppressorTest<AsyncDelegateNullabilitySuppressor>(Code(statement))
@@ -99,6 +113,22 @@ public class AsyncDelegateNullabilitySuppressorTests
             .WithExpectedDiagnosticsResults(
                 CS8619.WithLocation(0).WithIsSuppressed(true),
                 CS8619.WithLocation(1).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Does_Not_Suppress_A_Cast_Result()
+    {
+        // The cast's own conversion (Task<string?> to Task<string>) is a real mismatch, and its warning has the same span
+        // as the one on the lambda's result, so neither is suppressed.
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<AsyncDelegateNullabilitySuppressor>(Code("await Assert.That(() => {|#0:(Task<string>)GetMaybeNameAsync()|}).IsNotNull();"))
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8619)
+            .WithExpectedDiagnosticsResults(
+                CS8619.WithLocation(0).WithIsSuppressed(false),
+                CS8619.WithLocation(0).WithIsSuppressed(false))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
             .RunAsync();
     }
@@ -159,6 +189,7 @@ public class AsyncDelegateNullabilitySuppressorTests
         using System.Threading.Tasks;
         using TUnit.Assertions;
         using TUnit.Assertions.Extensions;
+        using static TUnit.Assertions.Assert;
 
         public static class Other
         {
@@ -171,6 +202,9 @@ public class AsyncDelegateNullabilitySuppressorTests
             private static Task<string> GetNameAsync() => Task.FromResult("Alice");
             private static Task<string?> GetMaybeNameAsync() => Task.FromResult<string?>(null);
             private static Task<string?>? GetMaybeTaskAsync() => null;
+            private static Task<List<string?>> GetMaybeNamesAsync() => Task.FromResult(new List<string?> { null });
+            private static Task<T> GetNewAsync<T>() where T : new() => Task.FromResult(new T());
+            private Task<string> GetInstanceNameAsync() => Task.FromResult("Alice");
             private static Task<IEnumerable<int>> GetNumbersAsync() => Task.FromResult<IEnumerable<int>>(new[] { 1 });
             private static Task<List<string>> GetNamesAsync() => Task.FromResult(new List<string> { "Alice" });
 

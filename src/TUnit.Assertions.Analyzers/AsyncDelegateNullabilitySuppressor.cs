@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using TUnit.Assertions.Analyzers.Helpers;
@@ -77,7 +78,9 @@ public class AsyncDelegateNullabilitySuppressor : DiagnosticSuppressor
     /// </summary>
     private static ArgumentSyntax? GetThatArgument(ExpressionSyntax expression, bool isMethodGroup)
     {
-        ExpressionSyntax? argumentExpression = isMethodGroup ? expression : GetLambdaOfResult(expression);
+        ExpressionSyntax? argumentExpression = isMethodGroup
+            ? (IsMethodGroupOrTypedLambda(expression) ? expression : null)
+            : (IsConversionOfItsOwn(expression) ? null : GetLambdaOfResult(expression));
         while (argumentExpression?.Parent is ParenthesizedExpressionSyntax parenthesized)
         {
             argumentExpression = parenthesized;
@@ -87,6 +90,28 @@ public class AsyncDelegateNullabilitySuppressor : DiagnosticSuppressor
                && IsNamedThat(invocation.Expression)
             ? argument
             : null;
+    }
+
+    /// <summary>
+    /// The CS8621 forms this suppressor handles: a method group, or a lambda with an explicit return type. A cast of
+    /// one is not: the warning then belongs to the cast.
+    /// </summary>
+    private static bool IsMethodGroupOrTypedLambda(ExpressionSyntax expression)
+        => expression is SimpleNameSyntax or MemberAccessExpressionSyntax or AnonymousFunctionExpressionSyntax;
+
+    /// <summary>
+    /// True for a result that is a cast or an <c>as</c> conversion (in any parentheses): its own conversion warning
+    /// shares the span with the warning on the lambda's result, so the two cannot be told apart.
+    /// </summary>
+    private static bool IsConversionOfItsOwn(ExpressionSyntax expression)
+    {
+        var inner = expression;
+        while (inner is ParenthesizedExpressionSyntax parenthesized)
+        {
+            inner = parenthesized.Expression;
+        }
+
+        return inner is CastExpressionSyntax || inner.IsKind(SyntaxKind.AsExpression);
     }
 
     private static bool IsNamedThat(ExpressionSyntax invoked)
