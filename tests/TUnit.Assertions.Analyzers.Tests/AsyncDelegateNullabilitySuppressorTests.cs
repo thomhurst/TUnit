@@ -89,6 +89,7 @@ public class AsyncDelegateNullabilitySuppressorTests
     [Arguments("await Assert.That<string>({|#0:GetMaybeTaskAsync|}).IsNotNull();")]
     // [return: MaybeNull]: the task itself may be null, which its type does not show.
     [Arguments("await Assert.That({|#0:GetMaybeNullTaskAsync|}).IsNotNull();")]
+    [Arguments("await Assert.That({|#0:GetMaybeNullValue<Task<string>>|}).IsNotNull();")]
     [Arguments("await Assert.That({|#0:[return: MaybeNull] Task<string> () =>|} GetNameAsync()).IsNotNull();")]
     // A cast of the method group: the warning belongs to the cast.
     [Arguments("await Assert.That({|#0:(Func<Task<string?>>)GetNameAsync|}).IsEqualTo(\"Alice\");")]
@@ -242,6 +243,7 @@ public class AsyncDelegateNullabilitySuppressorTests
             private static Task<string?>? GetMaybeTaskAsync() => null;
             private static Task<string>? GetNullableTaskAsync() => null;
             [return: MaybeNull] private static Task<string> GetMaybeNullTaskAsync() => null!;
+            [return: MaybeNull] private static T GetMaybeNullValue<T>() => default!;
             private static Task<List<string?>> GetMaybeNamesAsync() => Task.FromResult(new List<string?> { null });
             private static Task<T> GetNewAsync<T>() where T : new() => Task.FromResult(new T());
             private Task<string> GetInstanceNameAsync() => Task.FromResult("Alice");

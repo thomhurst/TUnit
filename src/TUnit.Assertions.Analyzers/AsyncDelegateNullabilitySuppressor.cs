@@ -277,7 +277,16 @@ public class AsyncDelegateNullabilitySuppressor : DiagnosticSuppressor
     private static bool IsTaskOfT(INamedTypeSymbol type, INamedTypeSymbol taskOfT)
         => SymbolEqualityComparer.Default.Equals(type.OriginalDefinition, taskOfT);
 
+    /// <summary>
+    /// True when the method's return value is marked <c>[return: MaybeNull]</c>, read from the method as declared too,
+    /// so a constructed generic method or a reduced extension method does not hide it.
+    /// </summary>
     private static bool HasMaybeNullReturn(IMethodSymbol method)
+        => HasMaybeNullAttribute(method)
+           || HasMaybeNullAttribute(method.OriginalDefinition)
+           || (method.ReducedFrom is { } reducedFrom && HasMaybeNullAttribute(reducedFrom));
+
+    private static bool HasMaybeNullAttribute(IMethodSymbol method)
         => method.GetReturnTypeAttributes().Any(a => a.AttributeClass is { Name: "MaybeNullAttribute", ContainingNamespace: { Name: "CodeAnalysis", ContainingNamespace: { Name: "Diagnostics", ContainingNamespace: { Name: "System", ContainingNamespace.IsGlobalNamespace: true } } } });
 
     private static SuppressionDescriptor CreateDescriptor(string id)
