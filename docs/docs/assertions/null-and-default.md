@@ -74,6 +74,10 @@ public async Task Chained_After_Null_Check()
 }
 ```
 
+### Delegates that return a task
+
+`Assert.That` takes a delegate that returns `Task<T?>`, so awaiting `IsNotNull()` on a lambda that returns `Task<string?>` gives a `string`. A lambda or method group that returns a `Task<T>` of a non-nullable `T`, passed directly, such as `Assert.That(() => GetNameAsync())` or `Assert.That(GetNameAsync)`, would get CS8619 or CS8621 from the compiler, because `Task<T>` is invariant in its nullability. TUnit's analyzer suppresses those two warnings there: the assertion only reads the task's result, and a result that cannot be null is always a valid `T?`.
+
 ## Default Value Assertions
 
 ### IsDefault
