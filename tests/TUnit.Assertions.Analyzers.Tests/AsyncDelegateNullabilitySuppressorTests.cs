@@ -45,6 +45,8 @@ public class AsyncDelegateNullabilitySuppressorTests
     [Arguments("await Assert.That({|#0:this.GetInstanceNameAsync|}).IsEqualTo(\"Alice\");")]
     [Arguments("await Assert.That({|#0:GetNewAsync<List<int>>|}).IsNotNull();")]
     [Arguments("await Assert.That({|#0:GetNumbersAsync|}).Contains(1);")]
+    // The warning sits on the head of a lambda with an explicit return type.
+    [Arguments("await Assert.That({|#0:Task<string> () =>|} GetNameAsync()).IsEqualTo(\"Alice\");")]
     public async Task Suppresses_A_Method_Group_Returning_A_Non_Nullable_Task_Result(string statement)
     {
         await AnalyzerTestHelpers
@@ -63,6 +65,9 @@ public class AsyncDelegateNullabilitySuppressorTests
     [Arguments("await Other.That(() => {|#0:GetNameAsync()|});")]
     // The Func<TValue?> overload with a task as TValue: the assertion is on the task, not its result.
     [Arguments("await Assert.That<Task<string?>>(() => {|#0:GetNameAsync()|}).IsNotNull();")]
+    // A return of a local function or a nested lambda inside the asserted lambda is not the asserted lambda's result.
+    [Arguments("await Assert.That(() => { Task<string?> Local() { return {|#0:GetNameAsync()|}; } return Local(); }).IsNotNull();")]
+    [Arguments("await Assert.That(() => { Func<Task<string?>> inner = () => {|#0:GetNameAsync()|}; return inner(); }).IsNotNull();")]
     // List<string> for List<string?>?: the element annotation differs too, which this suppressor leaves alone.
     [Arguments("await Assert.That<List<string?>>(() => {|#0:GetNamesAsync()|}).IsNotNull();")]
     [Arguments("await Assert.That(() => ({|#0:GetMaybeNameAsync() as Task<string>|})).IsNotNull();")]
@@ -82,6 +87,9 @@ public class AsyncDelegateNullabilitySuppressorTests
     [Arguments("Func<Task<string?>> name = {|#0:GetNameAsync|}; await name();")]
     // A task that may itself be null: the assertion would await null.
     [Arguments("await Assert.That<string>({|#0:GetMaybeTaskAsync|}).IsNotNull();")]
+    // [return: MaybeNull]: the task itself may be null, which its type does not show.
+    [Arguments("await Assert.That({|#0:GetMaybeNullTaskAsync|}).IsNotNull();")]
+    [Arguments("await Assert.That({|#0:[return: MaybeNull] Task<string> () =>|} GetNameAsync()).IsNotNull();")]
     // A cast of the method group: the warning belongs to the cast.
     [Arguments("await Assert.That({|#0:(Func<Task<string?>>)GetNameAsync|}).IsEqualTo(\"Alice\");")]
     public async Task Does_Not_Suppress_Other_CS8621(string statement)
@@ -113,6 +121,35 @@ public class AsyncDelegateNullabilitySuppressorTests
             .WithExpectedDiagnosticsResults(
                 CS8619.WithLocation(0).WithIsSuppressed(true),
                 CS8619.WithLocation(1).WithIsSuppressed(false))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task A_Typed_Lambda_Keeps_The_Warning_On_Its_Own_Body()
+    {
+        // The body's Task<string?> does not fit the lambda's declared Task<string>: a real mismatch, which stays. The
+        // lambda's Task<string> going to the delegate's Task<string?> is the false positive.
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<AsyncDelegateNullabilitySuppressor>(Code("await Assert.That({|#1:Task<string> () =>|} {|#0:GetMaybeNameAsync()|}).IsNotNull();"))
+            .IgnoringDiagnostics("CS1591")
+            .WithSpecificDiagnostics(CS8619, CS8621)
+            .WithExpectedDiagnosticsResults(
+                CS8619.WithLocation(0).WithIsSuppressed(false),
+                CS8621.WithLocation(1).WithIsSuppressed(true))
+            .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
+            .RunAsync();
+    }
+
+    [Test]
+    public async Task Does_Not_Suppress_For_A_Task_That_May_Itself_Be_Null()
+    {
+        // The compiler reports the possibly null task as CS8603 next to the CS8619; neither is the false positive.
+        await AnalyzerTestHelpers
+            .CreateSuppressorTest<AsyncDelegateNullabilitySuppressor>(Code("await Assert.That(() => {|#0:GetNullableTaskAsync()|}).IsNotNull();"))
+            .IgnoringDiagnostics("CS1591", "CS8603")
+            .WithSpecificDiagnostics(CS8619)
+            .WithExpectedDiagnosticsResults(CS8619.WithLocation(0).WithIsSuppressed(false))
             .WithCompilerDiagnostics(CompilerDiagnostics.Warnings)
             .RunAsync();
     }
@@ -186,6 +223,7 @@ public class AsyncDelegateNullabilitySuppressorTests
         #nullable enable
         using System;
         using System.Collections.Generic;
+        using System.Diagnostics.CodeAnalysis;
         using System.Threading.Tasks;
         using TUnit.Assertions;
         using TUnit.Assertions.Extensions;
@@ -202,6 +240,8 @@ public class AsyncDelegateNullabilitySuppressorTests
             private static Task<string> GetNameAsync() => Task.FromResult("Alice");
             private static Task<string?> GetMaybeNameAsync() => Task.FromResult<string?>(null);
             private static Task<string?>? GetMaybeTaskAsync() => null;
+            private static Task<string>? GetNullableTaskAsync() => null;
+            [return: MaybeNull] private static Task<string> GetMaybeNullTaskAsync() => null!;
             private static Task<List<string?>> GetMaybeNamesAsync() => Task.FromResult(new List<string?> { null });
             private static Task<T> GetNewAsync<T>() where T : new() => Task.FromResult(new T());
             private Task<string> GetInstanceNameAsync() => Task.FromResult("Alice");
