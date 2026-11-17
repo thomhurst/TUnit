@@ -55,6 +55,27 @@ public class TypeConverterArgumentsTests
         await Assert.That(value.Value).IsEqualTo("abc");
     }
 
+    [Test]
+    [Arguments("en-GB")]
+    public async Task Built_In_Converter_For_CultureInfo(CultureInfo culture)
+    {
+        await Assert.That(culture.Name).IsEqualTo("en-GB");
+    }
+
+    [Test]
+    [Arguments("https://example.com/path")]
+    public async Task Built_In_Converter_For_Uri(Uri uri)
+    {
+        await Assert.That(uri).IsEqualTo(new Uri("https://example.com/path"));
+    }
+
+    [Test]
+    [Arguments("1.2.3")]
+    public async Task Built_In_Converter_For_Version(Version version)
+    {
+        await Assert.That(version).IsEqualTo(new Version(1, 2, 3));
+    }
+
     [TypeConverter(typeof(ConvertFromOnlyConverter))]
     public sealed record ConvertFromOnly(string Value);
 

@@ -33,7 +33,7 @@ public class MyTestClass
 
 ## Converting String Arguments
 
-A string argument can be passed to a parameter of another type when that type implements `IParsable<TSelf>` (such as `DateTime`, `Guid` or `TimeSpan`) or declares a `[TypeConverter]` that converts from strings. Conversions use the invariant culture.
+A string argument can be passed to a parameter of another type when that type implements `IParsable<TSelf>` (such as `DateTime`, `Guid` or `TimeSpan`) or declares a `[TypeConverter]` that converts from strings. `CultureInfo`, `Uri` and `Version` also work, through the converters .NET provides for them. Conversions use the invariant culture.
 
 ```csharp
 using System;

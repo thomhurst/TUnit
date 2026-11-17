@@ -44,7 +44,8 @@ internal static class ParsableTypeExtensions
 
     /// <summary>
     /// Finds the <c>[TypeConverter]</c> that converts a string argument to <paramref name="type"/>, mirroring
-    /// how <c>TypeDescriptor</c> picks a converter declared on the type or a base type. Types that already
+    /// how <c>TypeDescriptor</c> picks a converter declared on the type or a base type, or one it supplies for a
+    /// built-in type such as <c>CultureInfo</c>. Types that already
     /// convert from string through the language (built-ins or user-defined operators) or through
     /// <see cref="IsParsableFromString"/> are excluded, so those keep their existing conversion.
     /// </summary>
@@ -92,6 +93,8 @@ internal static class ParsableTypeExtensions
             }
         }
 
+        converter ??= GetBuiltInConverter(type, compilation);
+
         if (converter is null || converter.IsAbstract || converter.IsUnboundGenericType || ContainsTypeParameters(converter)
             || IsObsoleteAsError(converter)
             || !compilation.IsSymbolAccessibleWithin(converter, compilation.Assembly)
@@ -120,6 +123,23 @@ internal static class ParsableTypeExtensions
 
         converterType = converter;
         return true;
+    }
+
+    /// <summary>
+    /// <c>TypeDescriptor</c> supplies converters for these types itself, as they declare no <c>[TypeConverter]</c>.
+    /// Built-in types that are parsable already convert through <c>Parse</c>.
+    /// </summary>
+    private static INamedTypeSymbol? GetBuiltInConverter(ITypeSymbol type, Compilation compilation)
+    {
+        var converterName = type.ToDisplayString() switch
+        {
+            "System.Globalization.CultureInfo" => "System.ComponentModel.CultureInfoConverter",
+            "System.Uri" => "System.UriTypeConverter",
+            "System.Version" => "System.ComponentModel.VersionConverter",
+            _ => null,
+        };
+
+        return converterName is null ? null : compilation.GetTypeByMetadataName(converterName);
     }
 
     /// <summary>

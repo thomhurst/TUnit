@@ -243,6 +243,25 @@ public class AotConverterScanTests
     }
 
     [Test]
+    public async Task GeneratesBuiltInTypeConverterConversionsFromString()
+    {
+        const string source = """
+            using System;
+            using System.Globalization;
+            using TUnit.Core;
+            public class Tests
+            {
+                [Test, Arguments("en-GB", "https://example.com", "1.2.3")]
+                public void Convert(CultureInfo culture, Uri uri, Version version) { }
+            }
+            """;
+        var generated = await GenerateTypeConverters(source);
+        await Assert.That(generated).Contains("(global::System.Globalization.CultureInfo)new global::System.ComponentModel.CultureInfoConverter().ConvertFrom(");
+        await Assert.That(generated).Contains("(global::System.Uri)new global::System.UriTypeConverter().ConvertFrom(");
+        await Assert.That(generated).Contains("(global::System.Version)new global::System.ComponentModel.VersionConverter().ConvertFrom(");
+    }
+
+    [Test]
     public async Task SkipsTypeConverterConstructorsLeavingRequiredMembersUnset()
     {
         const string source = """
