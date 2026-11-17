@@ -69,7 +69,7 @@
     <PackageVersion Include="Grpc.Core.Api" Version="2.85.0" />
     <PackageVersion Include="MassTransit" Version="9.2.6" />
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.1.0" />
-    <PackageVersion Include="AWSSDK.SQS" Version="4.1.0" />
+    <PackageVersion Include="AWSSDK.SQS" Version="4.1.0.1" />
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="13.6.5" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.6.5" />
     <PackageVersion Include="Azure.Data.Tables" Version="12.13.0" />
@@ -100,7 +100,7 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.7.23" />
-    <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="2.1.6" />
+    <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="2.2.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
     <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="11.0.100" />
@@ -156,18 +156,18 @@
     <PackageVersion Include="System.CommandLine" Version="3.0.0" />
     <PackageVersion Include="System.Text.Json" Version="9.0.0" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
-    <PackageVersion Include="Testcontainers.Kafka" Version="4.16.0" />
-    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.16.0" />
-    <PackageVersion Include="Testcontainers.Redis" Version="4.16.0" />
+    <PackageVersion Include="Testcontainers.Kafka" Version="4.17.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.17.0" />
+    <PackageVersion Include="Testcontainers.Redis" Version="4.17.0" />
     <PackageVersion Include="trxparser" Version="0.5.0" />
-    <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.85.7" />
+    <PackageVersion Include="TUnit.Assertions.FSharp" Version="1.86.0" />
     <PackageVersion Include="Verify" Version="33.5.0" />
     <PackageVersion Include="Verify.NUnit" Version="33.5.0" />
-    <PackageVersion Include="TUnit" Version="1.85.7" />
-    <PackageVersion Include="TUnit.AspNetCore" Version="1.85.7" />
-    <PackageVersion Include="TUnit.Core" Version="1.85.7" />
-    <PackageVersion Include="TUnit.Engine" Version="1.85.7" />
-    <PackageVersion Include="TUnit.Assertions" Version="1.85.7" />
+    <PackageVersion Include="TUnit" Version="1.86.0" />
+    <PackageVersion Include="TUnit.AspNetCore" Version="1.86.0" />
+    <PackageVersion Include="TUnit.Core" Version="1.86.0" />
+    <PackageVersion Include="TUnit.Engine" Version="1.86.0" />
+    <PackageVersion Include="TUnit.Assertions" Version="1.86.0" />
     <PackageVersion Include="Verify.TUnit" Version="33.5.0" />
     <PackageVersion Include="Vogen" Version="8.0.7" />
     <PackageVersion Include="xunit" Version="2.9.3" />
