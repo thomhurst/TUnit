@@ -56,7 +56,9 @@ public sealed class StructuralEqualityComparer<T> : IEqualityComparer<T>
     [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "GetType() is acceptable for runtime structural comparison")]
     private bool CompareStructurally(object? x, object? y, HashSet<object> visited)
     {
-        if (x == null && y == null)
+        // The same instance (or both null) is equal to itself. Reading its members twice could
+        // disagree when a getter is not stable between reads.
+        if (ReferenceEquals(x, y))
         {
             return true;
         }

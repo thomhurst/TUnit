@@ -100,8 +100,9 @@ public class StructuralEquivalencyAssertion<TValue> : Assertion<TValue>
             return AssertionResult.Passed;
         }
 
-        // Handle nulls
-        if (actual == null && expected == null)
+        // The same instance (or both null) is equivalent to itself. Reading its members twice could
+        // disagree when a getter is not stable between reads.
+        if (ReferenceEquals(actual, expected))
         {
             return AssertionResult.Passed;
         }
