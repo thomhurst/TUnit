@@ -31,7 +31,8 @@ public class AsyncDelegateNullabilitySuppressor : DiagnosticSuppressor
     public override void ReportSuppressions(SuppressionAnalysisContext context)
     {
         // Without TUnit.Assertions there is no Assert.That to pass a delegate to.
-        if (AssertionSymbols.For(context.Compilation).Assert.IsEmpty)
+        var symbols = AssertionSymbols.For(context.Compilation);
+        if (symbols.Assert.IsEmpty)
         {
             return;
         }
@@ -62,7 +63,7 @@ public class AsyncDelegateNullabilitySuppressor : DiagnosticSuppressor
             }
 
             var semanticModel = context.GetSemanticModel(sourceTree);
-            if (IsTaskDelegatePassedToAssertThat(expression, argument, isMethodGroup, semanticModel, context.CancellationToken))
+            if (IsTaskDelegatePassedToAssertThat(expression, argument, isMethodGroup, symbols, semanticModel, context.CancellationToken))
             {
                 context.ReportSuppression(Suppression.Create(descriptor, diagnostic));
             }
@@ -71,11 +72,16 @@ public class AsyncDelegateNullabilitySuppressor : DiagnosticSuppressor
 
     /// <summary>
     /// The argument of a call to a method named <c>That</c> that <paramref name="expression"/> belongs to: the
-    /// method group itself, or the lambda whose result it is. <see langword="null"/> otherwise.
+    /// method group itself, or the lambda whose result it is, with any parentheses around it.
+    /// <see langword="null"/> otherwise.
     /// </summary>
     private static ArgumentSyntax? GetThatArgument(ExpressionSyntax expression, bool isMethodGroup)
     {
         ExpressionSyntax? argumentExpression = isMethodGroup ? expression : GetLambdaOfResult(expression);
+        while (argumentExpression?.Parent is ParenthesizedExpressionSyntax parenthesized)
+        {
+            argumentExpression = parenthesized;
+        }
 
         return argumentExpression?.Parent is ArgumentSyntax { Parent: ArgumentListSyntax { Parent: InvocationExpressionSyntax invocation } } argument
                && IsNamedThat(invocation.Expression)
@@ -97,7 +103,8 @@ public class AsyncDelegateNullabilitySuppressor : DiagnosticSuppressor
 
     /// <summary>
     /// The lambda or anonymous method whose result <paramref name="expression"/> is: its expression body, or the
-    /// expression of a <c>return</c> statement of that function, with any parentheses around it.
+    /// expression of a <c>return</c> statement of that function, with any parentheses around it. A branch of a
+    /// conditional or switch expression is not: its warning is about the conversion to that expression's type.
     /// </summary>
     private static AnonymousFunctionExpressionSyntax? GetLambdaOfResult(ExpressionSyntax expression)
     {
@@ -132,12 +139,13 @@ public class AsyncDelegateNullabilitySuppressor : DiagnosticSuppressor
         ExpressionSyntax expression,
         ArgumentSyntax argument,
         bool isMethodGroup,
+        AssertionSymbols symbols,
         SemanticModel semanticModel,
         CancellationToken cancellationToken)
     {
         if (argument.Parent?.Parent is not InvocationExpressionSyntax invocation
             || semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is not IMethodSymbol method
-            || !AssertionSymbols.For(semanticModel.Compilation).IsAssertThat(method)
+            || !symbols.IsAssertThat(method)
             || !IsReferencedAssertionAssembly(method.ContainingAssembly, semanticModel.Compilation)
             || GetParameter(method, argument) is not { Type: INamedTypeSymbol { DelegateInvokeMethod: { } invoke } }
             // The overload must be declared with a Task-returning delegate (Func<Task<TValue?>>), not be a
@@ -148,11 +156,21 @@ public class AsyncDelegateNullabilitySuppressor : DiagnosticSuppressor
             return false;
         }
 
-        var sourceTask = isMethodGroup
-            ? (semanticModel.GetSymbolInfo(expression, cancellationToken).Symbol as IMethodSymbol)?.ReturnType
-            : semanticModel.GetTypeInfo(expression, cancellationToken).Type;
+        if (isMethodGroup)
+        {
+            var returnType = (semanticModel.GetSymbolInfo(expression, cancellationToken).Symbol as IMethodSymbol)?.ReturnType;
+            return DiffersOnlyInResultAnnotation(returnType, invoke.ReturnType);
+        }
 
-        return DiffersOnlyInResultAnnotation(sourceTask, invoke.ReturnType);
+        var typeInfo = semanticModel.GetTypeInfo(expression, cancellationToken);
+
+        // A task that may itself be null is a real problem: the assertion would await it.
+        if (typeInfo.Nullability.FlowState == NullableFlowState.MaybeNull)
+        {
+            return false;
+        }
+
+        return DiffersOnlyInResultAnnotation(typeInfo.Type, invoke.ReturnType);
     }
 
     private static IParameterSymbol? GetParameter(IMethodSymbol method, ArgumentSyntax argument)
@@ -172,13 +190,13 @@ public class AsyncDelegateNullabilitySuppressor : DiagnosticSuppressor
     }
 
     /// <summary>
-    /// True when both are <c>Task&lt;X&gt;</c> of the same <c>X</c>, the target's <c>X</c> is annotated
-    /// (<c>X?</c>), and nothing else differs: the source's <c>X</c> with the annotation added equals the
-    /// target's <c>X</c>, nullability included.
+    /// True when both are <c>Task&lt;X&gt;</c> of the same <c>X</c>, the source task itself cannot be null, the
+    /// target's <c>X</c> is annotated (<c>X?</c>), and nothing else differs: the source's <c>X</c> with the annotation
+    /// added equals the target's <c>X</c>, nullability included.
     /// </summary>
     private static bool DiffersOnlyInResultAnnotation(ITypeSymbol? source, ITypeSymbol target)
     {
-        if (source is not INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } sourceTask
+        if (source is not INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1, NullableAnnotation: not NullableAnnotation.Annotated } sourceTask
             || target is not INamedTypeSymbol { IsGenericType: true, TypeArguments.Length: 1 } targetTask
             || !IsTaskOfT(sourceTask)
             || !SymbolEqualityComparer.Default.Equals(sourceTask.OriginalDefinition, targetTask.OriginalDefinition))
