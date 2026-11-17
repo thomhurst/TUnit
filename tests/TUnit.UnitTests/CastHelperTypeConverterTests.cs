@@ -19,6 +19,14 @@ public class CastHelperTypeConverterTests
     }
 
     [Test]
+    public async Task Fallback_Uses_Built_In_Converters()
+    {
+        await Assert.That(CastHelper.Cast(typeof(CultureInfo), "en-GB")).IsEqualTo(CultureInfo.GetCultureInfo("en-GB"));
+        await Assert.That(CastHelper.Cast(typeof(Uri), "https://example.com")).IsEqualTo(new Uri("https://example.com"));
+        await Assert.That(CastHelper.Cast(typeof(Version), "1.2.3")).IsEqualTo(new Version(1, 2, 3));
+    }
+
+    [Test]
     public async Task Fallback_Ignores_Converter_Without_ConvertFrom()
     {
         // The base TypeConverter.ConvertFrom throws, so the value is left unconverted instead.

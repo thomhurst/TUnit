@@ -374,6 +374,35 @@ public class DataDrivenTestArgumentsAnalyzerTests
     }
 
     [Test]
+    public async Task BuiltIn_TypeConverter_Type_Is_Not_Flagged_When_String_Argument()
+    {
+        await Verifier
+            .VerifyAnalyzerAsync(
+                """
+                using System;
+                using System.Globalization;
+                using TUnit.Core;
+
+                public class MyClass
+                {
+                    [Test]
+                    [Arguments("en-GB", "https://example.com", "1.2.3")]
+                    public void MyTest(CultureInfo culture, Uri uri, Version version)
+                    {
+                    }
+
+                    [Test]
+                    [Arguments("en-GB", "https://example.com", "1.2.3")]
+                    [Arguments(null, null, null)]
+                    public void NullableTest(CultureInfo? culture, Uri? uri, Version? version)
+                    {
+                    }
+                }
+                """
+            );
+    }
+
+    [Test]
     public async Task TypeConverter_Without_Usable_Constructor_Is_Flagged()
     {
         await Verifier

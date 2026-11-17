@@ -454,8 +454,9 @@ public static class CastHelper
         Justification = "Not called in AOT mode; the source generator registers AOT converters that construct the declared converter directly.")]
     private static bool TryTypeConverterConvert(Type targetType, string value, out object? result)
     {
-        // Only declared converters that override ConvertFrom, matching what the source generator and analyzer
-        // recognise. CanConvertFrom is not consulted because the generated converter does not call it either.
+        // Only converters the source generator and analyzer also recognise: declared ones, plus the built-in ones
+        // for CultureInfo, Uri and Version (keep in sync with ParsableTypeExtensions.GetBuiltInConverter).
+        // They must override ConvertFrom. CanConvertFrom is not consulted because the generated converter does not call it either.
 #if NET
         // A parsable type only converts through Parse, as in generated code, so a rejected string stays rejected.
         if (ParseMethodCache.TryGetValue(targetType, out var parseMethod) && parseMethod is not null)
@@ -465,7 +466,8 @@ public static class CastHelper
         }
 #endif
 
-        if (targetType.IsDefined(typeof(System.ComponentModel.TypeConverterAttribute), inherit: true)
+        if ((targetType.IsDefined(typeof(System.ComponentModel.TypeConverterAttribute), inherit: true)
+                || targetType == typeof(System.Globalization.CultureInfo) || targetType == typeof(Uri) || targetType == typeof(Version))
             && System.ComponentModel.TypeDescriptor.GetConverter(targetType) is { } converter
             && converter.GetType().GetMethod(nameof(System.ComponentModel.TypeConverter.ConvertFrom),
                 [typeof(System.ComponentModel.ITypeDescriptorContext), typeof(System.Globalization.CultureInfo), typeof(object)])
