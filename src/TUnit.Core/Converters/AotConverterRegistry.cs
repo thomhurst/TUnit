@@ -37,6 +37,20 @@ public static class AotConverterRegistry
         return Converters.TryGetValue((sourceType, targetType), out converter);
     }
 
+    // Match existing closed target identities without constructing generic types under AOT.
+    // The caller supplies value-type state and a static callback to avoid per-row closures.
+    internal static bool HasConverter<TState>(Type sourceType, TState state, Func<Type, TState, bool> matchesTarget)
+    {
+        foreach (var entry in Converters)
+        {
+            if (entry.Key.Source == sourceType && matchesTarget(entry.Key.Target, state))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// <summary>
     /// Tries to convert a value using a registered converter
     /// </summary>
