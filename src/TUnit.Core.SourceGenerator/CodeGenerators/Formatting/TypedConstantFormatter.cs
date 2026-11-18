@@ -11,6 +11,9 @@ public class TypedConstantFormatter(Compilation? compilation = null) : ITypedCon
 {
 
     public string FormatForCode(TypedConstant constant, ITypeSymbol? targetType = null)
+        => FormatForCode(constant, targetType, forArrayElement: false);
+
+    private string FormatForCode(TypedConstant constant, ITypeSymbol? targetType, bool forArrayElement)
     {
         if (constant.IsNull)
         {
@@ -39,7 +42,7 @@ public class TypedConstantFormatter(Compilation? compilation = null) : ITypedCon
                         return specialValue;
                     }
                 }
-                return FormatPrimitiveForCode(constant.Value, targetType);
+                return FormatPrimitiveForCode(constant.Value, targetType, forArrayElement);
 
             case TypedConstantKind.Enum:
                 return FormatEnumForCode(constant, targetType);
@@ -108,11 +111,22 @@ public class TypedConstantFormatter(Compilation? compilation = null) : ITypedCon
         return FormatPrimitiveForCode(value, targetType);
     }
 
-    private string FormatPrimitiveForCode(object? value, ITypeSymbol? targetType)
+    private string FormatPrimitiveForCode(object? value, ITypeSymbol? targetType, bool forArrayElement = false)
     {
         if (value == null)
         {
             return "null";
+        }
+
+        // Inherited string rows for any non-string target stay literals, like
+        // same-project and reflection rows, so the shared runtime conversion
+        // handles them. Array elements keep the existing Parse / helper path.
+        if (!forArrayElement
+            && value is string stringArgument
+            && targetType is not null
+            && targetType.SpecialType != SpecialType.System_String)
+        {
+            return SymbolDisplay.FormatLiteral(stringArgument, quote: true);
         }
 
         // Handle target type conversions
@@ -308,7 +322,10 @@ public class TypedConstantFormatter(Compilation? compilation = null) : ITypedCon
             elementType = (constant.Type as IArrayTypeSymbol)?.ElementType;
         }
 
-        var elements = constant.Values.Select(v => FormatForCode(v, elementType));
+        // Array elements still use Parse / the decimal helper so the generated
+        // typed array compiles and stays AOT-safe. Inherited scalar strings are
+        // handled above; arrays are a follow-up.
+        var elements = constant.Values.Select(v => FormatForCode(v, elementType, forArrayElement: true));
         var elementTypeString = elementType?.GloballyQualified() ?? "object";
         return $"new {elementTypeString}[] {{ {string.Join(", ", elements)} }}";
     }
