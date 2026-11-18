@@ -235,7 +235,7 @@ public void Test(int a, int b, int c) { }
 
 ## Contributing
 
-See the [contribution guide](https://github.com/thomhurst/TUnit/blob/main/CONTRIBUTING.md) for details.
+See the [contribution guide](https://github.com/thomhurst/TUnit/blob/main/.github/CONTRIBUTING.md) for details.
 
 ## License
 
