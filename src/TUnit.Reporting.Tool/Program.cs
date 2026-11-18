@@ -136,7 +136,7 @@ internal static class Program
             WriteGitHubSummary(suites, collapsible);
         }
 
-        return failOnFailures && s.TotalFailed + s.Cancelled > 0 ? 1 : 0;
+        return failOnFailures && s.TotalUnsuccessful > 0 ? 1 : 0;
     }
 
     private static (List<ReportData> Suites, int Skipped) LoadSidecars(string directory)
@@ -153,9 +153,7 @@ internal static class Program
         // abort the walk — SearchOption.AllDirectories would throw mid-enumeration, before
         // the per-file guard below ever ran.
         var enumeration = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true };
-        var effectiveSidecars = ReportDataJson.SelectEffectiveSidecars(
-            Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, enumeration));
-        foreach (var file in effectiveSidecars)
+        foreach (var file in Directory.EnumerateFiles(directory, "*" + ReportDataJson.SidecarExtension, enumeration))
         {
             // This command is the designated final merge, so no publisher should still
             // be active. Skip any suite whose stable publication lock is still held.
