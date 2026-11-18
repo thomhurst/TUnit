@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0</TargetFrameworks>
+    <!-- Single-target (clear the Directory.Build.props default): AddDotnetProject resolves the run
+         command with the ComputeRunArguments target, which a multi-targeting outer build lacks. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks></TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
