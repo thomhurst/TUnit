@@ -207,6 +207,31 @@ jobs:
           echo "DOTNET_DbgMiniDumpType=2" >> "$GITHUB_ENV"
           echo "DOTNET_DbgMiniDumpName=$RUNNER_TEMP/tunit-crash-dumps/crash.%e.%p.dmp" >> "$GITHUB_ENV"
 
+      # InstallPlaywrightModule downloads Chromium on every run and finishes last on Ubuntu and
+      # Windows. Key the browsers on the Playwright package version, which decides the revision.
+      - name: Get Playwright version
+        id: playwright
+        shell: bash
+        run: echo "version=$(sed -nE 's/.*"Microsoft.Playwright" Version="([^"]+)".*/\1/p' Directory.Packages.props)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/Library/Caches/ms-playwright
+            ~/AppData/Local/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      # Run history gives the pipeline's results table a "Δ previous" column per module.
+      # Each run saves its own entry; the newest one for this job and OS is restored.
+      - name: Restore pipeline run history
+        uses: actions/cache@v6
+        with:
+          path: .modularpipelines/run-history
+          key: modularpipelines-history-${{ runner.os }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: modularpipelines-history-${{ runner.os }}-${{ github.job }}-
+
       - name: Run Pipeline
         uses: ./.github/actions/execute-pipeline
         with:
@@ -231,6 +256,15 @@ jobs:
           # suites, apart from the .NET Framework TFMs only Windows can run (see PipelineScope).
           # Manual runs, which publish, keep every suite on every OS.
           os-specific-only: ${{ github.event_name == 'pull_request' && matrix.os != 'ubuntu-latest' }}
+
+      # Module timings, statuses and machine CPU/memory saturation periods from the pipeline.
+      - name: Upload pipeline run report
+        uses: actions/upload-artifact@v7.0.2
+        if: always()
+        with:
+          name: PipelineRunReport-${{matrix.os}}
+          path: artifacts/run-report.json
+          if-no-files-found: ignore
 
       # Never upload raw process memory: the pipeline and its children inherit credentials.
       - name: Encrypt macOS crash dumps
