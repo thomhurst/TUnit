@@ -1037,11 +1037,11 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
 
         foreach (var resource in builder.Resources)
         {
-            if (resource is ProjectResource projectResource)
+            if (IsDotnetProgramResource(resource))
             {
-                var resourceName = projectResource.Name;
+                var resourceName = resource.Name;
 
-                projectResource.Annotations.Add(
+                resource.Annotations.Add(
                     new EnvironmentCallbackAnnotation(context =>
                     {
                         // Forward to user's dashboard if they set OTEL_EXPORTER_OTLP_ENDPOINT
@@ -1070,6 +1070,17 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
         }
     }
 
+    // IDotnetProgramResource is experimental in Aspire 13.x and stable from Aspire 17.
+#pragma warning disable ASPIREPROJECTS001
+    /// <summary>
+    /// Matches .NET project resources from both <c>AddProject</c> (<see cref="ProjectResource"/>) and
+    /// <c>AddDotnetProject</c> (<c>DotnetProjectResource</c>, an executable resource), which share
+    /// <see cref="IDotnetProgramResource"/>.
+    /// </summary>
+    private static bool IsDotnetProgramResource(IResource resource)
+        => resource is IDotnetProgramResource and IResourceWithEnvironment;
+#pragma warning restore ASPIREPROJECTS001
+
     /// <summary>
     /// Emits a one-time hint for any project resource that produced console output but never sent
     /// correlated OpenTelemetry logs to TUnit — the typical symptom of an SUT missing OTLP log
@@ -1087,8 +1098,8 @@ public class AspireFixture<TAppHost> : IAsyncInitializer, IAsyncDisposable, ITes
             // The fixture injects OTEL_SERVICE_NAME = resource name (see ConfigureOtlpEndpoints), so
             // an SUT using the default service name matches by resource name here; one that overrides
             // its service name may produce a false hint — hence the soft wording below.
-            var candidates = model.Resources.OfType<ProjectResource>()
-                .Where(p => ShouldWaitForResource(p) && !receiver.HasSeenLogsFrom(p.Name))
+            var candidates = model.Resources
+                .Where(p => IsDotnetProgramResource(p) && ShouldWaitForResource(p) && !receiver.HasSeenLogsFrom(p.Name))
                 .ToList();
             if (candidates.Count == 0)
             {

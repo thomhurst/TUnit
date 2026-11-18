@@ -15,6 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- AddDotnetProject; preview in Aspire 13.x, used only to test DotnetProjectResource support. -->
+    <PackageReference Include="Aspire.Hosting.Dotnet" />
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
   </ItemGroup>
