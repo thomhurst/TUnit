@@ -174,7 +174,7 @@ jobs:
       - name: Build
         shell: bash
         run: >-
-          dotnet build ${{ steps.projects.outputs.solution }} -c Release --no-restore -graphBuild:True
+          dotnet build ${{ steps.projects.outputs.solution }} -c Release --no-restore -graphBuild:True -mt
           "-p:Version=${{ steps.gitversion.outputs.semVer }}"
           "-p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
           "-p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
