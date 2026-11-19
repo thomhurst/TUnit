@@ -31,6 +31,27 @@ public class CaptureStorageTests
     }
 
     [Test]
+    public async Task Latest_Does_Not_Allocate_After_Capture_History_Grows()
+    {
+        var arg = Arg.Any<int>();
+        var mock = ICalculator.Mock();
+        mock.Add(arg, Arg.Any<int>()).Returns(42);
+
+        for (var i = 1; i <= 4096; i++)
+        {
+            mock.Object.Add(i, 0);
+        }
+
+        _ = arg.Latest;
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var latest = arg.Latest;
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+        await Assert.That(latest).IsEqualTo(4096);
+        await Assert.That(allocated).IsEqualTo(0);
+    }
+
+    [Test]
     public async Task Shared_Arguments_Capture_Each_Position_And_Survive_Clear_And_Reset()
     {
         var arg = Arg.Any<int>();
@@ -78,7 +99,7 @@ public class CaptureStorageTests
     }
 
     [Test]
-    public async Task Concurrent_First_Captures_Do_Not_Lose_Values_Or_Tear_Struct_Reads()
+    public async Task Concurrent_Captures_Do_Not_Lose_Values_Or_Tear_Struct_Reads()
     {
         var matcher = new CapturingMatcher<WideValue>(AnyMatcher<WideValue>.Instance);
         var capture = (ICapturingMatcher<WideValue>)matcher;
@@ -89,11 +110,20 @@ public class CaptureStorageTests
             await start.Task;
             while (Volatile.Read(ref stopped) == 0)
             {
-                CheckValue(matcher.Latest);
+                var latest = matcher.Latest;
+                CheckValue(latest);
+                var foundLatest = latest == default;
                 foreach (var value in matcher.CapturedValues)
                 {
                     CheckValue(value);
+                    foundLatest |= value == latest;
                 }
+
+                if (!foundLatest)
+                {
+                    throw new InvalidOperationException("The capture snapshot omitted the latest value read before it.");
+                }
+
                 await Task.Yield();
             }
         });
