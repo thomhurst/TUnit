@@ -25,6 +25,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
+            if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
             var result = ExecuteBehavior(behavior, store, arg1);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
@@ -70,6 +71,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
+            if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
             var result = ExecuteBehavior(behavior, store, arg1, arg2);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
@@ -115,6 +117,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
+            if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
             var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
@@ -160,6 +163,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
+            if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
             var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
@@ -205,6 +209,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
+            if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
             var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
@@ -250,6 +255,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
+            if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
             var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
@@ -295,6 +301,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
+            if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
             var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
@@ -340,6 +347,7 @@ public sealed partial class MockEngine<T> where T : class
 
         if (behavior is not null)
         {
+            if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
             var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
             if (result is RawReturn raw) RawReturnContext.Set(raw);
             try { ApplyMatchedSetup(matchedSetup); }
