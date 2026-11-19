@@ -1,6 +1,6 @@
 # CombinedWorkflow Benchmark
 
-> Full workflow: create → setup → invoke → verify — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+> Full workflow: create → setup → invoke → verify — comparing **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries.
 
 Last Updated
 
@@ -25,7 +25,7 @@ Full workflow: create → setup → invoke → verify:
 
 ## 🎯 Key Insights[​](#-key-insights "Direct link to 🎯 Key Insights")
 
-This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for full workflow: create → setup → invoke → verify.
+This benchmark compares **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries for full workflow: create → setup → invoke → verify.
 
 ***
 

@@ -1,6 +1,6 @@
 # MockCreation Benchmark
 
-> Mock instance creation performance — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+> Mock instance creation performance — comparing **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries.
 
 Last Updated
 
@@ -40,7 +40,7 @@ Mock instance creation performance:
 
 ## 🎯 Key Insights[​](#-key-insights "Direct link to 🎯 Key Insights")
 
-This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for mock instance creation performance.
+This benchmark compares **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries for mock instance creation performance.
 
 ***
 

@@ -1,6 +1,6 @@
 # Verification Benchmark
 
-> Verifying mock method calls — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+> Verifying mock method calls — comparing **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries.
 
 Last Updated
 
@@ -55,7 +55,7 @@ Verifying mock method calls:
 
 ## 🎯 Key Insights[​](#-key-insights "Direct link to 🎯 Key Insights")
 
-This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for verifying mock method calls.
+This benchmark compares **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries for verifying mock method calls.
 
 ***
 

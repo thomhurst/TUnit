@@ -1,6 +1,6 @@
 # Setup Benchmark
 
-> Mock behavior configuration (returns, matchers) — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+> Mock behavior configuration (returns, matchers) — comparing **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries.
 
 Last Updated
 
@@ -40,7 +40,7 @@ Mock behavior configuration (returns, matchers):
 
 ## 🎯 Key Insights[​](#-key-insights "Direct link to 🎯 Key Insights")
 
-This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for mock behavior configuration (returns, matchers).
+This benchmark compares **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries for mock behavior configuration (returns, matchers).
 
 ***
 
