@@ -305,7 +305,7 @@ sidebar_position: ${index + 2}
 
 # ${category} Benchmark
 
-> ${description} — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+> ${description} — comparing **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries.
 
 :::info Last Updated
 This benchmark was automatically generated on **${timestamp}** from the latest CI run.
@@ -321,7 +321,7 @@ ${sections.join('\n\n---\n\n')}
 
 ## 🎯 Key Insights
 
-This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for ${description.toLowerCase()}.
+This benchmark compares **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries for ${description.toLowerCase()}.
 
 ---
 
@@ -375,7 +375,7 @@ These benchmarks were automatically generated on **${timestamp}** from the lates
 
 ## 🚀 Overview
 
-These benchmarks compare source-generated, AOT-compatible mocking libraries against the most popular .NET mocking libraries that use runtime proxy generation:
+These benchmarks compare TUnit.Mocks against other source-generated, AOT-compatible mocking libraries as well as the most popular .NET mocking libraries that use runtime proxy generation:
 
 | Library | Approach | AOT Compatible |
 |---------|----------|----------------|

@@ -14,7 +14,7 @@ These benchmarks were automatically generated on **2026-09-04** from the latest 
 
 ## 🚀 Overview
 
-These benchmarks compare source-generated, AOT-compatible mocking libraries against the most popular .NET mocking libraries that use runtime proxy generation:
+These benchmarks compare TUnit.Mocks against other source-generated, AOT-compatible mocking libraries as well as the most popular .NET mocking libraries that use runtime proxy generation:
 
 | Library | Approach | AOT Compatible |
 |---------|----------|----------------|
