@@ -7,6 +7,7 @@ internal sealed record MockTypeParameterModel : IEquatable<MockTypeParameterMode
     public string Name { get; init; } = "";
     public string Constraints { get; init; } = "";
     public bool HasReferenceTypeConstraint { get; init; }
+    public bool IsReferenceType { get; init; }
     public bool HasValueTypeConstraint { get; init; }
     public bool HasAnnotatedNullableUsage { get; init; }
 
@@ -16,6 +17,7 @@ internal sealed record MockTypeParameterModel : IEquatable<MockTypeParameterMode
         return Name == other.Name
             && Constraints == other.Constraints
             && HasReferenceTypeConstraint == other.HasReferenceTypeConstraint
+            && IsReferenceType == other.IsReferenceType
             && HasValueTypeConstraint == other.HasValueTypeConstraint
             && HasAnnotatedNullableUsage == other.HasAnnotatedNullableUsage;
     }
@@ -28,6 +30,7 @@ internal sealed record MockTypeParameterModel : IEquatable<MockTypeParameterMode
             hash = hash * 31 + Name.GetHashCode();
             hash = hash * 31 + Constraints.GetHashCode();
             hash = hash * 31 + HasReferenceTypeConstraint.GetHashCode();
+            hash = hash * 31 + IsReferenceType.GetHashCode();
             hash = hash * 31 + HasValueTypeConstraint.GetHashCode();
             hash = hash * 31 + HasAnnotatedNullableUsage.GetHashCode();
             return hash;

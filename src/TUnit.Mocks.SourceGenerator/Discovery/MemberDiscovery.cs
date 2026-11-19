@@ -792,6 +792,7 @@ internal static class MemberDiscovery
                     Name = MethodTypeParameterRenames.GetName(tp),
                     Constraints = tp.GetGenericConstraints(),
                     HasReferenceTypeConstraint = tp.HasReferenceTypeConstraint,
+                    IsReferenceType = tp.IsReferenceType,
                     HasValueTypeConstraint = tp.HasValueTypeConstraint,
                     HasAnnotatedNullableUsage = tp.NeedsDefaultConstraintForNullableUsage(method)
                 }).ToImmutableArray()
