@@ -1167,7 +1167,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         }
 
         result = fixedReturn.Value;
-        if (result is RawReturn raw) RawReturnContext.Set(raw);
+        if (!typeof(TReturn).IsValueType && result is RawReturn raw) RawReturnContext.Set(raw);
         try
         {
             ApplyMatchedSetup(matchedSetup);
