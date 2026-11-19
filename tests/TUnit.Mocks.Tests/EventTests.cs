@@ -63,14 +63,13 @@ public class EventTests
     }
 
     [Test]
-    public async Task Raise_Event_With_No_Subscribers_Does_Not_Throw()
+    public void Raise_Event_With_No_Subscribers_Does_Not_Throw()
     {
         // Arrange
         var mock = IEventService.Mock();
 
         // Act & Assert — should not throw when no subscribers
         mock.RaiseOnMessage("nobody listening");
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

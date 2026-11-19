@@ -557,7 +557,7 @@ public class KitchenSinkInheritanceTests
     // ── Verification across hierarchy ──
 
     [Test]
-    public async Task Verification_Works_Across_Hierarchy()
+    public void Verification_Works_Across_Hierarchy()
     {
         var mock = Level2Leaf.Mock();
         mock.GetKind().Returns("x");
@@ -573,6 +573,5 @@ public class KitchenSinkInheritanceTests
         mock.Greet(Any()).WasCalled(Times.Once);
         mock.Describe().WasCalled(Times.Once);
         mock.Format(Any()).WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 }

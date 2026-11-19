@@ -152,7 +152,7 @@ public class PerformanceOptimizationTests
     // ========================================================================
 
     [Test]
-    public async Task Verification_Zero_Param_Method_Uses_Fast_Path()
+    public void Verification_Zero_Param_Method_Uses_Fast_Path()
     {
         // GetName() has zero parameters, so _matchers.Length == 0 → fast path (per-member counter)
         var mock = ICalculator.Mock();
@@ -166,11 +166,10 @@ public class PerformanceOptimizationTests
         mock.GetName().WasCalled(Times.Exactly(3));
         mock.GetName().WasCalled(Times.AtLeast(2));
         mock.GetName().WasCalled(Times.AtMost(5));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Verification_With_Any_Matchers_Uses_Matcher_Path()
+    public void Verification_With_Any_Matchers_Uses_Matcher_Path()
     {
         // Any() creates argument matchers, so _matchers.Length > 0 → matcher path
         var mock = ICalculator.Mock();
@@ -186,11 +185,10 @@ public class PerformanceOptimizationTests
         mock.Add(Any(), Any()).WasCalled(Times.AtMost(5));
         mock.GetName().WasNeverCalled();
         mock.Log(Any()).WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Verification_With_Exact_Args_Uses_Matcher_Path()
+    public void Verification_With_Exact_Args_Uses_Matcher_Path()
     {
         var mock = ICalculator.Mock();
         mock.Add(Any(), Any()).Returns(42);
@@ -204,28 +202,25 @@ public class PerformanceOptimizationTests
         mock.Add(1, 2).WasCalled(Times.Exactly(2));
         mock.Add(3, 4).WasCalled(Times.Once);
         mock.Add(5, 6).WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Verification_WasNeverCalled_Zero_Param_Method()
+    public void Verification_WasNeverCalled_Zero_Param_Method()
     {
         var mock = ICalculator.Mock();
 
         // Zero-param method → fast path with per-member counter = 0
         mock.GetName().WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Verification_WasNeverCalled_With_Matchers()
+    public void Verification_WasNeverCalled_With_Matchers()
     {
         var mock = ICalculator.Mock();
 
         // Any() creates matchers → matcher path, but still zero calls
         mock.Add(Any(), Any()).WasNeverCalled();
         mock.Log(Any()).WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -305,7 +300,6 @@ public class PerformanceOptimizationTests
             mock.Add(Any(), Any()).WasCalled(Times.Exactly(100));
         }));
         await Task.WhenAll(verifyTasks);
-        await Assert.That(true).IsTrue();
     }
 
     // ========================================================================
@@ -313,7 +307,7 @@ public class PerformanceOptimizationTests
     // ========================================================================
 
     [Test]
-    public async Task VerifyAll_Works_With_Flat_Array_Setup_Storage()
+    public void VerifyAll_Works_With_Flat_Array_Setup_Storage()
     {
         // Arrange — setups across multiple members
         var mock = ICalculator.Mock();
@@ -326,7 +320,6 @@ public class PerformanceOptimizationTests
 
         // Assert — VerifyAll should iterate all setups in flat array
         Mock.VerifyAll(mock);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -346,7 +339,7 @@ public class PerformanceOptimizationTests
     }
 
     [Test]
-    public async Task VerifyNoOtherCalls_Works_With_Per_Member_Index()
+    public void VerifyNoOtherCalls_Works_With_Per_Member_Index()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -361,7 +354,6 @@ public class PerformanceOptimizationTests
 
         // Assert — no unverified calls
         Mock.VerifyNoOtherCalls(mock);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

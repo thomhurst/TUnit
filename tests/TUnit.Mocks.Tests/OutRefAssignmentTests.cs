@@ -41,7 +41,7 @@ public class OutRefAssignmentTests
 
         // Assert — no SetsOutParameter, so value stays default
         await Assert.That(success).IsFalse();
-        await Assert.That(value).IsEqualTo(default(string)!);
+        await Assert.That(value).IsNull();
     }
 
     [Test]

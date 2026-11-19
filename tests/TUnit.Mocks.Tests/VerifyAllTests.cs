@@ -11,7 +11,7 @@ public class VerifyAllTests
     }
 
     [Test]
-    public async Task VerifyAll_Passes_When_All_Setups_Invoked()
+    public void VerifyAll_Passes_When_All_Setups_Invoked()
     {
         var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
@@ -22,7 +22,6 @@ public class VerifyAllTests
         svc.Process(1);
 
         Mock.VerifyAll(mock);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -50,11 +49,10 @@ public class VerifyAllTests
     }
 
     [Test]
-    public async Task VerifyAll_Passes_When_No_Setups_Registered()
+    public void VerifyAll_Passes_When_No_Setups_Registered()
     {
         var mock = IService.Mock();
         Mock.VerifyAll(mock); // No setups = nothing to verify
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

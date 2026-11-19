@@ -28,6 +28,11 @@ public sealed class MethodSetup
     private readonly IArgumentMatcher[] _matchers;
     private RareState? _rareState;
     private Lock? _behaviorLock;
+    private const int PublishingBehavior = 1;
+    private const int ClosedBehaviorStep = 2;
+    private const int OpenBehaviorStep = 3;
+    // Zero means untouched. Other states also track whether chained behaviors compose or start a new step.
+    private int _behaviorState;
 
     /// <summary>Fast path for the common single-behavior case. Avoids list + lock on read.</summary>
     /// <remarks>
@@ -38,8 +43,6 @@ public sealed class MethodSetup
     /// <remarks>See <see cref="_singleBehavior"/> for volatility rationale.</remarks>
     private List<IBehavior>? _behaviors;
     private int _callIndex;
-    /// <summary>True while chained behaviors are being composed into the current invocation step.</summary>
-    private bool _hasOpenBehaviorStep;
 
     public int MemberId { get; }
 
@@ -128,11 +131,30 @@ public sealed class MethodSetup
     {
         get
         {
+            if (Volatile.Read(ref _behaviorState) < ClosedBehaviorStep)
+            {
+                PrepareBehaviorLock();
+            }
+
             if (Volatile.Read(ref _behaviorLock) is { } existing)
             {
                 return existing;
             }
             return EnsureBehaviorLock();
+        }
+    }
+
+    private void PrepareBehaviorLock()
+    {
+        // Claim an untouched setup before taking the lock, or wait for the first writer.
+        // Then(), events and out/ref mutation must not race with first-behavior publication.
+        if (Interlocked.CompareExchange(ref _behaviorState, ClosedBehaviorStep, 0) == PublishingBehavior)
+        {
+            var spinner = new SpinWait();
+            while (Volatile.Read(ref _behaviorState) == PublishingBehavior)
+            {
+                spinner.SpinOnce();
+            }
         }
     }
 
@@ -164,14 +186,21 @@ public sealed class MethodSetup
 
     public void AddBehavior(IBehavior behavior)
     {
-        // Setup mutation is not a hot path; one lock keeps sequential steps and composed
-        // behavior steps consistent without the previous single-behavior CAS fast path.
+        if (Volatile.Read(ref _behaviorState) == 0
+            && Interlocked.CompareExchange(ref _behaviorState, PublishingBehavior, 0) == 0)
+        {
+            Volatile.Write(ref _singleBehavior, behavior);
+            Volatile.Write(ref _behaviorState, OpenBehaviorStep);
+            return;
+        }
+
+        // Subsequent mutations share the lock with sequencing, events and out/ref assignments.
         lock (BehaviorLock)
         {
-            if (!_hasOpenBehaviorStep)
+            if (_behaviorState == ClosedBehaviorStep)
             {
                 AddBehaviorStep(behavior);
-                _hasOpenBehaviorStep = true;
+                Volatile.Write(ref _behaviorState, OpenBehaviorStep);
                 return;
             }
 
@@ -183,7 +212,7 @@ public sealed class MethodSetup
     {
         lock (BehaviorLock)
         {
-            _hasOpenBehaviorStep = false;
+            Volatile.Write(ref _behaviorState, ClosedBehaviorStep);
         }
     }
 

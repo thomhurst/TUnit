@@ -12,7 +12,7 @@ public class VerifyNoOtherCallsTests
     }
 
     [Test]
-    public async Task VerifyNoOtherCalls_Passes_When_All_Calls_Verified()
+    public void VerifyNoOtherCalls_Passes_When_All_Calls_Verified()
     {
         var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
@@ -23,7 +23,6 @@ public class VerifyNoOtherCallsTests
         mock.GetValue("key1").WasCalled(Times.Once);
         Mock.VerifyNoOtherCalls(mock);
 
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -44,15 +43,14 @@ public class VerifyNoOtherCallsTests
     }
 
     [Test]
-    public async Task VerifyNoOtherCalls_Passes_When_No_Calls_Made()
+    public void VerifyNoOtherCalls_Passes_When_No_Calls_Made()
     {
         var mock = IService.Mock();
         Mock.VerifyNoOtherCalls(mock);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task VerifyNoOtherCalls_Works_After_Reset()
+    public void VerifyNoOtherCalls_Works_After_Reset()
     {
         var mock = IService.Mock();
         mock.GetValue(Any()).Returns("value");
@@ -63,7 +61,6 @@ public class VerifyNoOtherCallsTests
         Mock.Reset(mock);
         Mock.VerifyNoOtherCalls(mock); // should pass — history cleared
 
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

@@ -261,7 +261,7 @@ public class KitchenSinkGenericTests
     }
 
     [Test]
-    public async Task Generic_Interface_Verification_Works()
+    public void Generic_Interface_Verification_Works()
     {
         var mock = IGenericKitchenSink<GenericPayload, int>.Mock();
         var payload = new GenericPayload { Name = "verify" };
@@ -274,7 +274,6 @@ public class KitchenSinkGenericTests
 
         mock.Convert(Any()).WasCalled(Times.Exactly(2));
         mock.RoundTrip<int>(5).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -414,7 +413,7 @@ public class KitchenSinkGenericTests
     }
 
     [Test]
-    public async Task Generic_Abstract_Verification_Works()
+    public void Generic_Abstract_Verification_Works()
     {
         var seed = new GenericPayload { Name = "seed" };
         var mock = GenericAbstractKitchenSink<GenericPayload>.Mock(seed);
@@ -427,6 +426,5 @@ public class KitchenSinkGenericTests
 
         mock.Create(Any()).WasCalled(Times.Exactly(2));
         mock.Current.WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 }

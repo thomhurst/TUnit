@@ -33,7 +33,7 @@ public class OutRefTests
     }
 
     [Test]
-    public async Task Out_Parameter_Method_Verify_Call_Was_Made()
+    public void Out_Parameter_Method_Verify_Call_Was_Made()
     {
         // Arrange
         var mock = IDictionary.Mock();
@@ -44,7 +44,6 @@ public class OutRefTests
 
         // Assert - verify with the input arg only (out param excluded from matchers)
         mock.TryGet("hello").WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -95,14 +94,13 @@ public class OutRefTests
     }
 
     [Test]
-    public async Task Out_Parameter_Method_Verify_Never_Called()
+    public void Out_Parameter_Method_Verify_Never_Called()
     {
         // Arrange
         var mock = IDictionary.Mock();
 
         // Assert - never called
         mock.TryGet("key").WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -122,7 +120,7 @@ public class OutRefTests
     }
 
     [Test]
-    public async Task Ref_Parameter_Method_Verify_Call()
+    public void Ref_Parameter_Method_Verify_Call()
     {
         // Arrange
         var mock = IDictionary.Mock();
@@ -134,11 +132,10 @@ public class OutRefTests
 
         // Assert - ref params ARE included in matchers
         mock.Swap(10).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Multiple_Out_Method_Calls_Tracked()
+    public void Multiple_Out_Method_Calls_Tracked()
     {
         // Arrange
         var mock = IDictionary.Mock();
@@ -152,6 +149,5 @@ public class OutRefTests
         // Assert
         mock.TryGet("a").WasCalled(Times.Exactly(2));
         mock.TryGet("b").WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 }

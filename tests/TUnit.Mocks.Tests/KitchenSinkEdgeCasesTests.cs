@@ -377,7 +377,7 @@ public class KitchenSinkEdgeCasesTests
     // ── T5 ──
 
     [Test]
-    public async Task T5_Write_Only_Property_Setter_Tracked()
+    public void T5_Write_Only_Property_Setter_Tracked()
     {
         var mock = IWriteOnlyValue.Mock();
         mock.Regular.Returns(1);
@@ -394,7 +394,7 @@ public class KitchenSinkEdgeCasesTests
     // ── T6 ──
 
     [Test]
-    public async Task T6_Abstract_Override_Member_Mockable()
+    public void T6_Abstract_Override_Member_Mockable()
     {
         var mock = AbsOverrideMid.Mock();
 
@@ -402,7 +402,6 @@ public class KitchenSinkEdgeCasesTests
         mock.Object.Ping();
 
         mock.Ping().WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
     // ── T7 ──

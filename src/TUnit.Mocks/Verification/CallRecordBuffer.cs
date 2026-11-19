@@ -7,7 +7,7 @@ namespace TUnit.Mocks.Verification;
 /// Thread-safe append-only buffer for call records.
 /// Uses a per-buffer lock with a small critical section for append, which is cheaper
 /// than the previous shared MockEngine Lock (no contention with setup, no contention
-/// between different members, pre-allocated during setup).
+/// between different members, allocated on the first call).
 /// Readers can read without locking via volatile count + snapshot.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]

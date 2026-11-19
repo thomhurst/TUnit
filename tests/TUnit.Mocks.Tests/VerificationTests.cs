@@ -10,7 +10,7 @@ namespace TUnit.Mocks.Tests;
 public class VerificationTests
 {
     [Test]
-    public async Task Verify_Once_Succeeds_When_Called_Once()
+    public void Verify_Once_Succeeds_When_Called_Once()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -22,7 +22,6 @@ public class VerificationTests
 
         // Assert
         mock.Add(1, 2).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue(); // test completes without exception
     }
 
     [Test]
@@ -47,7 +46,7 @@ public class VerificationTests
     }
 
     [Test]
-    public async Task Verify_Never_Succeeds_When_Not_Called()
+    public void Verify_Never_Succeeds_When_Not_Called()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -56,7 +55,6 @@ public class VerificationTests
 
         // Assert
         mock.Add(1, 2).WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -79,7 +77,7 @@ public class VerificationTests
     }
 
     [Test]
-    public async Task Verify_AtLeast_Succeeds()
+    public void Verify_AtLeast_Succeeds()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -92,11 +90,10 @@ public class VerificationTests
 
         // Assert — at least 2 should pass
         mock.Add(1, 2).WasCalled(Times.AtLeast(2));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Verify_AtMost_Succeeds()
+    public void Verify_AtMost_Succeeds()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -108,7 +105,6 @@ public class VerificationTests
 
         // Assert — at most 3 should pass
         mock.Add(1, 2).WasCalled(Times.AtMost(3));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -133,7 +129,7 @@ public class VerificationTests
     }
 
     [Test]
-    public async Task Verify_Between_Succeeds()
+    public void Verify_Between_Succeeds()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -145,7 +141,6 @@ public class VerificationTests
 
         // Assert — between 1 and 3 should pass
         mock.Add(1, 2).WasCalled(Times.Between(1, 3));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -168,7 +163,7 @@ public class VerificationTests
     }
 
     [Test]
-    public async Task Verify_With_Exact_Args_Only_Matching_Calls_Count()
+    public void Verify_With_Exact_Args_Only_Matching_Calls_Count()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -182,11 +177,10 @@ public class VerificationTests
         // Assert — only calls with (1, 2) should count
         mock.Add(1, 2).WasCalled(Times.Exactly(2));
         mock.Add(3, 4).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Verify_WasCalled_Shorthand_At_Least_Once()
+    public void Verify_WasCalled_Shorthand_At_Least_Once()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -197,7 +191,6 @@ public class VerificationTests
 
         // Assert — WasCalled() means at least once
         mock.Add(1, 2).WasCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -216,7 +209,7 @@ public class VerificationTests
     }
 
     [Test]
-    public async Task Verify_Void_Method()
+    public void Verify_Void_Method()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -229,11 +222,10 @@ public class VerificationTests
         // Assert
         mock.Log("hello").WasCalled(Times.Once);
         mock.Log("world").WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Verify_String_Method_On_Different_Interface()
+    public void Verify_String_Method_On_Different_Interface()
     {
         // Arrange
         var mock = IGreeter.Mock();
@@ -247,7 +239,6 @@ public class VerificationTests
         // Assert
         mock.Greet("Alice").WasCalled(Times.Once);
         mock.Greet("Bob").WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

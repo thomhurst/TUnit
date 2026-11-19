@@ -131,7 +131,7 @@ public class GenericTests
     }
 
     [Test]
-    public async Task Generic_Void_Method_Verify()
+    public void Generic_Void_Method_Verify()
     {
         // Arrange
         var mock = IRepository.Mock();
@@ -143,7 +143,6 @@ public class GenericTests
 
         // Assert
         mock.Save<Customer>(Any()).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
