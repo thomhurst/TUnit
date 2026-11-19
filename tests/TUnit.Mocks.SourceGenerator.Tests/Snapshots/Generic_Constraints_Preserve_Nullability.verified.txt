@@ -10,7 +10,7 @@ public sealed class IServiceMock : global::TUnit.Mocks.Mock<global::IService>, g
 
     global::System.Threading.Tasks.Task<T> global::IService.Get<T>(string key) where T : class => Object.Get<T>(key);
 
-    T global::IService.Base<T>() => Object.Base<T>();
+    T global::IService.Base<T>() where T : class => Object.Base<T>();
 
     T global::IService.Required<T>() => Object.Required<T>();
 

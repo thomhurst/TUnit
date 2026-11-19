@@ -641,6 +641,7 @@ internal static class MockTypeDiscovery
                 Name = tp.Name,
                 Constraints = tp.GetGenericConstraints(),
                 HasReferenceTypeConstraint = tp.HasReferenceTypeConstraint,
+                IsReferenceType = tp.IsReferenceType,
                 HasValueTypeConstraint = tp.HasValueTypeConstraint,
                 HasAnnotatedNullableUsage = false
             })

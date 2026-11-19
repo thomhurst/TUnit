@@ -1427,8 +1427,9 @@ internal static class MockImplBuilder
         {
             if (forExplicitImplementation)
             {
-                // CS0460: Only 'class' and 'struct' constraints are allowed on explicit interface implementations.
-                if (tp.HasReferenceTypeConstraint)
+                // Only 'class', 'struct', and 'default' may be restated here. A base-class
+                // constraint also needs 'class' so T? binds as a nullable reference type (#7820).
+                if (tp.IsReferenceType)
                 {
                     clauses.Add($"where {tp.Name} : class");
                 }
