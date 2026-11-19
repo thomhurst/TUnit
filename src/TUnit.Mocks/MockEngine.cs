@@ -444,6 +444,8 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args, typeArguments);
 
+        if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
+
         if (behavior is not null)
         {
             var result = behavior is IArgumentFreeBehavior argFree ? argFree.Execute() : behavior.Execute(args);
@@ -785,6 +787,8 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         var callRecord = RecordCall(memberId, memberName, args);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
+
+        if (TryExecuteFixedReturn(behavior, matchedSetup, out result)) return true;
 
         if (behavior is not null)
         {
@@ -1161,6 +1165,30 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         {
             buffer?.CollectInto(target, filter);
         }
+    }
+
+    // Fixed returns stay typed so value types do not travel through IBehavior's boxed result.
+    // Keep raw-return publication and setup side effects identical to the fallback path.
+    private bool TryExecuteFixedReturn<TReturn>(IBehavior? behavior, MethodSetup? matchedSetup, out TReturn result)
+    {
+        if (behavior is not ReturnBehavior<TReturn> fixedReturn)
+        {
+            result = default!;
+            return false;
+        }
+
+        result = fixedReturn.Value;
+        if (result is RawReturn raw) RawReturnContext.Set(raw);
+        try
+        {
+            ApplyMatchedSetup(matchedSetup);
+        }
+        catch
+        {
+            RawReturnContext.Clear();
+            throw;
+        }
+        return true;
     }
 
     private CallRecord RecordCall(int memberId, string memberName, object?[] args)

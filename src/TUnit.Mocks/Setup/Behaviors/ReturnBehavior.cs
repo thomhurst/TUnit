@@ -6,6 +6,8 @@ internal sealed class ReturnBehavior<TReturn> : IBehavior, IArgumentFreeBehavior
 
     public ReturnBehavior(TReturn value) => _value = value;
 
+    internal TReturn Value => _value;
+
     public object? Execute(object?[] arguments) => Execute();
 
     public object? Execute() => _value;

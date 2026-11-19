@@ -23,6 +23,8 @@ public sealed partial class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1);
 
+        if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
+
         if (behavior is not null)
         {
             var result = ExecuteBehavior(behavior, store, arg1);
@@ -67,6 +69,8 @@ public sealed partial class MockEngine<T> where T : class
         var callRecord = RecordCall(memberId, memberName, store);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1, arg2);
+
+        if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
 
         if (behavior is not null)
         {
@@ -113,6 +117,8 @@ public sealed partial class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1, arg2, arg3);
 
+        if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
+
         if (behavior is not null)
         {
             var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3);
@@ -157,6 +163,8 @@ public sealed partial class MockEngine<T> where T : class
         var callRecord = RecordCall(memberId, memberName, store);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1, arg2, arg3, arg4);
+
+        if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
 
         if (behavior is not null)
         {
@@ -203,6 +211,8 @@ public sealed partial class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1, arg2, arg3, arg4, arg5);
 
+        if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
+
         if (behavior is not null)
         {
             var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5);
@@ -247,6 +257,8 @@ public sealed partial class MockEngine<T> where T : class
         var callRecord = RecordCall(memberId, memberName, store);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1, arg2, arg3, arg4, arg5, arg6);
+
+        if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
 
         if (behavior is not null)
         {
@@ -293,6 +305,8 @@ public sealed partial class MockEngine<T> where T : class
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 
+        if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
+
         if (behavior is not null)
         {
             var result = ExecuteBehavior(behavior, store, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
@@ -337,6 +351,8 @@ public sealed partial class MockEngine<T> where T : class
         var callRecord = RecordCall(memberId, memberName, store);
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+
+        if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
 
         if (behavior is not null)
         {
