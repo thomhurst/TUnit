@@ -6,7 +6,7 @@ sidebar_position: 4
 
 # Invocation Benchmark
 
-> Calling methods on mock objects — comparing **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries.
+> Calling methods on mock objects — comparing **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries.
 
 :::info Last Updated
 This benchmark was automatically generated on **2026-11-19** from the latest CI run.
@@ -139,7 +139,7 @@ xychart-beta
 
 ## 🎯 Key Insights
 
-This benchmark compares **TUnit.Mocks** (source-generated) against runtime proxy-based mocking libraries for calling methods on mock objects.
+This benchmark compares **TUnit.Mocks** (source-generated) against other source-generated and runtime proxy-based mocking libraries for calling methods on mock objects.
 
 ---
 
