@@ -12,6 +12,7 @@ namespace TUnit.Mocks.Benchmarks;
 [SimpleJob]
 [JsonExporterAttribute.Full]
 [MarkdownExporterAttribute.GitHub]
+// These are verification workflows: creation, setup and any calls are timed too.
 public class VerificationBenchmarks
 {
     [Benchmark(Description = "TUnit.Mocks")]
