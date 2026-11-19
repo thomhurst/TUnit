@@ -235,7 +235,7 @@ public class VerifyAllMessageTests
     }
 
     [Test]
-    public async Task VerifyAll_Passes_When_All_Setups_Invoked()
+    public void VerifyAll_Passes_When_All_Setups_Invoked()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -248,7 +248,6 @@ public class VerifyAllMessageTests
 
         // Assert — no exception
         Mock.VerifyAll(mock);
-        await Assert.That(true).IsTrue();
     }
 }
 

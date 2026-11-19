@@ -25,8 +25,7 @@ internal static class MockCallSequence
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVerificationFactory, IBareSetupRemover where T : class
 {
-    // Single lock for both setup and call mutations — reduces allocation by one Lock object.
-    // Contention is acceptable since setup and call recording rarely overlap in typical usage.
+    // Serializes setup mutation and first-call buffer initialization. Appends use each buffer's lock.
     private Lock? _lock;
     private Lock Lock => _lock ?? EnsureLock();
 
@@ -36,7 +35,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private volatile bool _hasStatefulSetups;
     private volatile bool _hasStaleSetups; // true when setup lists have been modified but snapshots not yet rebuilt
 
-    // Call buffers are pre-allocated during setup to avoid capacity checks on the invocation hot path.
+    // Call buffers are allocated on the first invocation, not while configuring unused members.
     // Each buffer uses its own lightweight lock, avoiding contention with the shared MockEngine Lock.
     // Each buffer publishes its own count, avoiding a second per-call atomic increment.
     private volatile CallRecordBuffer?[]? _callBuffers;
@@ -323,9 +322,6 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             _setupsByMemberId = newSnapshot;
             _setupListsByMemberId = newLists;
         }
-
-        // Pre-allocate call tracking buffers so invocations don't need to check capacity
-        EnsureCallBufferCapacity(memberId);
     }
 
     /// <inheritdoc />
@@ -1192,10 +1188,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         var memberId = record.MemberId;
         var buffers = _callBuffers; // single volatile read — consistent snapshot
 
-        // Fast path: buffers pre-allocated during setup
+        // Fast path: this member has already recorded a call.
         if (buffers is not null && (uint)memberId < (uint)buffers.Length)
         {
-            var buffer = buffers[memberId];
+            var buffer = Volatile.Read(ref buffers[memberId]);
             if (buffer is not null)
             {
                 buffer.Add(record);
@@ -1213,8 +1209,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         lock (Lock)
         {
             EnsureCallBufferCapacity(record.MemberId);
-            var buffers = _callBuffers!;
-            var buffer = buffers[record.MemberId] ??= new CallRecordBuffer();
+            var buffer = _callBuffers![record.MemberId]!;
             buffer.Add(record);
         }
         return record;
@@ -1238,8 +1233,11 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             _callBuffers = newBuffers;
         }
 
-        // Pre-create tracking so invocation only needs the buffer's own lock.
-        _callBuffers![memberId] ??= new CallRecordBuffer();
+        // Publish initialization to lock-free readers of an existing buffers array.
+        if (_callBuffers![memberId] is null)
+        {
+            Volatile.Write(ref _callBuffers[memberId], new CallRecordBuffer());
+        }
     }
 
     /// <summary>

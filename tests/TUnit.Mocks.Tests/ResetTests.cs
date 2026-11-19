@@ -31,7 +31,7 @@ public class ResetTests
     }
 
     [Test]
-    public async Task Reset_Clears_Call_History()
+    public void Reset_Clears_Call_History()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -48,7 +48,6 @@ public class ResetTests
 
         // Assert — after reset, call history is cleared
         mock.Add(Any(), Any()).WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -70,7 +69,7 @@ public class ResetTests
     }
 
     [Test]
-    public async Task Reset_Allows_Fresh_Verification()
+    public void Reset_Allows_Fresh_Verification()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -88,7 +87,6 @@ public class ResetTests
 
         // Assert — verification reflects only post-reset calls
         mock.Add(1, 2).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -133,7 +131,7 @@ public class ResetTests
     }
 
     [Test]
-    public async Task Reset_Clears_Void_Method_Call_History()
+    public void Reset_Clears_Void_Method_Call_History()
     {
         // Arrange
         var mock = ICalculator.Mock();
@@ -148,7 +146,6 @@ public class ResetTests
 
         // Assert — void method call history is cleared
         mock.Log(Any()).WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -175,7 +172,6 @@ public class ResetTests
         // Assert — new setup and history
         await Assert.That(calc.Add(1, 1)).IsEqualTo(20);
         mock.Add(1, 1).WasCalled(Times.Exactly(3)); // 2 from re-use + 1 from the assert line
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

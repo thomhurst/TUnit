@@ -81,7 +81,6 @@ public class AsyncTests
         await service.DoWorkAsync();
 
         // Assert — if we get here, the method worked
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -115,17 +114,7 @@ public class AsyncTests
         // Assert — the task is faulted
         await Assert.That(task.IsFaulted).IsTrue();
 
-        try
-        {
-            await task;
-            // Should not reach here
-            await Assert.That(false).IsTrue();
-        }
-        catch (InvalidOperationException)
-        {
-            // Expected
-            await Assert.That(true).IsTrue();
-        }
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await task);
     }
 
     [Test]
@@ -190,7 +179,6 @@ public class AsyncTests
 
         // Assert — verify it was called twice
         mock.GetValueAsync().WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -424,7 +412,7 @@ public class AsyncTests
 
         IAsyncService service = mock.Object;
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await service.GetNameAsync("badKey"));
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await service.GetNameAsync("badKey")).And.IsNotNull();
         await Assert.That(ex.Message).Contains("No value for: badKey");
     }
 
@@ -437,7 +425,7 @@ public class AsyncTests
 
         IAsyncService service = mock.Object;
 
-        var ex = await Assert.ThrowsAsync<ArgumentException>(async () => await service.ComputeValueTaskAsync(-1));
+        var ex = await Assert.ThrowsAsync<ArgumentException>(async () => await service.ComputeValueTaskAsync(-1)).And.IsNotNull();
         // Formatted the same way as the factory above, so it matches under any culture.
         await Assert.That(ex.Message).Contains($"Invalid input: {-1}");
     }

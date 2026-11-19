@@ -105,14 +105,13 @@ public class KitchenSinkInterfaceTests
     // ── Simple void method ──
 
     [Test]
-    public async Task Void_Method_Can_Be_Called()
+    public void Void_Method_Can_Be_Called()
     {
         var mock = IKitchenSink.Mock();
 
         mock.Object.Fire();
 
         mock.Fire().WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     // ── Return value method ──
@@ -147,7 +146,6 @@ public class KitchenSinkInterfaceTests
         var mock = IKitchenSink.Mock();
         // RunAsync returns Task — void async, just configure it doesn't throw
         await mock.Object.RunAsync();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -166,7 +164,6 @@ public class KitchenSinkInterfaceTests
     {
         var mock = IKitchenSink.Mock();
         await mock.Object.PingAsync();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -234,7 +231,7 @@ public class KitchenSinkInterfaceTests
     // ── Ref parameters ──
 
     [Test]
-    public async Task Ref_Parameter_Method()
+    public void Ref_Parameter_Method()
     {
         var mock = IKitchenSink.Mock();
 
@@ -242,7 +239,6 @@ public class KitchenSinkInterfaceTests
         mock.Object.Swap(ref val);
 
         mock.Swap(Any()).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     // ── In parameters ──
@@ -359,7 +355,7 @@ public class KitchenSinkInterfaceTests
     // ── Verification ──
 
     [Test]
-    public async Task Multiple_Methods_Verify_Independently()
+    public void Multiple_Methods_Verify_Independently()
     {
         var mock = IKitchenSink.Mock();
         mock.Echo(Any()).Returns("ok");
@@ -371,7 +367,6 @@ public class KitchenSinkInterfaceTests
 
         mock.Echo(Any()).WasCalled(Times.Exactly(2));
         mock.GetId().WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
 #if NET8_0_OR_GREATER
@@ -425,7 +420,7 @@ public class KitchenSinkInterfaceTests
     }
 
     [Test]
-    public async Task Params_PerElement_Verification()
+    public void Params_PerElement_Verification()
     {
         var mock = IKitchenSink.Mock();
         mock.Object.Sum(1, 2);

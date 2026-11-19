@@ -162,7 +162,7 @@ public class SpanReturnTests
     }
 
     [Test]
-    public async Task Span_Return_Verify_WasCalled()
+    public void Span_Return_Verify_WasCalled()
     {
         var mock = ISpanProducer.Mock();
         mock.GetBytes().Returns(new ReadOnlySpan<byte>([1]));
@@ -171,20 +171,18 @@ public class SpanReturnTests
         mock.Object.GetBytes();
 
         mock.GetBytes().WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue(); // if we get here, verification passed
     }
 
     [Test]
-    public async Task Span_Return_Verify_WasNeverCalled()
+    public void Span_Return_Verify_WasNeverCalled()
     {
         var mock = ISpanProducer.Mock();
 
         mock.GetBytes().WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Span_Return_Verify_With_Specific_Args()
+    public void Span_Return_Verify_With_Specific_Args()
     {
         var mock = ISpanProducer.Mock();
         mock.GetBytes(Any()).Returns(new ReadOnlySpan<byte>([1]));
@@ -195,7 +193,6 @@ public class SpanReturnTests
         mock.GetBytes("hello").WasCalled(Times.Once);
         mock.GetBytes("world").WasCalled(Times.Once);
         mock.GetBytes(Any()).WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

@@ -185,7 +185,7 @@ public class OverloadEdgeCaseTests
     }
 
     [Test]
-    public async Task Overload_Verify_Specific_Overload()
+    public void Overload_Verify_Specific_Overload()
     {
         // Arrange
         var mock = IOverloadedService.Mock();
@@ -201,7 +201,6 @@ public class OverloadEdgeCaseTests
         // Assert — verify only the int overload was called twice
         mock.Format(Any<int>()).WasCalled(Times.Exactly(2));
         mock.Format(Any<string>()).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 }
 
@@ -291,7 +290,6 @@ public class LargeParameterCountTests
             Any<string?>(),
             Any()
         ).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 }
 
@@ -405,15 +403,7 @@ public class ExceptionEdgeCaseTests
         var firstTask = api.CallRemoteServiceAsync("https://api.example.com/data");
         await Assert.That(firstTask.IsFaulted).IsTrue();
 
-        try
-        {
-            await firstTask;
-            await Assert.That(false).IsTrue(); // should not reach here
-        }
-        catch (InvalidOperationException)
-        {
-            // Expected
-        }
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await firstTask);
 
         // Second call: succeeds
         var result = await api.CallRemoteServiceAsync("https://api.example.com/data");
@@ -434,15 +424,7 @@ public class ExceptionEdgeCaseTests
         // Assert — the task itself is faulted (not a synchronous exception)
         await Assert.That(task.IsFaulted).IsTrue();
 
-        try
-        {
-            await task;
-            await Assert.That(false).IsTrue(); // should not reach
-        }
-        catch (TimeoutException)
-        {
-            await Assert.That(true).IsTrue(); // Expected
-        }
+        await Assert.ThrowsAsync<TimeoutException>(async () => await task);
     }
 
     [Test]
@@ -593,7 +575,7 @@ public class ResetReconfigurationTests
     }
 
     [Test]
-    public async Task Reset_Mid_Test_Changes_Verification_Baseline()
+    public void Reset_Mid_Test_Changes_Verification_Baseline()
     {
         // Arrange
         var mock = IExternalApi.Mock();
@@ -621,7 +603,6 @@ public class ResetReconfigurationTests
         // Verify only post-reset calls
         mock.GetConfig("key1").WasCalled(Times.Once);
         mock.GetConfig("key2").WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 }
 
@@ -673,7 +654,6 @@ public class ConcurrentAccessTests
 
         // Assert — verify exact count after all parallel calls complete
         mock.IncrementAsync("counter").WasCalled(Times.Exactly(100));
-        await Assert.That(true).IsTrue();
     }
 }
 
@@ -735,7 +715,7 @@ public class EnumParameterTests
     }
 
     [Test]
-    public async Task Enum_Void_Method_Verify_Specific_Value()
+    public void Enum_Void_Method_Verify_Specific_Value()
     {
         // Arrange
         var mock = ITaskManager.Mock();
@@ -755,6 +735,5 @@ public class EnumParameterTests
         // Verify specific task ID + status combination
         mock.UpdateStatus(1, Status.Active).WasCalled(Times.Once);
         mock.UpdateStatus(2, Status.Completed).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 }

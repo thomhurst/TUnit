@@ -61,7 +61,7 @@ public class RefStructTests
     }
 
     [Test]
-    public async Task Void_RefStruct_Method_Verification_Works()
+    public void Void_RefStruct_Method_Verification_Works()
     {
         // Arrange
         var mock = IBufferProcessor.Mock();
@@ -73,7 +73,6 @@ public class RefStructTests
 
         // Assert
         mock.Process().WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -109,7 +108,7 @@ public class RefStructTests
     }
 
     [Test]
-    public async Task NonVoid_RefStruct_Param_Verification()
+    public void NonVoid_RefStruct_Param_Verification()
     {
         // Arrange
         var mock = IBufferProcessor.Mock();
@@ -122,7 +121,6 @@ public class RefStructTests
 
         // Assert
         mock.Parse().WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
 #endif
@@ -168,7 +166,7 @@ public class RefStructTests
     }
 
     [Test]
-    public async Task Mixed_Params_Verification_With_Matcher()
+    public void Mixed_Params_Verification_With_Matcher()
     {
         // Arrange
         var mock = IMixedProcessor.Mock();
@@ -183,7 +181,6 @@ public class RefStructTests
         mock.Send("server-a").WasCalled(Times.Exactly(2));
         mock.Send("server-b").WasCalled(Times.Once);
         mock.Send(Any()).WasCalled(Times.Exactly(3));
-        await Assert.That(true).IsTrue();
     }
 
 #endif
@@ -237,7 +234,7 @@ public class RefStructTests
     }
 
     [Test]
-    public async Task RefStructArg_Verification_With_Any()
+    public void RefStructArg_Verification_With_Any()
     {
         // Arrange
         var mock = IBufferProcessor.Mock();
@@ -246,11 +243,10 @@ public class RefStructTests
 
         // Assert
         mock.Process(RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task RefStructArg_Mixed_Verification()
+    public void RefStructArg_Mixed_Verification()
     {
         // Arrange — Send(string destination, ReadOnlySpan<byte> payload)
         var mock = IMixedProcessor.Mock();
@@ -260,7 +256,6 @@ public class RefStructTests
         // Assert — verify with both Arg<string> and RefStructArg<ReadOnlySpan<byte>>
         mock.Send("server-a", RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Once);
         mock.Send(Any(), RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -296,7 +291,7 @@ public class RefStructTests
     }
 
     [Test]
-    public async Task RefStructArg_NonVoid_Method_Verification()
+    public void RefStructArg_NonVoid_Method_Verification()
     {
         // Arrange
         var mock = IBufferProcessor.Mock();
@@ -309,7 +304,6 @@ public class RefStructTests
 
         // Assert
         mock.Parse(RefStructArg<ReadOnlySpan<char>>.Any).WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -334,7 +328,7 @@ public class RefStructTests
     }
 
     [Test]
-    public async Task RefStructArg_Mixed_Params_Verification_With_Matcher()
+    public void RefStructArg_Mixed_Params_Verification_With_Matcher()
     {
         // Arrange
         var mock = IMixedProcessor.Mock();
@@ -349,7 +343,6 @@ public class RefStructTests
         mock.Send("server-a", RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(2));
         mock.Send("server-b", RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Once);
         mock.Send(Any(), RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(3));
-        await Assert.That(true).IsTrue();
     }
 
 #endif

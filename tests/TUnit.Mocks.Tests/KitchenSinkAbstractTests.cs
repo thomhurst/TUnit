@@ -163,7 +163,7 @@ public class KitchenSinkAbstractTests
     }
 
     [Test]
-    public async Task Abstract_Property_Setter_Verifiable()
+    public void Abstract_Property_Setter_Verifiable()
     {
         var mock = AbstractKitchenSink.Mock();
 
@@ -514,13 +514,13 @@ public class KitchenSinkAbstractTests
     {
         var mock = AbstractKitchenSink.Mock();
         mock.GetName().Returns("x");
-        mock.Combine(IsNull<string>(), Any()).Returns("null-path");
+        mock.Combine(IsNull<string?>(), Any()).Returns("null-path");
         mock.Combine("p-", Any()).Returns("prefixed");
 
         await Assert.That(mock.Object.Combine(null, "z")).IsEqualTo("null-path");
         await Assert.That(mock.Object.Combine("p-", "z")).IsEqualTo("prefixed");
 
-        mock.Combine(IsNull<string>(), Any()).WasCalled(Times.Once);
+        mock.Combine(IsNull<string?>(), Any()).WasCalled(Times.Once);
         mock.Combine("p-", Any()).WasCalled(Times.Once);
     }
 
@@ -546,7 +546,7 @@ public class KitchenSinkAbstractTests
     // ── Verification on abstract and virtual methods ──
 
     [Test]
-    public async Task Verify_Abstract_And_Virtual_Calls()
+    public void Verify_Abstract_And_Virtual_Calls()
     {
         var mock = AbstractKitchenSink.Mock();
         mock.GetName().Returns("x");
@@ -560,6 +560,5 @@ public class KitchenSinkAbstractTests
         mock.GetName().WasCalled(Times.Exactly(2));
         mock.Multiply(Any(), Any()).WasCalled(Times.Once);
         mock.ComputeAbstract(1, 2).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 }

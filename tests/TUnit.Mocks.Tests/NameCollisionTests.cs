@@ -148,7 +148,7 @@ public class NameCollisionTests
     }
 
     [Test]
-    public async Task Polyfill_VerifyAll_And_VerifyNoOtherCalls_Reachable()
+    public void Polyfill_VerifyAll_And_VerifyNoOtherCalls_Reachable()
     {
         var mock = IPolyfillSubject.Mock();
         mock.GetValue().Returns(1);
@@ -158,7 +158,6 @@ public class NameCollisionTests
         mock.GetValue().WasCalled();
         mock.VerifyNoOtherCalls();
         mock.VerifyAll();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

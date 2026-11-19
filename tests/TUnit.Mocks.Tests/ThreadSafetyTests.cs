@@ -41,7 +41,6 @@ public class ThreadSafetyTests
 
         // Assert — all 100 calls should be recorded
         mock.Log(Any()).WasCalled(Times.Exactly(100));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -122,7 +121,6 @@ public class ThreadSafetyTests
         await Task.WhenAll(verifyTasks);
 
         // Assert — all verifications passed without exception
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -174,6 +172,5 @@ public class ThreadSafetyTests
 
         // Assert — verify total call count
         mock.Greet(Any()).WasCalled(Times.Exactly(100));
-        await Assert.That(true).IsTrue();
     }
 }

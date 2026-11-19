@@ -89,7 +89,7 @@ public class InParameterTests
     }
 
     [Test]
-    public async Task In_Params_Verify_WasCalled()
+    public void In_Params_Verify_WasCalled()
     {
         var mock = ICalculatorWithIn.Mock();
         mock.Add(Any(), Any()).Returns(0);
@@ -98,16 +98,14 @@ public class InParameterTests
         mock.Object.Add(3, 4);
 
         mock.Add(Any(), Any()).WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task In_Params_Verify_WasNeverCalled()
+    public void In_Params_Verify_WasNeverCalled()
     {
         var mock = ICalculatorWithIn.Mock();
 
         mock.Add(1, 2).WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -180,7 +178,7 @@ public class InParameterTests
     }
 
     [Test]
-    public async Task In_Params_Verify_Specific_Values()
+    public void In_Params_Verify_Specific_Values()
     {
         var mock = ICalculatorWithIn.Mock();
         mock.Add(Any(), Any()).Returns(0);
@@ -191,7 +189,6 @@ public class InParameterTests
         mock.Add(1, 2).WasCalled(Times.Once);
         mock.Add(3, 4).WasCalled(Times.Once);
         mock.Add(5, 6).WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

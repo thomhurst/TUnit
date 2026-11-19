@@ -111,7 +111,7 @@ public class StringAndTypeMatcherTests
 
         mock.Echo(StartsWith("a")).WasCalled(Times.Exactly(2));
         mock.Echo(Contains("nan")).WasCalled(Times.Once);
-        await Assert.That(arg.Values).IsEquivalentTo(new[] { "apple", "avocado" });
+        await Assert.That(arg.Values).IsEquivalentTo(new string?[] { "apple", "avocado" });
     }
 
     [Test]

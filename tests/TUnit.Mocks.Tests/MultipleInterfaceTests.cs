@@ -48,7 +48,7 @@ public class MultipleInterfaceTests
     }
 
     [Test]
-    public async Task Can_Setup_Methods_From_Primary_Interface()
+    public void Can_Setup_Methods_From_Primary_Interface()
     {
         // Arrange
         var mock = Mock.Of<IMultiLogger, IMultiDisposable>();
@@ -131,7 +131,7 @@ public class MultipleInterfaceTests
     }
 
     [Test]
-    public async Task Mock_Of_Four_Interfaces_Can_Use_Primary()
+    public void Mock_Of_Four_Interfaces_Can_Use_Primary()
     {
         // Arrange
         var mock = Mock.Of<IMultiLogger, IMultiDisposable, IMultiSerializable, IMultiCloneable>();
@@ -142,7 +142,6 @@ public class MultipleInterfaceTests
 
         // Assert
         mock.Log("hello from four-interface mock").WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

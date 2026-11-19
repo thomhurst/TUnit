@@ -49,7 +49,7 @@ public class MockAssertionExtensionsTests
         var mock = ICalculator.Mock();
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Add(1, 2)).WasCalled());
+            await Assert.That(mock.Add(1, 2)).WasCalled()).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("Mock verification failed");
         await Assert.That(exception.Message).Contains("called 0 time(s)");
@@ -73,7 +73,7 @@ public class MockAssertionExtensionsTests
         var mock = ICalculator.Mock();
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Add(1, 2)).WasCalled(Times.Once));
+            await Assert.That(mock.Add(1, 2)).WasCalled(Times.Once)).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("called 0 time(s)");
     }
@@ -87,7 +87,7 @@ public class MockAssertionExtensionsTests
         calc.Add(1, 2);
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Add(1, 2)).WasCalled(Times.Once));
+            await Assert.That(mock.Add(1, 2)).WasCalled(Times.Once)).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("called 2 time(s)");
     }
@@ -111,7 +111,7 @@ public class MockAssertionExtensionsTests
         calc.Add(1, 2);
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Add(1, 2)).WasCalled(Times.Exactly(3)));
+            await Assert.That(mock.Add(1, 2)).WasCalled(Times.Exactly(3))).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("Mock verification failed");
         await Assert.That(exception.Message).Contains("called 1 time(s)");
@@ -136,7 +136,7 @@ public class MockAssertionExtensionsTests
         calc.Add(1, 2);
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Add(1, 2)).WasCalled(Times.AtLeast(2)));
+            await Assert.That(mock.Add(1, 2)).WasCalled(Times.AtLeast(2))).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("called 1 time(s)");
     }
@@ -162,7 +162,7 @@ public class MockAssertionExtensionsTests
         calc.Add(1, 2);
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Add(1, 2)).WasCalled(Times.AtMost(2)));
+            await Assert.That(mock.Add(1, 2)).WasCalled(Times.AtMost(2))).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("called 3 time(s)");
     }
@@ -186,7 +186,7 @@ public class MockAssertionExtensionsTests
         calc.Add(1, 2);
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Add(1, 2)).WasCalled(Times.Between(2, 4)));
+            await Assert.That(mock.Add(1, 2)).WasCalled(Times.Between(2, 4))).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("called 1 time(s)");
     }
@@ -207,7 +207,7 @@ public class MockAssertionExtensionsTests
         calc.Add(1, 2);
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Add(1, 2)).WasCalled(Times.Never));
+            await Assert.That(mock.Add(1, 2)).WasCalled(Times.Never)).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("called 1 time(s)");
     }
@@ -230,7 +230,7 @@ public class MockAssertionExtensionsTests
         calc.Add(1, 2);
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Add(1, 2)).WasNeverCalled());
+            await Assert.That(mock.Add(1, 2)).WasNeverCalled()).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("Mock verification failed");
         await Assert.That(exception.Message).Contains("called 1 time(s)");
@@ -283,7 +283,7 @@ public class MockAssertionExtensionsTests
         calc.Log("hello");
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Log("world")).WasCalled(Times.Once));
+            await Assert.That(mock.Log("world")).WasCalled(Times.Once)).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("called 0 time(s)");
     }
@@ -317,7 +317,7 @@ public class MockAssertionExtensionsTests
         mock.Name.Returns("test");
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Name).WasCalled(Times.Once));
+            await Assert.That(mock.Name).WasCalled(Times.Once)).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("called 0 time(s)");
     }
@@ -340,7 +340,7 @@ public class MockAssertionExtensionsTests
         _ = svc.Name;
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Name).WasNeverCalled());
+            await Assert.That(mock.Name).WasNeverCalled()).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("called 1 time(s)");
     }
@@ -366,7 +366,7 @@ public class MockAssertionExtensionsTests
         svc.Count = 10;
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(mock.Count.Set(99)).WasCalled(Times.Once));
+            await Assert.That(mock.Count.Set(99)).WasCalled(Times.Once)).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("called 0 time(s)");
     }
@@ -390,7 +390,7 @@ public class MockAssertionExtensionsTests
         ICallVerification verification = null!;
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(verification).WasCalled());
+            await Assert.That(verification).WasCalled()).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("null");
     }
@@ -401,7 +401,7 @@ public class MockAssertionExtensionsTests
         ICallVerification verification = null!;
 
         var exception = await Assert.ThrowsAsync<AssertionException>(async () =>
-            await Assert.That(verification).WasNeverCalled());
+            await Assert.That(verification).WasNeverCalled()).And.IsNotNull();
 
         await Assert.That(exception.Message).Contains("null");
     }

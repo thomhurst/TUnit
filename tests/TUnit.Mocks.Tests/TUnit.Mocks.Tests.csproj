@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Enforce null-literal and generated event nullability regression coverage. -->
-    <WarningsAsErrors>$(WarningsAsErrors);CS8625;CS8604;CS8612;CS8613;CS8614;CS8615;CS8634</WarningsAsErrors>
+    <!-- Keep matcher, exception and generated event nullability plus assertion-style regressions visible. -->
+    <WarningsAsErrors>$(WarningsAsErrors);CS8602;CS8620;CS8631;CS8625;CS8604;CS8612;CS8613;CS8614;CS8615;CS8634;TUnitAssertions0005;TUnitAssertions0014</WarningsAsErrors>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\eng\strongname.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>

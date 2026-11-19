@@ -383,7 +383,7 @@ public class KitchenSinkConcreteTests
     // ── Verification ──
 
     [Test]
-    public async Task Verify_Calls_On_Virtual_Methods()
+    public void Verify_Calls_On_Virtual_Methods()
     {
         var mock = ConcreteKitchenSink.Mock();
         mock.Transform(Any()).Returns("x");
@@ -394,7 +394,6 @@ public class KitchenSinkConcreteTests
 
         mock.Transform(Any()).WasCalled(Times.Exactly(2));
         mock.DoubleIt(5).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     // ── Event from base class ──
@@ -488,13 +487,13 @@ public class KitchenSinkConcreteTests
     public async Task Virtual_Nullable_Reference_Param_Configured_And_Verified()
     {
         var mock = ConcreteKitchenSink.Mock();
-        mock.Combine(IsNull<string>(), Any()).Returns("null-path");
+        mock.Combine(IsNull<string?>(), Any()).Returns("null-path");
         mock.Combine("p-", Any()).Returns("prefixed");
 
         await Assert.That(mock.Object.Combine(null, "x")).IsEqualTo("null-path");
         await Assert.That(mock.Object.Combine("p-", "x")).IsEqualTo("prefixed");
 
-        mock.Combine(IsNull<string>(), Any()).WasCalled(Times.Once);
+        mock.Combine(IsNull<string?>(), Any()).WasCalled(Times.Once);
         mock.Combine("p-", Any()).WasCalled(Times.Once);
     }
 

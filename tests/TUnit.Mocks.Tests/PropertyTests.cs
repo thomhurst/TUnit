@@ -67,7 +67,7 @@ public class PropertyTests
     }
 
     [Test]
-    public async Task Setter_Records_Call()
+    public void Setter_Records_Call()
     {
         // Arrange
         var mock = IPropertyService.Mock();
@@ -78,11 +78,10 @@ public class PropertyTests
 
         // Assert — verify setter was called
         mock.Count.Set(10).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Setter_Verify_With_Any_Matcher()
+    public void Setter_Verify_With_Any_Matcher()
     {
         // Arrange
         var mock = IPropertyService.Mock();
@@ -95,11 +94,10 @@ public class PropertyTests
 
         // Assert — verify setter was called 3 times with any value
         mock.Count.Setter.WasCalled(Times.Exactly(3));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Setter_Verify_With_Specific_Value()
+    public void Setter_Verify_With_Specific_Value()
     {
         // Arrange
         var mock = IPropertyService.Mock();
@@ -112,11 +110,10 @@ public class PropertyTests
         // Assert — only one call with value 10
         mock.Count.Set(10).WasCalled(Times.Once);
         mock.Count.Set(5).WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Setter_Verify_Never_Called()
+    public void Setter_Verify_Never_Called()
     {
         // Arrange
         var mock = IPropertyService.Mock();
@@ -125,11 +122,10 @@ public class PropertyTests
 
         // Assert
         mock.Count.Setter.WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Getter_Verify_Was_Called()
+    public void Getter_Verify_Was_Called()
     {
         // Arrange
         var mock = IPropertyService.Mock();
@@ -141,11 +137,10 @@ public class PropertyTests
 
         // Assert — getter was called twice
         mock.Name.WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Getter_Verify_Never_Called()
+    public void Getter_Verify_Never_Called()
     {
         // Arrange
         var mock = IPropertyService.Mock();
@@ -154,7 +149,6 @@ public class PropertyTests
 
         // Assert
         mock.Name.WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

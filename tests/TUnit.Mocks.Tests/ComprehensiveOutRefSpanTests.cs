@@ -138,23 +138,21 @@ public class OutMutableSpanTests
     }
 
     [Test]
-    public async Task Out_Span_Verification()
+    public void Out_Span_Verification()
     {
         var mock = IMutableSpanOutput.Mock();
         mock.Object.Fill(out _);
         mock.Object.Fill(out _);
 
         mock.Fill().WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Out_Span_Never_Called()
+    public void Out_Span_Never_Called()
     {
         var mock = IMutableSpanOutput.Mock();
 
         mock.Fill().WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 }
 
@@ -268,7 +266,7 @@ public class OutReadOnlySpanCharTests
     }
 
     [Test]
-    public async Task Out_ReadOnlySpan_Char_Verification_Multiple()
+    public void Out_ReadOnlySpan_Char_Verification_Multiple()
     {
         var mock = ICharSpanReader.Mock();
         mock.GetToken(Any()).Returns(0);
@@ -281,7 +279,6 @@ public class OutReadOnlySpanCharTests
         mock.GetToken("b").WasCalled(Times.Once);
         mock.GetToken(Any()).WasCalled(Times.Exactly(3));
         mock.GetToken("z").WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 }
 
@@ -424,7 +421,7 @@ public class MultipleOutParamsTests
     }
 
     [Test]
-    public async Task Multiple_Out_Verification()
+    public void Multiple_Out_Verification()
     {
         var mock = IMultiOutput.Mock();
         mock.Extract(Any()).Returns(false);
@@ -437,7 +434,6 @@ public class MultipleOutParamsTests
         mock.Extract("b").WasCalled(Times.Once);
         mock.Extract(Any()).WasCalled(Times.Exactly(3));
         mock.Extract("c").WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 }
 
@@ -528,7 +524,7 @@ public class RefAndOutSpanTests
     }
 
     [Test]
-    public async Task Ref_And_Out_Span_Verification()
+    public void Ref_And_Out_Span_Verification()
     {
         var mock = ICodec.Mock();
         mock.Decode(Any()).Returns(false);
@@ -541,7 +537,6 @@ public class RefAndOutSpanTests
         mock.Decode(5).WasCalled(Times.Once);
         mock.Decode(Any()).WasCalled(Times.Exactly(2));
         mock.Decode(99).WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -626,14 +621,13 @@ public class SpanInputAndOutputTests
     }
 
     [Test]
-    public async Task RefStructArg_Input_With_Out_Span_Verification()
+    public void RefStructArg_Input_With_Out_Span_Verification()
     {
         var mock = ITransformer.Mock();
         mock.Object.Transform(new byte[] { 1 }, out _);
         mock.Object.Transform(ReadOnlySpan<byte>.Empty, out _);
 
         mock.Transform(RefStructArg<ReadOnlySpan<byte>>.Any).WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 #else
     [Test]
@@ -653,14 +647,13 @@ public class SpanInputAndOutputTests
     }
 
     [Test]
-    public async Task PreNet9_Span_Input_Verification()
+    public void PreNet9_Span_Input_Verification()
     {
         var mock = ITransformer.Mock();
         mock.Object.Transform(new byte[] { 1 }, out _);
         mock.Object.Transform(ReadOnlySpan<byte>.Empty, out _);
 
         mock.Transform().WasCalled(Times.Exactly(2));
-        await Assert.That(true).IsTrue();
     }
 #endif
 }
@@ -782,7 +775,7 @@ public class ComprehensiveRefTests
     }
 
     [Test]
-    public async Task Ref_Verification_With_Exact_Value()
+    public void Ref_Verification_With_Exact_Value()
     {
         var mock = ICounter.Mock();
         mock.Increment(Any(), Any()).Returns(0);
@@ -795,11 +788,10 @@ public class ComprehensiveRefTests
         mock.Increment(5, 1).WasCalled(Times.Exactly(2));
         mock.Increment(10, 2).WasCalled(Times.Once);
         mock.Increment(Any(), Any()).WasCalled(Times.Exactly(3));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Ref_Verification_AtLeast_AtMost()
+    public void Ref_Verification_AtLeast_AtMost()
     {
         var mock = ICounter.Mock();
         mock.Clear(Any());
@@ -812,7 +804,6 @@ public class ComprehensiveRefTests
         mock.Clear(Any()).WasCalled(Times.AtLeast(2));
         mock.Clear(Any()).WasCalled(Times.AtMost(5));
         mock.Clear(Any()).WasCalled(Times.Between(2, 4));
-        await Assert.That(true).IsTrue();
     }
 }
 
@@ -894,7 +885,7 @@ public class RefAndOutCombinedTests
     }
 
     [Test]
-    public async Task Ref_And_Out_Verification()
+    public void Ref_And_Out_Verification()
     {
         var mock = ISwapper.Mock();
 
@@ -906,7 +897,6 @@ public class RefAndOutCombinedTests
         mock.SwapAndReport(1).WasCalled(Times.Exactly(2));
         mock.SwapAndReport(2).WasCalled(Times.Once);
         mock.SwapAndReport(Any()).WasCalled(Times.Exactly(3));
-        await Assert.That(true).IsTrue();
     }
 }
 
@@ -969,7 +959,7 @@ public class DualSpanOutputTests
     }
 
     [Test]
-    public async Task Two_Span_Out_Verification()
+    public void Two_Span_Out_Verification()
     {
         var mock = IDualSpanOutput.Mock();
 
@@ -980,7 +970,6 @@ public class DualSpanOutputTests
         mock.Split("b").WasCalled(Times.Once);
         mock.Split(Any()).WasCalled(Times.Exactly(2));
         mock.Split("c").WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -1177,17 +1166,16 @@ public class ReadOnlySpanByteOutComprehensiveTests
     }
 
     [Test]
-    public async Task Verification_Once()
+    public void Verification_Once()
     {
         var mock = ISpanWriter.Mock();
         mock.Object.Do(out _);
 
         mock.Do().WasCalled(Times.Once);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Verification_Multiple()
+    public void Verification_Multiple()
     {
         var mock = ISpanWriter.Mock();
         mock.Object.Do(out _);
@@ -1198,17 +1186,15 @@ public class ReadOnlySpanByteOutComprehensiveTests
         mock.Do().WasCalled(Times.AtLeast(2));
         mock.Do().WasCalled(Times.AtMost(5));
         mock.Do().WasCalled(Times.Between(1, 4));
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
-    public async Task Verification_Never()
+    public void Verification_Never()
     {
         var mock = ISpanWriter.Mock();
 
         mock.Do().WasNeverCalled();
         mock.Do().WasCalled(Times.Never);
-        await Assert.That(true).IsTrue();
     }
 
     [Test]
@@ -1320,7 +1306,7 @@ public class ReadOnlySpanByteOutComprehensiveTests
     }
 
     [Test]
-    public async Task Out_Span_Verification_With_Mixed_Params()
+    public void Out_Span_Verification_With_Mixed_Params()
     {
         var mock = ISpanParser.Mock();
         mock.TryParse(Any()).Returns(false);
@@ -1333,7 +1319,6 @@ public class ReadOnlySpanByteOutComprehensiveTests
         mock.TryParse("y").WasCalled(Times.Once);
         mock.TryParse(Any()).WasCalled(Times.Exactly(3));
         mock.TryParse("z").WasNeverCalled();
-        await Assert.That(true).IsTrue();
     }
 
     [Test]

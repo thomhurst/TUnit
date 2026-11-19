@@ -1,4 +1,6 @@
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Jobs;
 using FakeItEasy;
 using Imposter.Abstractions;
 using Mockolate;
@@ -8,7 +10,7 @@ using NSubstitute;
 namespace TUnit.Mocks.Benchmarks;
 
 [MemoryDiagnoser]
-[ShortRunJob]
+[Config(typeof(BoundedInvocationConfig))]
 [JsonExporterAttribute.Full]
 [MarkdownExporterAttribute.GitHub]
 public class InvocationBenchmarks
@@ -23,7 +25,9 @@ public class InvocationBenchmarks
     private ICalculatorService? _nsubObject;
     private ICalculatorService? _fakeObject;
 
-    [GlobalSetup]
+    // Recreate matchers as well as mocks: clearing calls does not clear captured arguments.
+    // Fixed invocation counts bound history independently of BenchmarkDotNet's pilot stage.
+    [IterationSetup]
     public void Setup()
     {
         // TUnit.Mocks
@@ -132,7 +136,8 @@ public class InvocationBenchmarks
         return _fakeObject!.Format(42);
     }
 
-    [Benchmark(Description = "TUnit.Mocks (100 calls)")]
+    [InvocationCount(256, unrollFactor: 1)]
+    [Benchmark(Description = "TUnit.Mocks (100 calls)", OperationsPerInvoke = 100)]
     public int TUnitMocks_ManyInvocations()
     {
         var sum = 0;
@@ -144,7 +149,8 @@ public class InvocationBenchmarks
         return sum;
     }
 
-    [Benchmark(Description = "Imposter (100 calls)")]
+    [InvocationCount(256, unrollFactor: 1)]
+    [Benchmark(Description = "Imposter (100 calls)", OperationsPerInvoke = 100)]
     public int Imposter_ManyInvocations()
     {
         var sum = 0;
@@ -156,7 +162,8 @@ public class InvocationBenchmarks
         return sum;
     }
 
-    [Benchmark(Description = "Mockolate (100 calls)")]
+    [InvocationCount(256, unrollFactor: 1)]
+    [Benchmark(Description = "Mockolate (100 calls)", OperationsPerInvoke = 100)]
     public int Mockolate_ManyInvocations()
     {
         var sum = 0;
@@ -168,7 +175,8 @@ public class InvocationBenchmarks
         return sum;
     }
 
-    [Benchmark(Description = "Moq (100 calls)")]
+    [InvocationCount(256, unrollFactor: 1)]
+    [Benchmark(Description = "Moq (100 calls)", OperationsPerInvoke = 100)]
     public int Moq_ManyInvocations()
     {
         var sum = 0;
@@ -180,7 +188,8 @@ public class InvocationBenchmarks
         return sum;
     }
 
-    [Benchmark(Description = "NSubstitute (100 calls)")]
+    [InvocationCount(256, unrollFactor: 1)]
+    [Benchmark(Description = "NSubstitute (100 calls)", OperationsPerInvoke = 100)]
     public int NSubstitute_ManyInvocations()
     {
         var sum = 0;
@@ -192,7 +201,8 @@ public class InvocationBenchmarks
         return sum;
     }
 
-    [Benchmark(Description = "FakeItEasy (100 calls)")]
+    [InvocationCount(256, unrollFactor: 1)]
+    [Benchmark(Description = "FakeItEasy (100 calls)", OperationsPerInvoke = 100)]
     public int FakeItEasy_ManyInvocations()
     {
         var sum = 0;
@@ -202,5 +212,13 @@ public class InvocationBenchmarks
         }
 
         return sum;
+    }
+}
+
+public sealed class BoundedInvocationConfig : ManualConfig
+{
+    public BoundedInvocationConfig()
+    {
+        AddJob(Job.ShortRun.WithInvocationCount(16384).WithUnrollFactor(1));
     }
 }

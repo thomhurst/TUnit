@@ -115,8 +115,8 @@ const categoryMap = {
 const categoryDescriptions = {
   'MockCreation': 'Mock instance creation performance',
   'Setup': 'Mock behavior configuration (returns, matchers)',
-  'Invocation': 'Calling methods on mock objects',
-  'Verification': 'Verifying mock method calls',
+  'Invocation': 'Calling methods on mock objects with bounded history; time and allocation are reported per call',
+  'Verification': 'Mock verification workflows, including creation, setup and invocation where applicable',
   'Callback': 'Callback registration and execution',
   'CombinedWorkflow': 'Full workflow: create → setup → invoke → verify'
 };

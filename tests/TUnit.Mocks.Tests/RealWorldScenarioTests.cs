@@ -571,9 +571,9 @@ public class RealWorldScenarioTests
         // Arrange
         var mock = INullableService.Mock();
         var callCount = 0;
-        mock.Process(IsNull<string>(), Any<int?>())
+        mock.Process(IsNull<string?>(), Any<int?>())
             .Callback(() => callCount++);
-        mock.Process(IsNotNull<string>(), Any<int?>())
+        mock.Process(IsNotNull<string?>(), Any<int?>())
             .Callback(() => callCount += 10);
 
         INullableService svc = mock.Object;
