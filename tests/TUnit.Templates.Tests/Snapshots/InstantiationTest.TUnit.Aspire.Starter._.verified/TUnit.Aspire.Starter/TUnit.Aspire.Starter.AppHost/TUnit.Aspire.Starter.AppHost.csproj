@@ -1,6 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <Sdk Name="Aspire.AppHost.Sdk" Version="0.0.0-scrubbed" />
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -13,12 +11,8 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="0.0.0-scrubbed" />
+    <PackageReference Include="Aspire.Hosting.Dotnet" Version="0.0.0-scrubbed" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="0.0.0-scrubbed" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\TUnit.Aspire.Starter.ApiService\TUnit.Aspire.Starter.ApiService.csproj" />
-    <ProjectReference Include="..\TUnit.Aspire.Starter.WebApp\TUnit.Aspire.Starter.WebApp.csproj" />
   </ItemGroup>
 
 </Project>

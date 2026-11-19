@@ -48,6 +48,9 @@ Dockerfile text eol=lf
 ###############################################################################
 *.verified.txt text eol=lf
 *.received.txt text eol=lf
+# TemplateVerifier compares complete directories, including JSON and project files.
+tests/TUnit.Templates.Tests/Snapshots/** text eol=lf
+src/TUnit.Templates/content/TUnit.Aspire.Starter/** text eol=lf
 
 ###############################################################################
 # Binary files - no normalization

@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/17.0.0">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,17 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="17.0.0" />
+    <PackageReference Include="Aspire.Hosting.Dotnet" Version="17.0.0" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="17.0.0" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="17.0.0" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="17.0.0" />
     <!-- Patched MessagePack (GHSA-qhrr-8q5h-9q3h); see src/TUnit.Aspire.Core/TUnit.Aspire.Core.csproj. -->
     <PackageReference Include="MessagePack" Version="3.1.12" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\CloudShop.ApiService\CloudShop.ApiService.csproj" />
-    <ProjectReference Include="..\CloudShop.Web\CloudShop.Web.csproj" />
-    <ProjectReference Include="..\CloudShop.Worker\CloudShop.Worker.csproj" />
   </ItemGroup>
 
 </Project>

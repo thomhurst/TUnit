@@ -1,10 +1,10 @@
-﻿var builder = DistributedApplication.CreateBuilder(args);
+var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache");
 
-var apiService = builder.AddProject<Projects.TUnit.Aspire.Starter_ApiService>("apiservice");
+var apiService = builder.AddDotnetProject("apiservice", "../TUnit.Aspire.Starter.ApiService/TUnit.Aspire.Starter.ApiService.csproj");
 
-builder.AddProject<Projects.TUnit.Aspire.Starter_WebApp>("webfrontend")
+builder.AddDotnetProject("webfrontend", "../TUnit.Aspire.Starter.WebApp/TUnit.Aspire.Starter.WebApp.csproj")
     .WithExternalHttpEndpoints()
     .WithReference(cache)
     .WaitFor(cache)

@@ -15,9 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- AddDotnetProject; preview in Aspire 13.x, used only to test DotnetProjectResource support. -->
+    <!-- Test Aspire 17 without raising the published libraries' Aspire dependency floor. -->
     <PackageReference Include="Aspire.Hosting.Dotnet" />
-    <PackageReference Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="Aspire.Hosting.Testing" VersionOverride="17.0.0" />
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
   </ItemGroup>
 

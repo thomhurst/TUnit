@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/17.0.0">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TUnit.Aspire.Tests.ApiService\TUnit.Aspire.Tests.ApiService.csproj" />
+    <ProjectReference Include="..\TUnit.Aspire.Tests.ApiService\TUnit.Aspire.Tests.ApiService.csproj" IsAspireProjectResource="true" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>
