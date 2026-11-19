@@ -433,10 +433,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args, typeArguments);
 
-        if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
-
         if (behavior is not null)
         {
+            if (TryExecuteFixedReturn(behavior, matchedSetup, out TReturn fixedResult)) return fixedResult;
             var result = behavior is IArgumentFreeBehavior argFree ? argFree.Execute() : behavior.Execute(args);
             if (result is RawReturn raw)
             {
@@ -777,10 +776,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
         var (setupFound, behavior, matchedSetup) = FindMatchingSetup(memberId, args);
 
-        if (TryExecuteFixedReturn(behavior, matchedSetup, out result)) return true;
-
         if (behavior is not null)
         {
+            if (TryExecuteFixedReturn(behavior, matchedSetup, out result)) return true;
             var behaviorResult = behavior.Execute(args);
             if (behaviorResult is RawReturn raw)
             {
@@ -1158,7 +1156,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
     // Fixed returns stay typed so value types do not travel through IBehavior's boxed result.
     // Keep raw-return publication and setup side effects identical to the fallback path.
-    private bool TryExecuteFixedReturn<TReturn>(IBehavior? behavior, MethodSetup? matchedSetup, out TReturn result)
+    private bool TryExecuteFixedReturn<TReturn>(IBehavior behavior, MethodSetup? matchedSetup, out TReturn result)
     {
         if (behavior is not ReturnBehavior<TReturn> fixedReturn)
         {
@@ -1280,7 +1278,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
-    /// Rebuilds snapshot buffers from the mutable lists for all members.
+    /// Rebuilds snapshot arrays from the mutable lists for all members.
     /// Called once on transition from setup phase to invocation phase.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
