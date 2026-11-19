@@ -38,19 +38,8 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
     // Call buffers are pre-allocated during setup to avoid capacity checks on the invocation hot path.
     // Each buffer uses its own lightweight lock, avoiding contention with the shared MockEngine Lock.
-    // Bundled into a single volatile reference to eliminate TOCTOU between the two arrays.
-    private volatile CallArrays? _callArrays;
-
-    /// <summary>
-    /// Bundles call buffers and per-member counts into a single reference so they can be
-    /// swapped atomically. Both arrays always have the same length.
-    /// </summary>
-    private sealed class CallArrays(CallRecordBuffer?[] buffers, int[] counts)
-    {
-        public readonly CallRecordBuffer?[] Buffers = buffers;
-        public readonly int[] Counts = counts;
-        public int Length => Buffers.Length;
-    }
+    // Each buffer publishes its own count, avoiding a second per-call atomic increment.
+    private volatile CallRecordBuffer?[]? _callBuffers;
 
     private ConcurrentDictionary<string, object?>? _autoTrackValues;
     private ConcurrentQueue<(string EventName, bool IsSubscribe)>? _eventSubscriptions;
@@ -335,8 +324,8 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             _setupListsByMemberId = newLists;
         }
 
-        // Pre-allocate call tracking arrays so invocations don't need to check capacity
-        EnsureCallArrayCapacity(memberId);
+        // Pre-allocate call tracking buffers so invocations don't need to check capacity
+        EnsureCallBufferCapacity(memberId);
     }
 
     /// <inheritdoc />
@@ -835,9 +824,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// </summary>
     public IReadOnlyList<CallRecord> GetCallsFor(int memberId)
     {
-        var arrays = _callArrays; // single volatile read
-        if (arrays is not null && (uint)memberId < (uint)arrays.Length
-            && arrays.Buffers[memberId] is { } buffer)
+        var buffers = _callBuffers; // single volatile read
+        if (buffers is not null && (uint)memberId < (uint)buffers.Length
+            && buffers[memberId] is { } buffer)
         {
             return buffer.ToArray();
         }
@@ -850,10 +839,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// </summary>
     internal CallRecordBuffer? GetCallBufferFor(int memberId)
     {
-        var arrays = _callArrays;
-        if (arrays is not null && (uint)memberId < (uint)arrays.Length)
+        var buffers = _callBuffers;
+        if (buffers is not null && (uint)memberId < (uint)buffers.Length)
         {
-            return arrays.Buffers[memberId];
+            return buffers[memberId];
         }
         return null;
     }
@@ -863,9 +852,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// </summary>
     internal void MarkCallsVerified(int memberId)
     {
-        var arrays = _callArrays;
-        if (arrays is not null && (uint)memberId < (uint)arrays.Length
-            && arrays.Buffers[memberId] is { } buffer)
+        var buffers = _callBuffers;
+        if (buffers is not null && (uint)memberId < (uint)buffers.Length
+            && buffers[memberId] is { } buffer)
         {
             buffer.ForEach(static r => r.IsVerified = true);
         }
@@ -877,10 +866,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     [EditorBrowsable(EditorBrowsableState.Never)]
     public int GetCallCountFor(int memberId)
     {
-        var arrays = _callArrays; // single volatile read — consistent snapshot
-        if (arrays is not null && (uint)memberId < (uint)arrays.Length)
+        var buffers = _callBuffers; // single volatile read — consistent snapshot
+        if (buffers is not null && (uint)memberId < (uint)buffers.Length)
         {
-            return Volatile.Read(ref arrays.Counts[memberId]);
+            return buffers[memberId]?.Count ?? 0;
         }
         return 0;
     }
@@ -890,7 +879,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// </summary>
     public IReadOnlyList<CallRecord> GetAllCalls()
     {
-        if (_callArrays is null) return [];
+        if (_callBuffers is null) return [];
         var all = new List<CallRecord>();
         CollectCallRecords(all);
         all.Sort((a, b) => a.SequenceNumber.CompareTo(b.SequenceNumber));
@@ -903,7 +892,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     [EditorBrowsable(EditorBrowsableState.Never)]
     public IReadOnlyList<CallRecord> GetUnverifiedCalls()
     {
-        if (_callArrays is null) return [];
+        if (_callBuffers is null) return [];
         var result = new List<CallRecord>();
         CollectCallRecords(result, static r => !r.IsVerified);
         return result;
@@ -1033,7 +1022,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     {
         lock (Lock)
         {
-            _callArrays = null;
+            _callBuffers = null;
         }
 
         foreach (var setup in GetSetups())
@@ -1066,7 +1055,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             _hasStaleSetups = false;
             _currentState = null;
             PendingRequiredState = null;
-            _callArrays = null;
+            _callBuffers = null;
         }
         Volatile.Write(ref _autoTrackValues, null);
         Volatile.Write(ref _eventSubscriptions, null);
@@ -1154,14 +1143,14 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// Collects call records from all per-member buffers into <paramref name="target"/>,
     /// optionally filtered by <paramref name="filter"/>.
     /// Iterates a snapshot of the buffers array — buffers added by concurrent
-    /// <see cref="EnsureCallArrayCapacity"/> after the snapshot won't appear.
+    /// <see cref="EnsureCallBufferCapacity"/> after the snapshot won't appear.
     /// This is acceptable because verification should only run after all calls have completed.
     /// </summary>
     private void CollectCallRecords(List<CallRecord> target, Func<CallRecord, bool>? filter = null)
     {
-        var arrays = _callArrays;
-        if (arrays is null) return;
-        foreach (var buffer in arrays.Buffers)
+        var buffers = _callBuffers;
+        if (buffers is null) return;
+        foreach (var buffer in buffers)
         {
             buffer?.CollectInto(target, filter);
         }
@@ -1203,16 +1192,16 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private CallRecord StoreCallRecord(CallRecord record)
     {
         var memberId = record.MemberId;
-        var arrays = _callArrays; // single volatile read — consistent snapshot
+        var buffers = _callBuffers; // single volatile read — consistent snapshot
 
-        // Fast path: arrays pre-allocated during setup
-        if (arrays is not null && (uint)memberId < (uint)arrays.Length)
+        // Fast path: buffers pre-allocated during setup
+        if (buffers is not null && (uint)memberId < (uint)buffers.Length)
         {
-            var buffer = arrays.Buffers[memberId];
+            var buffer = buffers[memberId];
             if (buffer is not null)
             {
                 buffer.Add(record);
-                Interlocked.Increment(ref arrays.Counts[memberId]);
+
                 return record;
             }
         }
@@ -1226,37 +1215,35 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     {
         lock (Lock)
         {
-            EnsureCallArrayCapacity(record.MemberId);
-            var arrays = _callArrays!;
-            var buffer = arrays.Buffers[record.MemberId] ??= new CallRecordBuffer();
+            EnsureCallBufferCapacity(record.MemberId);
+            var buffers = _callBuffers!;
+            var buffer = buffers[record.MemberId] ??= new CallRecordBuffer();
             buffer.Add(record);
-            Interlocked.Increment(ref arrays.Counts[record.MemberId]);
+
         }
         return record;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private void EnsureCallArrayCapacity(int memberId)
+    private void EnsureCallBufferCapacity(int memberId)
     {
         var required = memberId + 1;
-        var current = _callArrays;
+        var current = _callBuffers;
         if (current is null || current.Length < required)
         {
             var newSize = current is null
                 ? Math.Max(required, 8)
                 : Math.Max(required, current.Length * 2);
             var newBuffers = new CallRecordBuffer?[newSize];
-            var newCounts = new int[newSize];
             if (current is not null)
             {
-                Array.Copy(current.Buffers, newBuffers, current.Length);
-                Array.Copy(current.Counts, newCounts, current.Length);
+                Array.Copy(current, newBuffers, current.Length);
             }
-            _callArrays = new CallArrays(newBuffers, newCounts);
+            _callBuffers = newBuffers;
         }
 
         // Pre-create the buffer so the invocation hot path never needs to allocate or lock
-        _callArrays!.Buffers[memberId] ??= new CallRecordBuffer();
+        _callBuffers![memberId] ??= new CallRecordBuffer();
     }
 
     /// <summary>
@@ -1295,7 +1282,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
-    /// Rebuilds snapshot arrays from the mutable lists for all members.
+    /// Rebuilds snapshot buffers from the mutable lists for all members.
     /// Called once on transition from setup phase to invocation phase.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]

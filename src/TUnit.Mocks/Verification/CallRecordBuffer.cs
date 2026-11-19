@@ -39,7 +39,7 @@ internal sealed class CallRecordBuffer
                 items = Grow();
             }
             items[count] = record;
-            _count = count + 1;
+            Volatile.Write(ref _count, count + 1);
         }
     }
 
