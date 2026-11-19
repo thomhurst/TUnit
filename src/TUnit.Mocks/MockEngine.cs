@@ -1201,7 +1201,6 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             if (buffer is not null)
             {
                 buffer.Add(record);
-
                 return record;
             }
         }
@@ -1219,7 +1218,6 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             var buffers = _callBuffers!;
             var buffer = buffers[record.MemberId] ??= new CallRecordBuffer();
             buffer.Add(record);
-
         }
         return record;
     }
@@ -1242,7 +1240,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             _callBuffers = newBuffers;
         }
 
-        // Pre-create the buffer so the invocation hot path never needs to allocate or lock
+        // Pre-create tracking so invocation only needs the buffer's own lock.
         _callBuffers![memberId] ??= new CallRecordBuffer();
     }
 

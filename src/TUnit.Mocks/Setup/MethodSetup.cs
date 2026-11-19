@@ -18,7 +18,6 @@ public sealed class MethodSetup
     /// </summary>
     private sealed class RareState
     {
-        public Lock? BehaviorLock;
         public List<EventRaiseInfo>? EventRaises;
         public EventRaiseInfo[]? EventRaisesSnapshot;
         public Dictionary<int, object?>? OutRefAssignments;
@@ -28,6 +27,7 @@ public sealed class MethodSetup
 
     private readonly IArgumentMatcher[] _matchers;
     private RareState? _rareState;
+    private Lock? _behaviorLock;
 
     /// <summary>Fast path for the common single-behavior case. Avoids list + lock on read.</summary>
     /// <remarks>
@@ -120,17 +120,15 @@ public sealed class MethodSetup
     [MethodImpl(MethodImplOptions.NoInlining)]
     private Lock EnsureBehaviorLock()
     {
-        var rare = EnsureRareState();
-        if (Volatile.Read(ref rare.BehaviorLock) is { } existing) return existing;
-        Interlocked.CompareExchange(ref rare.BehaviorLock, new Lock(), null);
-        return Volatile.Read(ref rare.BehaviorLock)!;
+        Interlocked.CompareExchange(ref _behaviorLock, new Lock(), null);
+        return Volatile.Read(ref _behaviorLock)!;
     }
 
     private Lock BehaviorLock
     {
         get
         {
-            if (Volatile.Read(ref _rareState) is { } rare && Volatile.Read(ref rare.BehaviorLock) is { } existing)
+            if (Volatile.Read(ref _behaviorLock) is { } existing)
             {
                 return existing;
             }
