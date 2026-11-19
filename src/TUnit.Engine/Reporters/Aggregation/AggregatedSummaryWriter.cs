@@ -93,7 +93,8 @@ internal static class AggregatedSummaryWriter
     private static void AppendSuiteTable(
         StringBuilder sb, IReadOnlyList<ReportData> suites, string[] labels, (long StartMs, long EndMs)?[] bounds)
     {
-        var anyReportLink = suites.Any(static s => !string.IsNullOrEmpty(s.ArtifactUrl));
+        var reportLinks = suites.Select(static s => SafeUrl(s.ArtifactUrl)).ToArray();
+        var anyReportLink = reportLinks.Any(static u => u is not null);
 
         sb.AppendLine(anyReportLink
             ? "| Suite | Tests | ✅ | ❌ | ⏭️ | Duration | Report |"
@@ -109,10 +110,10 @@ internal static class AggregatedSummaryWriter
             // Wall clock derived from the suite's own test timestamps; TotalDurationMs is
             // only the fallback — it can come from a session span that measures differently.
             var duration = bounds[i] is { } b ? b.EndMs - b.StartMs : suites[i].TotalDurationMs;
-            var row = $"| {emoji} `{labels[i]}` | {s.Total} | {s.Passed} | {s.TotalUnsuccessful} | {s.Skipped} | {FormatDuration(duration)} |";
+            var row = $"| {emoji} `{Code(labels[i])}` | {s.Total} | {s.Passed} | {s.TotalUnsuccessful} | {s.Skipped} | {FormatDuration(duration)} |";
             if (anyReportLink)
             {
-                row += string.IsNullOrEmpty(suites[i].ArtifactUrl) ? " |" : $" [View]({suites[i].ArtifactUrl}) |";
+                row += reportLinks[i] is { } url ? $" [View]({url}) |" : " |";
             }
             sb.AppendLine(row);
         }
@@ -144,7 +145,7 @@ internal static class AggregatedSummaryWriter
         sb.AppendLine($"> **⚠️ {flakyTests.Count} flaky {(flakyTests.Count == 1 ? "test" : "tests")}** passed after retry:");
         foreach (var (suite, name, attempts, durationMs) in flakyTests)
         {
-            sb.AppendLine($"> - `{name}` ({suite}) — {attempts} attempts ({FormatDuration(durationMs)})");
+            sb.AppendLine($"> - `{Code(name, inTable: false)}` ({Text(suite)}) — {attempts} attempts ({FormatDuration(durationMs)})");
         }
         sb.AppendLine();
     }
@@ -180,7 +181,7 @@ internal static class AggregatedSummaryWriter
         var diagParts = grouped.Take(3).Select(static g =>
         {
             var topSuite = g.GroupBy(static x => x.Suite).OrderByDescending(static c => c.Count()).First();
-            return $"{g.Count()} × `{g.Key}` in `{topSuite.Key}`";
+            return $"{g.Count()} × `{Code(g.Key, inTable: false)}` in `{Code(topSuite.Key, inTable: false)}`";
         });
         sb.AppendLine($"> **Quick diagnosis:** {string.Join(", ", diagParts)}");
         sb.AppendLine();
@@ -191,7 +192,7 @@ internal static class AggregatedSummaryWriter
         foreach (var group in grouped)
         {
             var entries = group.ToList();
-            var label = $"{group.Key} ({entries.Count} {(entries.Count == 1 ? "test" : "tests")})";
+            var label = $"{Text(group.Key)} ({entries.Count} {(entries.Count == 1 ? "test" : "tests")})";
 
             if (collapsible)
             {
@@ -212,7 +213,7 @@ internal static class AggregatedSummaryWriter
             {
                 var (suite, test, owner) = entries[i];
                 var sourcePart = BuildSourceLink(test, owner, serverUrl) is { } link ? $" {link}" : "";
-                sb.AppendLine($"| `{test.ClassName}.{test.DisplayName}`{sourcePart} | `{suite}` | {FormatDuration(test.DurationMs)} |");
+                sb.AppendLine($"| `{Code($"{test.ClassName}.{test.DisplayName}")}`{sourcePart} | `{Code(suite)}` | {FormatDuration(test.DurationMs)} |");
             }
 
             if (entries.Count > MaxTestsPerGroup)
@@ -276,7 +277,79 @@ internal static class AggregatedSummaryWriter
         }
 
         var fileName = Path.GetFileName(test.SourceRelativePath!);
-        return $"[{fileName}:{line}]({serverUrl!.TrimEnd('/')}/{owner.RepositorySlug}/blob/{owner.CommitSha}/{test.SourceRelativePath}#L{line})";
+        var url = SafeUrl($"{serverUrl!.TrimEnd('/')}/{owner.RepositorySlug}/blob/{owner.CommitSha}/{test.SourceRelativePath}#L{line}");
+        return url is null ? null : $"[{Text(fileName)}:{line}]({url})";
+    }
+
+    /// <summary>
+    /// Makes test-derived text (display names, class names, suite labels) safe inside a
+    /// backtick code span in a Markdown table cell. HTML is inert inside a code span, so
+    /// only line breaks, backticks and (in a table cell) pipes need handling. Outside a
+    /// table the pipe is left alone: a code span would show the escaping backslash.
+    /// </summary>
+    internal static string Code(string? value, bool inTable = true)
+    {
+        var code = CollapseLineBreaks(value).Replace('`', '\'');
+        return inTable ? code.Replace("|", "\\|") : code;
+    }
+
+    /// <summary>
+    /// Makes test-derived text safe as plain text in a Markdown table cell, list item or
+    /// HTML element: one line, HTML-encoded, and no pipes or brackets to split cells or
+    /// form links.
+    /// </summary>
+    internal static string Text(string? value)
+        => WebUtility.HtmlEncode(CollapseLineBreaks(value))
+            .Replace("|", "&#124;")
+            .Replace("[", "&#91;")
+            .Replace("]", "&#93;");
+
+    /// <summary>
+    /// Returns <paramref name="value"/> as an escaped absolute URL when it is http(s),
+    /// otherwise null, so it can be used as a Markdown link target.
+    /// </summary>
+    internal static string? SafeUrl(string? value)
+    {
+        if (string.IsNullOrEmpty(value)
+            || !Uri.TryCreate(value, UriKind.Absolute, out var uri)
+            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            return null;
+        }
+
+        return uri.AbsoluteUri
+            .Replace("(", "%28")
+            .Replace(")", "%29")
+            .Replace("|", "%7C")
+            .Replace(" ", "%20");
+    }
+
+    private static string CollapseLineBreaks(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return string.Empty;
+        }
+
+        var sb = new StringBuilder(value!.Length);
+        for (var i = 0; i < value.Length; i++)
+        {
+            var c = value[i];
+            if (c is '\r' or '\n' or '\u0085' or '\u2028' or '\u2029')
+            {
+                // A CRLF pair becomes one space, not two.
+                if (c == '\r' && i + 1 < value.Length && value[i + 1] == '\n')
+                {
+                    i++;
+                }
+                sb.Append(' ');
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+        return sb.ToString();
     }
 
     private static string Truncate(string value, int maxLength)
