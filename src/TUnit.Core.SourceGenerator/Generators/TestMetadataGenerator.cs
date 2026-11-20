@@ -5950,7 +5950,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             var arg = constructorArgs[0];
             if (arg.Type?.Name == "String")
             {
-                var testName = arg.Value.ToInvariantString() ?? "";
+                var testName = SymbolDisplay.FormatLiteral(arg.Value.ToInvariantString() ?? "", quote: true);
 
                 if (genericTypeArgument != null)
                 {
@@ -5959,12 +5959,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var genericArity = genericTypeArgument is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
-                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity.ToString(CultureInfo.InvariantCulture)}, MethodName = \"{testName}\", ProceedOnFailure = {proceedOnFailure.ToString().ToLowerInvariant()} }}");
+                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity.ToString(CultureInfo.InvariantCulture)}, MethodName = {testName}, ProceedOnFailure = {proceedOnFailure.ToString().ToLowerInvariant()} }}");
                 }
                 else
                 {
                     // DependsOnAttribute(string testName) - dependency on test in same class
-                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ MethodName = \"{testName}\", ProceedOnFailure = {proceedOnFailure.ToString().ToLowerInvariant()} }}");
+                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ MethodName = {testName}, ProceedOnFailure = {proceedOnFailure.ToString().ToLowerInvariant()} }}");
                 }
             }
             else if (arg.Type?.TypeKind == TypeKind.Class || arg.Type?.Name == "Type")
@@ -5987,7 +5987,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
 
             if (firstArg.Type?.Name == "String" && secondArg.Type is IArrayTypeSymbol)
             {
-                var testName = firstArg.Value.ToInvariantString() ?? "";
+                var testName = SymbolDisplay.FormatLiteral(firstArg.Value.ToInvariantString() ?? "", quote: true);
 
                 if (genericTypeArgument != null)
                 {
@@ -5996,12 +5996,12 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var genericArity = genericTypeArgument is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
-                    writer.Append($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity.ToString(CultureInfo.InvariantCulture)}, MethodName = \"{testName}\"");
+                    writer.Append($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity.ToString(CultureInfo.InvariantCulture)}, MethodName = {testName}");
                 }
                 else
                 {
                     // DependsOnAttribute(string testName, Type[] parameterTypes)
-                    writer.Append($"new global::TUnit.Core.TestDependency {{ MethodName = \"{testName}\"");
+                    writer.Append($"new global::TUnit.Core.TestDependency {{ MethodName = {testName}");
                 }
 
                 // Handle parameter types
@@ -6028,7 +6028,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
             {
                 // DependsOnAttribute(Type testClass, string testName)
                 var classType = firstArg.Value as ITypeSymbol;
-                var testName = secondArg.Value.ToInvariantString() ?? "";
+                var testName = SymbolDisplay.FormatLiteral(secondArg.Value.ToInvariantString() ?? "", quote: true);
 
                 if (classType != null)
                 {
@@ -6036,7 +6036,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                     var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                         ? namedType.Arity
                         : 0;
-                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity.ToString(CultureInfo.InvariantCulture)}, MethodName = \"{testName}\", ProceedOnFailure = {proceedOnFailure.ToString().ToLowerInvariant()} }}");
+                    writer.AppendLine($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity.ToString(CultureInfo.InvariantCulture)}, MethodName = {testName}, ProceedOnFailure = {proceedOnFailure.ToString().ToLowerInvariant()} }}");
                 }
             }
         }
@@ -6044,7 +6044,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
         {
             // DependsOnAttribute(Type testClass, string testName, Type[] parameterTypes)
             var classType = constructorArgs[0].Value as ITypeSymbol;
-            var testName = constructorArgs[1].Value.ToInvariantString() ?? "";
+            var testName = SymbolDisplay.FormatLiteral(constructorArgs[1].Value.ToInvariantString() ?? "", quote: true);
 
             if (classType != null)
             {
@@ -6052,7 +6052,7 @@ public sealed class TestMetadataGenerator : IIncrementalGenerator
                 var genericArity = classType is INamedTypeSymbol { IsGenericType: true } namedType
                     ? namedType.Arity
                     : 0;
-                writer.Append($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity.ToString(CultureInfo.InvariantCulture)}, MethodName = \"{testName}\"");
+                writer.Append($"new global::TUnit.Core.TestDependency {{ ClassType = typeof({className}), ClassGenericArity = {genericArity.ToString(CultureInfo.InvariantCulture)}, MethodName = {testName}");
 
                 // Handle parameter types
                 var paramTypesArg = constructorArgs[2];
