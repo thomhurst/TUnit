@@ -126,8 +126,8 @@
     <PackageVersion Include="MSTest" Version="4.5.3" />
     <PackageVersion Include="MSTest.TestAdapter" Version="4.5.3" />
     <PackageVersion Include="MSTest.TestFramework" Version="4.5.3" />
-    <PackageVersion Include="Npgsql" Version="10.0.3" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="Npgsql" Version="10.0.4" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.4" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />
     <PackageVersion Include="NuGet.Protocol" Version="8.0.0" />
     <PackageVersion Include="NUnit" Version="5.0.0" />
