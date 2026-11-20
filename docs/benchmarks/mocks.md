@@ -2,7 +2,7 @@
 
 Last Updated
 
-These benchmarks were automatically generated on **2026-11-19** from the latest CI run.
+These benchmarks were automatically generated on **2026-11-20** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 11.0.100
 
@@ -25,10 +25,10 @@ Click on any benchmark to view detailed results:
 
 * [Callback](/docs/benchmarks/mocks/Callback.md) - Callback registration and execution
 * [CombinedWorkflow](/docs/benchmarks/mocks/CombinedWorkflow.md) - Full workflow: create → setup → invoke → verify
-* [Invocation](/docs/benchmarks/mocks/Invocation.md) - Calling methods on mock objects
+* [Invocation](/docs/benchmarks/mocks/Invocation.md) - Calling methods on mock objects with bounded history; time and allocation are reported per call
 * [MockCreation](/docs/benchmarks/mocks/MockCreation.md) - Mock instance creation performance
 * [Setup](/docs/benchmarks/mocks/Setup.md) - Mock behavior configuration (returns, matchers)
-* [Verification](/docs/benchmarks/mocks/Verification.md) - Verifying mock method calls
+* [Verification](/docs/benchmarks/mocks/Verification.md) - Mock verification workflows, including creation, setup and invocation where applicable
 
 ## 📈 What's Measured[​](#-whats-measured "Direct link to 📈 What's Measured")
 
@@ -36,8 +36,8 @@ Each benchmark category tests a specific aspect of mocking library usage:
 
 * **MockCreation** — Mock instance creation performance
 * **Setup** — Mock behavior configuration (returns, matchers)
-* **Invocation** — Calling methods on mock objects
-* **Verification** — Verifying mock method calls
+* **Invocation** — Calling methods on mock objects with bounded history; time and allocation are reported per call
+* **Verification** — Mock verification workflows, including creation, setup and invocation where applicable
 * **Callback** — Callback registration and execution
 * **CombinedWorkflow** — Full workflow: create → setup → invoke → verify
 
@@ -71,4 +71,4 @@ These benchmarks run automatically daily via [GitHub Actions](https://github.com
 
 Each benchmark runs multiple iterations with statistical analysis to ensure accuracy. Results may vary based on hardware and test characteristics.
 
-*Last generated: 2026-11-19T02:23:19.275Z*
+*Last generated: 2026-11-20T02:20:51.427Z*

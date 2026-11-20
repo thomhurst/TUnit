@@ -45,10 +45,10 @@
 - [Mock Library Benchmarks](/docs/benchmarks/mocks.md): Performance comparisons between TUnit.Mocks, Imposter, Mockolate, Moq, NSubstitute, FakeItEasy
 - [Callback Benchmark](/docs/benchmarks/mocks/Callback.md): Callback registration and execution — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
 - [CombinedWorkflow Benchmark](/docs/benchmarks/mocks/CombinedWorkflow.md): Full workflow: create → setup → invoke → verify — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
-- [Invocation Benchmark](/docs/benchmarks/mocks/Invocation.md): Calling methods on mock objects — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
+- [Invocation Benchmark](/docs/benchmarks/mocks/Invocation.md): Calling methods on mock objects with bounded history; time and allocation are reported per call — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
 - [MockCreation Benchmark](/docs/benchmarks/mocks/MockCreation.md): Mock instance creation performance — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
 - [Setup Benchmark](/docs/benchmarks/mocks/Setup.md): Mock behavior configuration (returns, matchers) — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
-- [Verification Benchmark](/docs/benchmarks/mocks/Verification.md): Verifying mock method calls — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
+- [Verification Benchmark](/docs/benchmarks/mocks/Verification.md): Mock verification workflows, including creation, setup and invocation where applicable — TUnit.Mocks vs Imposter vs Mockolate vs Moq vs NSubstitute vs FakeItEasy
 - [Attributes](/docs/comparison/attributes.md): Here are TUnit's equivalent attributes to other test frameworks.
 - [Framework Differences](/docs/comparison/framework-differences.md): TUnit is inspired by NUnit and xUnit — they're excellent frameworks that have served the .NET community well. TUnit was built to address some pain points around parallelism, lifecycle hooks, test isolation, and extensibility.
 - [Aspire Integration Testing](/docs/examples/aspire.md): TUnit provides first-class support for Aspire integration testing through the TUnit.Aspire package. This package eliminates the boilerplate of managing an Aspire distributed application in tests, handling the full lifecycle (build, start, wait for resources, stop, dispose) automatically.
