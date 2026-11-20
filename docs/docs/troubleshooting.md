@@ -78,6 +78,35 @@ If tests still don't appear, it may be a conflict with VSTest. You can fix it in
 
 If none of the above helps, try invalidating caches via File > Invalidate Caches and restart the IDE.
 
+#### Discovery hangs on .NET Framework projects with non-ASCII test names
+
+On a .NET Framework (e.g. `net48`) test project, Rider's Test Explorer can stay on "Test discovering is in progress, please wait" while the test host sits idle. `dotnet test` and `--list-tests` are unaffected.
+
+This happens when a test name contains non-ASCII characters. Rider reads the `Content-Length` of a Testing Platform message as a character count, while the platform sends a UTF-8 byte count, so the message is mis-framed (JetBrains [RSRP-504962](https://youtrack.jetbrains.com/issue/RSRP-504962)). TUnit itself writes one such character: a `.` in a string argument is displayed as `·` (U+00B7), so `[Arguments("a.b")]` shows as `Test(a·b)`.
+
+Until Rider is fixed, keep test names ASCII:
+
+- Move dotted strings out of `[Arguments]` and into the test body.
+- Or format string arguments yourself with an [argument formatter](extending/argument-formatters.md), which replaces the default `·` substitution:
+
+```csharp
+public class KeepStringsFormatter : ArgumentDisplayFormatter
+{
+    public override bool CanHandle(object? value) => value is string;
+    public override string FormatValue(object? value) => (string)value!;
+}
+
+public class DottedArgumentTests
+{
+    [Test]
+    [Arguments("a.b")]
+    [ArgumentDisplayFormatter<KeepStringsFormatter>]
+    public void Test(string value) { } // displayed as Test(a.b)
+}
+```
+
+A `[DisplayName("...$value...")]` doesn't avoid it: the substituted argument still uses `·`.
+
 ### VS Code
 
 1. Install C# Dev Kit, then reload.
