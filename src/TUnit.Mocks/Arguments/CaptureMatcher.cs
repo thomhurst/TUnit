@@ -27,6 +27,7 @@ internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatch
 {
     private readonly IArgumentMatcher _inner;
     private CaptureSegment? _tail;
+    private T? _first;
     private T?[]? _initialValues;
     private int _initialCount;
     private SpinLock _captureLock = new(enableThreadOwnerTracking: false);
@@ -42,7 +43,9 @@ internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatch
         {
             var tail = Volatile.Read(ref _tail);
             if (tail is not null) return tail.Snapshot();
-            if (Volatile.Read(ref _initialCount) == 0) return Array.Empty<T?>();
+            var count = Volatile.Read(ref _initialCount);
+            if (count == 0) return Array.Empty<T?>();
+            if (count == 1) return [_first];
             return GetInitialSnapshot();
         }
     }
@@ -53,7 +56,9 @@ internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatch
         {
             var tail = Volatile.Read(ref _tail);
             if (tail is not null) return tail.Latest;
-            if (Volatile.Read(ref _initialCount) == 0) return default;
+            var count = Volatile.Read(ref _initialCount);
+            if (count == 0) return default;
+            if (count == 1) return _first;
 
             var lockTaken = false;
             try
@@ -165,10 +170,16 @@ internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatch
                     Volatile.Write(ref _tail, new CaptureSegment(tail, value));
                 }
             }
+            else if (_initialCount == 0)
+            {
+                _first = value;
+                Volatile.Write(ref _initialCount, 1);
+            }
             else if (_initialCount < 4)
             {
-                _initialValues ??= new T?[4];
-                _initialValues[_initialCount++] = value;
+                _initialValues ??= [_first, default, default, default];
+                _initialValues[_initialCount] = value;
+                _initialCount++;
             }
             else
             {
@@ -191,64 +202,72 @@ internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatch
 
         private readonly CaptureSegment? _previous;
         private readonly long _previousCount;
-        private readonly Entry[] _entries;
+        private readonly T?[] _values;
+        // Keep publication flags separate so each captured value keeps its natural stride.
+        private readonly bool[] _published;
         private int _reserved;
 
         public CaptureSegment(T?[] initialValues, T? value)
         {
-            _entries = new Entry[InitialCapacity];
-            for (var i = 0; i < initialValues.Length; i++)
-            {
-                _entries[i] = new Entry { Value = initialValues[i], Published = true };
-            }
-
-            _entries[initialValues.Length] = new Entry { Value = value, Published = true };
+            _values = new T?[InitialCapacity];
+            _published = new bool[InitialCapacity];
+            Array.Copy(initialValues, _values, initialValues.Length);
+            _values[initialValues.Length] = value;
             _reserved = initialValues.Length + 1;
+            for (var i = 0; i < _reserved; i++)
+            {
+                _published[i] = true;
+            }
         }
 
         public CaptureSegment(CaptureSegment previous, T? value)
         {
             _previous = previous;
-            _previousCount = previous._previousCount + previous._entries.Length;
-            _entries = new Entry[Math.Min(previous._entries.Length * 2, MaximumCapacity)];
-            _entries[0] = new Entry { Value = value, Published = true };
+            _previousCount = previous._previousCount + previous._values.Length;
+            var capacity = Math.Min(previous._values.Length * 2, MaximumCapacity);
+            _values = new T?[capacity];
+            _published = new bool[capacity];
+            _values[0] = value;
+            _published[0] = true;
             _reserved = 1;
         }
 
-        public T? Latest => ReadPublished(ref _entries[Volatile.Read(ref _reserved) - 1]);
+        public T? Latest => ReadPublished(ReservedCount - 1);
+
+        // Threads racing to claim the last slot can advance _reserved beyond
+        // capacity. That overshoot does not represent any published slots.
+        private int ReservedCount => Math.Min(Volatile.Read(ref _reserved), _values.Length);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryAppend(T? value)
         {
-            while (true)
+            if (Volatile.Read(ref _reserved) >= _values.Length)
             {
-                var index = Volatile.Read(ref _reserved);
-                if (index == _entries.Length)
-                {
-                    return false;
-                }
-
-                if (Interlocked.CompareExchange(ref _reserved, index + 1, index) == index)
-                {
-                    ref var entry = ref _entries[index];
-                    entry.Value = value;
-                    Volatile.Write(ref entry.Published, true);
-                    return true;
-                }
+                return false;
             }
+
+            var index = Interlocked.Increment(ref _reserved) - 1;
+            if ((uint)index >= (uint)_values.Length)
+            {
+                return false;
+            }
+
+            _values[index] = value;
+            Volatile.Write(ref _published[index], true);
+            return true;
         }
 
         public T?[] Snapshot()
         {
             // Earlier segments are full. Only the tail can add reservations.
-            var count = Volatile.Read(ref _reserved);
+            var count = ReservedCount;
             var snapshot = new T?[_previousCount + count];
             for (var segment = this; ; segment = segment._previous)
             {
                 var offset = segment._previousCount;
                 for (var i = 0; i < count; i++)
                 {
-                    snapshot[offset + i] = ReadPublished(ref segment._entries[i]);
+                    snapshot[offset + i] = segment.ReadPublished(i);
                 }
 
                 if (segment._previous is null)
@@ -256,25 +275,20 @@ internal sealed class CapturingMatcher<T> : IArgumentMatcher<T>, ICapturingMatch
                     return snapshot;
                 }
 
-                count = segment._previous._entries.Length;
+                count = segment._previous._values.Length;
             }
         }
 
-        private static T? ReadPublished(ref Entry entry)
+        private T? ReadPublished(int index)
         {
+            ref var published = ref _published[index];
             var spinner = new SpinWait();
-            while (!Volatile.Read(ref entry.Published))
+            while (!Volatile.Read(ref published))
             {
                 spinner.SpinOnce();
             }
 
-            return entry.Value;
-        }
-
-        private struct Entry
-        {
-            public T? Value;
-            public bool Published;
+            return _values[index];
         }
     }
 }

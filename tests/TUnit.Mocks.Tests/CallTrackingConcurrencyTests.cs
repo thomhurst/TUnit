@@ -14,17 +14,23 @@ public class CallTrackingConcurrencyTests
         var first = engine.GetCallsFor(0).Single();
         var arguments = first.Arguments;
 
-        for (var value = 2; value <= 10; value++)
+        engine.HandleCall(0, "Call", 2);
+        var inlineHistory = engine.GetCallsFor(0);
+
+        const int callCount = 1025;
+        for (var value = 3; value <= callCount; value++)
         {
             engine.HandleCall(0, "Call", value);
         }
 
         var history = engine.GetCallsFor(0);
-        await Assert.That(history.Count).IsEqualTo(10);
+        await Assert.That(inlineHistory.Select(call => (int)call.Arguments[0]!))
+            .IsEquivalentTo(new[] { 1, 2 }, CollectionOrdering.Matching);
+        await Assert.That(history.Count).IsEqualTo(callCount);
         await Assert.That(history[0]).IsSameReferenceAs(first);
         await Assert.That(history[0].Arguments).IsSameReferenceAs(arguments);
         await Assert.That(history.Select(call => (int)call.Arguments[0]!))
-            .IsEquivalentTo(Enumerable.Range(1, 10), CollectionOrdering.Matching);
+            .IsEquivalentTo(Enumerable.Range(1, callCount), CollectionOrdering.Matching);
     }
 
     [Test]

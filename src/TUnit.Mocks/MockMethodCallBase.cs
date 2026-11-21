@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using TUnit.Mocks.Arguments;
 using TUnit.Mocks.Setup;
+using TUnit.Mocks.Setup.Behaviors;
 using TUnit.Mocks.Verification;
 
 namespace TUnit.Mocks;
@@ -23,7 +24,8 @@ public abstract class MockMethodCallBase<TSelf, TReturn> : ICallVerification
     private readonly string _memberName;
     private readonly IArgumentMatcher[] _matchers;
     private readonly ImmutableArray<Type> _typeArguments;
-    private MethodSetupBuilder<TReturn>? _builder;
+    // Store the setup directly until a generated overload needs the builder.
+    private object? _setupOrBuilder;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     protected MockMethodCallBase(IMockEngineAccess engine, int memberId, string memberName, IArgumentMatcher[] matchers, ImmutableArray<Type> typeArguments)
@@ -39,30 +41,40 @@ public abstract class MockMethodCallBase<TSelf, TReturn> : ICallVerification
     [EditorBrowsable(EditorBrowsableState.Never)]
     protected MethodSetupBuilder<TReturn> EnsureSetup()
     {
-        var existing = Volatile.Read(ref _builder);
-        if (existing is not null) return existing;
-        return EnsureSetupSlow();
+        if (Volatile.Read(ref _setupOrBuilder) is MethodSetupBuilder<TReturn> builder)
+        {
+            return builder;
+        }
+
+        var setup = EnsureMethodSetup();
+        var fresh = new MethodSetupBuilder<TReturn>(setup);
+        return Interlocked.CompareExchange(ref _setupOrBuilder, fresh, setup)
+            as MethodSetupBuilder<TReturn> ?? fresh;
     }
 
-    // Race note: if two threads lose/win the CAS, the loser returns before the winner
-    // calls AddSetup. Mock setup is sequential in normal usage (test setup phase completes
-    // before invocations), so this window is not observable. If you ever need concurrent
-    // setup + invocation of the same method-wrapper, reintroduce synchronization here.
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private MethodSetupBuilder<TReturn> EnsureSetupSlow()
+    private MethodSetup EnsureMethodSetup()
     {
-        var setup = new MethodSetup(_memberId, _matchers, _memberName, _typeArguments);
-        var fresh = new MethodSetupBuilder<TReturn>(setup);
-        var prev = Interlocked.CompareExchange(ref _builder, fresh, null);
-        if (prev is not null) return prev;
-        _engine.AddSetup(setup);
-        return fresh;
+        var registered = Volatile.Read(ref _setupOrBuilder);
+        if (registered is null)
+        {
+            var setup = new MethodSetup(_memberId, _matchers, _memberName, _typeArguments);
+            // As with builder publication, configuration on a shared wrapper should finish
+            // before invocation. Publish only one setup if several threads configure it.
+            registered = Interlocked.CompareExchange(ref _setupOrBuilder, setup, null);
+            if (registered is null)
+            {
+                _engine.AddSetup(setup);
+                return setup;
+            }
+        }
+
+        return registered is MethodSetup method ? method : ((MethodSetupBuilder<TReturn>)registered).Setup;
     }
 
     /// <summary>Configure a fixed return value.</summary>
-    public TSelf Returns(TReturn value) { EnsureSetup().Returns(value); return (TSelf)this; }
+    public TSelf Returns(TReturn value) { EnsureMethodSetup().AddBehavior(new ReturnBehavior<TReturn>(value)); return (TSelf)this; }
     /// <summary>Configure a computed return value, invoked on each call.</summary>
-    public TSelf Returns(Func<TReturn> factory) { EnsureSetup().Returns(factory); return (TSelf)this; }
+    public TSelf Returns(Func<TReturn> factory) { EnsureMethodSetup().AddBehavior(new ComputedReturnBehavior<TReturn>(factory)); return (TSelf)this; }
     /// <summary>Configure sequential return values.</summary>
     public TSelf ReturnsSequentially(params TReturn[] values) { EnsureSetup().ReturnsSequentially(values); return (TSelf)this; }
     /// <summary>Configure the method to throw an exception of the specified type.</summary>
@@ -70,7 +82,7 @@ public abstract class MockMethodCallBase<TSelf, TReturn> : ICallVerification
     /// <summary>Configure the method to throw the specified exception.</summary>
     public TSelf Throws(Exception exception) { EnsureSetup().Throws(exception); return (TSelf)this; }
     /// <summary>Execute a callback when the method is called.</summary>
-    public TSelf Callback(Action callback) { EnsureSetup().Callback(callback); return (TSelf)this; }
+    public TSelf Callback(Action callback) { EnsureMethodSetup().AddBehavior(new CallbackBehavior(callback)); return (TSelf)this; }
     /// <summary>Transition the mock to the specified state after this setup matches.</summary>
     public TSelf TransitionsTo(string stateName) { EnsureSetup().TransitionsTo(stateName); return (TSelf)this; }
     /// <summary>Chain the next sequential behavior.</summary>
