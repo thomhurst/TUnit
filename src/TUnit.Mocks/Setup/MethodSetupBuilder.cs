@@ -12,6 +12,8 @@ public sealed class MethodSetupBuilder<TReturn> : IMethodSetup<TReturn>, ISetupC
 {
     private readonly MethodSetup _setup;
 
+    internal MethodSetup Setup => _setup;
+
     public MethodSetupBuilder(MethodSetup setup)
     {
         _setup = setup;
