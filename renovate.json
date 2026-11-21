@@ -7,6 +7,12 @@
   ],
   "packageRules": [
     {
+      "description": "TUnit.Aspire and TUnit.Aspire.Core retain Aspire 13 and .NET 8 compatibility. Aspire 17 is exercised through the integration test project's VersionOverride.",
+      "matchPackageNames": ["Aspire.Hosting.Testing"],
+      "matchFileNames": ["Directory.Packages.props"],
+      "allowedVersions": "<14.0.0"
+    },
+    {
       "description": "Microsoft.Build 18.10+ only ships net11.0/net472 runtime assets; our net10.0 consumers can't load it. Remove once the repo targets net11.0.",
       "matchPackageNames": [
         "Microsoft.Build",

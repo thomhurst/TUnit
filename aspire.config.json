@@ -1,0 +1,8 @@
+{
+  "appHost": {
+    "path": "examples/CloudShop/CloudShop.AppHost/CloudShop.AppHost.csproj"
+  },
+  "sdk": {
+    "version": "17.0.0"
+  }
+}
