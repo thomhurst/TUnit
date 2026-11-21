@@ -1,9 +1,32 @@
+using TUnit.Assertions.Enums;
 using TUnit.Mocks.Setup;
 
 namespace TUnit.Mocks.Tests;
 
 public class CallTrackingConcurrencyTests
 {
+    [Test]
+    public async Task History_Growth_Preserves_The_First_Record()
+    {
+        var engine = new MockEngine<object>(MockBehavior.Loose);
+        engine.HandleCall(0, "Call", 1);
+
+        var first = engine.GetCallsFor(0).Single();
+        var arguments = first.Arguments;
+
+        for (var value = 2; value <= 10; value++)
+        {
+            engine.HandleCall(0, "Call", value);
+        }
+
+        var history = engine.GetCallsFor(0);
+        await Assert.That(history.Count).IsEqualTo(10);
+        await Assert.That(history[0]).IsSameReferenceAs(first);
+        await Assert.That(history[0].Arguments).IsSameReferenceAs(arguments);
+        await Assert.That(history.Select(call => (int)call.Arguments[0]!))
+            .IsEquivalentTo(Enumerable.Range(1, 10), CollectionOrdering.Matching);
+    }
+
     [Test]
     public async Task Published_Counts_Match_History_After_Concurrent_Growth_And_Clear()
     {

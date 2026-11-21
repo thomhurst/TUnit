@@ -31,12 +31,14 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
     // Flat array indexed by memberId for O(1) setup lookup (member IDs are dense sequential ints 0..N)
     private volatile MethodSetup[]?[]? _setupsByMemberId;
-    private List<MethodSetup>?[]? _setupListsByMemberId; // mutable lists used during AddSetup, guarded by Lock
+    // Without a list, the member's snapshot is its only storage and holds at most one setup.
+    // Once a second setup needs a list, the list is the source of truth and is guarded by Lock.
+    private List<MethodSetup>?[]? _setupListsByMemberId;
     private volatile bool _hasStatefulSetups;
     private volatile bool _hasStaleSetups; // true when setup lists have been modified but snapshots not yet rebuilt
 
     // Call buffers are allocated on the first invocation, not while configuring unused members.
-    // Each buffer uses its own lightweight lock, avoiding contention with the shared MockEngine Lock.
+    // Later calls use a per-buffer lock, avoiding contention with the shared MockEngine Lock.
     // Each buffer publishes its own count, avoiding a second per-call atomic increment.
     private volatile CallRecordBuffer?[]? _callBuffers;
 
@@ -262,20 +264,30 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
                 setup.RequiredState = PendingRequiredState;
             }
 
-            var memberId = setup.MemberId;
-            EnsureSetupArrayCapacity(memberId);
-
-            var lists = _setupListsByMemberId!;
-            var list = lists[memberId] ??= new();
-            list.Add(setup);
-
             if (setup.RequiredState is not null || setup.TransitionTarget is not null)
             {
                 _hasStatefulSetups = true;
             }
 
-            // Mark stale — snapshot will be rebuilt lazily on next FindMatchingSetup call.
-            // This avoids repeated ToArray allocations during the setup phase.
+            var memberId = setup.MemberId;
+            var snapshots = EnsureSetupArrayCapacity(memberId);
+            if (_setupListsByMemberId?[memberId] is { } list)
+            {
+                list.Add(setup);
+            }
+            else if (snapshots[memberId] is { } existing)
+            {
+                var lists = _setupListsByMemberId ??= new List<MethodSetup>?[snapshots.Length];
+                lists[memberId] = new List<MethodSetup>(4) { existing[0], setup };
+            }
+            else
+            {
+                // Publish the common one-setup case directly. Repeated setups use a list
+                // so configuring many rules still takes amortized constant time per rule.
+                Volatile.Write(ref snapshots[memberId], [setup]);
+                return;
+            }
+
             _hasStaleSetups = true;
         }
     }
@@ -291,37 +303,52 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             }
 
             var memberId = setup.MemberId;
-            if (_setupListsByMemberId is not { } lists
-                || (uint)memberId >= (uint)lists.Length
-                || lists[memberId]?.Remove(setup) != true)
+            if (_setupsByMemberId is not { } snapshots || (uint)memberId >= (uint)snapshots.Length)
             {
                 return false;
             }
 
-            _hasStaleSetups = true;
-            return true;
+            if (_setupListsByMemberId?[memberId] is { } list)
+            {
+                if (!list.Remove(setup))
+                {
+                    return false;
+                }
+
+                _hasStaleSetups = true;
+                return true;
+            }
+
+            if (snapshots[memberId] is { } existing && ReferenceEquals(existing[0], setup))
+            {
+                Volatile.Write(ref snapshots[memberId], null);
+                return true;
+            }
+
+            return false;
         }
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    private void EnsureSetupArrayCapacity(int memberId)
+    private MethodSetup[]?[] EnsureSetupArrayCapacity(int memberId)
     {
-        var required = memberId + 1;
-        if (_setupsByMemberId is null || _setupsByMemberId.Length < required)
+        var current = _setupsByMemberId;
+        if (current is not null && (uint)memberId < (uint)current.Length)
         {
-            var newSize = _setupsByMemberId is null
-                ? Math.Max(required, 8)
-                : Math.Max(required, _setupsByMemberId.Length * 2);
-            var newSnapshot = new MethodSetup[]?[newSize];
-            var newLists = new List<MethodSetup>?[newSize];
-            if (_setupsByMemberId is not null)
-            {
-                Array.Copy(_setupsByMemberId, newSnapshot, _setupsByMemberId.Length);
-                Array.Copy(_setupListsByMemberId!, newLists, _setupListsByMemberId!.Length);
-            }
-            _setupsByMemberId = newSnapshot;
-            _setupListsByMemberId = newLists;
+            return current;
         }
+
+        var newSize = Math.Max(memberId + 1, current is null ? 8 : current.Length * 2);
+        var snapshots = new MethodSetup[]?[newSize];
+        if (current is not null)
+        {
+            Array.Copy(current, snapshots, current.Length);
+        }
+        if (_setupListsByMemberId is not null)
+        {
+            Array.Resize(ref _setupListsByMemberId, newSize);
+        }
+        _setupsByMemberId = snapshots;
+        return snapshots;
     }
 
     /// <inheritdoc />
@@ -814,18 +841,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     }
 
     /// <summary>
-    /// Gets all recorded calls for a specific member, optionally filtered by matchers.
+    /// Gets all recorded calls for a specific member.
     /// </summary>
     public IReadOnlyList<CallRecord> GetCallsFor(int memberId)
-    {
-        var buffers = _callBuffers; // single volatile read
-        if (buffers is not null && (uint)memberId < (uint)buffers.Length
-            && buffers[memberId] is { } buffer)
-        {
-            return buffer.ToArray();
-        }
-        return [];
-    }
+        => GetCallBufferFor(memberId)?.ToArray() ?? [];
 
     /// <summary>
     /// Gets the internal call buffer for a member without copying.
@@ -836,7 +855,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         var buffers = _callBuffers;
         if (buffers is not null && (uint)memberId < (uint)buffers.Length)
         {
-            return buffers[memberId];
+            return Volatile.Read(ref buffers[memberId]);
         }
         return null;
     }
@@ -845,28 +864,14 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// Marks all calls for a specific member as verified without allocating a copy.
     /// </summary>
     internal void MarkCallsVerified(int memberId)
-    {
-        var buffers = _callBuffers;
-        if (buffers is not null && (uint)memberId < (uint)buffers.Length
-            && buffers[memberId] is { } buffer)
-        {
-            buffer.ForEach(static r => r.IsVerified = true);
-        }
-    }
+        => GetCallBufferFor(memberId)?.ForEach(static r => r.IsVerified = true);
 
     /// <summary>
     /// Gets the count of calls for a specific member without allocating.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public int GetCallCountFor(int memberId)
-    {
-        var buffers = _callBuffers; // single volatile read — consistent snapshot
-        if (buffers is not null && (uint)memberId < (uint)buffers.Length)
-        {
-            return buffers[memberId]?.Count ?? 0;
-        }
-        return 0;
-    }
+        => GetCallBufferFor(memberId)?.Count ?? 0;
 
     /// <summary>
     /// Gets all recorded calls.
@@ -910,11 +915,11 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         }
 
         var all = new List<MethodSetup>();
-        foreach (var arr in snapshot)
+        for (var i = 0; i < snapshot.Length; i++)
         {
-            if (arr is not null)
+            if (Volatile.Read(ref snapshot[i]) is { } setups)
             {
-                all.AddRange(arr);
+                all.AddRange(setups);
             }
         }
         return all;
@@ -1007,8 +1012,8 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     /// only the invoke count used by <c>VerifyAll</c> and diagnostics is reset.
     /// </summary>
     /// <remarks>
-    /// Recording is lock-free, so a call racing with this method may be recorded into the discarded
-    /// history and lost. That is intentional: a call concurrent with a clear has no defined ordering.
+    /// Appends to an existing buffer do not take the engine lock, so a call racing with this method
+    /// may be recorded into the discarded history. A call concurrent with a clear has no defined ordering.
     /// The clear is not atomic either: a verification running at the same time may see the history
     /// cleared before the invoke counts are.
     /// </remarks>
@@ -1144,9 +1149,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     {
         var buffers = _callBuffers;
         if (buffers is null) return;
-        foreach (var buffer in buffers)
+        for (var i = 0; i < buffers.Length; i++)
         {
-            buffer?.CollectInto(target, filter);
+            Volatile.Read(ref buffers[i])?.CollectInto(target, filter);
         }
     }
 
@@ -1186,17 +1191,10 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     private CallRecord StoreCallRecord(CallRecord record)
     {
         var memberId = record.MemberId;
-        var buffers = _callBuffers; // single volatile read — consistent snapshot
-
-        // Fast path: this member has already recorded a call.
-        if (buffers is not null && (uint)memberId < (uint)buffers.Length)
+        if (GetCallBufferFor(memberId) is { } buffer)
         {
-            var buffer = Volatile.Read(ref buffers[memberId]);
-            if (buffer is not null)
-            {
-                buffer.Add(record);
-                return record;
-            }
+            buffer.Add(record);
+            return record;
         }
 
         // Slow path: first time or capacity exceeded — needs lock for initialization
@@ -1208,15 +1206,22 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     {
         lock (Lock)
         {
-            EnsureCallBufferCapacity(record.MemberId);
-            var buffer = _callBuffers![record.MemberId]!;
-            buffer.Add(record);
+            var memberId = record.MemberId;
+            var buffers = EnsureCallBufferCapacity(memberId);
+            if (buffers[memberId] is { } buffer)
+            {
+                buffer.Add(record);
+            }
+            else
+            {
+                Volatile.Write(ref buffers[memberId], new CallRecordBuffer(record));
+            }
         }
         return record;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private void EnsureCallBufferCapacity(int memberId)
+    private CallRecordBuffer?[] EnsureCallBufferCapacity(int memberId)
     {
         var required = memberId + 1;
         var current = _callBuffers;
@@ -1230,14 +1235,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             {
                 Array.Copy(current, newBuffers, current.Length);
             }
-            _callBuffers = newBuffers;
+            _callBuffers = current = newBuffers;
         }
-
-        // Publish initialization to lock-free readers of an existing buffers array.
-        if (_callBuffers![memberId] is null)
-        {
-            Volatile.Write(ref _callBuffers[memberId], new CallRecordBuffer());
-        }
+        return current;
     }
 
     /// <summary>
@@ -1275,30 +1275,38 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         }
     }
 
-    /// <summary>
-    /// Rebuilds snapshot arrays from the mutable lists for all members.
-    /// Called once on transition from setup phase to invocation phase.
-    /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
     private void RebuildStaleSnapshots()
     {
         lock (Lock)
         {
-            if (!_hasStaleSetups) return;
-            var lists = _setupListsByMemberId;
-            var snapshots = _setupsByMemberId;
-            if (lists is not null && snapshots is not null)
-            {
-                for (int i = 0; i < lists.Length; i++)
-                {
-                    if (lists[i] is { } list)
-                    {
-                        snapshots[i] = list.ToArray();
-                    }
-                }
-            }
-            _hasStaleSetups = false;
+            RebuildStaleSnapshotsUnderLock();
         }
+    }
+
+    private void RebuildStaleSnapshotsUnderLock()
+    {
+        if (!_hasStaleSetups) return;
+
+        var lists = _setupListsByMemberId!;
+        var snapshots = _setupsByMemberId!;
+        for (var i = 0; i < lists.Length; i++)
+        {
+            if (lists[i] is { } list)
+            {
+                Volatile.Write(ref snapshots[i], list.Count == 0 ? null : list.ToArray());
+            }
+        }
+        _hasStaleSetups = false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private MethodSetup[]? GetMemberSetups(int memberId)
+    {
+        var snapshot = _setupsByMemberId;
+        return snapshot is not null && (uint)memberId < (uint)snapshot.Length
+            ? Volatile.Read(ref snapshot[memberId])
+            : null;
     }
 
     // Non-generic two-arg overload kept distinct (no optional parameter) so it wins overload
@@ -1323,13 +1331,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
             return FindMatchingSetupLocked(memberId, args, typeArguments);
         }
 
-        var snapshot = _setupsByMemberId;
-        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length)
-        {
-            return (false, null, null);
-        }
-
-        var setups = snapshot[memberId];
+        var setups = GetMemberSetups(memberId);
         if (setups is null)
         {
             return (false, null, null);
@@ -1357,18 +1359,14 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
     {
         lock (Lock)
         {
-            if (_setupListsByMemberId is not { } lists || (uint)memberId >= (uint)lists.Length)
-            {
-                return (false, null, null);
-            }
-
-            var setups = lists[memberId];
+            RebuildStaleSnapshotsUnderLock();
+            var setups = GetMemberSetups(memberId);
             if (setups is null)
             {
                 return (false, null, null);
             }
 
-            for (int i = setups.Count - 1; i >= 0; i--)
+            for (int i = setups.Length - 1; i >= 0; i--)
             {
                 var setup = setups[i];
 
@@ -1403,9 +1401,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         if (_hasStatefulSetups)
             return FindMatchingSetupLocked(memberId, [arg1]);
 
-        var snapshot = _setupsByMemberId;
-        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
-        var setups = snapshot[memberId];
+        var setups = GetMemberSetups(memberId);
         if (setups is null) return (false, null, null);
 
         for (int i = setups.Length - 1; i >= 0; i--)
@@ -1427,9 +1423,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         if (_hasStatefulSetups)
             return FindMatchingSetupLocked(memberId, [arg1, arg2]);
 
-        var snapshot = _setupsByMemberId;
-        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
-        var setups = snapshot[memberId];
+        var setups = GetMemberSetups(memberId);
         if (setups is null) return (false, null, null);
 
         for (int i = setups.Length - 1; i >= 0; i--)
@@ -1451,9 +1445,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         if (_hasStatefulSetups)
             return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3]);
 
-        var snapshot = _setupsByMemberId;
-        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
-        var setups = snapshot[memberId];
+        var setups = GetMemberSetups(memberId);
         if (setups is null) return (false, null, null);
 
         for (int i = setups.Length - 1; i >= 0; i--)
@@ -1475,9 +1467,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         if (_hasStatefulSetups)
             return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3, arg4]);
 
-        var snapshot = _setupsByMemberId;
-        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
-        var setups = snapshot[memberId];
+        var setups = GetMemberSetups(memberId);
         if (setups is null) return (false, null, null);
 
         for (int i = setups.Length - 1; i >= 0; i--)
@@ -1499,9 +1489,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         if (_hasStatefulSetups)
             return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3, arg4, arg5]);
 
-        var snapshot = _setupsByMemberId;
-        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
-        var setups = snapshot[memberId];
+        var setups = GetMemberSetups(memberId);
         if (setups is null) return (false, null, null);
 
         for (int i = setups.Length - 1; i >= 0; i--)
@@ -1523,9 +1511,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         if (_hasStatefulSetups)
             return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3, arg4, arg5, arg6]);
 
-        var snapshot = _setupsByMemberId;
-        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
-        var setups = snapshot[memberId];
+        var setups = GetMemberSetups(memberId);
         if (setups is null) return (false, null, null);
 
         for (int i = setups.Length - 1; i >= 0; i--)
@@ -1547,9 +1533,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         if (_hasStatefulSetups)
             return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3, arg4, arg5, arg6, arg7]);
 
-        var snapshot = _setupsByMemberId;
-        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
-        var setups = snapshot[memberId];
+        var setups = GetMemberSetups(memberId);
         if (setups is null) return (false, null, null);
 
         for (int i = setups.Length - 1; i >= 0; i--)
@@ -1571,9 +1555,7 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
         if (_hasStatefulSetups)
             return FindMatchingSetupLocked(memberId, [arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8]);
 
-        var snapshot = _setupsByMemberId;
-        if (snapshot is null || (uint)memberId >= (uint)snapshot.Length) return (false, null, null);
-        var setups = snapshot[memberId];
+        var setups = GetMemberSetups(memberId);
         if (setups is null) return (false, null, null);
 
         for (int i = setups.Length - 1; i >= 0; i--)
