@@ -57,7 +57,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         // Fast path: when no argument matchers (and no type-argument filter), use the per-member
         // call counter directly. A type-argument filter forces the per-record path below, since the
         // member counter aggregates calls across all type arguments.
-        // Note: the count is read lock-free, then MarkCallsVerified acquires the lock.
+        // The count and MarkCallsVerified use separate lock-free reads.
         // Calls recorded between these two steps will be marked verified but weren't counted.
         // This is safe because verification should only run after all calls have completed.
         if (_matchers.Length == 0 && _typeArguments.IsDefault)
@@ -82,7 +82,7 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
         // Iterate the internal buffer directly — no .ToArray() copy on the happy path.
         // Count first, then mark only on success to avoid corrupting prior verifications.
         var buffer = _engine.GetCallBufferFor(_memberId);
-        if (buffer is null || buffer.Count == 0)
+        if (buffer is null)
         {
             if (!times.Matches(0))
             {
@@ -119,11 +119,10 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
 
     private int CountMatchingBuffer(CallRecordBuffer buffer)
     {
-        var (items, bufferCount) = buffer.GetSnapshot();
         var count = 0;
-        for (int i = 0; i < bufferCount; i++)
+        foreach (var record in buffer.GetSnapshot())
         {
-            if (MatchesCall(items[i]!))
+            if (MatchesCall(record))
             {
                 count++;
             }
@@ -133,10 +132,8 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
 
     private void MarkMatchingBuffer(CallRecordBuffer buffer)
     {
-        var (items, bufferCount) = buffer.GetSnapshot();
-        for (int i = 0; i < bufferCount; i++)
+        foreach (var record in buffer.GetSnapshot())
         {
-            var record = items[i]!;
             if (MatchesCall(record))
             {
                 record.IsVerified = true;

@@ -1,25 +1,25 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace TUnit.Mocks.Verification;
 
 /// <summary>
 /// Thread-safe append-only buffer for call records.
-/// Uses a per-buffer lock with a small critical section for append, which is cheaper
-/// than the previous shared MockEngine Lock (no contention with setup, no contention
-/// between different members, allocated on the first call).
-/// Readers can read without locking via volatile count + snapshot.
+/// Stores the first call inline. Further appends use a per-buffer lock,
+/// independent of setup and other members. Readers use lock-free snapshots.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
 internal sealed class CallRecordBuffer
 {
-    private readonly Lock _syncRoot = new();
-    private CallRecord?[] _items;
-    private int _count;
+    private readonly CallRecord _first;
+    private Lock? _syncRoot;
+    private CallRecord[]? _items;
+    private int _count = 1;
 
-    public CallRecordBuffer(int initialCapacity = 4)
+    public CallRecordBuffer(CallRecord first)
     {
-        _items = new CallRecord?[initialCapacity];
+        _first = first;
     }
 
     public int Count
@@ -30,13 +30,13 @@ internal sealed class CallRecordBuffer
 
     public void Add(CallRecord record)
     {
-        lock (_syncRoot)
+        lock (LazyInitializer.EnsureInitialized(ref _syncRoot, static () => new Lock()))
         {
             var count = _count;
             var items = _items;
-            if ((uint)count >= (uint)items.Length)
+            if (items is null || (uint)count >= (uint)items.Length)
             {
-                items = Grow();
+                items = Grow(items);
             }
             items[count] = record;
             Volatile.Write(ref _count, count + 1);
@@ -44,57 +44,53 @@ internal sealed class CallRecordBuffer
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private CallRecord?[] Grow()
+    private CallRecord[] Grow(CallRecord[]? items)
     {
-        var items = _items;
-        var newItems = new CallRecord?[items.Length * 2];
-        Array.Copy(items, newItems, items.Length);
-        _items = newItems;
+        var newItems = new CallRecord[items is null ? 4 : items.Length * 2];
+        if (items is null)
+        {
+            newItems[0] = _first;
+        }
+        else
+        {
+            Array.Copy(items, newItems, items.Length);
+        }
+        Volatile.Write(ref _items, newItems);
         return newItems;
     }
 
     /// <summary>
-    /// Returns the current items array and count for lock-free iteration.
-    /// The returned array and count form a consistent snapshot: all items at
-    /// indices 0..count-1 are guaranteed to be non-null.
+    /// Returns a consistent snapshot for lock-free iteration.
     /// </summary>
     /// <remarks>
     /// Read count first, then items. A writer always updates items (including Grow)
-    /// before incrementing count (inside the lock), so reading count first guarantees
-    /// the subsequently-read items array has length &gt;= count.
+    /// before incrementing count (inside the lock). If count is one, either
+    /// storage location can supply the first record.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal (CallRecord?[] Items, int Count) GetSnapshot()
+    internal ReadOnlySpan<CallRecord> GetSnapshot()
     {
         var count = Volatile.Read(ref _count);
         var items = Volatile.Read(ref _items);
-        return (items, count);
+        return items is null
+            ? MemoryMarshal.CreateReadOnlySpan(in _first, 1)
+            : items.AsSpan(0, count);
     }
 
-    public CallRecord[] ToArray()
-    {
-        var (items, count) = GetSnapshot();
-        if (count == 0) return [];
-        var result = new CallRecord[count];
-        Array.Copy(items, result, count);
-        return result;
-    }
+    public CallRecord[] ToArray() => GetSnapshot().ToArray();
 
     public void ForEach(Action<CallRecord> action)
     {
-        var (items, count) = GetSnapshot();
-        for (int i = 0; i < count; i++)
+        foreach (var record in GetSnapshot())
         {
-            action(items[i]!);
+            action(record);
         }
     }
 
     public void CollectInto(List<CallRecord> target, Func<CallRecord, bool>? filter = null)
     {
-        var (items, count) = GetSnapshot();
-        for (int i = 0; i < count; i++)
+        foreach (var record in GetSnapshot())
         {
-            var record = items[i]!;
             if (filter is null || filter(record))
             {
                 target.Add(record);
