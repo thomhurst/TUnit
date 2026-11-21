@@ -31,7 +31,9 @@ public sealed partial class MockEngine<T> : IMockEngineAccess, ITypeArgumentVeri
 
     // Flat array indexed by memberId for O(1) setup lookup (member IDs are dense sequential ints 0..N)
     private volatile MethodSetup[]?[]? _setupsByMemberId;
-    private List<MethodSetup>?[]? _setupListsByMemberId; // allocated only for members with multiple setups, guarded by Lock
+    // Without a list, the member's snapshot is its only storage and holds at most one setup.
+    // Once a second setup needs a list, the list is the source of truth and is guarded by Lock.
+    private List<MethodSetup>?[]? _setupListsByMemberId;
     private volatile bool _hasStatefulSetups;
     private volatile bool _hasStaleSetups; // true when setup lists have been modified but snapshots not yet rebuilt
 

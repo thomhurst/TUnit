@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace TUnit.Mocks.Verification;
 
@@ -30,7 +29,7 @@ internal sealed class CallRecordBuffer
 
     public void Add(CallRecord record)
     {
-        lock (LazyInitializer.EnsureInitialized(ref _syncRoot, static () => new Lock()))
+        lock (Volatile.Read(ref _syncRoot) ?? InitializeLock())
         {
             var count = _count;
             var items = _items;
@@ -41,6 +40,13 @@ internal sealed class CallRecordBuffer
             items[count] = record;
             Volatile.Write(ref _count, count + 1);
         }
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private Lock InitializeLock()
+    {
+        var newLock = new Lock();
+        return Interlocked.CompareExchange(ref _syncRoot, newLock, null) ?? newLock;
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -68,33 +74,43 @@ internal sealed class CallRecordBuffer
     /// storage location can supply the first record.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ReadOnlySpan<CallRecord> GetSnapshot()
+    internal Snapshot GetSnapshot()
     {
         var count = Volatile.Read(ref _count);
         var items = Volatile.Read(ref _items);
-        return items is null
-            ? MemoryMarshal.CreateReadOnlySpan(in _first, 1)
-            : items.AsSpan(0, count);
+        return new Snapshot(_first, items, count);
     }
 
     public CallRecord[] ToArray() => GetSnapshot().ToArray();
 
     public void ForEach(Action<CallRecord> action)
     {
-        foreach (var record in GetSnapshot())
+        var snapshot = GetSnapshot();
+        for (var i = 0; i < snapshot.Count; i++)
         {
-            action(record);
+            action(snapshot[i]);
         }
     }
 
     public void CollectInto(List<CallRecord> target, Func<CallRecord, bool>? filter = null)
     {
-        foreach (var record in GetSnapshot())
+        var snapshot = GetSnapshot();
+        for (var i = 0; i < snapshot.Count; i++)
         {
+            var record = snapshot[i];
             if (filter is null || filter(record))
             {
                 target.Add(record);
             }
         }
+    }
+
+    internal readonly struct Snapshot(CallRecord first, CallRecord[]? items, int count)
+    {
+        public int Count { get; } = count;
+
+        public CallRecord this[int index] => items is null ? first : items[index];
+
+        public CallRecord[] ToArray() => items is null ? [first] : items.AsSpan(0, Count).ToArray();
     }
 }

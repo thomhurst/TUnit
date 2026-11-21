@@ -120,9 +120,10 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
     private int CountMatchingBuffer(CallRecordBuffer buffer)
     {
         var count = 0;
-        foreach (var record in buffer.GetSnapshot())
+        var snapshot = buffer.GetSnapshot();
+        for (var i = 0; i < snapshot.Count; i++)
         {
-            if (MatchesCall(record))
+            if (MatchesCall(snapshot[i]))
             {
                 count++;
             }
@@ -132,8 +133,10 @@ public sealed class CallVerificationBuilder<T> : ICallVerification where T : cla
 
     private void MarkMatchingBuffer(CallRecordBuffer buffer)
     {
-        foreach (var record in buffer.GetSnapshot())
+        var snapshot = buffer.GetSnapshot();
+        for (var i = 0; i < snapshot.Count; i++)
         {
+            var record = snapshot[i];
             if (MatchesCall(record))
             {
                 record.IsVerified = true;
