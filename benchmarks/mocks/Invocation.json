@@ -1,173 +1,155 @@
 {
-  "timestamp": "2026-11-20T02:20:51.427Z",
+  "timestamp": "2026-11-21T02:20:26.016Z",
   "category": "Invocation",
   "description": "Calling methods on mock objects with bounded history; time and allocation are reported per call",
   "environment": {
     "benchmarkDotNetVersion": "BenchmarkDotNet v0.16.0-preview.2, Linux Ubuntu 26.04.1 LTS (Resolute Raccoon)",
     "sdk": ".NET SDK 11.0.100",
-    "host": ".NET 11.0.0 (11.0.0, 11.0.26.53018), X64 RyuJIT x86-64-v4"
+    "host": ".NET 11.0.0 (11.0.0, 11.0.26.53018), X64 RyuJIT x86-64-v3"
   },
   "results": [
     {
       "Method": "'TUnit.Mocks (100 calls)'",
       "InvocationCount": "256",
-      "Mean": "50.59 ns",
-      "Error": "9.069 ns",
-      "StdDev": "0.497 ns",
-      "Gen0": "-",
+      "Mean": "103.21 ns",
+      "Error": "271.529 ns",
+      "StdDev": "14.883 ns",
       "Allocated": "129 B"
     },
     {
       "Method": "'Imposter (100 calls)'",
       "InvocationCount": "256",
-      "Mean": "16.35 ns",
-      "Error": "9.114 ns",
-      "StdDev": "0.500 ns",
-      "Gen0": "-",
+      "Mean": "29.60 ns",
+      "Error": "17.281 ns",
+      "StdDev": "0.947 ns",
       "Allocated": "48 B"
     },
     {
       "Method": "'Mockolate (100 calls)'",
       "InvocationCount": "256",
-      "Mean": "29.04 ns",
-      "Error": "8.409 ns",
-      "StdDev": "0.461 ns",
-      "Gen0": "-",
+      "Mean": "36.13 ns",
+      "Error": "38.925 ns",
+      "StdDev": "2.134 ns",
       "Allocated": "56 B"
     },
     {
       "Method": "'Moq (100 calls)'",
       "InvocationCount": "256",
-      "Mean": "395.97 ns",
-      "Error": "14.631 ns",
-      "StdDev": "0.802 ns",
-      "Gen0": "-",
+      "Mean": "288.12 ns",
+      "Error": "53.376 ns",
+      "StdDev": "2.926 ns",
       "Allocated": "396 B"
     },
     {
       "Method": "'NSubstitute (100 calls)'",
       "InvocationCount": "256",
-      "Mean": "184.03 ns",
-      "Error": "85.282 ns",
-      "StdDev": "4.675 ns",
-      "Gen0": "-",
+      "Mean": "203.39 ns",
+      "Error": "44.893 ns",
+      "StdDev": "2.461 ns",
       "Allocated": "309 B"
     },
     {
       "Method": "'FakeItEasy (100 calls)'",
       "InvocationCount": "256",
-      "Mean": "705.85 ns",
-      "Error": "411.181 ns",
-      "StdDev": "22.538 ns",
-      "Gen0": "0.0391",
+      "Mean": "532.94 ns",
+      "Error": "113.860 ns",
+      "StdDev": "6.241 ns",
       "Allocated": "981 B"
     },
     {
       "Method": "TUnit.Mocks",
       "InvocationCount": "16384",
-      "Mean": "70.19 ns",
-      "Error": "40.440 ns",
-      "StdDev": "2.217 ns",
-      "Gen0": "-",
+      "Mean": "98.99 ns",
+      "Error": "228.702 ns",
+      "StdDev": "12.536 ns",
       "Allocated": "136 B"
     },
     {
       "Method": "Imposter",
       "InvocationCount": "16384",
-      "Mean": "16.55 ns",
-      "Error": "8.758 ns",
-      "StdDev": "0.480 ns",
-      "Gen0": "-",
+      "Mean": "21.51 ns",
+      "Error": "25.541 ns",
+      "StdDev": "1.400 ns",
       "Allocated": "48 B"
     },
     {
       "Method": "Mockolate",
       "InvocationCount": "16384",
-      "Mean": "18.20 ns",
-      "Error": "12.311 ns",
-      "StdDev": "0.675 ns",
-      "Gen0": "-",
+      "Mean": "23.21 ns",
+      "Error": "3.274 ns",
+      "StdDev": "0.179 ns",
       "Allocated": "56 B"
     },
     {
       "Method": "Moq",
       "InvocationCount": "16384",
-      "Mean": "264.54 ns",
-      "Error": "86.598 ns",
-      "StdDev": "4.747 ns",
-      "Gen0": "-",
+      "Mean": "275.30 ns",
+      "Error": "108.140 ns",
+      "StdDev": "5.928 ns",
       "Allocated": "392 B"
     },
     {
       "Method": "NSubstitute",
       "InvocationCount": "16384",
-      "Mean": "218.37 ns",
-      "Error": "85.189 ns",
-      "StdDev": "4.670 ns",
-      "Gen0": "-",
-      "Allocated": "376 B"
+      "Mean": "221.23 ns",
+      "Error": "89.194 ns",
+      "StdDev": "4.889 ns",
+      "Allocated": "320 B"
     },
     {
       "Method": "FakeItEasy",
       "InvocationCount": "16384",
-      "Mean": "260.33 ns",
-      "Error": "18.177 ns",
-      "StdDev": "0.996 ns",
-      "Gen0": "-",
+      "Mean": "342.21 ns",
+      "Error": "44.507 ns",
+      "StdDev": "2.440 ns",
       "Allocated": "992 B"
     },
     {
       "Method": "'TUnit.Mocks (String)'",
       "InvocationCount": "16384",
-      "Mean": "45.72 ns",
-      "Error": "114.030 ns",
-      "StdDev": "6.250 ns",
-      "Gen0": "-",
+      "Mean": "70.85 ns",
+      "Error": "19.479 ns",
+      "StdDev": "1.068 ns",
       "Allocated": "120 B"
     },
     {
       "Method": "'Imposter (String)'",
       "InvocationCount": "16384",
-      "Mean": "14.55 ns",
-      "Error": "0.845 ns",
-      "StdDev": "0.046 ns",
-      "Gen0": "-",
+      "Mean": "19.38 ns",
+      "Error": "3.992 ns",
+      "StdDev": "0.219 ns",
       "Allocated": "48 B"
     },
     {
       "Method": "'Mockolate (String)'",
       "InvocationCount": "16384",
-      "Mean": "20.96 ns",
-      "Error": "10.278 ns",
-      "StdDev": "0.563 ns",
-      "Gen0": "-",
+      "Mean": "38.78 ns",
+      "Error": "15.255 ns",
+      "StdDev": "0.836 ns",
       "Allocated": "56 B"
     },
     {
       "Method": "'Moq (String)'",
       "InvocationCount": "16384",
-      "Mean": "122.16 ns",
-      "Error": "678.330 ns",
-      "StdDev": "37.182 ns",
-      "Gen0": "-",
+      "Mean": "136.30 ns",
+      "Error": "106.755 ns",
+      "StdDev": "5.852 ns",
       "Allocated": "312 B"
     },
     {
       "Method": "'NSubstitute (String)'",
       "InvocationCount": "16384",
-      "Mean": "180.18 ns",
-      "Error": "15.178 ns",
-      "StdDev": "0.832 ns",
-      "Gen0": "-",
-      "Allocated": "344 B"
+      "Mean": "190.91 ns",
+      "Error": "80.030 ns",
+      "StdDev": "4.387 ns",
+      "Allocated": "288 B"
     },
     {
       "Method": "'FakeItEasy (String)'",
       "InvocationCount": "16384",
-      "Mean": "308.86 ns",
-      "Error": "1,119.664 ns",
-      "StdDev": "61.373 ns",
-      "Gen0": "-",
+      "Mean": "280.81 ns",
+      "Error": "233.396 ns",
+      "StdDev": "12.793 ns",
       "Allocated": "832 B"
     }
   ]
