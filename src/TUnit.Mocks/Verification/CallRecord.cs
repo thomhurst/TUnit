@@ -10,8 +10,8 @@ namespace TUnit.Mocks.Verification;
 [EditorBrowsable(EditorBrowsableState.Never)]
 public sealed class CallRecord
 {
-    private readonly IArgumentStore? _store;
-    private object?[]? _arguments;
+    // Holds the typed store until the boxed array is first requested.
+    private object? _arguments;
 
     /// <summary>
     /// Creates a call record with pre-boxed arguments (fallback path).
@@ -43,7 +43,7 @@ public sealed class CallRecord
     {
         MemberId = memberId;
         MemberName = memberName;
-        _store = store;
+        _arguments = store;
         SequenceNumber = sequenceNumber;
     }
 
@@ -69,9 +69,11 @@ public sealed class CallRecord
     {
         get
         {
-            if (_arguments is not null) return _arguments;
-            var arr = _store?.ToArray() ?? [];
-            return Interlocked.CompareExchange(ref _arguments, arr, null) ?? arr;
+            var arguments = Volatile.Read(ref _arguments);
+            if (arguments is object?[] array) return array;
+
+            var materialized = ((IArgumentStore?)arguments)?.ToArray() ?? [];
+            return Interlocked.CompareExchange(ref _arguments, materialized, arguments) as object?[] ?? materialized;
         }
     }
 
