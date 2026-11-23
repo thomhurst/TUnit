@@ -125,7 +125,9 @@ jobs:
         run: |
           set -euo pipefail
           body=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" --jq '.body // ""')
-          body=$(printf '%s' "$body" | sed -E "s#(/compare/[^ )]+)\.\.\.[^ )]+#\1...$RELEASE_TAG#")
+          # Only the generated "Full Changelog" line: compare links written into the notes by hand
+          # keep their targets.
+          body=$(printf '%s' "$body" | sed -E "/^\*\*Full Changelog\*\*/ s#(/compare/[^ )]+)\.\.\.[^ )]+#\1...$RELEASE_TAG#")
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" -f name="$VERSION" -f body="$body" > /dev/null
 
       # Windows and macOS pull request runs test only what can differ by OS (--os-specific-only
@@ -509,3 +511,19 @@ jobs:
         with:
           name: fsharp-trimming-logs
           path: artifacts/fsharp-trimming/**/*.log
+
+  # The release tag grammar in resolve-version.sh only runs when a release is published, so test
+  # it on every pull request.
+  release-scripts:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Test release tag validation
+        run: bash .github/actions/resolve-version/test-resolve-version.sh

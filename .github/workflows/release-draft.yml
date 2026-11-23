@@ -10,8 +10,8 @@ name: Release Draft
 # the tag's version and pushes the packages to NuGet.
 #
 # Every push to main rewrites the draft, so edits to it are lost if main moves before it is
-# published. The draft this workflow owns carries DRAFT_MARKER in its notes; other drafts are left
-# alone.
+# published. The draft this workflow owns carries DRAFT_MARKER, a hidden comment in its notes: keep
+# it when editing, or the next push creates a second draft. Other drafts are left alone.
 
 on:
   push:
@@ -27,6 +27,8 @@ concurrency:
 
 jobs:
   draft:
+    # A manual run from another branch would point main's draft at an unmerged commit.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -53,6 +55,22 @@ jobs:
           repo="repos/$GITHUB_REPOSITORY"
           tag="v$VERSION"
 
+          # The commit is already released (or a publish raced this run): nothing to draft.
+          # Releases may use either tag form.
+          for candidate in "$tag" "$VERSION"; do
+            status=0
+            git ls-remote --exit-code --tags origin "refs/tags/$candidate" > /dev/null || status=$?
+            if [ "$status" -eq 0 ]; then
+              echo "Tag $candidate already exists; leaving the draft alone." | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            elif [ "$status" -ne 2 ]; then
+              echo "::error::Could not check whether tag $candidate exists (git exit $status)."
+              exit 1
+            fi
+          done
+
+          # Every lookup is a checked assignment, so an API failure fails the step instead of
+          # drafting from empty values.
           previous=$(gh api "$repo/releases/latest" --jq .tag_name)
           notes=$(gh api -X POST "$repo/releases/generate-notes" \
             -f tag_name="$tag" -f target_commitish="$GITHUB_SHA" -f previous_tag_name="$previous" \
@@ -63,16 +81,23 @@ jobs:
             --jq '.[] | select(.draft and ((.body // "") | contains(env.DRAFT_MARKER))) | .id')
           draft_id=${draft_ids%%$'\n'*}
 
-          if [ -n "$draft_id" ]; then
-            method=PATCH
-            endpoint="$repo/releases/$draft_id"
+          if [ -z "$draft_id" ]; then
+            url=$(gh api -X POST "$repo/releases" \
+              -f tag_name="$tag" -f target_commitish="$GITHUB_SHA" -f name="$VERSION" \
+              -F draft=true -f body="$body" --jq .html_url)
           else
-            method=POST
-            endpoint="$repo/releases"
+            # The draft may have been published since it was listed. Re-check, and never send
+            # draft=true on an update, so a published release is not turned back into a draft.
+            # GitHub has no conditional update, so a publish in the moment between this check
+            # and the update can still have its tag, name and notes replaced.
+            still_draft=$(gh api "$repo/releases/$draft_id" --jq .draft)
+            if [ "$still_draft" != "true" ]; then
+              echo "Release $draft_id was published meanwhile; leaving it alone." | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            url=$(gh api -X PATCH "$repo/releases/$draft_id" \
+              -f tag_name="$tag" -f target_commitish="$GITHUB_SHA" -f name="$VERSION" \
+              -f body="$body" --jq .html_url)
           fi
-
-          url=$(gh api -X "$method" "$endpoint" \
-            -f tag_name="$tag" -f target_commitish="$GITHUB_SHA" -f name="$VERSION" \
-            -F draft=true -f body="$body" --jq .html_url)
 
           echo "Draft release $tag for $GITHUB_SHA (previous release $previous): $url" | tee -a "$GITHUB_STEP_SUMMARY"

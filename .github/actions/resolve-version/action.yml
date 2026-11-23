@@ -52,41 +52,5 @@ runs:
         GV_ASSEMBLYSEMVER: ${{ steps.gitversion.outputs.assemblySemVer }}
         GV_ASSEMBLYSEMFILEVER: ${{ steps.gitversion.outputs.assemblySemFileVer }}
         GV_INFORMATIONALVERSION: ${{ steps.gitversion.outputs.informationalVersion }}
-      run: |
-        set -euo pipefail
-        if [ "$GITHUB_EVENT_NAME" = "release" ]; then
-          if [[ ! "$RELEASE_TAG" =~ ^v?([0-9]+)\.([0-9]+)\.([0-9]+)(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "::error::Release tag '$RELEASE_TAG' is not a version. Use a tag such as v1.2.3 or v1.2.3-beta.1."
-            exit 1
-          fi
-          assembly="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}.0"
-          semver="${RELEASE_TAG#v}"
-          full="$semver"
-          file="$assembly"
-          informational="$semver+Sha.$GITHUB_SHA"
-        else
-          if [ -z "$GV_SEMVER" ]; then
-            echo "::error::GitVersion produced no semVer; Version would be empty."
-            exit 1
-          fi
-          semver="$GV_SEMVER"
-          full="$GV_FULLSEMVER"
-          assembly="$GV_ASSEMBLYSEMVER"
-          file="$GV_ASSEMBLYSEMFILEVER"
-          informational="$GV_INFORMATIONALVERSION"
-        fi
-        echo "Version: $semver"
-        {
-          echo "Version=$semver"
-          echo "AssemblyVersion=$assembly"
-          echo "FileVersion=$file"
-          echo "InformationalVersion=$informational"
-          echo "PackageVersion=$full"
-        } >> "$GITHUB_ENV"
-        {
-          echo "semVer=$semver"
-          echo "fullSemVer=$full"
-          echo "assemblySemVer=$assembly"
-          echo "assemblySemFileVer=$file"
-          echo "informationalVersion=$informational"
-        } >> "$GITHUB_OUTPUT"
+      # Passed to bash as an argument, which also works on Windows, where the path has backslashes.
+      run: bash "$GITHUB_ACTION_PATH/resolve-version.sh"
