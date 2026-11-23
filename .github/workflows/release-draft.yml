@@ -98,6 +98,9 @@ jobs:
           draft_ids=$(gh api --paginate "$repo/releases?per_page=100" \
             --jq '.[] | select(.draft and ((.body // "") | contains(env.DRAFT_MARKER))) | .id')
           draft_id=${draft_ids%%$'\n'*}
+          if [ "$draft_id" != "$draft_ids" ]; then
+            echo "::warning::Several drafts carry the release-draft marker ($(echo $draft_ids)); updating the newest, $draft_id. Delete the others."
+          fi
 
           # Prints the draft's notes for tag $1: GitHub-generated, categorised by .github/release.yml.
           generate_body() {
