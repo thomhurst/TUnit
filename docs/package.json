@@ -52,7 +52,7 @@
     "minimatch": "11.0.9",
     "express/path-to-regexp": "9.0.0",
     "serialize-javascript": "7.1.4",
-    "brace-expansion": "5.0.13",
+    "brace-expansion": "5.1.0",
     "qs": "6.17.1",
     "dompurify": "3.5.0",
     "node-forge": "1.4.4",
