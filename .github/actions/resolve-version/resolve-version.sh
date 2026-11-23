@@ -2,24 +2,14 @@
 # Resolves the build version; see action.yml. Inputs come from the environment (GITHUB_EVENT_NAME,
 # RELEASE_TAG, GITHUB_SHA, GV_*), outputs go to GITHUB_ENV and GITHUB_OUTPUT.
 set -euo pipefail
+# shellcheck source=semver.sh
+source "$(dirname "${BASH_SOURCE[0]}")/semver.sh"
 if [ "$GITHUB_EVENT_NAME" = "release" ]; then
-  # SemVer 2.0 without build metadata: no leading zeros in numbers, no empty prerelease
-  # identifiers. NuGet would normalise 1.02.3 to 1.2.3 and alias an existing version.
-  num='(0|[1-9][0-9]*)'
-  id='(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)'
-  if [[ ! "$RELEASE_TAG" =~ ^v?$num\.$num\.$num(-$id(\.$id)*)?$ ]]; then
-    echo "::error::Release tag '$RELEASE_TAG' is not a version. Use a tag such as v1.2.3 or v1.2.3-beta.1."
+  if ! is_release_tag "$RELEASE_TAG"; then
+    echo "::error::Release tag '$RELEASE_TAG' is not a version. Use a tag such as v1.2.3 or v1.2.3-beta.1, with no leading zeros and each number at most 65534 (the AssemblyVersion limit)."
     exit 1
   fi
-  major="${BASH_REMATCH[1]}" minor="${BASH_REMATCH[2]}" patch="${BASH_REMATCH[3]}"
-  # Each part also becomes an AssemblyVersion component, which is limited to 65534.
-  for part in "$major" "$minor" "$patch"; do
-    if [ "${#part}" -gt 5 ] || [ "$part" -gt 65534 ]; then
-      echo "::error::Release tag '$RELEASE_TAG' has a version part above 65534, which AssemblyVersion cannot hold."
-      exit 1
-    fi
-  done
-  assembly="$major.$minor.$patch.0"
+  assembly="$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH.0"
   semver="${RELEASE_TAG#v}"
   full="$semver"
   file="$assembly"

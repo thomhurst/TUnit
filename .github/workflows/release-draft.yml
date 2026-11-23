@@ -5,12 +5,14 @@ name: Release Draft
 # release (categorised by .github/release.yml).
 #
 # To release, edit the draft on GitHub: change the tag to choose the version (for example
-# v1.88.0 for a minor or v2.0.0 for a major release), adjust the notes, and publish it. Publishing
+# v1.88.0 for a minor or v2.0.0 for a major release), adjust the notes, and publish it. Later pushes
+# keep a tag you set if it is higher than the suggestion; set it back to the suggestion (or lower)
+# to return to the default. Publishing
 # creates the tag on the draft's commit and runs dotnet.yml, which tests and packs that commit with
 # the tag's version and pushes the packages to NuGet.
 #
-# Every push to main rewrites the draft, so edits to it are lost if main moves before it is
-# published. The draft this workflow owns carries DRAFT_MARKER, a hidden comment in its notes: keep
+# Every push to main rewrites the draft's commit and notes, so edits to the notes are lost if main
+# moves before it is published. The draft this workflow owns carries DRAFT_MARKER, a hidden comment in its notes: keep
 # it when editing, or the next push creates a second draft. Other drafts are left alone.
 
 on:
@@ -52,36 +54,51 @@ jobs:
           VERSION: ${{ steps.version.outputs.semVer }}
         run: |
           set -euo pipefail
+          source .github/actions/resolve-version/semver.sh
           repo="repos/$GITHUB_REPOSITORY"
           tag="v$VERSION"
 
+          # Succeeds when a tag for version $1 exists, in either of the forms releases may use.
+          version_tagged() {
+            local candidate status
+            for candidate in "v${1#v}" "${1#v}"; do
+              status=0
+              git ls-remote --exit-code --tags origin "refs/tags/$candidate" > /dev/null || status=$?
+              if [ "$status" -eq 0 ]; then
+                return 0
+              elif [ "$status" -ne 2 ]; then
+                echo "::error::Could not check whether tag $candidate exists (git exit $status)."
+                exit 1
+              fi
+            done
+            return 1
+          }
+
           # The commit is already released (or a publish raced this run): nothing to draft.
-          # Releases may use either tag form.
-          for candidate in "$tag" "$VERSION"; do
-            status=0
-            git ls-remote --exit-code --tags origin "refs/tags/$candidate" > /dev/null || status=$?
-            if [ "$status" -eq 0 ]; then
-              echo "Tag $candidate already exists; leaving the draft alone." | tee -a "$GITHUB_STEP_SUMMARY"
-              exit 0
-            elif [ "$status" -ne 2 ]; then
-              echo "::error::Could not check whether tag $candidate exists (git exit $status)."
-              exit 1
-            fi
-          done
+          if version_tagged "$VERSION"; then
+            echo "Version $VERSION is already tagged; leaving the draft alone." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
 
           # Every lookup is a checked assignment, so an API failure fails the step instead of
           # drafting from empty values.
           previous=$(gh api "$repo/releases/latest" --jq .tag_name)
-          notes=$(gh api -X POST "$repo/releases/generate-notes" \
-            -f tag_name="$tag" -f target_commitish="$GITHUB_SHA" -f previous_tag_name="$previous" \
-            --jq .body)
-          body="$notes"$'\n\n'"$DRAFT_MARKER"
 
           draft_ids=$(gh api --paginate "$repo/releases?per_page=100" \
             --jq '.[] | select(.draft and ((.body // "") | contains(env.DRAFT_MARKER))) | .id')
           draft_id=${draft_ids%%$'\n'*}
 
+          # Prints the draft's notes for tag $1: GitHub-generated, categorised by .github/release.yml.
+          generate_body() {
+            local notes
+            notes=$(gh api -X POST "$repo/releases/generate-notes" \
+              -f tag_name="$1" -f target_commitish="$GITHUB_SHA" -f previous_tag_name="$previous" \
+              --jq .body)
+            printf '%s\n\n%s' "$notes" "$DRAFT_MARKER"
+          }
+
           if [ -z "$draft_id" ]; then
+            body=$(generate_body "$tag")
             url=$(gh api -X POST "$repo/releases" \
               -f tag_name="$tag" -f target_commitish="$GITHUB_SHA" -f name="$VERSION" \
               -F draft=true -f body="$body" --jq .html_url)
@@ -90,11 +107,23 @@ jobs:
             # draft=true on an update, so a published release is not turned back into a draft.
             # GitHub has no conditional update, so a publish in the moment between this check
             # and the update can still have its tag, name and notes replaced.
-            still_draft=$(gh api "$repo/releases/$draft_id" --jq .draft)
-            if [ "$still_draft" != "true" ]; then
+            current=$(gh api "$repo/releases/$draft_id" --jq '"\(.draft) \(.tag_name)"')
+            if [ "${current%% *}" != "true" ]; then
               echo "Release $draft_id was published meanwhile; leaving it alone." | tee -a "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
+
+            # Keep a version the owner set on the draft when it is higher than the suggestion
+            # and not already released; otherwise go back to the suggestion.
+            current_tag="${current#* }"
+            if is_release_tag "$current_tag" && version_gt "$current_tag" "$VERSION" \
+              && ! version_tagged "$current_tag"; then
+              echo "Keeping the draft's tag $current_tag over the suggested $tag." | tee -a "$GITHUB_STEP_SUMMARY"
+              tag="$current_tag"
+              VERSION="${current_tag#v}"
+            fi
+
+            body=$(generate_body "$tag")
             url=$(gh api -X PATCH "$repo/releases/$draft_id" \
               -f tag_name="$tag" -f target_commitish="$GITHUB_SHA" -f name="$VERSION" \
               -f body="$body" --jq .html_url)
