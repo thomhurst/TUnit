@@ -4,7 +4,7 @@
 
 Last Updated
 
-This benchmark was automatically generated on **2026-11-22** from the latest CI run.
+This benchmark was automatically generated on **2026-11-23** from the latest CI run.
 
 **Environment:** Ubuntu Latest • .NET SDK 11.0.100
 
@@ -14,12 +14,12 @@ Mock verification workflows, including creation, setup and invocation where appl
 
 | Library         | Mean          | Error        | StdDev       | Allocated |
 | --------------- | ------------- | ------------ | ------------ | --------- |
-| **TUnit.Mocks** | 327.49 ns     | 5.227 ns     | 4.890 ns     | 1512 B    |
-| Imposter        | 267.50 ns     | 5.219 ns     | 6.601 ns     | 1096 B    |
-| Mockolate       | 148.38 ns     | 2.658 ns     | 2.487 ns     | 712 B     |
-| Moq             | 214,518.48 ns | 2,385.813 ns | 2,114.961 ns | 24316 B   |
-| NSubstitute     | 5,263.41 ns   | 101.994 ns   | 95.405 ns    | 10024 B   |
-| FakeItEasy      | 5,339.65 ns   | 105.800 ns   | 190.780 ns   | 10506 B   |
+| **TUnit.Mocks** | 328.30 ns     | 2.447 ns     | 2.289 ns     | 1512 B    |
+| Imposter        | 223.77 ns     | 4.252 ns     | 3.977 ns     | 1096 B    |
+| Mockolate       | 152.44 ns     | 2.939 ns     | 2.887 ns     | 712 B     |
+| Moq             | 209,970.54 ns | 1,498.224 ns | 1,401.440 ns | 24316 B   |
+| NSubstitute     | 5,230.77 ns   | 63.796 ns    | 56.554 ns    | 10024 B   |
+| FakeItEasy      | 5,142.18 ns   | 72.457 ns    | 64.231 ns    | 10506 B   |
 
 <!-- -->
 
@@ -27,14 +27,14 @@ Mock verification workflows, including creation, setup and invocation where appl
 
 ### Never[​](#never "Direct link to Never")
 
-| Library         | Mean         | Error        | StdDev     | Allocated |
-| --------------- | ------------ | ------------ | ---------- | --------- |
-| **TUnit.Mocks** | 46.65 ns     | 0.927 ns     | 1.205 ns   | 360 B     |
-| Imposter        | 118.47 ns    | 2.018 ns     | 1.789 ns   | 616 B     |
-| Mockolate       | 59.76 ns     | 1.136 ns     | 1.115 ns   | 368 B     |
-| Moq             | 57,175.69 ns | 1,015.760 ns | 900.445 ns | 6917 B    |
-| NSubstitute     | 2,827.46 ns  | 56.507 ns    | 130.962 ns | 7056 B    |
-| FakeItEasy      | 2,523.17 ns  | 46.586 ns    | 43.576 ns  | 5105 B    |
+| Library         | Mean         | Error      | StdDev     | Allocated |
+| --------------- | ------------ | ---------- | ---------- | --------- |
+| **TUnit.Mocks** | 43.53 ns     | 0.607 ns   | 0.567 ns   | 360 B     |
+| Imposter        | 122.24 ns    | 2.351 ns   | 3.139 ns   | 616 B     |
+| Mockolate       | 60.93 ns     | 0.892 ns   | 0.835 ns   | 368 B     |
+| Moq             | 54,555.70 ns | 645.506 ns | 572.224 ns | 6917 B    |
+| NSubstitute     | 2,994.42 ns  | 48.818 ns  | 45.664 ns  | 7056 B    |
+| FakeItEasy      | 2,707.24 ns  | 29.026 ns  | 27.150 ns  | 5105 B    |
 
 <!-- -->
 
@@ -44,12 +44,12 @@ Mock verification workflows, including creation, setup and invocation where appl
 
 | Library         | Mean          | Error        | StdDev       | Allocated |
 | --------------- | ------------- | ------------ | ------------ | --------- |
-| **TUnit.Mocks** | 597.48 ns     | 3.503 ns     | 2.925 ns     | 2528 B    |
-| Imposter        | 502.68 ns     | 9.735 ns     | 14.571 ns    | 2288 B    |
-| Mockolate       | 317.70 ns     | 6.242 ns     | 7.666 ns     | 1360 B    |
-| Moq             | 302,000.19 ns | 1,788.356 ns | 1,672.829 ns | 34890 B   |
-| NSubstitute     | 8,935.32 ns   | 114.514 ns   | 107.117 ns   | 16745 B   |
-| FakeItEasy      | 9,128.87 ns   | 181.649 ns   | 194.362 ns   | 18703 B   |
+| **TUnit.Mocks** | 626.79 ns     | 10.495 ns    | 8.764 ns     | 2528 B    |
+| Imposter        | 482.69 ns     | 4.335 ns     | 4.055 ns     | 2288 B    |
+| Mockolate       | 322.26 ns     | 3.620 ns     | 3.023 ns     | 1360 B    |
+| Moq             | 295,703.24 ns | 2,429.323 ns | 2,153.531 ns | 34890 B   |
+| NSubstitute     | 9,160.00 ns   | 122.681 ns   | 114.755 ns   | 16633 B   |
+| FakeItEasy      | 9,252.41 ns   | 109.102 ns   | 96.716 ns    | 18703 B   |
 
 <!-- -->
 
@@ -63,4 +63,4 @@ Methodology
 
 View the [mock benchmarks overview](/docs/benchmarks/mocks/.md) for methodology details and environment information.
 
-*Last generated: 2026-11-22T02:21:53.323Z*
+*Last generated: 2026-11-23T02:22:45.286Z*
