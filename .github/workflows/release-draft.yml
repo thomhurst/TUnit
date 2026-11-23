@@ -54,6 +54,8 @@ jobs:
           VERSION: ${{ steps.version.outputs.semVer }}
         run: |
           set -euo pipefail
+          # Functions run in $(...) would otherwise ignore errexit, and a failed call would pass.
+          shopt -s inherit_errexit
           source .github/actions/resolve-version/semver.sh
           repo="repos/$GITHUB_REPOSITORY"
           tag="v$VERSION"
@@ -74,6 +76,13 @@ jobs:
             return 1
           }
 
+          # A re-run of an older main run keeps its old commit; only the tip of main may move the draft.
+          tip=$(git ls-remote --exit-code origin refs/heads/main | cut -f1)
+          if [ "$tip" != "$GITHUB_SHA" ]; then
+            echo "$GITHUB_SHA is no longer the tip of main ($tip); leaving the draft alone." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
           # The commit is already released (or a publish raced this run): nothing to draft.
           if version_tagged "$VERSION"; then
             echo "Version $VERSION is already tagged; leaving the draft alone." | tee -a "$GITHUB_STEP_SUMMARY"
@@ -82,6 +91,8 @@ jobs:
 
           # Every lookup is a checked assignment, so an API failure fails the step instead of
           # drafting from empty values.
+          # The latest stable release: GitHub's "latest" skips prereleases, so after a prerelease the
+          # notes still list everything since the last stable version.
           previous=$(gh api "$repo/releases/latest" --jq .tag_name)
 
           draft_ids=$(gh api --paginate "$repo/releases?per_page=100" \
@@ -93,7 +104,7 @@ jobs:
             local notes
             notes=$(gh api -X POST "$repo/releases/generate-notes" \
               -f tag_name="$1" -f target_commitish="$GITHUB_SHA" -f previous_tag_name="$previous" \
-              --jq .body)
+              --jq .body) || return
             printf '%s\n\n%s' "$notes" "$DRAFT_MARKER"
           }
 

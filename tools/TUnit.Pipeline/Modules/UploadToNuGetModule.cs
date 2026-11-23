@@ -10,7 +10,9 @@ using Octokit;
 namespace TUnit.Pipeline.Modules;
 
 // Publishing runs only for a published GitHub release (see release-draft.yml): the release's tag is
-// the version, and GitHub has already created the tag and the release.
+// the version, and GitHub has already created the tag and the release. This replaces a "main only"
+// branch condition, which a tag checkout cannot satisfy: dotnet.yml's "Verify release" step fails
+// the job before this module runs unless the tagged commit is on main.
 [RunIf<OnLinux>]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<PackTUnitFilesModule>]
