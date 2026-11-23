@@ -1,3 +1,10 @@
+# Categories for the generated notes of the draft release (see .github/workflows/release-draft.yml).
+# GitHub files each pull request under the first category it matches, in this order:
+# - `ignore-for-release` leaves a pull request out of the notes entirely.
+# - `breaking` (or `breaking-change`, `Semver-Major`) lists it under Breaking Changes, even when it
+#   is also a dependency update.
+# - Every other dependency update (`dependencies`) is grouped under Dependencies: the categories
+#   before it exclude that label.
 changelog:
   exclude:
     labels:
@@ -8,30 +15,45 @@ changelog:
   categories:
     - title: Breaking Changes
       labels:
-        - Semver-Major
-        - breaking-change
         - breaking
+        - breaking-change
+        - Semver-Major
     - title: New Features
       labels:
         - enhancement
         - feature
+      exclude:
+        labels:
+          - dependencies
     - title: Bug Fixes
       labels:
         - bug
         - fix
+      exclude:
+        labels:
+          - dependencies
     - title: Performance Improvements
       labels:
         - performance
+      exclude:
+        labels:
+          - dependencies
     - title: Documentation
       labels:
         - documentation
         - docs
+      exclude:
+        labels:
+          - dependencies
     - title: Other Changes
       labels:
         - '*'
       exclude:
         labels:
           - dependencies
+          - breaking
+          - breaking-change
+          - Semver-Major
           - enhancement
           - feature
           - bug
@@ -39,9 +61,6 @@ changelog:
           - performance
           - documentation
           - docs
-          - Semver-Major
-          - breaking-change
-          - breaking
     - title: Dependencies
       labels:
         - dependencies

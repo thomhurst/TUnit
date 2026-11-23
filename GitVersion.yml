@@ -1,6 +1,8 @@
 mode: ContinuousDeployment
-strategies:
-  - Mainline
+# Versions are chosen by editing the tag of the draft release before publishing it (see
+# .github/workflows/release-draft.yml), not by +semver: commit messages. GitVersion only suggests
+# the draft's version: the next patch after the latest release tag.
+commit-message-incrementing: Disabled
 ignore:
   sha:
     - e39ef8a0ed0d5e12e396e3c87d185ba7b0c512b0

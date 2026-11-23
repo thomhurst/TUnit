@@ -1,0 +1,56 @@
+name: Resolve version
+description: >-
+  Resolves the version to stamp on builds and packages. A published release takes it from the
+  release's tag, so editing the tag of the draft release is how a version is chosen. Every other
+  run computes it with GitVersion. The values are exported as environment variables named after
+  the MSBuild properties: MSBuild binds them as global properties, so every later build, publish,
+  pack or test in the job, including the ones TUnit.Pipeline launches, stamps the same version even
+  on AOT recompiles. Without them a publish that recompiles drops AssemblyVersion to 1.0.0.0, and a
+  following `pack --no-build` ships a strong-name-mismatched package (issue #5622).
+
+outputs:
+  semVer:
+    description: The package version, such as 1.2.3 or 1.2.3-beta.1
+    value: ${{ steps.version.outputs.semVer }}
+  assemblySemVer:
+    description: The assembly version, such as 1.2.3.0
+    value: ${{ steps.version.outputs.assemblySemVer }}
+  assemblySemFileVer:
+    description: The file version, such as 1.2.3.0
+    value: ${{ steps.version.outputs.assemblySemFileVer }}
+  informationalVersion:
+    description: The informational version, with the commit as build metadata
+    value: ${{ steps.version.outputs.informationalVersion }}
+  fullSemVer:
+    description: The full package version
+    value: ${{ steps.version.outputs.fullSemVer }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install GitVersion
+      if: github.event_name != 'release'
+      uses: gittools/actions/gitversion/setup@v4
+      with:
+        versionSpec: '6.7.x'
+
+    - name: Determine Version
+      if: github.event_name != 'release'
+      id: gitversion
+      uses: gittools/actions/gitversion/execute@v4
+
+    # The GV_/RELEASE_ prefixes keep these apart from the action's own GitVersion_* variables:
+    # Windows environment names are case-insensitive, so GITVERSION_SEMVER would merge with
+    # GitVersion_SemVer.
+    - name: Resolve version
+      id: version
+      shell: bash
+      env:
+        RELEASE_TAG: ${{ github.event.release.tag_name }}
+        GV_SEMVER: ${{ steps.gitversion.outputs.semVer }}
+        GV_FULLSEMVER: ${{ steps.gitversion.outputs.fullSemVer }}
+        GV_ASSEMBLYSEMVER: ${{ steps.gitversion.outputs.assemblySemVer }}
+        GV_ASSEMBLYSEMFILEVER: ${{ steps.gitversion.outputs.assemblySemFileVer }}
+        GV_INFORMATIONALVERSION: ${{ steps.gitversion.outputs.informationalVersion }}
+      # Passed to bash as an argument, which also works on Windows, where the path has backslashes.
+      run: bash "$GITHUB_ACTION_PATH/resolve-version.sh"

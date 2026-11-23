@@ -9,7 +9,10 @@ using Octokit;
 
 namespace TUnit.Pipeline.Modules;
 
-[RunOnlyOnBranch("main")]
+// Publishing runs only for a published GitHub release (see release-draft.yml): the release's tag is
+// the version, and GitHub has already created the tag and the release. This replaces a "main only"
+// branch condition, which a tag checkout cannot satisfy: dotnet.yml's "Verify release" step fails
+// the job before this module runs unless the tagged commit is on main.
 [RunIf<OnLinux>]
 [DependsOn<GenerateVersionModule>]
 [DependsOn<PackTUnitFilesModule>]
@@ -52,6 +55,11 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
         .WithTimeout(ModuleTimeout)
         .WithSkipWhen(_ =>
         {
+            if (Environment.GetEnvironmentVariable("GITHUB_EVENT_NAME") != "release")
+            {
+                return SkipDecision.Skip("Not a published release");
+            }
+
             if (!options.Value.ShouldPublish)
             {
                 return SkipDecision.Skip("Should Publish is false");
@@ -97,6 +105,8 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
             {
                 Source = "https://api.nuget.org/v3/index.json",
                 ApiKey = options.Value.ApiKey,
+                // A failed release is retried by re-running its workflow; keep what already went up.
+                SkipDuplicate = true,
             }, new CommandExecutionOptions
             {
                 Logging = new CommandLoggingOptions
@@ -116,7 +126,7 @@ public class UploadToNuGetModule(IOptions<NuGetOptions> options) : Module<Comman
     // run for the commit finished without success, or when no run succeeds within the timeout.
     // A run that is not listed yet counts as pending. Any successful run on the commit passes the
     // gate, whatever its trigger: a push run and a dispatched run build the same code. A
-    // dotnet.yml publish dispatched on a commit with no aot.yml run fails closed.
+    // release whose commit has no aot.yml run fails closed.
     private static async Task WaitForAotWorkflowAsync(IModuleContext context, CancellationToken cancellationToken)
     {
         var gitHub = context.Tools.GitHub;
