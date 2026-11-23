@@ -4,16 +4,16 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     branches: ["main"]
+  # Publishing the draft release that release-draft.yml keeps for main runs the full pipeline on
+  # the release's tag and pushes the packages to NuGet, stamped with the tag's version.
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       categories:
         description: Categories to run
         type: string
         required: false
-      publish-packages:
-        description: Publish packages?
-        type: boolean
-        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || (github.event_name == 'push' && github.ref) || github.run_id }}
@@ -22,7 +22,7 @@ concurrency:
 jobs:
   modularpipeline:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft
-    environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Pull Requests' }}
+    environment: ${{ (github.ref == 'refs/heads/main' || github.event_name == 'release') && 'Production' || 'Pull Requests' }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -93,31 +93,40 @@ jobs:
           New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
         shell: pwsh
 
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v4
-        with:
-          versionSpec: '6.7.x'
+      # GitVersion, or the release's tag when a release is published. Exports the version as
+      # MSBuild properties for every later step (issue #5622).
+      - name: Resolve version
+        id: version
+        uses: ./.github/actions/resolve-version
 
-      - name: Determine Version
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v4
-
-      # Export GitVersion outputs as env vars. MSBuild auto-binds env vars whose name
-      # matches a property to a global property, so every subsequent dotnet build/publish/
-      # pack/test in this job — including ones launched by TUnit.Pipeline — stamps the
-      # correct AssemblyVersion/FileVersion even on AOT recompiles. Without this, a
-      # publish that triggers a recompile drops AssemblyVersion to 1.0.0.0, and any
-      # following `pack --no-build` ships a strong-name-mismatched package (issue #5622).
-      - name: Export version env vars
+      # A release can only ship what main has: the tag must point at a commit on main.
+      - name: Verify release
+        if: github.event_name == 'release'
         shell: bash
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          {
-            echo "Version=${{ steps.gitversion.outputs.semVer }}"
-            echo "AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
-            echo "FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
-            echo "InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
-            echo "PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
-          } >> "$GITHUB_ENV"
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Release $RELEASE_TAG points at $GITHUB_SHA, which is not on main."
+            exit 1
+          fi
+
+      # The draft was named, and its compare link written, for the version GitVersion suggested.
+      # Follow the tag if it was edited before publishing. Cosmetic, so it never blocks a release.
+      - name: Name release after its tag
+        if: github.event_name == 'release' && matrix.os == 'ubuntu-latest'
+        continue-on-error: true
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ github.event.release.id }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          VERSION: ${{ steps.version.outputs.semVer }}
+        run: |
+          set -euo pipefail
+          body=$(gh api "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" --jq '.body // ""')
+          body=$(printf '%s' "$body" | sed -E "s#(/compare/[^ )]+)\.\.\.[^ )]+#\1...$RELEASE_TAG#")
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$RELEASE_ID" -f name="$VERSION" -f body="$body" > /dev/null
 
       # Windows and macOS pull request runs test only what can differ by OS (--os-specific-only
       # below): Ubuntu runs every suite, so the PlatformNeutral suites' projects need not build here.
@@ -171,15 +180,12 @@ jobs:
         shell: bash
         run: dotnet restore ${{ steps.projects.outputs.solution }}
 
+      # The version comes from the environment the Resolve version step exported, not from -p:
+      # arguments: interpolating its outputs into the script would run branch-derived text as
+      # shell (issue #7229).
       - name: Build
         shell: bash
-        run: >-
-          dotnet build ${{ steps.projects.outputs.solution }} -c Release --no-restore -graphBuild:True
-          "-p:Version=${{ steps.gitversion.outputs.semVer }}"
-          "-p:AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
-          "-p:FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
-          "-p:InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
-          "-p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
+        run: dotnet build ${{ steps.projects.outputs.solution }} -c Release --no-restore -graphBuild:True
 
       - name: Expose GitHub Actions Runtime
         uses: actions/github-script@v9
@@ -189,7 +195,7 @@ jobs:
             core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
 
       - name: NuGet login
-        if: ${{ github.ref == 'refs/heads/main' && github.event.inputs.publish-packages == 'true' && matrix.os == 'ubuntu-latest' }}
+        if: ${{ github.event_name == 'release' && matrix.os == 'ubuntu-latest' }}
         uses: NuGet/login@v1
         id: login
         with:
@@ -236,9 +242,9 @@ jobs:
         uses: ./.github/actions/execute-pipeline
         with:
           admin-token: ${{ secrets.ADMIN_TOKEN }}
-          environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Development' }}
+          environment: ${{ (github.ref == 'refs/heads/main' || github.event_name == 'release') && 'Production' || 'Development' }}
           nuget-apikey: ${{ steps.login.outputs.NUGET_API_KEY }}
-          publish-packages: ${{ (github.event.inputs.publish-packages || false) && matrix.os == 'ubuntu-latest' }}
+          publish-packages: ${{ github.event_name == 'release' && matrix.os == 'ubuntu-latest' }}
           # The native AOT publishes (the test app with its engine tests, and the NugetTester) and
           # the Reflection-mode engine tests run in aot.yml.
           # Only Ubuntu packs and tests the packages: it is the runner that publishes them. Windows
@@ -254,7 +260,7 @@ jobs:
             || 'Aot EngineTests Packaging NuGetPackageTests' }}
           # On pull requests Windows and macOS skip what Ubuntu already proves: the PlatformNeutral
           # suites, apart from the .NET Framework TFMs only Windows can run (see PipelineScope).
-          # Manual runs, which publish, keep every suite on every OS.
+          # Manual and release runs keep every suite on every OS.
           os-specific-only: ${{ github.event_name == 'pull_request' && matrix.os != 'ubuntu-latest' }}
 
       # Module timings, statuses and machine CPU/memory saturation periods from the pipeline.
@@ -417,26 +423,10 @@ jobs:
           New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
         shell: pwsh
 
-      - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v4
-        with:
-          versionSpec: '6.7.x'
-
-      - name: Determine Version
-        id: gitversion
-        uses: gittools/actions/gitversion/execute@v4
-
       # See the matching step in the modularpipeline job (issue #5622).
-      - name: Export version env vars
-        shell: bash
-        run: |
-          {
-            echo "Version=${{ steps.gitversion.outputs.semVer }}"
-            echo "AssemblyVersion=${{ steps.gitversion.outputs.assemblySemVer }}"
-            echo "FileVersion=${{ steps.gitversion.outputs.assemblySemFileVer }}"
-            echo "InformationalVersion=${{ steps.gitversion.outputs.informationalVersion }}"
-            echo "PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}"
-          } >> "$GITHUB_ENV"
+      - name: Resolve version
+        id: version
+        uses: ./.github/actions/resolve-version
 
       # Only what packing needs: every library project (packing reads the Roslyn variants from
       # their own bin folders) and the pipeline itself.

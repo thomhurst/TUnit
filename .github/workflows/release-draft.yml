@@ -1,0 +1,78 @@
+name: Release Draft
+
+# Keeps one draft release up to date with main: its tag is the version GitVersion computes for the
+# newest commit, its target is that commit, and its notes list the changes since the latest
+# release (categorised by .github/release.yml).
+#
+# To release, edit the draft on GitHub: change the tag to choose the version (for example
+# v1.88.0 for a minor or v2.0.0 for a major release), adjust the notes, and publish it. Publishing
+# creates the tag on the draft's commit and runs dotnet.yml, which tests and packs that commit with
+# the tag's version and pushes the packages to NuGet.
+#
+# Every push to main rewrites the draft, so edits to it are lost if main moves before it is
+# published. The draft this workflow owns carries DRAFT_MARKER in its notes; other drafts are left
+# alone.
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions: {}
+
+# Only the newest commit's draft matters.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      DRAFT_MARKER: '<!-- tunit-release-draft -->'
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve version
+        id: version
+        uses: ./.github/actions/resolve-version
+
+      - name: Update draft release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.semVer }}
+        run: |
+          set -euo pipefail
+          repo="repos/$GITHUB_REPOSITORY"
+          tag="v$VERSION"
+
+          previous=$(gh api "$repo/releases/latest" --jq .tag_name)
+          notes=$(gh api -X POST "$repo/releases/generate-notes" \
+            -f tag_name="$tag" -f target_commitish="$GITHUB_SHA" -f previous_tag_name="$previous" \
+            --jq .body)
+          body="$notes"$'\n\n'"$DRAFT_MARKER"
+
+          draft_ids=$(gh api --paginate "$repo/releases?per_page=100" \
+            --jq '.[] | select(.draft and ((.body // "") | contains(env.DRAFT_MARKER))) | .id')
+          draft_id=${draft_ids%%$'\n'*}
+
+          if [ -n "$draft_id" ]; then
+            method=PATCH
+            endpoint="$repo/releases/$draft_id"
+          else
+            method=POST
+            endpoint="$repo/releases"
+          fi
+
+          url=$(gh api -X "$method" "$endpoint" \
+            -f tag_name="$tag" -f target_commitish="$GITHUB_SHA" -f name="$VERSION" \
+            -F draft=true -f body="$body" --jq .html_url)
+
+          echo "Draft release $tag for $GITHUB_SHA (previous release $previous): $url" | tee -a "$GITHUB_STEP_SUMMARY"

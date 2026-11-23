@@ -59,6 +59,12 @@ Verify against local packages:
 ./scripts/Verify-DocSnippets.ps1 -PackagesPath <package-directory> -Version <semver>
 ```
 
+## Releasing
+
+`release-draft.yml` keeps one draft release for main, rewritten on every push. Its tag is the version GitVersion computes for the newest commit, and its notes are generated from the merged PRs since the latest release, categorised by `.github/release.yml`. Commit messages no longer choose the version, so `+semver:` has no effect.
+
+To release, edit the draft on GitHub, change its tag to the version you want (for example `v1.88.0` or `v2.0.0`; a prerelease such as `v2.0.0-beta.1` also works), adjust the notes, and publish it. Publishing creates the tag on the draft's commit and runs `dotnet.yml` on it. That run fails unless the commit is on main. It tests and packs the commit with the tag's version, waits for `aot.yml` to pass on the commit, and pushes the packages to NuGet. To retry a failed publish, re-run that workflow run: packages already on NuGet are skipped.
+
 ## Native macOS crashes
 
 When the repository variable `CRASH_DUMP_ENCRYPTION_CERT` contains a PEM X.509
