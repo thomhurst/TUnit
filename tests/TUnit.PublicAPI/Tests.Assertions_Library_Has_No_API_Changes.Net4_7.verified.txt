@@ -2428,6 +2428,7 @@ namespace .Extensions
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
         public static .<TValue> CompletesWithin<TValue>(this .<TValue> source,  timeout, [.("timeout")] string? expression = null) { }
+        public static .<.<TItem>> CompletesWithin<TItem>(this .<TItem> source,  timeout, [.("timeout")] string? expression = null) { }
         public static .<TValue> CompletesWithin<TValue>(this .<TValue> source,  timeout, [.("timeout")] string? expression = null) { }
         public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TCollection : .<.<TInner>> { }

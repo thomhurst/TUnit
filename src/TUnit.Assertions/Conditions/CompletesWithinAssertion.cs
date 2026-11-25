@@ -86,11 +86,11 @@ public class CompletesWithinAsyncAssertion : Assertion<object?>
         try
         {
             var task = _asyncAction();
-            var completedTask = await Task.WhenAny(task, delay);
 
-            if (completedTask != task)
+            if (await CompletesWithinTimeout.HasTimedOutAsync(task, delay, _timeout))
             {
-                return AssertionResult.Failed("it took too long to complete");
+                // A task that faulted while it ran past the limit gives its exception, so it is not left unobserved
+                return AssertionResult.Failed("it took too long to complete", task.Exception?.InnerException);
             }
 
             await task; // Await to get any exceptions
@@ -133,7 +133,7 @@ public class CompletesWithinAsyncAssertion<TValue> : Assertion<TValue>
         Task.FromResult(metadata.Exception switch
         {
             null => AssertionResult.Passed,
-            TimedOutException => AssertionResult.Failed("it took too long to complete"),
+            CompletesWithinTimeoutException timedOut => AssertionResult.Failed("it took too long to complete", timedOut.InnerException),
             var ex => AssertionResult.Failed($"threw {ex.GetType().FullName}: {ex.Message}", ex),
         });
 
@@ -154,9 +154,10 @@ public class CompletesWithinAsyncAssertion<TValue> : Assertion<TValue>
         try
         {
             var task = asyncFunc();
-            var completedTask = await Task.WhenAny(task, delay);
 
-            return completedTask == task ? (await task, null) : (default, new TimedOutException(timeout));
+            return await CompletesWithinTimeout.HasTimedOutAsync(task, delay, timeout)
+                ? (default, new CompletesWithinTimeoutException(timeout, task.Exception?.InnerException))
+                : (await task, null);
         }
         catch (Exception ex)
         {
@@ -167,8 +168,22 @@ public class CompletesWithinAsyncAssertion<TValue> : Assertion<TValue>
             cts.Cancel(); // stops the delay's timer when the task finished first or threw
         }
     }
-
-    // Marks a timeout in the evaluation; private, so no awaited task can throw it.
-    private sealed class TimedOutException(TimeSpan timeout)
-        : TimeoutException($"did not complete within {timeout.TotalMilliseconds:F0} milliseconds");
 }
+
+internal static class CompletesWithinTimeout
+{
+    /// <summary>
+    /// Whether <paramref name="task"/> missed the limit that <paramref name="delay"/> measures.
+    /// A function that blocks past the limit before it returns its task has timed out too.
+    /// A zero limit still passes a task that is already complete.
+    /// </summary>
+    internal static async Task<bool> HasTimedOutAsync(Task task, Task delay, TimeSpan timeout) =>
+        (timeout > TimeSpan.Zero && delay.IsCompleted) || (await Task.WhenAny(task, delay)) != task;
+}
+
+/// <summary>
+/// Marks a timeout in the evaluation of <see cref="CompletesWithinAsyncAssertion{TValue}"/>, with the exception
+/// of a task that faulted while it ran past the limit. Internal, so no awaited task can throw it.
+/// </summary>
+internal sealed class CompletesWithinTimeoutException(TimeSpan timeout, Exception? innerException)
+    : TimeoutException($"did not complete within {timeout.TotalMilliseconds:F0} milliseconds", innerException);

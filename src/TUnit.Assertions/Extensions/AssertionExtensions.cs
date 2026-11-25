@@ -1714,6 +1714,21 @@ public static partial class AssertionExtensions
     }
 
     /// <summary>
+    /// Asserts that an asynchronous function returning a collection completes execution within the specified timeout,
+    /// and returns the collection.
+    /// If the function takes longer than the timeout, the assertion fails.
+    /// Example: var items = await Assert.That(async () => await GetItemsAsync()).CompletesWithin(TimeSpan.FromSeconds(5));
+    /// </summary>
+    public static CompletesWithinAsyncAssertion<IEnumerable<TItem>> CompletesWithin<TItem>(
+        this AsyncFuncCollectionAssertion<TItem> source,
+        TimeSpan timeout,
+        [CallerArgumentExpression(nameof(timeout))] string? expression = null)
+    {
+        source.Context.ExpressionBuilder.Append($".CompletesWithin({expression})");
+        return new CompletesWithinAsyncAssertion<IEnumerable<TItem>>(source.AsyncFunc, timeout, source.Context.ExpressionBuilder);
+    }
+
+    /// <summary>
     /// Asserts that a task completes within the specified timeout, and returns its result.
     /// If the task takes longer than the timeout, the assertion fails.
     /// Example: var reply = await Assert.That(replyTask).CompletesWithin(TimeSpan.FromSeconds(5));

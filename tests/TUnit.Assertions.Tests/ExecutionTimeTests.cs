@@ -82,6 +82,28 @@ public class ExecutionTimeTests
     }
 
     [Test]
+    public async Task Completes_Within_Returns_The_Result_Of_A_Func_Returning_IEnumerable()
+    {
+        // A function returning Task<IEnumerable<T>> binds to the collection source of Assert.That
+        var items = await Assert.That(async () => await GetItemsAsync()).CompletesWithin(TimeSpan.FromSeconds(10));
+
+        await Assert.That(items).IsEquivalentTo([1, 2, 3]);
+
+        var neverCompletes = new TaskCompletionSource<IEnumerable<int>?>().Task;
+
+        await Assert.That(
+            async () => await Assert.That(() => neverCompletes).CompletesWithin(TimeSpan.FromMilliseconds(250))
+        ).Throws<AssertionException>()
+        .WithMessageMatching(StringMatcher.AsRegex(@"Expected action to complete within 250 milliseconds\s+but it took too long to complete"));
+
+        static async Task<IEnumerable<int>> GetItemsAsync()
+        {
+            await Task.Delay(1);
+            return [1, 2, 3];
+        }
+    }
+
+    [Test]
     public async Task Completes_Within_Chains_A_Check_Of_The_Result()
     {
         await Assert.That(() => Task.FromResult(42)).CompletesWithin(TimeSpan.FromSeconds(10)).And.IsEqualTo(42);
@@ -104,6 +126,88 @@ public class ExecutionTimeTests
         .WithMessageMatching(StringMatcher.AsRegex(@"Expected action to complete within 250 milliseconds\s+but it took too long to complete"));
 
         await Assert.That(stopwatch.Elapsed).IsLessThan(TimeSpan.FromSeconds(5));
+    }
+
+    [Test]
+    public async Task Completes_Within_Fails_A_Function_That_Blocks_Past_The_Limit()
+    {
+        Func<Task> blocks = () =>
+        {
+            Thread.Sleep(1000);
+            return Task.CompletedTask;
+        };
+        Func<Task<int>> blocksWithAResult = () =>
+        {
+            Thread.Sleep(1000);
+            return Task.FromResult(1);
+        };
+
+        await Assert.That(
+            async () => await Assert.That(blocks).CompletesWithin(TimeSpan.FromMilliseconds(50))
+        ).Throws<AssertionException>()
+        .WithMessageContaining("but it took too long to complete");
+
+        await Assert.That(
+            async () => await Assert.That(blocksWithAResult).CompletesWithin(TimeSpan.FromMilliseconds(50))
+        ).Throws<AssertionException>()
+        .WithMessageContaining("but it took too long to complete");
+    }
+
+    [Test]
+    public async Task Completes_Within_Gives_The_Exception_Of_Work_That_Faulted_Past_The_Limit()
+    {
+        Func<Task> blocksThenFaults = () =>
+        {
+            Thread.Sleep(1000);
+            return Task.FromException(new InvalidOperationException("boom"));
+        };
+        Func<Task<int>> blocksThenFaultsWithAResult = () =>
+        {
+            Thread.Sleep(1000);
+            return Task.FromException<int>(new InvalidOperationException("boom"));
+        };
+
+        var exception = await Assert.That(
+            async () => await Assert.That(blocksThenFaults).CompletesWithin(TimeSpan.FromMilliseconds(50))
+        ).Throws<AssertionException>()
+        .WithMessageContaining("but it took too long to complete");
+
+        await Assert.That(exception!.InnerException).IsTypeOf<InvalidOperationException>();
+
+        var exceptionWithAResult = await Assert.That(
+            async () => await Assert.That(blocksThenFaultsWithAResult).CompletesWithin(TimeSpan.FromMilliseconds(50))
+        ).Throws<AssertionException>()
+        .WithMessageContaining("but it took too long to complete");
+
+        await Assert.That(exceptionWithAResult!.InnerException).IsTypeOf<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task Completes_Within_Names_The_Timeout_In_An_Or_Chain()
+    {
+        var neverCompletes = new TaskCompletionSource<int?>().Task;
+
+        await Assert.That(
+            async () => await Assert.That(neverCompletes).CompletesWithin(TimeSpan.FromMilliseconds(50)).Or.IsNull()
+        ).Throws<AssertionException>()
+        .WithMessageContaining("but threw TUnit.Assertions.Conditions.CompletesWithinTimeoutException");
+    }
+
+    [Test]
+    public async Task Completes_Within_A_Zero_Limit_Passes_Only_Work_That_Is_Already_Complete()
+    {
+        Task completed = Task.FromResult(1);
+        var pending = new TaskCompletionSource<int>().Task;
+
+        await Assert.That(Task.CompletedTask).CompletesWithin(TimeSpan.Zero);
+        await Assert.That(completed).CompletesWithin(TimeSpan.Zero);
+        await Assert.That(Task.FromResult(1)).CompletesWithin(TimeSpan.Zero);
+        await Assert.That(() => Task.FromResult(1)).CompletesWithin(TimeSpan.Zero);
+
+        await Assert.That(
+            async () => await Assert.That(pending).CompletesWithin(TimeSpan.Zero)
+        ).Throws<AssertionException>()
+        .WithMessageContaining("but it took too long to complete");
     }
 
     [Test]
