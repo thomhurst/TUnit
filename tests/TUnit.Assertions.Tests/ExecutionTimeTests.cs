@@ -194,18 +194,24 @@ public class ExecutionTimeTests
     }
 
     [Test]
-    public async Task Completes_Within_A_Zero_Limit_Passes_Only_Work_That_Is_Already_Complete()
+    [Arguments(0L)]
+    [Arguments(1L)]
+    [Arguments(5_000L)]
+    [Arguments(9_999L)]
+    public async Task Completes_Within_A_Limit_Under_A_Millisecond_Passes_Only_Work_That_Is_Already_Complete(long ticks)
     {
+        // Task.Delay rounds a limit under a millisecond down to zero
+        var limit = TimeSpan.FromTicks(ticks);
         Task completed = Task.FromResult(1);
         var pending = new TaskCompletionSource<int>().Task;
 
-        await Assert.That(Task.CompletedTask).CompletesWithin(TimeSpan.Zero);
-        await Assert.That(completed).CompletesWithin(TimeSpan.Zero);
-        await Assert.That(Task.FromResult(1)).CompletesWithin(TimeSpan.Zero);
-        await Assert.That(() => Task.FromResult(1)).CompletesWithin(TimeSpan.Zero);
+        await Assert.That(Task.CompletedTask).CompletesWithin(limit);
+        await Assert.That(completed).CompletesWithin(limit);
+        await Assert.That(Task.FromResult(1)).CompletesWithin(limit);
+        await Assert.That(() => Task.FromResult(1)).CompletesWithin(limit);
 
         await Assert.That(
-            async () => await Assert.That(pending).CompletesWithin(TimeSpan.Zero)
+            async () => await Assert.That(pending).CompletesWithin(limit)
         ).Throws<AssertionException>()
         .WithMessageContaining("but it took too long to complete");
     }

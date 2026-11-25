@@ -175,10 +175,15 @@ internal static class CompletesWithinTimeout
     /// <summary>
     /// Whether <paramref name="task"/> missed the limit that <paramref name="delay"/> measures.
     /// A function that blocks past the limit before it returns its task has timed out too.
-    /// A zero limit still passes a task that is already complete.
+    /// <see cref="Task.Delay(TimeSpan, CancellationToken)"/> truncates the limit to whole milliseconds,
+    /// so a limit under a millisecond (zero included) is over at once: it still passes a task that is
+    /// already complete when the function returns it, and fails a pending one.
     /// </summary>
-    internal static async Task<bool> HasTimedOutAsync(Task task, Task delay, TimeSpan timeout) =>
-        (timeout > TimeSpan.Zero && delay.IsCompleted) || (await Task.WhenAny(task, delay)) != task;
+    internal static async Task<bool> HasTimedOutAsync(Task task, Task delay, TimeSpan timeout)
+    {
+        var limitIsUnderAMillisecond = (long)timeout.TotalMilliseconds == 0;
+        return (!limitIsUnderAMillisecond && delay.IsCompleted) || (await Task.WhenAny(task, delay)) != task;
+    }
 }
 
 /// <summary>
