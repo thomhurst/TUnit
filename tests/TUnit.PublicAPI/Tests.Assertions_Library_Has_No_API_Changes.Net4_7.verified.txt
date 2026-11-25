@@ -792,6 +792,11 @@ namespace .Conditions
         protected override .<.> CheckAsync(.<object?> metadata) { }
         protected override string GetExpectation() { }
     }
+    public class CompletesWithinAsyncAssertion<TValue> : .<TValue>
+    {
+        protected override .<.> CheckAsync(.<TValue> metadata) { }
+        protected override string GetExpectation() { }
+    }
     [.<.Cookie>("Expired", CustomName="IsNotExpired", ExpectationMessage="be expired", NegateLogic=true)]
     [.<.Cookie>("Expired", ExpectationMessage="be expired")]
     [.<.Cookie>("HttpOnly", CustomName="IsNotHttpOnly", ExpectationMessage="be HTTP-only", NegateLogic=true)]
@@ -2422,6 +2427,8 @@ namespace .Extensions
     {
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
         public static . CompletesWithin(this . source,  timeout, [.("timeout")] string? expression = null) { }
+        public static .<TValue> CompletesWithin<TValue>(this .<TValue> source,  timeout, [.("timeout")] string? expression = null) { }
+        public static .<TValue> CompletesWithin<TValue>(this .<TValue> source,  timeout, [.("timeout")] string? expression = null) { }
         public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)
             where TCollection : .<.<TInner>> { }
         public static .<TCollection, .<TInner>> Count<TCollection, TInner>(this .<TCollection, .<TInner>> source, <.<TInner>, .?> itemAssertion, [.("itemAssertion")] string? expression = null)

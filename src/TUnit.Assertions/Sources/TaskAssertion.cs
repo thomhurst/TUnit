@@ -18,9 +18,11 @@ public class TaskAssertion<TValue> : IAssertionSource<TValue>, IDelegateAssertio
     AssertionContext<Task<TValue?>> IAssertionSource<Task<TValue?>>.Context => TaskContext;
 
     private AssertionContext<Task<TValue?>> TaskContext { get; }
+    internal Task<TValue?> SourceTask { get; }
 
     public TaskAssertion(Task<TValue?> task, string? expression)
     {
+        SourceTask = task;
         var expressionBuilder = AssertionExpressionBuilder.Create(expression);
 
         // Context for result assertions (e.g., IsEqualTo on the TValue result)
