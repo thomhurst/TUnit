@@ -12,9 +12,12 @@ namespace TUnit.Assertions.Sources;
 /// </summary>
 public class AsyncFuncCollectionAssertion<TItem> : CollectionAssertionBase<IEnumerable<TItem>, TItem>, IDelegateAssertionSource<IEnumerable<TItem>>
 {
+    internal Func<Task<IEnumerable<TItem>?>> AsyncFunc { get; }
+
     public AsyncFuncCollectionAssertion(Func<Task<IEnumerable<TItem>?>> func, string? expression)
         : base(CreateContext(func, expression))
     {
+        AsyncFunc = func;
     }
 
     private static AssertionContext<IEnumerable<TItem>> CreateContext(Func<Task<IEnumerable<TItem>?>> func, string? expression)

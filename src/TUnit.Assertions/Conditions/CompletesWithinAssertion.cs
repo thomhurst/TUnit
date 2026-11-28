@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text;
 using TUnit.Assertions.Core;
 
@@ -6,7 +5,7 @@ namespace TUnit.Assertions.Conditions;
 
 /// <summary>
 /// Asserts that an action completes execution within the specified time limit.
-/// Supports cancellation to avoid waiting for slow operations.
+/// Stops waiting at the limit; the action itself is not canceled.
 /// </summary>
 public class CompletesWithinActionAssertion : Assertion<object?>
 {
@@ -27,16 +26,13 @@ public class CompletesWithinActionAssertion : Assertion<object?>
 
     protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<object?> metadata)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        var stopwatch = Stopwatch.StartNew();
-        using var cts = new CancellationTokenSource(_timeout);
+        using var cts = new CancellationTokenSource();
+        var delay = Task.Delay(_timeout, cts.Token); // before the action, so an invalid timeout does not start it
 
         try
         {
             var task = Task.Run(() => _action());
-            var completedTask = await Task.WhenAny(task, Task.Delay(_timeout, cts.Token));
+            var completedTask = await Task.WhenAny(task, delay);
 
             if (completedTask != task)
             {
@@ -44,17 +40,16 @@ public class CompletesWithinActionAssertion : Assertion<object?>
             }
 
             await task; // Await to get any exceptions
-            stopwatch.Stop();
 
             return AssertionResult.Passed;
-        }
-        catch (OperationCanceledException)
-        {
-            return AssertionResult.Failed("it took too long to complete");
         }
         catch (Exception ex)
         {
             return AssertionResult.Failed($"threw {ex.GetType().FullName}: {ex.Message}", ex);
+        }
+        finally
+        {
+            cts.Cancel(); // stops the delay's timer when the work finished first or threw
         }
     }
 
@@ -64,7 +59,7 @@ public class CompletesWithinActionAssertion : Assertion<object?>
 
 /// <summary>
 /// Asserts that an async function completes execution within the specified time limit.
-/// Supports cancellation to avoid waiting for slow operations.
+/// Stops waiting at the limit; the function's task is not canceled.
 /// </summary>
 public class CompletesWithinAsyncAssertion : Assertion<object?>
 {
@@ -85,37 +80,115 @@ public class CompletesWithinAsyncAssertion : Assertion<object?>
 
     protected override async Task<AssertionResult> CheckAsync(EvaluationMetadata<object?> metadata)
     {
-        var value = metadata.Value;
-        var exception = metadata.Exception;
-
-        var stopwatch = Stopwatch.StartNew();
-        using var cts = new CancellationTokenSource(_timeout);
+        using var cts = new CancellationTokenSource();
+        var delay = Task.Delay(_timeout, cts.Token); // before the task, so an invalid timeout does not start it
 
         try
         {
             var task = _asyncAction();
-            var completedTask = await Task.WhenAny(task, Task.Delay(_timeout, cts.Token));
 
-            if (completedTask != task)
+            if (await CompletesWithinTimeout.HasTimedOutAsync(task, delay, _timeout))
             {
-                return AssertionResult.Failed("it took too long to complete");
+                // A task that faulted while it ran past the limit gives its exception, so it is not left unobserved
+                return AssertionResult.Failed("it took too long to complete", task.Exception?.InnerException);
             }
 
             await task; // Await to get any exceptions
-            stopwatch.Stop();
 
             return AssertionResult.Passed;
-        }
-        catch (OperationCanceledException)
-        {
-            return AssertionResult.Failed("it took too long to complete");
         }
         catch (Exception ex)
         {
             return AssertionResult.Failed($"threw {ex.GetType().FullName}: {ex.Message}", ex);
+        }
+        finally
+        {
+            cts.Cancel(); // stops the delay's timer when the work finished first or threw
         }
     }
 
     protected override string GetExpectation() =>
         $"action to complete within {_timeout.TotalMilliseconds:F0} milliseconds";
 }
+
+/// <summary>
+/// Asserts that an async function or a task completes within the specified time limit,
+/// and returns its result when awaited.
+/// </summary>
+/// <typeparam name="TValue">The type of the result</typeparam>
+public class CompletesWithinAsyncAssertion<TValue> : Assertion<TValue>
+{
+    private readonly TimeSpan _timeout;
+
+    internal CompletesWithinAsyncAssertion(
+        Func<Task<TValue?>> asyncFunc,
+        TimeSpan timeout,
+        StringBuilder expressionBuilder)
+        : base(CreateContext(asyncFunc ?? throw new ArgumentNullException(nameof(asyncFunc)), timeout, expressionBuilder))
+    {
+        _timeout = timeout;
+    }
+
+    protected override Task<AssertionResult> CheckAsync(EvaluationMetadata<TValue> metadata) =>
+        Task.FromResult(metadata.Exception switch
+        {
+            null => AssertionResult.Passed,
+            CompletesWithinTimeoutException timedOut => AssertionResult.Failed("it took too long to complete", timedOut.InnerException),
+            var ex => AssertionResult.Failed($"threw {ex.GetType().FullName}: {ex.Message}", ex),
+        });
+
+    protected override string GetExpectation() =>
+        $"action to complete within {_timeout.TotalMilliseconds:F0} milliseconds";
+
+    private static AssertionContext<TValue> CreateContext(
+        Func<Task<TValue?>> asyncFunc,
+        TimeSpan timeout,
+        StringBuilder expressionBuilder) =>
+        new(new EvaluationContext<TValue>(() => EvaluateWithinAsync(asyncFunc, timeout)), expressionBuilder);
+
+    private static async Task<(TValue?, Exception?)> EvaluateWithinAsync(Func<Task<TValue?>> asyncFunc, TimeSpan timeout)
+    {
+        using var cts = new CancellationTokenSource();
+        var delay = Task.Delay(timeout, cts.Token); // before the task, so an invalid timeout does not start it
+
+        try
+        {
+            var task = asyncFunc();
+
+            return await CompletesWithinTimeout.HasTimedOutAsync(task, delay, timeout)
+                ? (default, new CompletesWithinTimeoutException(timeout, task.Exception?.InnerException))
+                : (await task, null);
+        }
+        catch (Exception ex)
+        {
+            return (default, ex);
+        }
+        finally
+        {
+            cts.Cancel(); // stops the delay's timer when the task finished first or threw
+        }
+    }
+}
+
+internal static class CompletesWithinTimeout
+{
+    /// <summary>
+    /// Whether <paramref name="task"/> missed the limit that <paramref name="delay"/> measures.
+    /// A function that blocks past the limit before it returns its task has timed out too.
+    /// <see cref="Task.Delay(TimeSpan, CancellationToken)"/> truncates the limit to whole milliseconds,
+    /// so a limit under a millisecond (zero included) is over at once: it still passes a task that is
+    /// already complete when the function returns it, and fails a pending one.
+    /// </summary>
+    internal static async Task<bool> HasTimedOutAsync(Task task, Task delay, TimeSpan timeout)
+    {
+        var limitIsUnderAMillisecond = (long)timeout.TotalMilliseconds == 0;
+        return (!limitIsUnderAMillisecond && delay.IsCompleted) || (await Task.WhenAny(task, delay)) != task;
+    }
+}
+
+/// <summary>
+/// Marks a timeout in the evaluation of <see cref="CompletesWithinAsyncAssertion{TValue}"/>, with the exception
+/// of a task that faulted while it ran past the limit. Internal, so no awaited task can throw it.
+/// </summary>
+internal sealed class CompletesWithinTimeoutException(TimeSpan timeout, Exception? innerException)
+    : TimeoutException($"did not complete within {timeout.TotalMilliseconds:F0} milliseconds", innerException);
