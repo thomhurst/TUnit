@@ -204,6 +204,8 @@ public async Task Task_Completes_Within_Timeout()
 }
 ```
 
+For a `Task<T>`, or a function that returns one, `CompletesWithin` returns the task's result (see [Task Result Assertions](#task-result-assertions)).
+
 Fails if timeout exceeded:
 
 ```
@@ -275,13 +277,13 @@ public async Task API_Call_Completes_In_Time()
 
 
 
-    await Assert.That((Func<Task>)(async () => { await apiTask; })).CompletesWithin(TimeSpan.FromSeconds(5));
+    // For a Task<T>, CompletesWithin returns the task's result
+
+    var response = await Assert.That(apiTask).CompletesWithin(TimeSpan.FromSeconds(5));
 
 
 
-    var response = await apiTask;
-
-    await Assert.That(response.IsSuccessStatusCode).IsTrue();
+    await Assert.That(response!.IsSuccessStatusCode).IsTrue();
 
 }
 ```
@@ -368,7 +370,7 @@ public async Task Async_Method_Throws_Exception()
 
 ### Task Result Assertions[​](#task-result-assertions "Direct link to Task Result Assertions")
 
-For `Task<T>`, await the task first, then assert on the result:
+For `Task<T>`, `CompletesWithin` returns the task's result, so you can assert on it next:
 
 ```
 [Test]
@@ -381,15 +383,9 @@ public async Task Task_Returns_Expected_Result()
 
 
 
-    // Ensure it completes in time
+    // Ensure it completes in time, and get the result
 
-    await Assert.That((Func<Task>)(async () => { await task; })).CompletesWithin(TimeSpan.FromSeconds(1));
-
-
-
-    // Get the result
-
-    var result = await task;
+    var result = await Assert.That(task).CompletesWithin(TimeSpan.FromSeconds(1));
 
 
 
@@ -569,7 +565,7 @@ public async Task Any_Task_Completes()
 
 
 
-    await Assert.That((Func<Task>)(async () => { await firstCompleted; })).CompletesWithin(TimeSpan.FromMilliseconds(500));
+    await Assert.That(firstCompleted).CompletesWithin(TimeSpan.FromMilliseconds(500));
 
 
 
@@ -627,9 +623,7 @@ public async Task Chained_Task_Assertions()
 
 
 
-    await Assert.That((Func<Task>)(async () => { await task; }))
-
-        .CompletesWithin(TimeSpan.FromSeconds(5));
+    await Assert.That(task).CompletesWithin(TimeSpan.FromSeconds(5));
 
 
 
@@ -677,9 +671,7 @@ public async Task Retry_Eventually_Succeeds()
 
 
 
-    await Assert.That((Func<Task>)(async () => { await task; })).CompletesWithin(TimeSpan.FromSeconds(10));
-
-    var result = await task;
+    var result = await Assert.That(task).CompletesWithin(TimeSpan.FromSeconds(10));
 
     await Assert.That(result).IsEqualTo("Success");
 
@@ -711,9 +703,7 @@ public async Task Debounced_Operation()
 
 
 
-    await Assert.That((Func<Task>)(async () => { await debouncedTask; }))
-
-        .CompletesWithin(TimeSpan.FromSeconds(1));
+    await Assert.That(debouncedTask).CompletesWithin(TimeSpan.FromSeconds(1));
 
 }
 ```
