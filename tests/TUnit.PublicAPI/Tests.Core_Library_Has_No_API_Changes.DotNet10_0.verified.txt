@@ -3148,6 +3148,7 @@ namespace .Settings
     }
     public sealed class ParallelismSettings
     {
+        [.("TUNITEXP001")]
         public bool Adaptive { get; set; }
         public int? MaximumParallelTests { get; set; }
     }

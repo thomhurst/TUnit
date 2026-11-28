@@ -63,7 +63,7 @@ Please note that for the coverage and trx report, you need to install [additiona
         Takes one argument as string in the format [h|m|s] where 'value' is float.
 
     --adaptive-parallelism
-        Adjust the number of parallel tests while running, based on machine load and throughput
+        Experimental. Adjust the number of parallel tests while running, based on machine load and throughput
         Programmatic equivalent: context.Settings.Parallelism.Adaptive
 
     --coverage

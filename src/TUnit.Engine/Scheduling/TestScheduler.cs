@@ -764,7 +764,9 @@ internal sealed class TestScheduler : ITestScheduler
 
         var adaptive = commandLineOptions.IsOptionSet(AdaptiveParallelismCommandProvider.AdaptiveParallelism)
             || EnvironmentFlags.IsSet(EnvironmentConstants.AdaptiveParallelism)
+#pragma warning disable TUNITEXP001 // Adaptive parallelism is experimental
             || TUnitSettings.Default.Parallelism.Adaptive;
+#pragma warning restore TUNITEXP001
 
         if (!adaptive)
         {

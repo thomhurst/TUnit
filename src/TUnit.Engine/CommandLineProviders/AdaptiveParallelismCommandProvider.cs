@@ -25,7 +25,7 @@ internal class AdaptiveParallelismCommandProvider(IExtension extension) : IComma
     {
         return
         [
-            new CommandLineOption(AdaptiveParallelism, "Adjust the number of parallel tests while running, based on machine load and throughput", ArgumentArity.Zero, false)
+            new CommandLineOption(AdaptiveParallelism, "Experimental. Adjust the number of parallel tests while running, based on machine load and throughput", ArgumentArity.Zero, false)
         ];
     }
 

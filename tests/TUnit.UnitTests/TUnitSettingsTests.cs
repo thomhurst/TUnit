@@ -1,3 +1,4 @@
+#pragma warning disable TUNITEXP001 // Exercises the experimental adaptive parallelism setting
 using TUnit.Core.Settings;
 using TUnit.Engine.Helpers;
 

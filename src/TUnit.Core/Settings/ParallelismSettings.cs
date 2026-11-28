@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace TUnit.Core.Settings;
 
 /// <summary>
@@ -36,6 +38,8 @@ public sealed class ParallelismSettings
     /// <see cref="MaximumParallelTests"/>, when set, is where the limit starts and the highest it
     /// goes; otherwise it starts at 2× CPU cores and may reach 8×. Default: <c>false</c>.
     /// Enabled by any of <c>--adaptive-parallelism</c>, <c>TUNIT_ADAPTIVE_PARALLELISM</c> or TUnitSettings.
+    /// This setting is experimental: its behavior may change, or it may be removed, in a future release.
     /// </summary>
+    [Experimental("TUNITEXP001")]
     public bool Adaptive { get; set; }
 }
