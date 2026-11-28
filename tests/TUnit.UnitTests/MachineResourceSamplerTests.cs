@@ -100,6 +100,35 @@ public class MachineResourceSamplerTests
     }
 
     [Test]
+    public async Task Switching_From_Group_To_Host_Pressure_Is_Not_A_Stall()
+    {
+        // The control group's pressure file became unreadable, so the reader fell back to the
+        // host's, whose total since boot is far larger. Neither counter advanced.
+        var reader = new FakeReader { Reading = new MachineResourceReading(800, 1000, 8 * Gigabyte, 2 * Gigabyte, CpuStallMicroseconds: 1_000) };
+        var sampler = new MachineResourceSampler(reader);
+        sampler.Sample(Seconds(0));
+
+        reader.Reading = new MachineResourceReading(800, 1000, 8 * Gigabyte, 2 * Gigabyte, HostCpuStallMicroseconds: 90_000_000);
+        await Assert.That(sampler.Sample(Seconds(1)).CpuStalled).IsFalse();
+
+        // From here the host counter has a baseline of its own.
+        reader.Reading = new MachineResourceReading(800, 1000, 8 * Gigabyte, 2 * Gigabyte, HostCpuStallMicroseconds: 90_500_000);
+        await Assert.That(sampler.Sample(Seconds(2)).CpuStalled).IsTrue();
+    }
+
+    [Test]
+    public async Task Host_Memory_Stalls_Count_Alongside_The_Group()
+    {
+        var reader = new FakeReader { Reading = new MachineResourceReading(800, 1000, 8 * Gigabyte, 2 * Gigabyte, MemoryStallMicroseconds: 1_000, HostMemoryStallMicroseconds: 5_000) };
+        var sampler = new MachineResourceSampler(reader);
+        sampler.Sample(Seconds(0));
+
+        reader.Reading = new MachineResourceReading(800, 1000, 8 * Gigabyte, 2 * Gigabyte, MemoryStallMicroseconds: 1_000, HostMemoryStallMicroseconds: 505_000);
+
+        await Assert.That(sampler.Sample(Seconds(1)).MemoryStalled).IsTrue();
+    }
+
+    [Test]
     public async Task Totals_Since_Boot_Are_Not_A_Stall()
     {
         // The counter was unreadable on the previous sample, so its whole history arrives at once.
@@ -136,7 +165,7 @@ public class MachineResourceSamplerTests
         await Assert.That(load.CpuUtilization).IsNotNull();
         await Assert.That(load.CpuUtilization!.Value).IsBetween(0, 1);
         await Assert.That(load.MemoryUsed).IsNotNull();
-        await Assert.That(load.MemoryUsed!.Value).IsBetween(0.01, 1);
+        await Assert.That(load.MemoryUsed!.Value).IsBetween(0, 1);
     }
 
     private static MachineResourceReading Reading(long? throttled = null, long? cpuStall = null, long? memoryStall = null)

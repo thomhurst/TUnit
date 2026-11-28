@@ -39,18 +39,23 @@ internal sealed class LinuxMachineResourceReader : IMachineResourceReader
 
         (memoryTotal, memoryAvailable) = ReadCgroupMemory(memoryTotal, memoryAvailable);
 
-        // Pressure of the process's own control group when it is readable, else of the host.
-        var cpuPressure = ReadCgroupFile("cpu.pressure") ?? Read("/proc/pressure/cpu");
-        var memoryPressure = ReadCgroupFile("memory.pressure") ?? Read("/proc/pressure/memory");
+        // CPU pressure of the process's own control group says whether its tasks wait for a
+        // CPU; the host's figure also counts other tenants' tasks, so it is the fallback only.
+        var cpuStall = FindPressureTotal(ReadCgroupFile("cpu.pressure"));
+        var hostCpuStall = cpuStall is null ? FindPressureTotal(Read("/proc/pressure/cpu")) : null;
 
+        // Memory is different: a host that runs out takes every container with it, so both
+        // figures count.
         reading = new MachineResourceReading(
             idle,
             total,
             memoryTotal,
             memoryAvailable,
             ReadThrottledMicroseconds(),
-            FindPressureTotal(cpuPressure),
-            FindPressureTotal(memoryPressure));
+            cpuStall,
+            FindPressureTotal(ReadCgroupFile("memory.pressure")),
+            hostCpuStall,
+            FindPressureTotal(Read("/proc/pressure/memory")));
         return true;
     }
 
@@ -76,12 +81,13 @@ internal sealed class LinuxMachineResourceReader : IMachineResourceReader
         return throttled;
     }
 
-    // Each visible control group is compared against its own limit, and the one closest to it
-    // supplies the reading: siblings can exhaust a parent's limit before this group reaches its own.
+    // The host and each visible control group are compared against their own limits, and the
+    // one closest to its limit supplies the reading. Siblings can exhaust a parent's limit
+    // before this group reaches its own, and a container with room left does not help when
+    // the host itself is nearly out of memory.
     private (long Total, long Available) ReadCgroupMemory(long hostTotal, long hostAvailable)
     {
         long total = hostTotal, available = hostAvailable;
-        var found = false;
 
         for (var directory = _cgroupDirectory; directory is not null && _cgroupMount is not null; directory = GetParent(directory))
         {
@@ -95,11 +101,10 @@ internal sealed class LinuxMachineResourceReader : IMachineResourceReader
                 used -= Math.Min(used, inactiveFile);
 
                 var headroom = Math.Clamp(limit - used, 0, limit);
-                if (!found || (double) headroom / limit < (double) available / total)
+                if ((double) headroom / limit < (double) available / total)
                 {
                     total = limit;
                     available = headroom;
-                    found = true;
                 }
             }
 

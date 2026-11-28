@@ -12,8 +12,10 @@ namespace TUnit.Engine.Scheduling;
 /// <param name="MemoryTotalBytes">Memory the process may use: the machine's, or a container limit.</param>
 /// <param name="MemoryAvailableBytes">Memory still available within that total.</param>
 /// <param name="ThrottledMicroseconds">How long a CPU quota has throttled this process's control groups.</param>
-/// <param name="CpuStallMicroseconds">How long at least one task has waited for a CPU.</param>
-/// <param name="MemoryStallMicroseconds">How long at least one task has waited for memory to be reclaimed.</param>
+/// <param name="CpuStallMicroseconds">How long at least one task in this process's control group has waited for a CPU.</param>
+/// <param name="MemoryStallMicroseconds">How long at least one task in this process's control group has waited for memory to be reclaimed.</param>
+/// <param name="HostCpuStallMicroseconds">The same for the whole host. Read only when the control group's figure is not available.</param>
+/// <param name="HostMemoryStallMicroseconds">The same for the whole host.</param>
 internal readonly record struct MachineResourceReading(
     long CpuIdle,
     long CpuTotal,
@@ -21,7 +23,9 @@ internal readonly record struct MachineResourceReading(
     long MemoryAvailableBytes,
     long? ThrottledMicroseconds = null,
     long? CpuStallMicroseconds = null,
-    long? MemoryStallMicroseconds = null);
+    long? MemoryStallMicroseconds = null,
+    long? HostCpuStallMicroseconds = null,
+    long? HostMemoryStallMicroseconds = null);
 
 internal interface IMachineResourceReader
 {
@@ -121,9 +125,13 @@ internal sealed class MachineResourceSampler
             ? 1 - (double) idle / total
             : null;
 
+        // Each counter is compared only with its own previous value, so a reader that switches
+        // from one source to another never subtracts two unrelated totals.
         var cpuStalled = Stalled(reading.ThrottledMicroseconds, previous.ThrottledMicroseconds, elapsedMicroseconds)
-            || Stalled(reading.CpuStallMicroseconds, previous.CpuStallMicroseconds, elapsedMicroseconds);
-        var memoryStalled = Stalled(reading.MemoryStallMicroseconds, previous.MemoryStallMicroseconds, elapsedMicroseconds);
+            || Stalled(reading.CpuStallMicroseconds, previous.CpuStallMicroseconds, elapsedMicroseconds)
+            || Stalled(reading.HostCpuStallMicroseconds, previous.HostCpuStallMicroseconds, elapsedMicroseconds);
+        var memoryStalled = Stalled(reading.MemoryStallMicroseconds, previous.MemoryStallMicroseconds, elapsedMicroseconds)
+            || Stalled(reading.HostMemoryStallMicroseconds, previous.HostMemoryStallMicroseconds, elapsedMicroseconds);
 
         return new MachineLoad(cpuUtilization, memoryUsed, cpuStalled, memoryStalled);
     }

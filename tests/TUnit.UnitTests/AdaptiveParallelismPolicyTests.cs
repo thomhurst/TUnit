@@ -288,6 +288,14 @@ public class AdaptiveParallelismPolicyTests
             new AdaptiveDecision(9, AdaptiveLimitChange.CpuSaturation),
             new AdaptiveDecision(12, AdaptiveLimitChange.LowerReverted),
         ]);
+
+        // Retries of the rejected step, and raises that are tried and put back in between,
+        // are still judged against the throughput before the first lowering.
+        simulation.Run(TimeSpan.FromMinutes(10));
+
+        await Assert.That(simulation.Policy.Limit).IsEqualTo(12);
+        await Assert.That(simulation.Changes.Count(x => x.Limit == 9))
+            .IsEqualTo(simulation.Changes.Count(x => x.Change == AdaptiveLimitChange.LowerReverted));
     }
 
     [Test]

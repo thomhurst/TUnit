@@ -142,9 +142,12 @@ internal sealed class AdaptiveParallelismPolicy
     private double _measuredThroughput;
     private int _measuredLimit;
 
-    // Throughput before the first of a run of lowerings. Each further lowering is judged
-    // against it, so several steps down cannot each give a little throughput away.
+    // Throughput before the first of a run of lowerings, and the limit it was measured at.
+    // Every lowering is judged against it for as long as the limit stays below that one, so
+    // neither several steps down nor a retry after a rejected step can each give a little
+    // throughput away. It lapses once the limit is back where the run began.
     private double _throughputBeforeLowering;
+    private int _limitBeforeLowering;
 
     // The limit divided by throughput: the average time a test holds a slot.
     private TimeSpan _averageSlotTime = MinimumWindow;
@@ -247,13 +250,14 @@ internal sealed class AdaptiveParallelismPolicy
 
                 _lowerHoldUntil = _clock + _lowerHold;
                 _lowerHold = Double(_lowerHold);
-                _throughputBeforeLowering = 0;
+                EndLoweringRunAt(_limitBeforeTrial);
                 return ChangeLimit(_limitBeforeTrial, AdaptiveLimitChange.LowerReverted);
             }
 
             if (raised)
             {
                 _raiseHold = InitialHold;
+                EndLoweringRunAt(_limit);
             }
             else
             {
@@ -289,6 +293,7 @@ internal sealed class AdaptiveParallelismPolicy
 
             if (hasCpuHeadroom)
             {
+                EndLoweringRunAt(higher);
                 return ChangeLimit(higher, AdaptiveLimitChange.Recovery);
             }
 
@@ -311,13 +316,12 @@ internal sealed class AdaptiveParallelismPolicy
 
     private AdaptiveDecision StartTrial(int limit, AdaptiveLimitChange change, double throughput)
     {
-        if (limit > _limit)
-        {
-            _throughputBeforeLowering = 0;
-        }
-        else if (_throughputBeforeLowering <= 0)
+        // A raise on trial leaves the run of lowerings open: if it is put back, the limit is
+        // still below where the run began.
+        if (limit < _limit && _throughputBeforeLowering <= 0)
         {
             _throughputBeforeLowering = throughput;
+            _limitBeforeLowering = _limit;
         }
 
         _trial = change;
@@ -377,6 +381,15 @@ internal sealed class AdaptiveParallelismPolicy
         HoldRaises();
 
         return ChangeLimit(lowered, AdaptiveLimitChange.MemoryPressure);
+    }
+
+    // The run of lowerings is over once the limit is back at, or above, where it began.
+    private void EndLoweringRunAt(int limit)
+    {
+        if (limit >= _limitBeforeLowering)
+        {
+            _throughputBeforeLowering = 0;
+        }
     }
 
     private void HoldRaises()

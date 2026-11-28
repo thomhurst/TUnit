@@ -33,6 +33,8 @@ public class LinuxMachineResourceReaderTests
         await Assert.That(reading.ThrottledMicroseconds).IsNull();
         await Assert.That(reading.CpuStallMicroseconds).IsNull();
         await Assert.That(reading.MemoryStallMicroseconds).IsNull();
+        await Assert.That(reading.HostCpuStallMicroseconds).IsNull();
+        await Assert.That(reading.HostMemoryStallMicroseconds).IsNull();
     }
 
     [Test]
@@ -53,7 +55,28 @@ public class LinuxMachineResourceReaderTests
     }
 
     [Test]
-    public async Task Container_Memory_Limit_Replaces_Host_Memory()
+    public async Task A_Container_With_Room_Left_Does_Not_Hide_An_Exhausted_Host()
+    {
+        // The container uses half of its limit, but the host has under 3% left.
+        var reader = Reader(new()
+        {
+            ["/proc/stat"] = ProcStat,
+            ["/proc/meminfo"] = "MemTotal:       16777216 kB\nMemAvailable:      419430 kB\n",
+            ["/proc/self/cgroup"] = "0::/\n",
+            ["/proc/self/mountinfo"] = CgroupV2Mount,
+            ["/sys/fs/cgroup/cgroup.procs"] = $"{ProcessId}\n",
+            ["/sys/fs/cgroup/memory.max"] = $"{2 * Gigabyte}\n",
+            ["/sys/fs/cgroup/memory.current"] = $"{Gigabyte}\n",
+        });
+
+        reader.TryRead(out var reading);
+
+        await Assert.That(reading.MemoryTotalBytes).IsEqualTo(16 * Gigabyte);
+        await Assert.That(reading.MemoryAvailableBytes).IsEqualTo(419430L * 1024);
+    }
+
+    [Test]
+    public async Task A_Container_Closer_To_Its_Limit_Than_The_Host_Supplies_Memory()
     {
         var reader = Reader(new()
         {
@@ -63,15 +86,16 @@ public class LinuxMachineResourceReaderTests
             ["/proc/self/mountinfo"] = CgroupV2Mount,
             ["/sys/fs/cgroup/cgroup.procs"] = $"1\n{ProcessId}\n",
             ["/sys/fs/cgroup/memory.max"] = $"{2 * Gigabyte}\n",
-            ["/sys/fs/cgroup/memory.current"] = $"{Gigabyte + Gigabyte / 2}\n",
+            ["/sys/fs/cgroup/memory.current"] = $"{2 * Gigabyte}\n",
             // File cache the kernel can drop at once is not memory in use.
-            ["/sys/fs/cgroup/memory.stat"] = $"anon 1000\ninactive_file {Gigabyte / 2}\nactive_file 10\n",
+            ["/sys/fs/cgroup/memory.stat"] = $"anon 1000\ninactive_file {Gigabyte / 4}\nactive_file 10\n",
         });
 
         reader.TryRead(out var reading);
 
+        // An eighth of the container's limit is left, against a quarter of the host's memory.
         await Assert.That(reading.MemoryTotalBytes).IsEqualTo(2 * Gigabyte);
-        await Assert.That(reading.MemoryAvailableBytes).IsEqualTo(Gigabyte);
+        await Assert.That(reading.MemoryAvailableBytes).IsEqualTo(Gigabyte / 4);
     }
 
     [Test]
@@ -153,9 +177,12 @@ public class LinuxMachineResourceReaderTests
 
         reader.TryRead(out var reading);
 
+        // The group's own CPU pressure is used, so the host's is not read.
         await Assert.That(reading.CpuStallMicroseconds).IsEqualTo(7000);
-        // The group has no memory.pressure file, so the host's is used.
-        await Assert.That(reading.MemoryStallMicroseconds).IsEqualTo(42);
+        await Assert.That(reading.HostCpuStallMicroseconds).IsNull();
+        // The group has no memory.pressure file. The host's is reported as the host's.
+        await Assert.That(reading.MemoryStallMicroseconds).IsNull();
+        await Assert.That(reading.HostMemoryStallMicroseconds).IsEqualTo(42);
     }
 
     [Test]
