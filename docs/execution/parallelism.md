@@ -306,6 +306,10 @@ You can also set this programmatically via `context.Settings.Parallelism.Maximum
 
 ## Adaptive Parallelism[​](#adaptive-parallelism "Direct link to Adaptive Parallelism")
 
+Experimental
+
+Adaptive parallelism is experimental. Its behavior may change, or it may be removed, in a future release. Using `context.Settings.Parallelism.Adaptive` in code reports diagnostic `TUNITEXP001`; suppress it to opt in, for example with `#pragma warning disable TUNITEXP001`.
+
 A fixed limit suits some suites better than others. Tests that mostly await I/O leave the machine idle at 2 x the processor count, while tests that use a lot of memory can exhaust it at the same number. With adaptive parallelism, TUnit changes the limit while the run is in progress. It is off by default.
 
 ```
