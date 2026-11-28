@@ -47,6 +47,9 @@ public abstract class EngineTestsModuleBase : Module<CommandResult>
                 // and the failures would pollute the job's aggregated summary.
                 ["TUNIT_AGGREGATE_REPORTS"] = "off",
                 ["TUNIT_ENGINE_TEST_MODE"] = TestMode,
+                // Inherited by the child test processes the engine tests start, so those runs
+                // exercise it too. The --maximum-parallel-tests above stays the upper bound.
+                [TestBaseModule.AdaptiveParallelismVariable] = "1",
             },
             Logging = new CommandLoggingOptions
             {

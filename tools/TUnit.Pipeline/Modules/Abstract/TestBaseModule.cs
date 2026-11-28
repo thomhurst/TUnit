@@ -102,8 +102,9 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         }
     }
 
-    // TUnit.Engine's EnvironmentConstants.AdaptiveParallelism.
-    private const string AdaptiveParallelismVariable = "TUNIT_ADAPTIVE_PARALLELISM";
+    // TUnit.Engine's EnvironmentConstants.AdaptiveParallelism. Modules that do not derive from
+    // this class set it in their own options.
+    internal const string AdaptiveParallelismVariable = "TUNIT_ADAPTIVE_PARALLELISM";
 
     private CommandExecutionOptions SetDefaults(DotNetRunOptions testOptions, CommandExecutionOptions executionOptions, string framework)
     {
