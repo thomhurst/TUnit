@@ -150,7 +150,7 @@ public class AdaptiveParallelismPolicyTests
     }
 
     [Test]
-    public async Task Cpu_Saturation_Lowers_The_Limit_Only_When_Sustained_And_Work_Is_Queuing()
+    public async Task Cpu_Saturation_Lowers_The_Limit_Once_Throughput_Has_Been_Measured()
     {
         var simulation = new Simulation(Limits)
         {
@@ -158,11 +158,158 @@ public class AdaptiveParallelismPolicyTests
             QueueDelay = TimeSpan.FromMilliseconds(150),
         };
 
-        simulation.Step();
+        // The first window measures what the lowering will be judged against.
+        simulation.Run(TimeSpan.FromSeconds(1));
         await Assert.That(simulation.Changes).IsEmpty();
 
         simulation.Step();
         await Assert.That(simulation.Changes).IsEquivalentTo([new AdaptiveDecision(12, AdaptiveLimitChange.CpuSaturation)]);
+    }
+
+    [Test]
+    public async Task Keeps_Lowering_For_Cpu_Saturation_While_Throughput_Holds()
+    {
+        // Four CPUs' worth of work, whatever the limit: fewer tests at once lose nothing.
+        var simulation = new Simulation(Limits)
+        {
+            CpuUtilization = 0.99,
+            QueueDelay = TimeSpan.FromMilliseconds(150),
+            Throughput = _ => 4 * TestsPerSecondPerSlot,
+        };
+
+        simulation.Run(TimeSpan.FromSeconds(30));
+
+        await Assert.That(simulation.Changes.Select(x => x.Change)).DoesNotContain(AdaptiveLimitChange.LowerReverted);
+        await Assert.That(simulation.Policy.Limit).IsEqualTo(Limits.Minimum);
+    }
+
+    [Test]
+    public async Task Does_Not_Lower_For_Cpu_Saturation_Below_The_Processor_Count()
+    {
+        // Twelve processors: with twelve tests running, this process no longer oversubscribes them.
+        var simulation = new Simulation(Limits, processorCount: 12)
+        {
+            CpuUtilization = 0.99,
+            QueueDelay = TimeSpan.FromMilliseconds(150),
+            CpuStalled = true,
+            Throughput = _ => 12 * TestsPerSecondPerSlot,
+        };
+
+        simulation.Run(TimeSpan.FromSeconds(60));
+
+        await Assert.That(simulation.Changes.Min(x => x.Limit)).IsEqualTo(12);
+    }
+
+    [Test]
+    public async Task Reverts_A_Lowering_For_Cpu_Saturation_That_Costs_Throughput()
+    {
+        // Tests that mostly wait: other processes keep the CPUs busy, and every slot taken
+        // away is throughput lost.
+        var simulation = new Simulation(Limits)
+        {
+            CpuUtilization = 0.99,
+            QueueDelay = TimeSpan.FromMilliseconds(150),
+        };
+
+        simulation.Run(TimeSpan.FromSeconds(10));
+
+        await Assert.That(simulation.Changes).IsEquivalentTo(
+        [
+            new AdaptiveDecision(12, AdaptiveLimitChange.CpuSaturation),
+            new AdaptiveDecision(16, AdaptiveLimitChange.LowerReverted),
+        ]);
+    }
+
+    [Test]
+    public async Task Waits_Longer_Before_Each_Lowering_After_A_Failed_One()
+    {
+        var simulation = new Simulation(Limits)
+        {
+            CpuUtilization = 0.99,
+            QueueDelay = TimeSpan.FromMilliseconds(150),
+        };
+
+        simulation.Run(TimeSpan.FromSeconds(60));
+
+        // Lowered at about 1 s, 19 s (15 s hold) and 52 s (30 s hold), and put back each time.
+        await Assert.That(simulation.Changes.Count(x => x.Change == AdaptiveLimitChange.CpuSaturation)).IsEqualTo(3);
+        await Assert.That(simulation.Changes.Min(x => x.Limit)).IsEqualTo(12);
+    }
+
+    [Test]
+    public async Task Stalled_Tasks_Lower_The_Limit_Whatever_The_Utilization()
+    {
+        // A container at its CPU quota on a host that is otherwise idle.
+        var simulation = new Simulation(Limits)
+        {
+            CpuUtilization = 0.3,
+            CpuStalled = true,
+            Throughput = _ => 4 * TestsPerSecondPerSlot,
+        };
+
+        simulation.Run(TimeSpan.FromSeconds(3));
+
+        await Assert.That(simulation.Changes).IsEquivalentTo([new AdaptiveDecision(12, AdaptiveLimitChange.CpuSaturation)]);
+    }
+
+    [Test]
+    public async Task Does_Not_Raise_While_Tasks_Are_Stalled()
+    {
+        // Lowering is put back because throughput follows the limit, and nothing is raised.
+        var simulation = new Simulation(Limits) { CpuStalled = true };
+
+        simulation.Run(TimeSpan.FromSeconds(30));
+
+        await Assert.That(simulation.Changes.Select(x => x.Change)).DoesNotContain(AdaptiveLimitChange.Probe);
+        await Assert.That(simulation.Changes.Max(x => x.Limit)).IsEqualTo(Limits.Initial);
+    }
+
+    [Test]
+    public async Task Several_Lowerings_Cannot_Each_Give_A_Little_Throughput_Away()
+    {
+        // Each step down costs 5%: within the allowance alone, beyond it together.
+        var simulation = new Simulation(Limits)
+        {
+            CpuUtilization = 0.99,
+            QueueDelay = TimeSpan.FromMilliseconds(150),
+            Throughput = limit => limit switch
+            {
+                >= 16 => 100,
+                >= 12 => 95,
+                _ => 90,
+            },
+        };
+
+        simulation.Run(TimeSpan.FromSeconds(12));
+
+        await Assert.That(simulation.Changes).IsEquivalentTo(
+        [
+            new AdaptiveDecision(12, AdaptiveLimitChange.CpuSaturation),
+            new AdaptiveDecision(9, AdaptiveLimitChange.CpuSaturation),
+            new AdaptiveDecision(12, AdaptiveLimitChange.LowerReverted),
+        ]);
+    }
+
+    [Test]
+    public async Task Tries_The_Way_Back_To_The_Starting_Limit_Without_Cpu_Headroom()
+    {
+        var simulation = new Simulation(Limits) { MemoryLoad = 1.05 };
+        simulation.Run(TimeSpan.FromSeconds(1));
+
+        // Memory has eased, but other processes keep the CPUs busy.
+        simulation.MemoryLoad = 0.3;
+        simulation.CpuUtilization = 0.9;
+        simulation.Run(TimeSpan.FromSeconds(40));
+
+        // No free recovery without headroom: each step back is a trial, kept because
+        // throughput follows the limit. The first waits for the hold after the pressure.
+        await Assert.That(simulation.Changes.Take(3)).IsEquivalentTo(
+        [
+            new AdaptiveDecision(8, AdaptiveLimitChange.MemoryPressure),
+            new AdaptiveDecision(12, AdaptiveLimitChange.Probe),
+            new AdaptiveDecision(16, AdaptiveLimitChange.Probe),
+        ]);
+        await Assert.That(simulation.Policy.Limit).IsEqualTo(16);
     }
 
     [Test]
@@ -200,18 +347,19 @@ public class AdaptiveParallelismPolicyTests
             simulation.MemoryLoad = random.NextDouble() * 1.2;
             simulation.QueueDelay = TimeSpan.FromMilliseconds(random.Next(0, 300));
             simulation.LimitReached = random.Next(4) != 0;
+            simulation.CpuStalled = random.Next(5) == 0;
             simulation.Step();
 
             await Assert.That(simulation.Policy.Limit).IsBetween(Limits.Minimum, Limits.Maximum);
         }
     }
 
-    private sealed class Simulation(ParallelismLimits limits)
+    private sealed class Simulation(ParallelismLimits limits, int processorCount = 4)
     {
         private static readonly TimeSpan SampleInterval = TimeSpan.FromMilliseconds(250);
         private double _partialTests;
 
-        public AdaptiveParallelismPolicy Policy { get; } = new(limits);
+        public AdaptiveParallelismPolicy Policy { get; } = new(limits, processorCount);
 
         public List<AdaptiveDecision> Changes { get; } = [];
 
@@ -225,13 +373,15 @@ public class AdaptiveParallelismPolicyTests
 
         public bool LimitReached { get; set; } = true;
 
+        public bool CpuStalled { get; set; }
+
         public bool Step()
         {
             _partialTests += Throughput(Policy.Limit) * SampleInterval.TotalSeconds;
             var completed = (long) _partialTests;
             _partialTests -= completed;
 
-            var decision = Policy.OnSample(new AdaptiveSample(SampleInterval, CpuUtilization, MemoryLoad, QueueDelay, completed, LimitReached));
+            var decision = Policy.OnSample(new AdaptiveSample(SampleInterval, CpuUtilization, MemoryLoad, QueueDelay, completed, LimitReached, CpuStalled));
 
             if (decision.Change == AdaptiveLimitChange.None)
             {

@@ -783,15 +783,16 @@ internal sealed class TestScheduler : ITestScheduler
     }
 
     /// <summary>
-    /// A configured maximum is a hard upper bound. Without one the limit may grow to 8 per
-    /// processor. Either way the run starts at the limit a fixed run would use, and never goes
-    /// below a quarter of that, so pressure from elsewhere on the machine cannot stall it.
+    /// The run starts at the limit a fixed run would use: the configured maximum, or 2 per
+    /// processor. A configured maximum is also a hard upper bound; without one the limit may
+    /// grow to 8 per processor. The limit never goes below a quarter of the default (or of a
+    /// lower configured maximum), so pressure from elsewhere on the machine cannot stall the run.
     /// </summary>
     internal static ParallelismLimits GetAdaptiveLimits(int? configuredMaxParallelism, int processorCount)
     {
         var maximum = configuredMaxParallelism ?? processorCount * 8;
-        var initial = Math.Min(processorCount * 2, maximum);
-        var minimum = Math.Max(1, initial / 4);
+        var initial = configuredMaxParallelism ?? processorCount * 2;
+        var minimum = Math.Max(1, Math.Min(initial, processorCount * 2) / 4);
         return new ParallelismLimits(initial, minimum, maximum);
     }
 

@@ -1,5 +1,4 @@
 #if NET
-using System.Text;
 using TUnit.Core.Logging;
 using TUnit.Engine.Scheduling;
 
@@ -35,18 +34,18 @@ public class AdaptiveParallelismControllerTests
     }
 
     [Test]
-    public async Task Memory_Load_Is_A_Sane_Ratio()
+    public async Task Runtime_Memory_Load_Is_A_Sane_Ratio()
     {
         // The runtime fills these numbers in at the first garbage collection.
         GC.Collect();
 
-        await Assert.That(AdaptiveParallelismController.ReadMemoryLoad()).IsBetween(0, 2);
+        await Assert.That(AdaptiveParallelismController.ReadRuntimeMemoryLoad()).IsBetween(0, 2);
     }
 
     [Test]
     [Arguments(null, 8, 16, 4, 64)]
-    // A configured maximum is a hard upper bound, above or below the starting limit.
-    [Arguments(100, 8, 16, 4, 100)]
+    // A configured maximum is where a fixed run would be, so it is the start and the upper bound.
+    [Arguments(100, 8, 100, 4, 100)]
     [Arguments(4, 8, 4, 1, 4)]
     [Arguments(1, 8, 1, 1, 1)]
     [Arguments(null, 1, 2, 1, 8)]
@@ -55,55 +54,6 @@ public class AdaptiveParallelismControllerTests
         var limits = TUnit.Engine.Scheduling.TestScheduler.GetAdaptiveLimits(configured, processorCount);
 
         await Assert.That(limits).IsEqualTo(new ParallelismLimits(initial, minimum, maximum));
-    }
-
-    [Test]
-    public async Task Machine_Cpu_Is_A_Share_Of_Capacity()
-    {
-        using var monitor = MachineCpuMonitor.Create();
-        if (monitor is null)
-        {
-            Skip.Test("This operating system has no machine-wide CPU reading");
-        }
-
-        await Assert.That(monitor.Sample()).IsNull();
-
-        // The operating system advances its counters at its own pace: macOS can go a second
-        // without, and a sample in between has nothing to report.
-        double? utilization = null;
-        for (var attempt = 0; attempt < 50 && utilization is null; attempt++)
-        {
-            await Task.Delay(200);
-            utilization = monitor.Sample();
-        }
-
-        await Assert.That(utilization).IsNotNull();
-        await Assert.That(utilization!.Value).IsBetween(0, 1);
-    }
-
-    [Test]
-    public async Task Proc_Stat_Counts_Idle_And_IoWait_As_Not_Busy()
-    {
-        // user nice system idle iowait irq softirq steal guest guest_nice
-        var content = "cpu  100 20 30 800 40 5 3 2 50 0\ncpu0 50 10 15 400 20 2 1 1 25 0\n"u8;
-
-        var parsed = MachineCpuMonitor.TryParseProcStat(content, out var busy, out var total);
-
-        await Assert.That(parsed).IsTrue();
-        await Assert.That(total).IsEqualTo(1000UL);
-        await Assert.That(busy).IsEqualTo(160UL);
-    }
-
-    [Test]
-    [Arguments("")]
-    [Arguments("cpu0 1 2 3 4\n")]
-    [Arguments("cpu  1 2 3\n")]
-    [Arguments("cpu  1 x 3 4\n")]
-    public async Task Proc_Stat_Rejects_Content_It_Cannot_Read(string content)
-    {
-        var parsed = MachineCpuMonitor.TryParseProcStat(Encoding.ASCII.GetBytes(content), out _, out _);
-
-        await Assert.That(parsed).IsFalse();
     }
 
     private sealed class RecordingLogger : ILogger

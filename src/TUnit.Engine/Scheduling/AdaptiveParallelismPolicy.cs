@@ -5,8 +5,9 @@ namespace TUnit.Engine.Scheduling;
 /// </summary>
 /// <param name="Elapsed">Time since the previous sample.</param>
 /// <param name="CpuUtilization">Share of the machine's CPU capacity in use, 0 to 1.</param>
-/// <param name="MemoryLoad">Memory in use relative to the level the runtime treats as high. 1 or more means memory pressure.</param>
+/// <param name="MemoryLoad">Memory in use relative to the level that counts as high. 1 or more means memory pressure.</param>
 /// <param name="QueueDelay">How long work queued to the thread pool waited for a thread.</param>
+/// <param name="CpuStalled">Whether the operating system reported tasks waiting for a CPU, or a CPU quota throttling the process.</param>
 /// <param name="CompletedTests">Tests that finished since the previous sample.</param>
 /// <param name="LimitReached">Whether every slot of the parallel limit was in use.</param>
 internal readonly record struct AdaptiveSample(
@@ -15,7 +16,8 @@ internal readonly record struct AdaptiveSample(
     double MemoryLoad,
     TimeSpan QueueDelay,
     long CompletedTests,
-    bool LimitReached);
+    bool LimitReached,
+    bool CpuStalled = false);
 
 internal enum AdaptiveLimitChange
 {
@@ -30,11 +32,14 @@ internal enum AdaptiveLimitChange
     /// <summary>Raised back toward the starting limit after pressure eased.</summary>
     Recovery,
 
-    /// <summary>Lowered because memory use reached the runtime's high-memory level.</summary>
+    /// <summary>Lowered because the machine or container is nearly out of memory.</summary>
     MemoryPressure,
 
-    /// <summary>Lowered because the CPUs were saturated while work queued for a thread.</summary>
+    /// <summary>Lowered to find out whether fewer concurrent tests relieve saturated CPUs at no cost in throughput.</summary>
     CpuSaturation,
+
+    /// <summary>The last lowering for CPU saturation cost throughput, so it was undone.</summary>
+    LowerReverted,
 }
 
 internal readonly record struct AdaptiveDecision(int Limit, AdaptiveLimitChange Change);
@@ -45,16 +50,24 @@ internal readonly record struct AdaptiveDecision(int Limit, AdaptiveLimitChange 
 /// </summary>
 /// <remarks>
 /// <para>
-/// Machine headroom alone cannot justify a higher limit: tests that wait on a database pool, a
+/// The run starts at the limit a run without adaptive parallelism uses, and a move away from it
+/// has to pay for itself in completed tests per second. Machine metrics alone cannot justify
+/// one. Idle CPUs do not mean more tests would help: tests that wait on a database pool, a
 /// container or a lock leave the CPU idle, and running more of them only makes each one wait
-/// longer inside its body, toward [Timeout]. So a raise is a probe. The policy measures completed
-/// tests per second, raises the limit, measures again, and keeps the raise only when throughput
-/// rose by a fair share of the raise. CPU, memory and thread pool delay are guards: they stop
-/// probes and lower the limit, but never raise it on their own.
+/// longer inside its body, toward [Timeout]. Saturated CPUs do not mean fewer tests would help
+/// either: when other processes cause the saturation, or the tests mostly wait on I/O, a lower
+/// limit only gives throughput away.
 /// </para>
 /// <para>
-/// The starting limit is the one exception. It is the fixed limit a run without adaptive
-/// parallelism uses, so the policy returns to it without proof once pressure has eased.
+/// So every change is a trial. The policy measures throughput, changes the limit, measures
+/// again, and keeps a raise only when throughput rose by a fair share of the raise, and a
+/// lowering only when throughput fell by less than a fair share of it. A failed trial puts the
+/// limit back and makes the next one wait longer.
+/// </para>
+/// <para>
+/// There are two exceptions. Memory pressure lowers the limit at once, because swapping or an
+/// out-of-memory kill costs far more than a trial. And the starting limit needs no proof: the
+/// policy returns to it once the machine has headroom again.
 /// </para>
 /// </remarks>
 internal sealed class AdaptiveParallelismPolicy
@@ -74,16 +87,18 @@ internal sealed class AdaptiveParallelismPolicy
     // One saturated sample can be a burst (a JIT spike, a GC). Two in a row is sustained.
     internal const int SaturatedSamplesBeforeDecrease = 2;
 
-    // Memory pressure risks swapping or an out-of-memory kill, so it halves the limit. CPU
-    // saturation only slows tests down, so it takes a quarter.
+    // Memory pressure risks swapping or an out-of-memory kill, so it halves the limit at once.
+    // CPU saturation only slows tests down, so it takes a quarter, on trial.
     internal const double MemoryDecreaseFactor = 0.5;
     internal const double CpuDecreaseFactor = 0.75;
 
     // Large enough that its effect on throughput stands out from window-to-window noise.
     internal const double IncreaseFactor = 1.5;
 
-    // A probe is kept when throughput rose by at least this share of the raise: a 50% raise
-    // must bring 15% more completed tests per second.
+    // A raise is kept when throughput rose by at least this share of it: a 50% raise must
+    // bring 15% more completed tests per second. A lowering is kept when throughput fell by
+    // less than this share of it: a 25% lowering may cost at most 7.5%. Measurement noise then
+    // sends an undecided trial back to the limit it started from.
     internal const double MinimumGainShare = 0.3;
 
     internal static readonly TimeSpan MinimumWindow = TimeSpan.FromSeconds(1);
@@ -95,7 +110,7 @@ internal sealed class AdaptiveParallelismPolicy
     // A lower limit takes effect only as running tests finish, so wait before lowering again.
     internal static readonly TimeSpan PressureCooldown = TimeSpan.FromSeconds(3);
 
-    // After a failed probe or pressure, how long before the next probe. Doubles each time.
+    // After a failed trial or memory pressure, how long before the next trial. Doubles each time.
     internal static readonly TimeSpan InitialHold = TimeSpan.FromSeconds(15);
     internal static readonly TimeSpan MaximumHold = TimeSpan.FromMinutes(2);
 
@@ -105,22 +120,40 @@ internal sealed class AdaptiveParallelismPolicy
 
     private readonly ParallelismLimits _limits;
 
+    // Lowering for CPU saturation stops here. With no more tests running than there are
+    // processors, this process is not what oversubscribes them, and going lower would only
+    // leave processors unused or hand them to other processes.
+    private readonly int _cpuSaturationFloor;
+
     private int _limit;
     private TimeSpan _clock;
 
     private bool _settling;
     private TimeSpan _settleRemaining;
 
-    // Set while a probe is waiting for its verdict.
-    private bool _probing;
-    private int _limitBeforeProbe;
-    private double _throughputBeforeProbe;
+    // Set while a raise or a lowering is waiting for its verdict.
+    private AdaptiveLimitChange _trial;
+    private int _limitBeforeTrial;
+    private double _throughputBeforeTrial;
+
+    // Throughput of the latest window, and the limit it was measured at: 0 when that window
+    // could not be compared with another. A trial starts only from a measurement at the
+    // current limit.
+    private double _measuredThroughput;
+    private int _measuredLimit;
+
+    // Throughput before the first of a run of lowerings. Each further lowering is judged
+    // against it, so several steps down cannot each give a little throughput away.
+    private double _throughputBeforeLowering;
 
     // The limit divided by throughput: the average time a test holds a slot.
     private TimeSpan _averageSlotTime = MinimumWindow;
 
-    private TimeSpan _hold = InitialHold;
-    private TimeSpan _holdUntil;
+    // Raises and lowerings wait separately: a failed raise says nothing against lowering.
+    private TimeSpan _raiseHold = InitialHold;
+    private TimeSpan _raiseHoldUntil;
+    private TimeSpan _lowerHold = InitialHold;
+    private TimeSpan _lowerHoldUntil;
 
     // While pressure is recent, the limit stays below the one that caused it.
     private int _pressureCap = int.MaxValue;
@@ -135,11 +168,13 @@ internal sealed class AdaptiveParallelismPolicy
     private TimeSpan _windowMaxQueueDelay;
     private int _windowSamples;
     private int _windowLimitReachedSamples;
+    private int _windowCpuStalledSamples;
 
-    public AdaptiveParallelismPolicy(ParallelismLimits limits)
+    public AdaptiveParallelismPolicy(ParallelismLimits limits, int processorCount)
     {
         _limits = limits;
         _limit = limits.Initial;
+        _cpuSaturationFloor = Math.Max(limits.Minimum, Math.Min(processorCount, limits.Initial));
     }
 
     public int Limit => _limit;
@@ -179,9 +214,10 @@ internal sealed class AdaptiveParallelismPolicy
         var measurable = _windowCompleted >= MinimumWindowCompletions
             && _windowLimitReachedSamples * 2 >= _windowSamples;
 
-        var hasHeadroom = _windowCpuSeconds / _windowElapsed.TotalSeconds < CpuHeadroomUtilization
-            && _windowMaxMemoryLoad < MemoryHeadroomLoad
-            && _windowMaxQueueDelay < QueueDelayLimit;
+        var hasMemoryHeadroom = _windowMaxMemoryLoad < MemoryHeadroomLoad;
+        var hasCpuHeadroom = _windowCpuSeconds / _windowElapsed.TotalSeconds < CpuHeadroomUtilization
+            && _windowMaxQueueDelay < QueueDelayLimit
+            && _windowCpuStalledSamples * 4 < _windowSamples;
 
         ResetWindow();
 
@@ -190,23 +226,48 @@ internal sealed class AdaptiveParallelismPolicy
             _averageSlotTime = TimeSpan.FromSeconds(_limit / throughput);
         }
 
-        if (_probing)
+        if (_trial != AdaptiveLimitChange.None)
         {
-            _probing = false;
+            var raised = _limit > _limitBeforeTrial;
+            _trial = AdaptiveLimitChange.None;
 
-            var raise = (double) _limit / _limitBeforeProbe - 1;
-            var requiredThroughput = _throughputBeforeProbe * (1 + raise * MinimumGainShare);
+            // Negative for a lowering, so the same formula allows it a small loss.
+            var change = (double) _limit / _limitBeforeTrial - 1;
+            var requiredThroughput = raised
+                ? _throughputBeforeTrial * (1 + change * MinimumGainShare)
+                : _throughputBeforeLowering * (1 - (1 - CpuDecreaseFactor) * MinimumGainShare);
 
             if (!measurable || throughput < requiredThroughput)
             {
-                HoldProbes();
-                return ChangeLimit(_limitBeforeProbe, AdaptiveLimitChange.ProbeReverted);
+                if (raised)
+                {
+                    HoldRaises();
+                    return ChangeLimit(_limitBeforeTrial, AdaptiveLimitChange.ProbeReverted);
+                }
+
+                _lowerHoldUntil = _clock + _lowerHold;
+                _lowerHold = Double(_lowerHold);
+                _throughputBeforeLowering = 0;
+                return ChangeLimit(_limitBeforeTrial, AdaptiveLimitChange.LowerReverted);
             }
 
-            _hold = InitialHold;
+            if (raised)
+            {
+                _raiseHold = InitialHold;
+            }
+            else
+            {
+                // Fewer tests did as well, so trying more again straight away would only
+                // undo it. The wait does not grow: nothing failed.
+                _lowerHold = InitialHold;
+                _raiseHoldUntil = _clock + _raiseHold;
+            }
         }
 
-        if (!hasHeadroom)
+        _measuredThroughput = throughput;
+        _measuredLimit = measurable ? _limit : 0;
+
+        if (!hasMemoryHeadroom)
         {
             return NoChange();
         }
@@ -220,27 +281,57 @@ internal sealed class AdaptiveParallelismPolicy
             return NoChange();
         }
 
-        var raised = Math.Min(ceiling, Math.Max(_limit + 1, (int) Math.Ceiling(_limit * IncreaseFactor)));
+        var higher = Math.Min(ceiling, Math.Max(_limit + 1, (int) Math.Ceiling(_limit * IncreaseFactor)));
 
         if (_limit < _limits.Initial)
         {
-            return ChangeLimit(Math.Min(raised, _limits.Initial), AdaptiveLimitChange.Recovery);
-        }
+            higher = Math.Min(higher, _limits.Initial);
 
-        if (!measurable || _clock < _holdUntil)
+            if (hasCpuHeadroom)
+            {
+                return ChangeLimit(higher, AdaptiveLimitChange.Recovery);
+            }
+
+            // Busy CPUs are no reason to stay below the starting limit when the tests have
+            // changed, or other processes are what keeps the CPUs busy. Without headroom the
+            // way back is a trial like any other.
+        }
+        else if (!hasCpuHeadroom)
         {
             return NoChange();
         }
 
-        _probing = true;
-        _limitBeforeProbe = _limit;
-        _throughputBeforeProbe = throughput;
-        return ChangeLimit(raised, AdaptiveLimitChange.Probe);
+        if (!measurable || _clock < _raiseHoldUntil)
+        {
+            return NoChange();
+        }
+
+        return StartTrial(higher, AdaptiveLimitChange.Probe, throughput);
+    }
+
+    private AdaptiveDecision StartTrial(int limit, AdaptiveLimitChange change, double throughput)
+    {
+        if (limit > _limit)
+        {
+            _throughputBeforeLowering = 0;
+        }
+        else if (_throughputBeforeLowering <= 0)
+        {
+            _throughputBeforeLowering = throughput;
+        }
+
+        _trial = change;
+        _limitBeforeTrial = _limit;
+        _throughputBeforeTrial = throughput;
+        return ChangeLimit(limit, change);
     }
 
     private AdaptiveDecision? TryRelievePressure(AdaptiveSample sample)
     {
-        var saturated = sample.CpuUtilization >= SaturatedCpuUtilization && sample.QueueDelay >= QueueDelayLimit;
+        // Either the CPUs are all busy while work queues for a thread, or the operating
+        // system says outright that tasks are waiting for a CPU.
+        var saturated = sample.CpuStalled
+            || (sample.CpuUtilization >= SaturatedCpuUtilization && sample.QueueDelay >= QueueDelayLimit);
         _saturatedSamples = saturated ? _saturatedSamples + 1 : 0;
 
         if (_limit <= _limits.Minimum || _clock < _pressureCooldownUntil)
@@ -250,42 +341,56 @@ internal sealed class AdaptiveParallelismPolicy
 
         if (sample.MemoryLoad >= MemoryPressureLoad)
         {
-            return Lower(MemoryDecreaseFactor, AdaptiveLimitChange.MemoryPressure);
+            return LowerForMemoryPressure();
         }
 
-        if (_saturatedSamples >= SaturatedSamplesBeforeDecrease)
+        // A lowering for CPU saturation is a trial, so it needs a throughput measurement at
+        // this limit to be judged against, and no other trial in progress.
+        if (_saturatedSamples >= SaturatedSamplesBeforeDecrease
+            && _limit > _cpuSaturationFloor
+            && _trial == AdaptiveLimitChange.None
+            && !_settling
+            && _measuredLimit == _limit
+            && _clock >= _lowerHoldUntil)
         {
-            return Lower(CpuDecreaseFactor, AdaptiveLimitChange.CpuSaturation);
+            _saturatedSamples = 0;
+            return StartTrial(Math.Max(_cpuSaturationFloor, LowerBy(CpuDecreaseFactor)), AdaptiveLimitChange.CpuSaturation, _measuredThroughput);
         }
 
         return null;
     }
 
-    private AdaptiveDecision Lower(double factor, AdaptiveLimitChange change)
+    private int LowerBy(double factor) => Math.Max(_limits.Minimum, Math.Min(_limit - 1, (int) (_limit * factor)));
+
+    private AdaptiveDecision LowerForMemoryPressure()
     {
-        var lowered = Math.Max(_limits.Minimum, Math.Min(_limit - 1, (int) (_limit * factor)));
+        var lowered = LowerBy(MemoryDecreaseFactor);
 
         // Halfway back is the highest the limit may return to while the pressure is recent, so
         // repeated pressure closes in on a limit the machine can hold.
         _pressureCap = Math.Max(lowered, (_limit + lowered) / 2);
-        _pressureCapUntil = _clock + _hold;
+        _pressureCapUntil = _clock + _raiseHold;
         _pressureCooldownUntil = _clock + PressureCooldown;
         _saturatedSamples = 0;
-        _probing = false;
-        HoldProbes();
+        _trial = AdaptiveLimitChange.None;
+        _throughputBeforeLowering = 0;
+        HoldRaises();
 
-        return ChangeLimit(lowered, change);
+        return ChangeLimit(lowered, AdaptiveLimitChange.MemoryPressure);
     }
 
-    private void HoldProbes()
+    private void HoldRaises()
     {
-        _holdUntil = _clock + _hold;
-        _hold = TimeSpan.FromTicks(Math.Min(_hold.Ticks * 2, MaximumHold.Ticks));
+        _raiseHoldUntil = _clock + _raiseHold;
+        _raiseHold = Double(_raiseHold);
     }
+
+    private static TimeSpan Double(TimeSpan hold) => TimeSpan.FromTicks(Math.Min(hold.Ticks * 2, MaximumHold.Ticks));
 
     private AdaptiveDecision ChangeLimit(int limit, AdaptiveLimitChange change)
     {
         _limit = limit;
+        _measuredLimit = 0;
         _settling = true;
         _settleRemaining = TimeSpan.FromTicks(Math.Min(Math.Max(_averageSlotTime.Ticks, MinimumWindow.Ticks), MaximumSettle.Ticks));
         return new AdaptiveDecision(limit, change);
@@ -306,6 +411,11 @@ internal sealed class AdaptiveParallelismPolicy
         {
             _windowLimitReachedSamples++;
         }
+
+        if (sample.CpuStalled)
+        {
+            _windowCpuStalledSamples++;
+        }
     }
 
     // Long enough to average over at least two tests per slot, so a mix of short and long
@@ -324,5 +434,6 @@ internal sealed class AdaptiveParallelismPolicy
         _windowMaxQueueDelay = TimeSpan.Zero;
         _windowSamples = 0;
         _windowLimitReachedSamples = 0;
+        _windowCpuStalledSamples = 0;
     }
 }
