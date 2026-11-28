@@ -102,16 +102,18 @@ public abstract class TestBaseModule : Module<IReadOnlyList<CommandResult>>
         }
     }
 
+    // TUnit.Engine's EnvironmentConstants.AdaptiveParallelism.
+    private const string AdaptiveParallelismVariable = "TUNIT_ADAPTIVE_PARALLELISM";
+
     private CommandExecutionOptions SetDefaults(DotNetRunOptions testOptions, CommandExecutionOptions executionOptions, string framework)
     {
-        var envVars = executionOptions.EnvironmentVariables ?? new Dictionary<string, string?>();
-        if (!envVars.ContainsKey("NET_VERSION"))
-        {
-            envVars = new Dictionary<string, string?>(envVars)
-            {
-                ["NET_VERSION"] = framework
-            };
-        }
+        var envVars = new Dictionary<string, string?>(executionOptions.EnvironmentVariables ?? new Dictionary<string, string?>());
+        envVars.TryAdd("NET_VERSION", framework);
+
+        // TUnit's own suites run with adaptive parallelism, so every pipeline run exercises it
+        // across CPU-bound, I/O-bound and memory-heavy suites on all three operating systems.
+        // A module opts out by setting the variable to "0" in its own options.
+        envVars.TryAdd(AdaptiveParallelismVariable, "1");
 
         // Suppress output for successful operations, but show errors and basic info
         return executionOptions with
