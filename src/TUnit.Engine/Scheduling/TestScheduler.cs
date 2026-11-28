@@ -771,12 +771,15 @@ internal sealed class TestScheduler : ITestScheduler
             return ParallelismLimits.Fixed(maxParallelism);
         }
 
-#if NET
+        if (!AdaptiveParallelismController.IsSupported)
+        {
+            // An adaptive limit starts at the default and relies on the controller to raise
+            // it, so without a controller it would hold a configured maximum down.
+            logger.LogDebug("Adaptive parallelism requires .NET 8 or later on Windows, Linux or macOS; the parallel test limit stays fixed");
+            return ParallelismLimits.Fixed(maxParallelism);
+        }
+
         return GetAdaptiveLimits(isConfigured ? maxParallelism : null, Environment.ProcessorCount);
-#else
-        logger.LogDebug("Adaptive parallelism requires .NET 8 or later; the parallel test limit stays fixed");
-        return ParallelismLimits.Fixed(maxParallelism);
-#endif
     }
 
     /// <summary>

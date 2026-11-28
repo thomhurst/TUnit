@@ -227,6 +227,8 @@ Idle CPU alone does not raise the limit. Tests that wait on a shared resource, s
 
 The summary at the end of the run reports the range the limit moved in, for example `Adaptive parallelism: the parallel test limit ranged from 16 to 64 over 4 changes and ended at 64`. Run with `--log-level Debug` to see each change and its reason. If a test fails only under adaptive parallelism, rerun with `--maximum-parallel-tests` set to the highest limit reported to reproduce that level of concurrency with a fixed limit.
 
+TUnit reads memory use from the .NET runtime, which measures it at each garbage collection. Memory taken by child processes or containers is therefore noticed only at the test process's next collection. If your tests start memory-heavy processes, also set `--maximum-parallel-tests` to bound how far the limit can grow.
+
 Adaptive parallelism requires .NET 8 or later and runs on Windows, Linux and macOS. Elsewhere the limit stays fixed.
 
 ## When to Use Which

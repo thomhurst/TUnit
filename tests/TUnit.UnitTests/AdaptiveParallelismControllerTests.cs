@@ -27,8 +27,11 @@ public class AdaptiveParallelismControllerTests
         controller!.Dispose();
         controller.Dispose();
 
-        await Assert.That(logger.Messages.Where(x => x.Level == LogLevel.Information).Select(x => x.Message))
-            .IsEquivalentTo(["Adaptive parallelism: the parallel test limit stayed at 4"]);
+        // One summary for the two calls. Its wording depends on whether the host was under
+        // enough pressure to move the limit while the controller ran.
+        var summaries = logger.Messages.Where(x => x.Level == LogLevel.Information).Select(x => x.Message).ToArray();
+        await Assert.That(summaries).HasSingleItem();
+        await Assert.That(summaries[0]).StartsWith("Adaptive parallelism: the parallel test limit ");
     }
 
     [Test]
@@ -65,13 +68,15 @@ public class AdaptiveParallelismControllerTests
 
         await Assert.That(monitor.Sample()).IsNull();
 
-        // Long enough for the kernel's tick counters to advance.
-        var spinUntil = DateTime.UtcNow.AddMilliseconds(300);
-        while (DateTime.UtcNow < spinUntil)
+        // The operating system advances its counters at its own pace: macOS can go a second
+        // without, and a sample in between has nothing to report.
+        double? utilization = null;
+        for (var attempt = 0; attempt < 50 && utilization is null; attempt++)
         {
+            await Task.Delay(200);
+            utilization = monitor.Sample();
         }
 
-        var utilization = monitor.Sample();
         await Assert.That(utilization).IsNotNull();
         await Assert.That(utilization!.Value).IsBetween(0, 1);
     }

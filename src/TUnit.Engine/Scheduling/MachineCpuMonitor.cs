@@ -28,7 +28,9 @@ internal abstract class MachineCpuMonitor : IDisposable
 
         if (OperatingSystem.IsWindows())
         {
-            return new WindowsMonitor();
+            // GetSystemTimes covers one processor group, which holds at most 64 logical
+            // processors. On a larger machine it would describe only part of it.
+            return Environment.ProcessorCount > WindowsMonitor.MaxProcessorsPerGroup ? null : new WindowsMonitor();
         }
 
         if (OperatingSystem.IsMacOS())
@@ -41,7 +43,8 @@ internal abstract class MachineCpuMonitor : IDisposable
 
     /// <summary>
     /// The share of CPU capacity used since the previous call, 0 to 1. Returns <c>null</c> on
-    /// the first call and whenever the operating system gives no reading.
+    /// the first call, when the operating system has not advanced its counters since the
+    /// previous call, and when it gives no reading.
     /// </summary>
     public double? Sample()
     {
@@ -174,6 +177,8 @@ internal abstract class MachineCpuMonitor : IDisposable
     [SupportedOSPlatform("windows")]
     private sealed class WindowsMonitor : MachineCpuMonitor
     {
+        public const int MaxProcessorsPerGroup = 64;
+
         protected override bool TryReadCounters(out ulong busy, out ulong total)
         {
             // Kernel time includes idle time.
@@ -205,14 +210,16 @@ internal abstract class MachineCpuMonitor : IDisposable
         private const int CpuStateNice = 3;
         private const int CpuStateCount = 4;
 
-        // mach_host_self returns a new port right on every call, so take it once.
-        private readonly uint _host = mach_host_self();
+        // mach_host_self adds a reference to the host port on every call. Taking it once per
+        // process means monitors hold nothing of their own to release.
+        private static readonly uint Host = mach_host_self();
+
         private readonly uint[] _ticks = new uint[CpuStateCount];
 
         protected override bool TryReadCounters(out ulong busy, out ulong total)
         {
             var count = (uint) CpuStateCount;
-            if (host_statistics(_host, HostCpuLoadInfo, _ticks, ref count) != 0 || count < CpuStateCount)
+            if (host_statistics(Host, HostCpuLoadInfo, _ticks, ref count) != 0 || count < CpuStateCount)
             {
                 busy = 0;
                 total = 0;

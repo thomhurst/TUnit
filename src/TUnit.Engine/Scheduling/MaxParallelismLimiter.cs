@@ -38,7 +38,7 @@ internal sealed class MaxParallelismLimiter
     private int _currentLimit;
 
     // Slots a shrink could not take back because tests were holding them. Each one is taken
-    // back when a test releases its slot.
+    // back when a test releases its slot. Guarded by _resizeLock.
     private int _slotsToRetire;
 
     private long _releasedSlots;
@@ -105,17 +105,27 @@ internal sealed class MaxParallelismLimiter
     {
         Interlocked.Increment(ref _releasedSlots);
 
-        // A fixed budget never has slots to retire, so this is one read on that path.
-        while (Volatile.Read(ref _slotsToRetire) is > 0 and var slotsToRetire)
+        // A fixed budget is never resized, so its release takes no lock.
+        if (!_limits.Value.IsAdaptive)
         {
-            if (Interlocked.CompareExchange(ref _slotsToRetire, slotsToRetire - 1, slotsToRetire) == slotsToRetire)
-            {
-                // The slot leaves the budget instead of going to the next waiting test.
-                return;
-            }
+            _semaphore.Value.Release();
+            return;
         }
 
-        _semaphore.Value.Release();
+        // Ordered against SetLimit. Without the lock, a release could hand its slot to a
+        // waiting test just after a shrink had counted that slot as one to retire, and the
+        // lowered limit would admit one test too many.
+        lock (_resizeLock)
+        {
+            if (_slotsToRetire > 0)
+            {
+                // The slot leaves the budget instead of going to the next waiting test.
+                _slotsToRetire--;
+                return;
+            }
+
+            _semaphore.Value.Release();
+        }
     }
 
     /// <summary>
@@ -138,13 +148,9 @@ internal sealed class MaxParallelismLimiter
             {
                 // Cancel pending retirements first: those slots are still held by tests and
                 // return to the budget when released.
-                while (change > 0 && Volatile.Read(ref _slotsToRetire) is > 0 and var slotsToRetire)
-                {
-                    if (Interlocked.CompareExchange(ref _slotsToRetire, slotsToRetire - 1, slotsToRetire) == slotsToRetire)
-                    {
-                        change--;
-                    }
-                }
+                var kept = Math.Min(change, _slotsToRetire);
+                _slotsToRetire -= kept;
+                change -= kept;
 
                 if (change > 0)
                 {
@@ -160,7 +166,7 @@ internal sealed class MaxParallelismLimiter
                     var taken = semaphore.WaitAsync(0);
                     if (taken.Status != TaskStatus.RanToCompletion || !taken.Result)
                     {
-                        Interlocked.Increment(ref _slotsToRetire);
+                        _slotsToRetire++;
                     }
                 }
             }

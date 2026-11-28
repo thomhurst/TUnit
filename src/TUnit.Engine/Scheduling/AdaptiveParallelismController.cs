@@ -26,10 +26,12 @@ internal sealed class AdaptiveParallelismController : IDisposable
     private long _probeQueuedAt;
     private long _lastProbeDelayTicks;
 
+    // Guards the fields below, so no limit change lands after Dispose has reported the summary.
+    private readonly Lock _stateLock = new();
     private int _lowestLimit;
     private int _highestLimit;
     private int _changes;
-    private int _stopped;
+    private bool _stopped;
 
     private AdaptiveParallelismController(MaxParallelismLimiter limiter, ILogger logger)
     {
@@ -40,8 +42,24 @@ internal sealed class AdaptiveParallelismController : IDisposable
 #endif
 
     /// <summary>
-    /// Starts adjusting the limit, or returns <c>null</c> when the limit is fixed or this
-    /// platform cannot be measured.
+    /// Whether this runtime and operating system can be measured. Where they cannot, the
+    /// limit must be resolved as fixed, because nothing would ever move an adaptive one.
+    /// </summary>
+    public static bool IsSupported
+    {
+        get
+        {
+#if NET
+            // The systems MachineCpuMonitor can read machine-wide CPU on.
+            return OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS();
+#else
+            return false;
+#endif
+        }
+    }
+
+    /// <summary>
+    /// Starts adjusting the limit, or returns <c>null</c> when the limit is fixed.
     /// </summary>
     public static AdaptiveParallelismController? Start(MaxParallelismLimiter limiter, ILogger logger)
     {
@@ -51,10 +69,9 @@ internal sealed class AdaptiveParallelismController : IDisposable
             return null;
         }
 
-        // Browser and WASI are single-threaded, and iOS/tvOS do not support reading process CPU time.
-        if (!(OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS() || OperatingSystem.IsFreeBSD()))
+        // TestScheduler.GetParallelismLimits resolves a fixed limit on other systems.
+        if (!(OperatingSystem.IsWindows() || OperatingSystem.IsLinux() || OperatingSystem.IsMacOS()))
         {
-            logger.LogDebug("Adaptive parallelism is not supported on this platform; the parallel test limit stays fixed");
             return null;
         }
 
@@ -79,7 +96,6 @@ internal sealed class AdaptiveParallelismController : IDisposable
     [SupportedOSPlatform("windows")]
     [SupportedOSPlatform("linux")]
     [SupportedOSPlatform("macos")]
-    [SupportedOSPlatform("freebsd")]
     private void Run()
     {
         var limits = _limiter.Limits;
@@ -94,14 +110,13 @@ internal sealed class AdaptiveParallelismController : IDisposable
             // An exception escaping a dedicated thread terminates the process. Fall back to the
             // limit a run without adaptive parallelism uses.
             _logger.LogDebug($"Adaptive parallelism stopped after an error; limit reset to {limits.Initial}: {ex}");
-            _limiter.SetLimit(limits.Initial);
+            Apply(new AdaptiveDecision(limits.Initial, AdaptiveLimitChange.None), cpuUtilization: 0, memoryLoad: 0);
         }
     }
 
     [SupportedOSPlatform("windows")]
     [SupportedOSPlatform("linux")]
     [SupportedOSPlatform("macos")]
-    [SupportedOSPlatform("freebsd")]
     private void Sample(ParallelismLimits limits)
     {
 #if NET9_0_OR_GREATER
@@ -123,6 +138,7 @@ internal sealed class AdaptiveParallelismController : IDisposable
         var previousCpuTime = getProcessCpuTime();
         var previousTimestamp = Stopwatch.GetTimestamp();
         var previousReleasedSlots = _limiter.ReleasedSlots;
+        var machineCpuUtilization = 0d;
 
         while (!_stopSignal.Wait(SampleInterval))
         {
@@ -135,9 +151,13 @@ internal sealed class AdaptiveParallelismController : IDisposable
                 ? 0
                 : (cpuTime - previousCpuTime).TotalMilliseconds / (elapsed.TotalMilliseconds * processorCount);
 
+            // The operating system does not advance its counters on every sample (macOS can
+            // go a second without), so keep the last reading until the next one arrives.
+            machineCpuUtilization = machineCpu?.Sample() ?? machineCpuUtilization;
+
             // Under a container CPU quota the process can be at its limit while the host is
             // mostly idle, so take the higher of the two.
-            var cpuUtilization = Math.Min(1, Math.Max(processCpu, machineCpu?.Sample() ?? 0));
+            var cpuUtilization = Math.Min(1, Math.Max(processCpu, machineCpuUtilization));
             var memoryLoad = ReadMemoryLoad();
 
             var decision = policy.OnSample(new AdaptiveSample(
@@ -161,14 +181,30 @@ internal sealed class AdaptiveParallelismController : IDisposable
 
     private void Apply(AdaptiveDecision decision, double cpuUtilization, double memoryLoad)
     {
-        var previousLimit = _limiter.CurrentLimit;
-        var limit = _limiter.SetLimit(decision.Limit);
+        int previousLimit;
+        int limit;
 
-        _lowestLimit = Math.Min(_lowestLimit, limit);
-        _highestLimit = Math.Max(_highestLimit, limit);
-        _changes++;
+        lock (_stateLock)
+        {
+            if (_stopped)
+            {
+                return;
+            }
 
-        if (_logger.IsEnabled(LogLevel.Debug))
+            previousLimit = _limiter.CurrentLimit;
+            limit = _limiter.SetLimit(decision.Limit);
+
+            if (limit == previousLimit)
+            {
+                return;
+            }
+
+            _lowestLimit = Math.Min(_lowestLimit, limit);
+            _highestLimit = Math.Max(_highestLimit, limit);
+            _changes++;
+        }
+
+        if (decision.Change != AdaptiveLimitChange.None && _logger.IsEnabled(LogLevel.Debug))
         {
             _logger.LogDebug($"Adaptive parallelism: limit {previousLimit} -> {limit} ({Describe(decision.Change)}); CPU {cpuUtilization:P0}, memory load {memoryLoad:P0}");
         }
@@ -188,8 +224,9 @@ internal sealed class AdaptiveParallelismController : IDisposable
     /// Memory in use relative to the level at which the runtime considers the machine (or the
     /// container, when it has a memory limit) short of memory.
     /// </summary>
-    // The runtime refreshes these numbers at each garbage collection. That is recent enough
-    // while tests allocate; a process that stops collecting is not the one using the memory.
+    // The runtime refreshes these numbers at each garbage collection, and they are zero before
+    // the first one. That is recent enough while tests allocate. Memory taken by child
+    // processes or containers while this process collects rarely is seen late (#7873).
     internal static double ReadMemoryLoad()
     {
         var info = GC.GetGCMemoryInfo();
@@ -228,22 +265,32 @@ internal sealed class AdaptiveParallelismController : IDisposable
     public void Dispose()
     {
 #if NET
-        if (Interlocked.Exchange(ref _stopped, 1) != 0)
-        {
-            return;
-        }
-
         _stopSignal.Set();
 
         // The thread wakes on the signal and a sample takes microseconds, so this returns at
         // once. The timeout only guards against a sample stuck in the operating system.
         _thread?.Join(TimeSpan.FromSeconds(1));
 
+        string summary;
+
+        lock (_stateLock)
+        {
+            if (_stopped)
+            {
+                return;
+            }
+
+            // From here a sample that outlived the join can no longer change the limit.
+            _stopped = true;
+
+            summary = _changes == 0
+                ? $"Adaptive parallelism: the parallel test limit stayed at {_limiter.CurrentLimit}"
+                : $"Adaptive parallelism: the parallel test limit ranged from {_lowestLimit} to {_highestLimit} over {_changes} changes and ended at {_limiter.CurrentLimit}";
+        }
+
         // Information, not Debug: a failure that depends on how many tests ran at once can
         // only be understood from a log that says how many did.
-        _logger.LogInformation(_changes == 0
-            ? $"Adaptive parallelism: the parallel test limit stayed at {_limiter.CurrentLimit}"
-            : $"Adaptive parallelism: the parallel test limit ranged from {_lowestLimit} to {_highestLimit} over {_changes} changes and ended at {_limiter.CurrentLimit}");
+        _logger.LogInformation(summary);
 #endif
     }
 }

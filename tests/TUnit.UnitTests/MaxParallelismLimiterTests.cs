@@ -132,6 +132,9 @@ public class MaxParallelismLimiterTests
         var mostRunning = 0;
         using var stop = new CancellationTokenSource();
 
+        // A lost slot would leave a worker waiting forever; fail the test instead.
+        using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+
         var resizer = Task.Run(() =>
         {
             var random = new Random(7871);
@@ -145,7 +148,7 @@ public class MaxParallelismLimiterTests
         {
             for (var i = 0; i < 500; i++)
             {
-                await limiter.WaitAsync(CancellationToken.None);
+                await limiter.WaitAsync(timeout.Token);
                 try
                 {
                     var now = Interlocked.Increment(ref running);
@@ -160,9 +163,15 @@ public class MaxParallelismLimiterTests
             }
         })).ToArray();
 
-        await Task.WhenAll(tests);
-        stop.Cancel();
-        await resizer;
+        try
+        {
+            await Task.WhenAll(tests);
+        }
+        finally
+        {
+            stop.Cancel();
+            await resizer;
+        }
 
         await Assert.That(mostRunning).IsLessThanOrEqualTo(maximum);
 
