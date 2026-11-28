@@ -201,6 +201,34 @@ TUNIT_MAX_PARALLEL_TESTS=4 dotnet run --project MyTests
 
 You can also set this programmatically via `context.Settings.Parallelism.MaximumParallelTests` in a `[Before(HookType.TestDiscovery)]` hook. See the [Programmatic Configuration](/docs/reference/programmatic-configuration) reference for details.
 
+## Adaptive Parallelism
+
+A fixed limit suits some suites better than others. Tests that mostly await I/O leave the machine idle at 2 x the processor count, while tests that use a lot of memory can exhaust it at the same number. With adaptive parallelism, TUnit changes the limit while the run is in progress. It is off by default.
+
+```bash
+# Command-line flag
+dotnet run --project MyTests -- --adaptive-parallelism
+
+# Environment variable
+TUNIT_ADAPTIVE_PARALLELISM=1 dotnet run --project MyTests
+```
+
+You can also set `context.Settings.Parallelism.Adaptive = true` in a `[Before(HookType.TestDiscovery)]` hook.
+
+The run starts at the usual limit. From there TUnit:
+
+- **Raises the limit** by half when tests are waiting for a slot, CPU use is below 80%, memory use is under 85% of the level the .NET runtime treats as high, and thread pool work is not queuing. It then measures completed tests per second. If the raise did not bring a fair share more (15% more for a 50% raise), TUnit undoes it and waits before trying again: 15 seconds at first, doubling up to 2 minutes.
+- **Lowers the limit** by half when memory use reaches the runtime's high-memory level, and by a quarter when the CPUs are saturated while thread pool work queues for a thread. Running tests are never interrupted; the lower limit takes effect as they finish.
+- **Returns to the starting limit** in steps once the pressure has eased.
+
+The limit never goes above `--maximum-parallel-tests` when you set it, or 8 x the processor count when you do not. It never goes below a quarter of the starting limit.
+
+Idle CPU alone does not raise the limit. Tests that wait on a shared resource, such as a database connection pool, leave the CPU idle, but running more of them only makes each one wait longer. Because TUnit keeps a raise only when it completes more tests per second, such suites stay at the starting limit. `[ParallelLimiter<T>]` is still the right tool when you know a group of tests shares limited capacity.
+
+The summary at the end of the run reports the range the limit moved in, for example `Adaptive parallelism: the parallel test limit ranged from 16 to 64 over 4 changes and ended at 64`. Run with `--log-level Debug` to see each change and its reason. If a test fails only under adaptive parallelism, rerun with `--maximum-parallel-tests` set to the highest limit reported to reproduce that level of concurrency with a fixed limit.
+
+Adaptive parallelism requires .NET 8 or later and runs on Windows, Linux and macOS. Elsewhere the limit stays fixed.
+
 ## When to Use Which
 
 | Scenario | Attribute |

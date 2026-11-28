@@ -132,6 +132,20 @@ export TUNIT_MAX_PARALLEL_TESTS=0    # Use the default limit (2 x CPU cores)
 
 **Note:** Command-line arguments take precedence over environment variables.
 
+### TUNIT_ADAPTIVE_PARALLELISM
+
+Set to `1`, `true` or `yes` to let TUnit change the number of tests that run in parallel while the run is in progress, based on machine load and on whether a higher limit completes more tests per second. `TUNIT_MAX_PARALLEL_TESTS`, when set, is the highest the limit goes. See [Adaptive Parallelism](../execution/parallelism.md#adaptive-parallelism).
+
+```bash
+export TUNIT_ADAPTIVE_PARALLELISM=1
+```
+
+**Equivalent to:** `--adaptive-parallelism`
+
+**Programmatic equivalent:** `context.Settings.Parallelism.Adaptive = true` (see [Programmatic Configuration](./programmatic-configuration.md))
+
+**Note:** Any one of the flag, the environment variable and the programmatic setting enables it.
+
 ### TUNIT_DISABLE_THREADPOOL_TUNING
 
 By default, TUnit watches the thread pool while tests run. If queued work waits for a thread while most CPUs are idle (a sign that tests are blocking), TUnit raises the pool's minimum worker thread count to the maximum number of parallel tests plus one per processor, and doubles it while starvation continues, up to 64 per processor. This stops blocking tests from delaying timers and timeouts in other tests while the pool slowly adds threads. TUnit never lowers a minimum that you configured yourself. Set this variable to `1`, `true` or `yes` to turn the behavior off.
@@ -325,6 +339,7 @@ When the same setting is configured in multiple places, TUnit follows this prior
 | `TUNIT_DISABLE_ARTIFACT_UPLOAD` | - | Keeps the HTML report file but skips the GitHub Actions artifact upload (`context.Settings.Reporting.ArtifactUploadEnabled = false`) |
 | `JUNIT_XML_OUTPUT_PATH` | - | JUnit output path |
 | `TUNIT_MAX_PARALLEL_TESTS` | `--maximum-parallel-tests` | Max parallel tests |
+| `TUNIT_ADAPTIVE_PARALLELISM` | `--adaptive-parallelism` | Adjusts the parallel test limit while running (`1` to enable) |
 | `TUNIT_DISABLE_THREADPOOL_TUNING` | - | Disables the thread pool starvation monitor (`1` to disable) |
 | `TUNIT_DISABLE_JIT_WARMUP` | - | Disables background compilation of the engine's startup code (`1` to disable) |
 | `TUNIT_EXECUTION_MODE` | `--reflection` | Selects source-generation (`sourcegeneration`/`aot`) or `reflection` execution mode |
