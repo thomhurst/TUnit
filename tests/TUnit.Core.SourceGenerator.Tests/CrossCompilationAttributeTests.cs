@@ -51,7 +51,74 @@ public class CrossCompilationAttributeTests
             [Arguments(0x1F)]
             [Arguments(0b1010)]
             [Arguments("3\n")]
+            [Arguments("1e2")]
             public void InheritedDecimal(decimal value)
+            {
+            }
+
+            [Test]
+            [Arguments("abc")]
+            [Arguments("0x10")]
+            [Arguments("42")]
+            [Arguments("say \"hi\"\\")]
+            public void InheritedNullableIntFromString(int? value)
+            {
+            }
+
+            [Test]
+            [Arguments("42")]
+            public void InheritedIntFromString(int value)
+            {
+            }
+
+            [Test]
+            [Arguments("1.5")]
+            public void InheritedNullableDoubleFromString(double? value)
+            {
+            }
+
+            [Test]
+            [Arguments("1.5")]
+            [Arguments("abc")]
+            [Arguments("1e2")]
+            public void InheritedNullableDecimalFromString(decimal? value)
+            {
+            }
+
+            [Test]
+            [Arguments("00000000-0000-0000-0000-000000000000")]
+            [Arguments("abc")]
+            public void InheritedNullableGuidFromString(System.Guid? value)
+            {
+            }
+
+            [Test]
+            [Arguments("00000000-0000-0000-0000-000000000000")]
+            public void InheritedGuidFromString(System.Guid value)
+            {
+            }
+
+            [Test]
+            [Arguments("2020-01-02")]
+            public void InheritedNullableDateTimeFromString(System.DateTime? value)
+            {
+            }
+
+            [Test]
+            [Arguments("00:00:01")]
+            public void InheritedNullableTimeSpanFromString(System.TimeSpan? value)
+            {
+            }
+
+            [Test]
+            [Arguments(0, new string[] { "42" })]
+            public void InheritedNullableIntArrayFromStrings(int marker, int?[] values)
+            {
+            }
+
+            [Test]
+            [Arguments(0, new string[] { "00000000-0000-0000-0000-000000000000" })]
+            public void InheritedNullableGuidArrayFromStrings(int marker, System.Guid?[] values)
             {
             }
 
@@ -236,10 +303,36 @@ public class CrossCompilationAttributeTests
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(0.10000000000000001d)");
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(1.5d)");
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute<int>(3)");
-        await Assert.That(generated).Contains("ParseDecimalWithCultureFallback(\"3\\n\")");
+        // Inherited string rows for parsable scalars stay string literals, including
+        // the existing decimal "3\n" row (no longer the culture-fallback helper).
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"3\\n\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"1e2\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"abc\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"0x10\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"42\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"say \\\"hi\\\"\\\\\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"1.5\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"00000000-0000-0000-0000-000000000000\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"2020-01-02\")");
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(\"00:00:01\")");
+        await Assert.That(generated).DoesNotContain("ParseDecimalWithCultureFallback(\"3\\n\")");
+        await Assert.That(generated).DoesNotContain("ParseDecimalWithCultureFallback(\"1e2\")");
+        await Assert.That(generated).DoesNotContain("ParseDecimalWithCultureFallback(\"1.5\")");
+        await Assert.That(generated).DoesNotContain("ArgumentsAttribute(int.Parse");
+        await Assert.That(generated).DoesNotContain("double.Parse");
+        await Assert.That(generated).DoesNotContain("decimal.Parse");
+        await Assert.That(generated).DoesNotContain("global::System.Guid.Parse(\"abc\")");
+        await Assert.That(generated).DoesNotContain("DateTime.Parse(\"2020-01-02\")");
+        await Assert.That(generated).DoesNotContain("TimeSpan.Parse(\"00:00:01\")");
 
         await Assert.That(generated).Contains("global::System.DayOfWeek.Monday");
         await Assert.That(generated).Contains("(global::System.DayOfWeek)99");
+
+        // Array elements still use Parse inside a typed array (AOT-safe, follow-up later).
+        await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(0, new int?[] { int.Parse(\"42\"");
+        await Assert.That(generated).DoesNotContain("new int?[] { \"42\" }");
+        await Assert.That(generated).Contains("new global::System.Guid?[] { global::System.Guid.Parse(\"00000000-0000-0000-0000-000000000000\"");
+        await Assert.That(generated).DoesNotContain("new global::System.Guid?[] { \"00000000-0000-0000-0000-000000000000\" }");
 
         // [Arguments(null)] binds null to the params array itself.
         await Assert.That(generated).Contains("new global::TUnit.Core.ArgumentsAttribute(null)");
