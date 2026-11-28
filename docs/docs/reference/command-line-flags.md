@@ -7,21 +7,26 @@ Please note that for the coverage and trx report, you need to install [additiona
 :::
 
 <pre>
+    --ansi
+        Control whether ANSI escape characters are emitted.
+        Valid values are 'auto' (default), 'on' or 'off'.
+        'on' forces ANSI escape codes even when stdout is redirected; pair it with --progress off if you only want colors.
+
     --diagnostic
         Enable the diagnostic logging. The default log level is 'Trace'.
         The file will be written in the output directory with the name log_[MMddHHssfff].diag
 
-    --diagnostic-filelogger-synchronouswrite
-        Force the built-in file logger to write the log synchronously.
-        Useful for scenario where you don't want to lose any log (i.e. in case of crash).
-        Note that this is slowing down the test execution.
+    --diagnostic-file-prefix
+        Prefix for the log file name that will replace '[log]_.'
 
     --diagnostic-output-directory
         Output directory of the diagnostic logging.
         If not specified the file will be generated inside the default 'TestResults' directory.
 
-    --diagnostic-file-prefix
-        Prefix for the log file name that will replace '[log]_.'
+    --diagnostic-synchronous-write
+        Force the built-in file logger to write the log synchronously.
+        Useful for scenario where you don't want to lose any log (i.e. in case of crash).
+        Note that this is slowing down the test execution.
 
     --diagnostic-verbosity
         Define the level of the verbosity for the --diagnostic.
@@ -52,6 +57,11 @@ Please note that for the coverage and trx report, you need to install [additiona
 
     --minimum-expected-tests
         Specifies the minimum number of tests that are expected to run.
+
+    --progress
+        Control whether progress is reported to screen.
+        Valid values are 'auto' (default), 'on' or 'off'.
+        'auto' shows progress unless the terminal cannot update in place (for example with --ansi off or in CI).
 
     --results-directory
         The directory where the test results are going to be placed.
@@ -89,12 +99,6 @@ Please note that for the coverage and trx report, you need to install [additiona
     --maximum-parallel-tests
         Maximum Parallel Tests
         Programmatic equivalent: context.Settings.Parallelism.MaximumParallelTests
-
-    --no-ansi
-        Disable outputting ANSI escape characters to screen.
-
-    --no-progress
-        Disable reporting progress to screen.
 
     --output
         Controls test result detail level AND real-time console output buffering.

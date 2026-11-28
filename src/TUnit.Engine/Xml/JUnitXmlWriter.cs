@@ -250,6 +250,10 @@ internal static class JUnitXmlWriter
         // Write state-specific child elements
         switch (stateProperty)
         {
+            case ErrorTestNodeStateProperty { Exception: TestCancelledException }:
+                WriteCancellationError(writer);
+                break;
+
             case FailedTestNodeStateProperty failed:
                 WriteFailure(writer, failed);
                 break;
@@ -260,12 +264,6 @@ internal static class JUnitXmlWriter
 
             case TimeoutTestNodeStateProperty timeout:
                 WriteTimeoutError(writer, timeout);
-                break;
-
-#pragma warning disable CS0618, MTP0001 // Retained for TUnit's JUnit cancellation reporting
-            case CancelledTestNodeStateProperty:
-#pragma warning restore CS0618, MTP0001
-                WriteCancellationError(writer);
                 break;
 
             case SkippedTestNodeStateProperty skipped:
@@ -429,9 +427,6 @@ internal static class JUnitXmlWriter
                     break;
                 case ErrorTestNodeStateProperty:
                 case TimeoutTestNodeStateProperty:
-#pragma warning disable CS0618, MTP0001 // Retained for TUnit's JUnit cancellation reporting
-                case CancelledTestNodeStateProperty:
-#pragma warning restore CS0618, MTP0001
                 case InProgressTestNodeStateProperty:
                     summary.Errors++;
                     break;

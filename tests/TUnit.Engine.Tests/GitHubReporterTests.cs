@@ -528,9 +528,7 @@ public class GitHubReporterTests
         string testId, string displayName, string typeName) =>
         CreateTestMessage(testId, displayName, typeName, PassedTestNodeStateProperty.CachedInstance);
 
-#pragma warning disable CS0618, MTP0001 // Required to verify TUnit's cancelled-state reporting
     private static TestNodeUpdateMessage CreateCancelledTestMessage(
         string testId, string displayName, string typeName) =>
-        CreateTestMessage(testId, displayName, typeName, new CancelledTestNodeStateProperty());
-#pragma warning restore CS0618, MTP0001
+        CreateTestMessage(testId, displayName, typeName, TestCancelledException.CreateStateProperty());
 }

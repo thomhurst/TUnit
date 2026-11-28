@@ -115,9 +115,7 @@ internal class TUnitMessageBus(IExtension extension, ICommandLineOptions command
 
     public ValueTask Cancelled(TestContext testContext, DateTimeOffset start)
     {
-#pragma warning disable CS0618, MTP0001 // Retained for TUnit's own cancellation reporters
-        var testNode = testContext.ToTestNode(new CancelledTestNodeStateProperty());
-#pragma warning restore CS0618, MTP0001
+        var testNode = testContext.ToTestNode(TestCancelledException.CreateStateProperty());
 
         return new ValueTask(context.MessageBus.PublishAsync(this, CreateUpdateMessage(testContext, testNode)));
     }

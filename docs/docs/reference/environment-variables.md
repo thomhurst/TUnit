@@ -234,18 +234,18 @@ export TESTINGPLATFORM_UI_LANGUAGE=en-us
 
 Some command-line flags are handled by the Microsoft Testing Platform rather than TUnit directly. These flags currently do not have environment variable equivalents:
 
-- `--no-progress` - Disables progress reporting to screen
-- `--no-ansi` - Disables ANSI escape characters
+- `--progress off` - Disables progress reporting to screen
+- `--ansi off` - Disables ANSI escape characters
 
-### Workarounds for --no-progress
+### Workarounds for --progress off
 
-While there's no environment variable for `--no-progress`, you can use these alternatives:
+While there's no environment variable for `--progress off`, you can use these alternatives:
 
 **1. MSBuild Property (with `dotnet test`):**
 
 ```xml
 <PropertyGroup>
-  <TestingPlatformCommandLineArguments>--no-progress</TestingPlatformCommandLineArguments>
+  <TestingPlatformCommandLineArguments>--progress off</TestingPlatformCommandLineArguments>
 </PropertyGroup>
 ```
 
@@ -254,13 +254,13 @@ While there's no environment variable for `--no-progress`, you can use these alt
 ```bash
 #!/bin/bash
 # run-tests.sh
-./MyTestProject.exe --no-progress "$@"
+./MyTestProject.exe --progress off "$@"
 ```
 
 **3. Direct Command Line:**
 
 ```bash
-./MyTestProject.exe --no-progress
+./MyTestProject.exe --progress off
 ```
 
 ## CI/CD Examples

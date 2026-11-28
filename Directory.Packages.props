@@ -106,15 +106,15 @@
     <PackageVersion Include="Microsoft.Playwright" Version="1.65.1" />
     <PackageVersion Include="Microsoft.TemplateEngine.Authoring.TemplateVerifier" Version="11.0.100" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.12.0" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.5.3" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.5.3" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.HtmlReport" Version="2.5.3" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="2.5.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="3.0.0-preview.26577.6" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="3.0.0-preview.26577.6" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HtmlReport" Version="3.0.0-preview.26577.6" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.Telemetry" Version="3.0.0-preview.26577.6" />
     <!-- 2.4.0's controller-backed TRX path kills the test host on Ctrl+C instead of allowing hook cleanup. -->
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.5.3" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="2.5.3" />
-    <PackageVersion Include="Microsoft.Testing.Platform" Version="2.5.3" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.5.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="3.0.0-preview.26577.6" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport.Abstractions" Version="3.0.0-preview.26577.6" />
+    <PackageVersion Include="Microsoft.Testing.Platform" Version="3.0.0-preview.26577.6" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="3.0.0-preview.26577.6" />
     <PackageVersion Include="Imposter" Version="1.0.13"/>
     <PackageVersion Include="Mockolate" Version="4.2.0" />
     <PackageVersion Include="Mono.Cecil" Version="0.11.6" />
