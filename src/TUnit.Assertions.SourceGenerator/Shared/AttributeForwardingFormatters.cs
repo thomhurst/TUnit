@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace TUnit.SourceGen.Shared;
 
@@ -26,7 +27,7 @@ internal static class AttributeForwardingFormatters
         var args = new List<string>();
         if (attr.ConstructorArguments.Length > 0 && attr.ConstructorArguments[0].Value is string message)
         {
-            args.Add($"\"{message.Replace("\"", "\\\"")}\"");
+            args.Add(SymbolDisplay.FormatLiteral(message, quote: true));
         }
         if (attr.ConstructorArguments.Length > 1 && attr.ConstructorArguments[1].Value is bool isError && isError)
         {
@@ -39,11 +40,11 @@ internal static class AttributeForwardingFormatters
         {
             if (named.Key == "DiagnosticId" && named.Value.Value is string id)
             {
-                diagnosticIdPart = $", DiagnosticId = \"{id}\"";
+                diagnosticIdPart = $", DiagnosticId = {SymbolDisplay.FormatLiteral(id, quote: true)}";
             }
             else if (named.Key == "UrlFormat" && named.Value.Value is string url)
             {
-                urlFormatPart = $", UrlFormat = \"{url}\"";
+                urlFormatPart = $", UrlFormat = {SymbolDisplay.FormatLiteral(url, quote: true)}";
             }
         }
         return $"[{globalQualifier}System.Obsolete({string.Join(", ", args)}{diagnosticIdPart}{urlFormatPart})]";

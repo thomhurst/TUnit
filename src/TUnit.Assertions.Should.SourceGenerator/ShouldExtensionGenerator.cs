@@ -1318,9 +1318,9 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         // separators don't produce malformed literals like `1,5F`.
         return defaultValue switch
         {
-            string s => "\"" + s.Replace("\"", "\\\"") + "\"",
+            string s => SymbolDisplay.FormatLiteral(s, quote: true),
             bool b => b ? "true" : "false",
-            char c => $"'{c}'",
+            char c => SymbolDisplay.FormatLiteral(c, quote: true),
             float f => System.FormattableString.Invariant($"{f}F"),
             double d => System.FormattableString.Invariant($"{d}D"),
             decimal m => System.FormattableString.Invariant($"{m}M"),
@@ -1396,8 +1396,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         sb.AppendLine();
         if (!string.IsNullOrEmpty(m.RequiresUnreferencedCodeMessage))
         {
-            var escaped = m.RequiresUnreferencedCodeMessage!.Replace("\"", "\\\"");
-            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{escaped}\")]");
+            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode({SymbolDisplay.FormatLiteral(m.RequiresUnreferencedCodeMessage!, quote: true)})]");
         }
 
         sb.Append($"    public {returnType} {positiveName}(");
@@ -1417,7 +1416,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         {
             if (p.CallerArgumentExpressionTarget is null) continue;
             if (!first) sb.Append(", ");
-            sb.Append($"[global::System.Runtime.CompilerServices.CallerArgumentExpression(\"{p.CallerArgumentExpressionTarget}\")] string? {p.Name} = null");
+            sb.Append($"[global::System.Runtime.CompilerServices.CallerArgumentExpression({SymbolDisplay.FormatLiteral(p.CallerArgumentExpressionTarget, quote: true)})] string? {p.Name} = null");
             first = false;
         }
         sb.AppendLine(")");
@@ -1513,12 +1512,11 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         sb.AppendLine();
         if (!string.IsNullOrEmpty(m.RequiresUnreferencedCodeMessage))
         {
-            var escaped = m.RequiresUnreferencedCodeMessage!.Replace("\"", "\\\"");
-            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{escaped}\")]");
+            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode({SymbolDisplay.FormatLiteral(m.RequiresUnreferencedCodeMessage!, quote: true)})]");
         }
         foreach (var code in m.SuppressedTrimWarnings)
         {
-            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"{code}\", Justification = \"Forwarded from source method\")]");
+            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", {SymbolDisplay.FormatLiteral(code, quote: true)}, Justification = \"Forwarded from source method\")]");
         }
         foreach (var attr in m.ForwardedAttributes)
         {
@@ -1538,7 +1536,7 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         foreach (var p in m.Parameters)
         {
             if (p.CallerArgumentExpressionTarget is null) continue;
-            sb.Append($", [global::System.Runtime.CompilerServices.CallerArgumentExpression(\"{p.CallerArgumentExpressionTarget}\")] string? {p.Name} = null");
+            sb.Append($", [global::System.Runtime.CompilerServices.CallerArgumentExpression({SymbolDisplay.FormatLiteral(p.CallerArgumentExpressionTarget, quote: true)})] string? {p.Name} = null");
         }
         sb.Append(')');
 
@@ -2011,12 +2009,11 @@ public sealed class ShouldExtensionGenerator : IIncrementalGenerator
         }
         if (!string.IsNullOrEmpty(entry.RequiresUnreferencedCodeMessage))
         {
-            var escaped = entry.RequiresUnreferencedCodeMessage!.Replace("\"", "\\\"");
-            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(\"{escaped}\")]");
+            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode({SymbolDisplay.FormatLiteral(entry.RequiresUnreferencedCodeMessage!, quote: true)})]");
         }
         foreach (var code in entry.SuppressedTrimWarnings)
         {
-            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", \"{code}\", Justification = \"Forwarded from source method\")]");
+            sb.AppendLine($"    [global::System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(\"Trimming\", {SymbolDisplay.FormatLiteral(code, quote: true)}, Justification = \"Forwarded from source method\")]");
         }
         foreach (var attr in entry.ForwardedAttributes)
         {
