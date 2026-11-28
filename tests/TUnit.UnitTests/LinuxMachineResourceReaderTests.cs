@@ -188,6 +188,30 @@ public class LinuxMachineResourceReaderTests
     }
 
     [Test]
+    public async Task A_Group_Too_Far_Up_A_Deep_Hierarchy_Is_Left_Out_Of_Throttled_Time()
+    {
+        // 40 levels below the mount. Only the nearest 31 can each be told apart in the sum.
+        var levels = Enumerable.Range(0, 40).Select(level => $"g{level}").ToArray();
+        var files = new Dictionary<string, string?>
+        {
+            ["/proc/stat"] = ProcStat,
+            ["/proc/meminfo"] = MemInfo,
+            ["/proc/self/cgroup"] = $"0::/{string.Join('/', levels)}\n",
+            ["/proc/self/mountinfo"] = CgroupV2Mount,
+            [$"/sys/fs/cgroup/{string.Join('/', levels)}/cpu.stat"] = "throttled_usec 1000\n",
+        };
+        var sampler = new MachineResourceSampler(Reader(files));
+        var second = System.Diagnostics.Stopwatch.Frequency;
+        sampler.Sample(1);
+
+        // 35 levels up from the process's group: a counter that appears there with its whole
+        // history must not read as new throttling.
+        files[$"/sys/fs/cgroup/{string.Join('/', levels.Take(5))}/cpu.stat"] = "throttled_usec 90000000\n";
+
+        await Assert.That(sampler.Sample(1 + second).CpuStalled).IsFalse();
+    }
+
+    [Test]
     public async Task Pressure_Comes_From_The_Control_Group_When_It_Has_Any()
     {
         var reader = Reader(new()

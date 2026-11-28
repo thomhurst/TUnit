@@ -92,9 +92,10 @@ internal sealed class MaxParallelismLimiter
     public int AvailableSlots => _semaphore.Value.CurrentCount;
 
     /// <summary>
-    /// The number of slots released since the session started: one per finished test.
+    /// The number of slots an adaptive budget has had released since the session started: one
+    /// per finished test. A fixed budget does not count.
     /// </summary>
-    public long ReleasedSlots => Interlocked.Read(ref _releasedSlots);
+    public long ReleasedSlots => Volatile.Read(ref _releasedSlots);
 
     /// <summary>
     /// Waits for a slot. An uncontended wait completes synchronously without allocating.
@@ -103,9 +104,8 @@ internal sealed class MaxParallelismLimiter
 
     public void Release()
     {
-        Interlocked.Increment(ref _releasedSlots);
-
-        // A fixed budget is never resized, so its release takes no lock.
+        // A fixed budget is never resized or measured, so its release takes no lock and
+        // counts nothing: it does exactly what it did before the budget could be resized.
         if (!_limits.Value.IsAdaptive)
         {
             _semaphore.Value.Release();
@@ -117,6 +117,8 @@ internal sealed class MaxParallelismLimiter
         // lowered limit would admit one test too many.
         lock (_resizeLock)
         {
+            _releasedSlots++;
+
             if (_slotsToRetire > 0)
             {
                 // The slot leaves the budget instead of going to the next waiting test.

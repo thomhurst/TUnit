@@ -10,6 +10,9 @@ namespace TUnit.Engine.Scheduling;
 /// </summary>
 internal sealed class LinuxMachineResourceReader : IMachineResourceReader
 {
+    // One bit of a non-negative int per control group level.
+    private const int MaxThrottledLevels = 31;
+
     private readonly Func<string, string?> _readFile;
 
     // The process's control group and the mount it is visible under. Found once: a test
@@ -63,21 +66,22 @@ internal sealed class LinuxMachineResourceReader : IMachineResourceReader
     // cpu.stat counts only the throttling of the quota set on that control group, so a quota
     // on a parent shows in the parent's file. The sum covers every level that is visible.
     // The sources value has one bit per level that contributed, the process's own group first,
-    // so the sampler can tell when the sum is made of different groups than last time.
+    // so the sampler can tell when the sum is made of different groups than last time. Levels
+    // beyond the bits available are left out of the sum, so every contributor has a bit of its own.
     private long? ReadThrottledMicroseconds(out int sources)
     {
         long? throttled = null;
         sources = 0;
         var level = 0;
 
-        for (var directory = _cgroupDirectory; directory is not null && _cgroupMount is not null; directory = GetParent(directory), level++)
+        for (var directory = _cgroupDirectory;
+             directory is not null && _cgroupMount is not null && level < MaxThrottledLevels;
+             directory = GetParent(directory), level++)
         {
             if (FindCounter(Read(Combine(directory, "cpu.stat")), "throttled_usec") is { } value)
             {
                 throttled = (throttled ?? 0) + value;
-
-                // Hierarchies deeper than 31 levels share the last bit.
-                sources |= 1 << Math.Min(level, 30);
+                sources |= 1 << level;
             }
 
             if (directory == _cgroupMount)

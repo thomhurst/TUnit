@@ -116,7 +116,7 @@ internal sealed class AdaptiveParallelismController : IDisposable
             // An exception escaping a dedicated thread terminates the process. Fall back to the
             // limit a run without adaptive parallelism uses.
             _logger.LogDebug($"Adaptive parallelism stopped after an error; limit reset to {limits.Initial}: {ex}");
-            Apply(new AdaptiveDecision(limits.Initial, AdaptiveLimitChange.None), cpuUtilization: 0, memoryLoad: 0);
+            TrySetLimit(limits.Initial, out _, out _);
 
             lock (_stateLock)
             {
@@ -194,9 +194,11 @@ internal sealed class AdaptiveParallelismController : IDisposable
                 LimitReached: _limiter.AvailableSlots == 0,
                 machineLoad.CpuStalled));
 
-            if (decision.Change != AdaptiveLimitChange.None)
+            if (decision.Change != AdaptiveLimitChange.None
+                && TrySetLimit(decision.Limit, out var previousLimit, out var limit)
+                && _logger.IsEnabled(LogLevel.Debug))
             {
-                Apply(decision, cpuUtilization, memoryLoad);
+                _logger.LogDebug($"Adaptive parallelism: limit {previousLimit} -> {limit} ({Describe(decision.Change)}); CPU {cpuUtilization * 100:0}%, memory load {memoryLoad * 100:0}%");
             }
 
             previousCpuTime = cpuTime;
@@ -205,34 +207,31 @@ internal sealed class AdaptiveParallelismController : IDisposable
         }
     }
 
-    private void Apply(AdaptiveDecision decision, double cpuUtilization, double memoryLoad)
+    /// <summary>
+    /// Resizes the limiter unless the controller has stopped. Returns whether the limit changed.
+    /// </summary>
+    private bool TrySetLimit(int requestedLimit, out int previousLimit, out int limit)
     {
-        int previousLimit;
-        int limit;
-
         lock (_stateLock)
         {
+            previousLimit = limit = _limiter.CurrentLimit;
+
             if (_stopped)
             {
-                return;
+                return false;
             }
 
-            previousLimit = _limiter.CurrentLimit;
-            limit = _limiter.SetLimit(decision.Limit);
+            limit = _limiter.SetLimit(requestedLimit);
 
             if (limit == previousLimit)
             {
-                return;
+                return false;
             }
 
             _lowestLimit = Math.Min(_lowestLimit, limit);
             _highestLimit = Math.Max(_highestLimit, limit);
             _changes++;
-        }
-
-        if (decision.Change != AdaptiveLimitChange.None && _logger.IsEnabled(LogLevel.Debug))
-        {
-            _logger.LogDebug($"Adaptive parallelism: limit {previousLimit} -> {limit} ({Describe(decision.Change)}); CPU {cpuUtilization * 100:0}%, memory load {memoryLoad * 100:0}%");
+            return true;
         }
     }
 

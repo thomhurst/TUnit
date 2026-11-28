@@ -23,7 +23,21 @@ public class MaxParallelismLimiterTests
         limiter.Release();
         await third;
 
-        await Assert.That(limiter.ReleasedSlots).IsEqualTo(1);
+        // Only an adaptive budget counts releases: a fixed one does no more than before.
+        await Assert.That(limiter.ReleasedSlots).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task Adaptive_Limiter_Counts_Released_Slots()
+    {
+        var limiter = CreateAdaptive();
+        await limiter.WaitAsync(CancellationToken.None);
+        await limiter.WaitAsync(CancellationToken.None);
+
+        limiter.Release();
+        limiter.Release();
+
+        await Assert.That(limiter.ReleasedSlots).IsEqualTo(2);
     }
 
     [Test]
