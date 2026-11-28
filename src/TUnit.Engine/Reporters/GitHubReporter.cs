@@ -148,6 +148,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                 case PassedTestNodeStateProperty:
                     passedCount++;
                     break;
+                case ErrorTestNodeStateProperty { Exception: TestCancelledException }:
+                    cancelled.Add(kvp);
+                    break;
                 case FailedTestNodeStateProperty or ErrorTestNodeStateProperty:
                     failed.Add(kvp);
                     break;
@@ -159,11 +162,6 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
                     break;
                 case InProgressTestNodeStateProperty:
                     inProgress.Add(kvp);
-                    break;
-#pragma warning disable CS0618, MTP0001 // Retained for TUnit's GitHub cancellation reporting
-                case CancelledTestNodeStateProperty:
-#pragma warning restore CS0618, MTP0001
-                    cancelled.Add(kvp);
                     break;
             }
         }
@@ -561,12 +559,9 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
 
     private string GetDetails(IProperty? stateProperty, PropertyBag properties)
     {
-#pragma warning disable CS0618, MTP0001 // Retained for TUnit's GitHub cancellation reporting
         if (stateProperty is FailedTestNodeStateProperty
             or ErrorTestNodeStateProperty
-            or TimeoutTestNodeStateProperty
-            or CancelledTestNodeStateProperty)
-#pragma warning restore CS0618, MTP0001
+            or TimeoutTestNodeStateProperty)
         {
             return $"<pre>{GetError(stateProperty)}</pre>";
         }
@@ -590,14 +585,12 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     {
         return stateProperty switch
         {
+            ErrorTestNodeStateProperty { Exception: TestCancelledException } => TestCancelledException.CancelledMessage,
             FailedTestNodeStateProperty failedTestNodeStateProperty =>
                 GetTruncatedExceptionMessage(TUnitFailedException.Unwrap(failedTestNodeStateProperty.Exception)) ?? "Test failed",
             ErrorTestNodeStateProperty errorTestNodeStateProperty =>
                 GetTruncatedExceptionMessage(TUnitFailedException.Unwrap(errorTestNodeStateProperty.Exception)) ?? "Test failed",
             TimeoutTestNodeStateProperty timeoutTestNodeStateProperty => timeoutTestNodeStateProperty.Explanation,
-#pragma warning disable CS0618, MTP0001 // Retained for TUnit's GitHub cancellation reporting
-            CancelledTestNodeStateProperty => "Test was cancelled",
-#pragma warning restore CS0618, MTP0001
             _ => null
         };
     }
@@ -625,9 +618,7 @@ public class GitHubReporter(IExtension extension) : IDataConsumer, ITestHostAppl
     {
         return stateProperty switch
         {
-#pragma warning disable CS0618, MTP0001 // Retained for TUnit's GitHub cancellation reporting
-            CancelledTestNodeStateProperty => "Cancelled",
-#pragma warning restore CS0618, MTP0001
+            ErrorTestNodeStateProperty { Exception: TestCancelledException } => "Cancelled",
             ErrorTestNodeStateProperty => "Failed",
             FailedTestNodeStateProperty => "Failed",
             InProgressTestNodeStateProperty => "In Progress (never finished)",

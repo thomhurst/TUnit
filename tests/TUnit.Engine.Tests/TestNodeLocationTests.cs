@@ -54,7 +54,6 @@ public class TestNodeLocationTests
             var discovered = context.ToTestNode(DiscoveredTestNodeStateProperty.CachedInstance);
             context.CachedReportingProperties.ShouldNotBeNull();
 
-#pragma warning disable CS0618, MTP0001 // Exercise the engine's cancellation reporting path.
             TestNodeStateProperty finalState = state switch
             {
                 "Passed" => PassedTestNodeStateProperty.CachedInstance,
@@ -62,10 +61,9 @@ public class TestNodeLocationTests
                 "Error" => new ErrorTestNodeStateProperty(new Exception("error")),
                 "Timeout" => new TimeoutTestNodeStateProperty(),
                 "Skipped" => new SkippedTestNodeStateProperty("skipped"),
-                "Cancelled" => new CancelledTestNodeStateProperty(),
+                "Cancelled" => TestCancelledException.CreateStateProperty(),
                 _ => throw new ArgumentOutOfRangeException(nameof(state))
             };
-#pragma warning restore CS0618, MTP0001
             var final = context.ToTestNode(finalState);
 
             context.CachedReportingProperties.ShouldBeNull();
