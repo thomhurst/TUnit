@@ -8,7 +8,7 @@
 
 <script>window.tlumaConfig={source:"thomhurst/tunit",theme:"auto",brandColor:"green",button:"bottom-right",welcomePulse:!0,edgePadding:"1rem",autoOpen:!1,desktopFullscreenByDefault:!1}</script>
 <script src="https://tluma.ai/widget.js" async></script><link rel="stylesheet" href="/assets/css/styles.be4c87e3.css">
-<script src="/assets/js/runtime~main.ca5bd910.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.b357ae6a.js" defer="defer"></script>
 <script src="/assets/js/main.9d321a10.js" defer="defer"></script>
 </head>
 <body>
@@ -45,7 +45,9 @@ The directory where the test results are going to be placed.
 If the specified directory doesn&#x27;t exist, it&#x27;s created.
 The default is TestResults in the directory that contains the test application.</p><p>--timeout
 A global test execution timeout.
-Takes one argument as string in the format [h|m|s] where &#x27;value&#x27; is float.</p><p>--coverage
+Takes one argument as string in the format [h|m|s] where &#x27;value&#x27; is float.</p><p>--adaptive-parallelism
+Adjust the number of parallel tests while running, based on machine load and throughput
+Programmatic equivalent: context.Settings.Parallelism.Adaptive</p><p>--coverage
 Collect the code coverage using dotnet-coverage tool</p><p>--coverage-output
 Output file</p><p>--coverage-output-format
 Output file format. Supported values: &#x27;coverage&#x27;, &#x27;xml&#x27; and &#x27;cobertura&#x27;</p><p>--coverage-settings

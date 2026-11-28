@@ -72,9 +72,10 @@ On Linux and macOS with .NET 10 or later, SIGTERM (sent by `docker stop`, Kubern
 
 ### `context.Settings.Parallelism`[​](#contextsettingsparallelism "Direct link to contextsettingsparallelism")
 
-| Property               | Type   | Default                | Description                                                                                        |
-| ---------------------- | ------ | ---------------------- | -------------------------------------------------------------------------------------------------- |
-| `MaximumParallelTests` | `int?` | `null` (2 x CPU cores) | Maximum number of tests that can execute concurrently. Set to `null` to use the default heuristic. |
+| Property               | Type   | Default                | Description                                                                                                                                                                                                                                                  |
+| ---------------------- | ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MaximumParallelTests` | `int?` | `null` (2 x CPU cores) | Maximum number of tests that can execute concurrently. Set to `null` to use the default heuristic.                                                                                                                                                           |
+| `Adaptive`             | `bool` | `false`                | Changes the number of concurrent tests while the run is in progress, based on machine load and throughput. `MaximumParallelTests`, when set, is the highest the limit goes. See [Adaptive Parallelism](/docs/execution/parallelism.md#adaptive-parallelism). |
 
 ### `context.Settings.Display`[​](#contextsettingsdisplay "Direct link to contextsettingsdisplay")
 

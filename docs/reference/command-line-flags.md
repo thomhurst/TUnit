@@ -69,6 +69,10 @@ The default is TestResults in the directory that contains the test application.
 A global test execution timeout.
 Takes one argument as string in the format [h|m|s] where 'value' is float.
 
+--adaptive-parallelism
+Adjust the number of parallel tests while running, based on machine load and throughput
+Programmatic equivalent: context.Settings.Parallelism.Adaptive
+
 --coverage
 Collect the code coverage using dotnet-coverage tool
 
