@@ -16,6 +16,7 @@ public class TUnitSettingsTests
     private TimeSpan _savedForcefulExitTimeout;
     private TimeSpan _savedProcessExitHookDelay;
     private int? _savedMaximumParallelTests;
+    private bool _savedAdaptiveParallelism;
     private bool _savedDetailedStackTrace;
     private bool _savedFailFast;
     private bool _savedFailOnUnobservedTaskExceptions;
@@ -32,6 +33,7 @@ public class TUnitSettingsTests
         _savedForcefulExitTimeout = TUnitSettings.Default.Timeouts.ForcefulExitTimeout;
         _savedProcessExitHookDelay = TUnitSettings.Default.Timeouts.ProcessExitHookDelay;
         _savedMaximumParallelTests = TUnitSettings.Default.Parallelism.MaximumParallelTests;
+        _savedAdaptiveParallelism = TUnitSettings.Default.Parallelism.Adaptive;
         _savedDetailedStackTrace = TUnitSettings.Default.Display.DetailedStackTrace;
         _savedFailFast = TUnitSettings.Default.Execution.FailFast;
         _savedFailOnUnobservedTaskExceptions = TUnitSettings.Default.Execution.FailOnUnobservedTaskExceptions;
@@ -49,6 +51,7 @@ public class TUnitSettingsTests
         TUnitSettings.Default.Timeouts.ForcefulExitTimeout = _savedForcefulExitTimeout;
         TUnitSettings.Default.Timeouts.ProcessExitHookDelay = _savedProcessExitHookDelay;
         TUnitSettings.Default.Parallelism.MaximumParallelTests = _savedMaximumParallelTests;
+        TUnitSettings.Default.Parallelism.Adaptive = _savedAdaptiveParallelism;
         TUnitSettings.Default.Display.DetailedStackTrace = _savedDetailedStackTrace;
         TUnitSettings.Default.Execution.FailFast = _savedFailFast;
         TUnitSettings.Default.Execution.FailOnUnobservedTaskExceptions = _savedFailOnUnobservedTaskExceptions;
@@ -66,6 +69,7 @@ public class TUnitSettingsTests
         await Assert.That(TUnitSettings.Default.Timeouts.ForcefulExitTimeout).IsEqualTo(TimeSpan.FromSeconds(30));
         await Assert.That(TUnitSettings.Default.Timeouts.ProcessExitHookDelay).IsEqualTo(TimeSpan.FromMilliseconds(500));
         await Assert.That(TUnitSettings.Default.Parallelism.MaximumParallelTests).IsNull();
+        await Assert.That(TUnitSettings.Default.Parallelism.Adaptive).IsFalse();
         await Assert.That(TUnitSettings.Default.Display.DetailedStackTrace).IsFalse();
         await Assert.That(TUnitSettings.Default.Execution.FailFast).IsFalse();
         await Assert.That(TUnitSettings.Default.Execution.FailOnUnobservedTaskExceptions).IsFalse();

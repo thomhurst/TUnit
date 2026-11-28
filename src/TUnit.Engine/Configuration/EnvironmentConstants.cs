@@ -29,6 +29,8 @@ internal static class EnvironmentConstants
     // TUnit-specific: Execution
     public const string ExecutionMode = "TUNIT_EXECUTION_MODE";
     public const string MaxParallelTests = "TUNIT_MAX_PARALLEL_TESTS";
+    // Opts in to resizing the parallel test limit from machine load and throughput while tests run.
+    public const string AdaptiveParallelism = "TUNIT_ADAPTIVE_PARALLELISM";
     // Opts out of the thread pool starvation monitor (raises min worker threads when tests block).
     // Takes precedence over TUnitSettings.Execution.ThreadPoolTuningEnabled.
     public const string DisableThreadPoolTuning = "TUNIT_DISABLE_THREADPOOL_TUNING";

@@ -3070,6 +3070,7 @@ namespace .Settings
     }
     public sealed class ParallelismSettings
     {
+        public bool Adaptive { get; set; }
         public int? MaximumParallelTests { get; set; }
     }
     public sealed class ReportingSettings

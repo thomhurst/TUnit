@@ -879,7 +879,8 @@ TUnit.Engine.Services.DynamicTestQueue::WaitToReadAsync
 TUnit.Engine.Scheduling.TestScheduler::ExecuteAllPhasesAsync
 TUnit.Engine.Models.GroupedTests::get_Parallel
 TUnit.Engine.Scheduling.TestScheduler::ExecuteTestsAsync
-TUnit.Engine.Scheduling.MaxParallelismLimiter::get_Semaphore
+TUnit.Engine.Scheduling.MaxParallelismLimiter::WaitAsync
+TUnit.Engine.Scheduling.MaxParallelismLimiter::Release
 TUnit.Engine.Scheduling.TestScheduler::ExecuteWithGlobalLimitAsync
 TUnit.Engine.Models.GroupedTests::get_KeyedNotInParallel
 TUnit.Engine.Scheduling.TestScheduler::RunPhasesConcurrentlyAsync

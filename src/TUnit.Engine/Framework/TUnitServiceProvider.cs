@@ -259,7 +259,7 @@ internal class TUnitServiceProvider : IServiceProvider, IAsyncDisposable
 
         // One --maximum-parallel-tests budget shared by the unconstrained and keyed
         // NotInParallel schedulers, whose phases run concurrently (#7074).
-        var maxParallelismLimiter = new MaxParallelismLimiter(() => TestScheduler.GetMaxParallelism(Logger, CommandLineOptions));
+        var maxParallelismLimiter = new MaxParallelismLimiter(() => TestScheduler.GetParallelismLimits(Logger, CommandLineOptions));
 
         var constraintKeyScheduler = Register<IConstraintKeyScheduler>(new ConstraintKeyScheduler(
             testRunner,

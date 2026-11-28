@@ -27,6 +27,7 @@ public class RunOpenTelemetryTestsModule : Module<CommandResult>
             EnvironmentVariables = new Dictionary<string, string?>
             {
                 ["DISABLE_GITHUB_REPORTER"] = "true",
+                [TestBaseModule.AdaptiveParallelismVariable] = "1",
             },
             Logging = new CommandLoggingOptions
             {

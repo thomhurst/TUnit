@@ -47,6 +47,7 @@ public static class TestApplicationBuilderExtensions
 
         // Core functionality command providers
         testApplicationBuilder.CommandLine.AddProvider(() => new MaximumParallelTestsCommandProvider(extension));
+        testApplicationBuilder.CommandLine.AddProvider(() => new AdaptiveParallelismCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new ParametersCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new FailFastCommandProvider(extension));
         testApplicationBuilder.CommandLine.AddProvider(() => new FailOnUnobservedTaskExceptionsCommandProvider(extension));

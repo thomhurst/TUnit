@@ -179,15 +179,14 @@ internal sealed class ConstraintKeyScheduler : IConstraintKeyScheduler
             // are always running tests, never waiting on keys, so the two never deadlock.
             // Acquired before entering TestRunner so a dependency that reaches this test
             // first runs it inline instead of waiting behind a slot.
-            var semaphore = _maxParallelismLimiter.Semaphore;
-            await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await _maxParallelismLimiter.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 await _testRunner.ExecuteTestWithoutExecutionTaskAsync(test, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
-                semaphore.Release();
+                _maxParallelismLimiter.Release();
             }
         }
         finally

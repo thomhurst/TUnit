@@ -107,7 +107,12 @@ internal sealed class TestScheduler : ITestScheduler
 
         // Covers every phase that runs user code (static property initializers, tests,
         // session hooks) so blocking tests do not delay timers in other tests.
-        using var starvationMonitor = ThreadPoolStarvationMonitor.Start(_maxParallelismLimiter.MaxParallelism, _logger);
+        // Sized for the starting limit: the monitor doubles its raise while starvation continues,
+        // which covers an adaptive limit that has grown since.
+        using var starvationMonitor = ThreadPoolStarvationMonitor.Start(_maxParallelismLimiter.Limits.Initial, _logger);
+
+        // Disposed before the starvation monitor, and only after the session hooks have run.
+        using var adaptiveParallelism = AdaptiveParallelismController.Start(_maxParallelismLimiter, _logger);
 
         // Initialize static properties before tests run
         try
@@ -647,7 +652,7 @@ internal sealed class TestScheduler : ITestScheduler
         // All paths run through the shared limiter so the DOP cap is unified in
         // GetMaxParallelism. "Unlimited" is resolved to the default cap
         // (ProcessorCount * 2) there rather than being a separate code path.
-        return ExecuteWithGlobalLimitAsync(tests, _maxParallelismLimiter.Semaphore, cancellationToken);
+        return ExecuteWithGlobalLimitAsync(tests, _maxParallelismLimiter, cancellationToken);
     }
 
     [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("Test execution involves reflection for hooks and initialization")]
@@ -667,11 +672,13 @@ internal sealed class TestScheduler : ITestScheduler
 #if NET
     private Task ExecuteWithGlobalLimitAsync(
         AbstractExecutableTest[] tests,
-        SemaphoreSlim globalSemaphore,
+        MaxParallelismLimiter limiter,
         CancellationToken cancellationToken)
     {
-        // MaxDegreeOfParallelism bounds this call's workers; the shared semaphore bounds the
+        // MaxDegreeOfParallelism bounds this call's workers; the shared limiter bounds the
         // session, because the keyed phase and dynamic batches run concurrently with this one.
+        // With adaptive parallelism the workers number the highest limit, and those beyond the
+        // current limit wait here for a slot.
         // An uncontended WaitAsync completes synchronously without allocating.
         return Parallel.ForEachAsync(
             tests,
@@ -682,14 +689,14 @@ internal sealed class TestScheduler : ITestScheduler
             },
             async (test, ct) =>
             {
-                await globalSemaphore.WaitAsync(ct).ConfigureAwait(false);
+                await limiter.WaitAsync(ct).ConfigureAwait(false);
                 try
                 {
                     await ExecuteScheduledTestAsync(test, ct).ConfigureAwait(false);
                 }
                 finally
                 {
-                    globalSemaphore.Release();
+                    limiter.Release();
                 }
             }
         );
@@ -697,24 +704,24 @@ internal sealed class TestScheduler : ITestScheduler
 #else
     private async Task ExecuteWithGlobalLimitAsync(
         AbstractExecutableTest[] tests,
-        SemaphoreSlim globalSemaphore,
+        MaxParallelismLimiter limiter,
         CancellationToken cancellationToken)
     {
-        // Fallback for netstandard2.0: Manual bounded concurrency using existing semaphore
+        // Fallback for netstandard2.0: Manual bounded concurrency using the shared limiter
         var tasks = new Task[tests.Length];
         for (var i = 0; i < tests.Length; i++)
         {
             var test = tests[i];
             tasks[i] = Task.Run(async () =>
             {
-                await globalSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                await limiter.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
                     await ExecuteScheduledTestAsync(test, cancellationToken).ConfigureAwait(false);
                 }
                 finally
                 {
-                    globalSemaphore.Release();
+                    limiter.Release();
                 }
             }, CancellationToken.None);
         }
@@ -747,8 +754,53 @@ internal sealed class TestScheduler : ITestScheduler
         return Task.WhenAll(a, b);
     }
 
-    internal static int GetMaxParallelism(ILogger logger, ICommandLineOptions commandLineOptions)
+    /// <summary>
+    /// Resolves the limits the parallel test budget moves between. They are all the configured
+    /// maximum unless adaptive parallelism is enabled.
+    /// </summary>
+    internal static ParallelismLimits GetParallelismLimits(ILogger logger, ICommandLineOptions commandLineOptions)
     {
+        var maxParallelism = GetMaxParallelism(logger, commandLineOptions, out var isConfigured);
+
+        var adaptive = commandLineOptions.IsOptionSet(AdaptiveParallelismCommandProvider.AdaptiveParallelism)
+            || EnvironmentFlags.IsSet(EnvironmentConstants.AdaptiveParallelism)
+            || TUnitSettings.Default.Parallelism.Adaptive;
+
+        if (!adaptive)
+        {
+            return ParallelismLimits.Fixed(maxParallelism);
+        }
+
+        if (!AdaptiveParallelismController.IsSupported)
+        {
+            // An adaptive limit starts at the default and relies on the controller to raise
+            // it, so without a controller it would hold a configured maximum down.
+            logger.LogDebug("Adaptive parallelism requires .NET 8 or later on Windows, Linux or macOS; the parallel test limit stays fixed");
+            return ParallelismLimits.Fixed(maxParallelism);
+        }
+
+        return GetAdaptiveLimits(isConfigured ? maxParallelism : null, Environment.ProcessorCount);
+    }
+
+    /// <summary>
+    /// The run starts at the limit a fixed run would use: the configured maximum, or 2 per
+    /// processor. A configured maximum is also a hard upper bound; without one the limit may
+    /// grow to 8 per processor. The limit never goes below a quarter of the default (or of a
+    /// lower configured maximum), so pressure from elsewhere on the machine cannot stall the run.
+    /// </summary>
+    internal static ParallelismLimits GetAdaptiveLimits(int? configuredMaxParallelism, int processorCount)
+    {
+        var maximum = configuredMaxParallelism ?? processorCount * 8;
+        var initial = configuredMaxParallelism ?? processorCount * 2;
+        var minimum = Math.Max(1, Math.Min(initial, processorCount * 2) / 4);
+        return new ParallelismLimits(initial, minimum, maximum);
+    }
+
+    private static int GetMaxParallelism(ILogger logger, ICommandLineOptions commandLineOptions, out bool isConfigured)
+    {
+        // "Unlimited" (0) and no configuration both leave the choice of limit to TUnit.
+        isConfigured = false;
+
         // "Unlimited" (caller passed 0) resolves to the same cap as the default path.
         // Parallel.ForEachAsync with MaxDegreeOfParallelism = -1 is truly unbounded —
         // with thousands of tests this saturates IOCP threads, so we always apply a cap.
@@ -771,6 +823,7 @@ internal sealed class TestScheduler : ITestScheduler
             if (maxParallelTests > 0)
             {
                 logger.LogDebug($"Maximum parallel tests limit set to {maxParallelTests} (from command line)");
+                isConfigured = true;
                 return maxParallelTests;
             }
         }
@@ -788,6 +841,7 @@ internal sealed class TestScheduler : ITestScheduler
             if (envLimit > 0)
             {
                 logger.LogDebug($"Maximum parallel tests limit set to {envLimit} (from TUNIT_MAX_PARALLEL_TESTS environment variable)");
+                isConfigured = true;
                 return envLimit;
             }
         }
@@ -802,6 +856,7 @@ internal sealed class TestScheduler : ITestScheduler
             }
 
             logger.LogDebug($"Maximum parallel tests limit set to {codeLimit} (from TUnitSettings)");
+            isConfigured = true;
             return codeLimit;
         }
 
