@@ -86,11 +86,12 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
             var dependencyParameterTypes = dependsOnAttribute.ConstructorArguments
                 .FirstOrNull(x => x.Kind == TypedConstantKind.Array)
                 ?.Values
-                .Select(x => (INamedTypeSymbol) x.Value!)
+                .Select(x => x.Value as ITypeSymbol)
                 .ToArray();
 
             if (dependencyType is not INamedTypeSymbol namedTypeSymbol)
             {
+                context.ReportDiagnostic(Diagnostic.Create(Rules.NoMethodFound, dependsOnAttribute.GetLocation()));
                 continue;
             }
 
@@ -161,7 +162,7 @@ public class DependsOnConflictAnalyzer : ConcurrentDiagnosticAnalyzer
     }
 
     private static IMethodSymbol[] FilterMethods(string? dependencyMethodName, IMethodSymbol[] methods,
-        INamedTypeSymbol[]? dependencyParameterTypes)
+        ITypeSymbol?[]? dependencyParameterTypes)
     {
         if (dependencyMethodName == null)
         {
