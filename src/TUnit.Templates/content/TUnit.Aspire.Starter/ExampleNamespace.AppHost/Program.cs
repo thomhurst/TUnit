@@ -2,9 +2,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var cache = builder.AddRedis("cache");
 
-var apiService = builder.AddProject<Projects.ExampleNamespace_ApiService>("apiservice");
+var apiService = builder.AddDotnetProject("apiservice", "../ExampleNamespace.ApiService/ExampleNamespace.ApiService.csproj");
 
-builder.AddProject<Projects.ExampleNamespace_WebApp>("webfrontend")
+builder.AddDotnetProject("webfrontend", "../ExampleNamespace.WebApp/ExampleNamespace.WebApp.csproj")
     .WithExternalHttpEndpoints()
     .WithReference(cache)
     .WaitFor(cache)

@@ -13,7 +13,7 @@ var rabbitmq = builder.AddRabbitMQ("rabbitmq")
     .WithManagementPlugin();
 
 // API Service
-var apiService = builder.AddProject<Projects.CloudShop_ApiService>("apiservice")
+var apiService = builder.AddDotnetProject("apiservice", "../CloudShop.ApiService/CloudShop.ApiService.csproj")
     .WithReference(postgres)
     .WithReference(redis)
     .WithReference(rabbitmq)
@@ -24,7 +24,7 @@ var apiService = builder.AddProject<Projects.CloudShop_ApiService>("apiservice")
     .WithoutHttpsCertificate();
 
 // Worker Service
-builder.AddProject<Projects.CloudShop_Worker>("worker")
+builder.AddDotnetProject("worker", "../CloudShop.Worker/CloudShop.Worker.csproj")
     .WithReference(postgres)
     .WithReference(rabbitmq)
     .WaitFor(postgres)
@@ -33,7 +33,7 @@ builder.AddProject<Projects.CloudShop_Worker>("worker")
     .WithoutHttpsCertificate();
 
 // Web Frontend
-builder.AddProject<Projects.CloudShop_Web>("webfrontend")
+builder.AddDotnetProject("webfrontend", "../CloudShop.Web/CloudShop.Web.csproj")
     .WithExternalHttpEndpoints()
     .WithReference(apiService)
     .WaitFor(apiService)
