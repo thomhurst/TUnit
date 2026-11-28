@@ -30,14 +30,14 @@ runs:
   steps:
     - name: Install GitVersion
       if: github.event_name != 'release'
-      uses: gittools/actions/gitversion/setup@v4
+      uses: gittools/actions/gitversion/setup@v5.0.0
       with:
         versionSpec: '6.7.x'
 
     - name: Determine Version
       if: github.event_name != 'release'
       id: gitversion
-      uses: gittools/actions/gitversion/execute@v4
+      uses: gittools/actions/gitversion/execute@v5.0.0
 
     # The GV_/RELEASE_ prefixes keep these apart from the action's own GitVersion_* variables:
     # Windows environment names are case-insensitive, so GITVERSION_SEMVER would merge with
