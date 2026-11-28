@@ -162,6 +162,32 @@ public class LinuxMachineResourceReaderTests
     }
 
     [Test]
+    public async Task A_Parent_That_Becomes_Readable_Again_Is_Not_New_Throttling()
+    {
+        var files = new Dictionary<string, string?>
+        {
+            ["/proc/stat"] = ProcStat,
+            ["/proc/meminfo"] = MemInfo,
+            ["/proc/self/cgroup"] = "0::/parent/child\n",
+            ["/proc/self/mountinfo"] = CgroupV2Mount,
+            ["/sys/fs/cgroup/parent/child/cpu.stat"] = "throttled_usec 1000\n",
+        };
+        var sampler = new MachineResourceSampler(Reader(files));
+        var second = System.Diagnostics.Stopwatch.Frequency;
+
+        // The parent's file cannot be read at first, so only the child is in the sum.
+        sampler.Sample(1);
+
+        // It can now, and brings its whole history with it. Neither counter has advanced.
+        files["/sys/fs/cgroup/parent/cpu.stat"] = "throttled_usec 90000000\n";
+        await Assert.That(sampler.Sample(1 + second).CpuStalled).IsFalse();
+
+        // With the same groups in both sums, new throttling counts again.
+        files["/sys/fs/cgroup/parent/cpu.stat"] = "throttled_usec 90500000\n";
+        await Assert.That(sampler.Sample(1 + 2 * second).CpuStalled).IsTrue();
+    }
+
+    [Test]
     public async Task Pressure_Comes_From_The_Control_Group_When_It_Has_Any()
     {
         var reader = Reader(new()

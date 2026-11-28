@@ -51,25 +51,33 @@ internal sealed class LinuxMachineResourceReader : IMachineResourceReader
             total,
             memoryTotal,
             memoryAvailable,
-            ReadThrottledMicroseconds(),
+            ReadThrottledMicroseconds(out var throttledSources),
             cpuStall,
             FindPressureTotal(ReadCgroupFile("memory.pressure")),
             hostCpuStall,
-            FindPressureTotal(Read("/proc/pressure/memory")));
+            FindPressureTotal(Read("/proc/pressure/memory")),
+            throttledSources);
         return true;
     }
 
     // cpu.stat counts only the throttling of the quota set on that control group, so a quota
     // on a parent shows in the parent's file. The sum covers every level that is visible.
-    private long? ReadThrottledMicroseconds()
+    // The sources value has one bit per level that contributed, the process's own group first,
+    // so the sampler can tell when the sum is made of different groups than last time.
+    private long? ReadThrottledMicroseconds(out int sources)
     {
         long? throttled = null;
+        sources = 0;
+        var level = 0;
 
-        for (var directory = _cgroupDirectory; directory is not null && _cgroupMount is not null; directory = GetParent(directory))
+        for (var directory = _cgroupDirectory; directory is not null && _cgroupMount is not null; directory = GetParent(directory), level++)
         {
             if (FindCounter(Read(Combine(directory, "cpu.stat")), "throttled_usec") is { } value)
             {
                 throttled = (throttled ?? 0) + value;
+
+                // Hierarchies deeper than 31 levels share the last bit.
+                sources |= 1 << Math.Min(level, 30);
             }
 
             if (directory == _cgroupMount)

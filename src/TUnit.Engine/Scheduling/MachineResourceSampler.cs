@@ -16,6 +16,7 @@ namespace TUnit.Engine.Scheduling;
 /// <param name="MemoryStallMicroseconds">How long at least one task in this process's control group has waited for memory to be reclaimed.</param>
 /// <param name="HostCpuStallMicroseconds">The same for the whole host. Read only when the control group's figure is not available.</param>
 /// <param name="HostMemoryStallMicroseconds">The same for the whole host.</param>
+/// <param name="ThrottledSources">Identifies which control groups <paramref name="ThrottledMicroseconds"/> adds up. Two totals compare only when it is the same.</param>
 internal readonly record struct MachineResourceReading(
     long CpuIdle,
     long CpuTotal,
@@ -25,7 +26,8 @@ internal readonly record struct MachineResourceReading(
     long? CpuStallMicroseconds = null,
     long? MemoryStallMicroseconds = null,
     long? HostCpuStallMicroseconds = null,
-    long? HostMemoryStallMicroseconds = null);
+    long? HostMemoryStallMicroseconds = null,
+    int ThrottledSources = 0);
 
 internal interface IMachineResourceReader
 {
@@ -127,7 +129,10 @@ internal sealed class MachineResourceSampler
 
         // Each counter is compared only with its own previous value, so a reader that switches
         // from one source to another never subtracts two unrelated totals.
-        var cpuStalled = Stalled(reading.ThrottledMicroseconds, previous.ThrottledMicroseconds, elapsedMicroseconds)
+        // The throttled total adds up several control groups. When one of them drops out of the
+        // sum or comes back, the totals differ by its whole history, not by new throttling.
+        var cpuStalled = (reading.ThrottledSources == previous.ThrottledSources
+                && Stalled(reading.ThrottledMicroseconds, previous.ThrottledMicroseconds, elapsedMicroseconds))
             || Stalled(reading.CpuStallMicroseconds, previous.CpuStallMicroseconds, elapsedMicroseconds)
             || Stalled(reading.HostCpuStallMicroseconds, previous.HostCpuStallMicroseconds, elapsedMicroseconds);
         var memoryStalled = Stalled(reading.MemoryStallMicroseconds, previous.MemoryStallMicroseconds, elapsedMicroseconds)
