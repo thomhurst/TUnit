@@ -463,6 +463,25 @@ public class GitHubReporterTests
         output.ShouldContain("FailingTest");
     }
 
+    [Test]
+    public async Task AfterRunAsync_Escapes_Test_Names_In_Summary()
+    {
+        var (reporter, outputFile) = await SetupReporter();
+        var hostileName = $"T1(\"a|b\nc</details><!-- `x` {GitHubSummaryRegion.EndMarker}\")";
+
+        await FeedTestMessages(reporter,
+            CreateFailedTestMessage("1", hostileName, "Svc", new InvalidOperationException("oops")),
+            CreateCancelledTestMessage("2", "C<b>|\n", "Svc")
+        );
+
+        await reporter.AfterRunAsync(1, CancellationToken.None);
+
+        var output = await File.ReadAllTextAsync(outputFile);
+        output.ShouldContain("| `Svc.T1(\"a\\|b c</details><!-- 'x' &lt;!-- tunit:aggregated-summary:end -->\")` |");
+        output.ShouldNotContain(GitHubSummaryRegion.EndMarker);
+        output.ShouldContain("<td>Svc.C&lt;b&gt;&#124; </td>");
+    }
+
     private string CreateTempFile()
     {
         var path = Path.GetTempFileName();

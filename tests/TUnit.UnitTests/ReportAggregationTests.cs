@@ -400,6 +400,18 @@ public class GitHubSummaryRegionTests
         await Assert.That(updated).Contains("NEW");
         await Assert.That(updated).DoesNotContain("OLD");
     }
+
+    [Test]
+    public async Task Splice_Ignores_Markers_Inside_Content()
+    {
+        // A test name carrying marker text must not leave a stale block behind on the next rewrite.
+        var hostile = $"name {GitHubSummaryRegion.EndMarker} x {GitHubSummaryRegion.StartMarker} y";
+        var first = GitHubSummaryRegion.Splice("before\n", $"V1 {hostile}");
+        var second = GitHubSummaryRegion.Splice(first + "after\n", $"V2 {hostile}");
+        var third = GitHubSummaryRegion.Splice(second, "V3");
+
+        await Assert.That(third).IsEqualTo($"before\n{GitHubSummaryRegion.StartMarker}\nV3\n{GitHubSummaryRegion.EndMarker}\nafter\n");
+    }
 }
 
 public class AggregatedSummaryWriterTests
@@ -433,6 +445,64 @@ public class AggregatedSummaryWriterTests
         await Assert.That(markdown).Contains("✅ TUnit Test Results — 1 suite");
         await Assert.That(markdown).DoesNotContain("Failures by Cause");
         await Assert.That(markdown).DoesNotContain("Quick diagnosis");
+    }
+    [Test]
+    public async Task Render_Escapes_Test_Data_In_Tables()
+    {
+        const string hostile = "Divides(\"a|b\r\nc\u2028### Heading\n</details><!-- hidden `tick`\")";
+        var suite = TestReportData.Build("A.Tests");
+        var failing = suite.Groups[0].Tests[1];
+        suite.Groups[0].Tests[1] = new ReportTestResult
+        {
+            Id = failing.Id,
+            DisplayName = hostile,
+            MethodName = failing.MethodName,
+            ClassName = failing.ClassName,
+            Status = failing.Status,
+            DurationMs = failing.DurationMs,
+            StartTime = failing.StartTime,
+            Exception = new ReportExceptionData { Type = "My.Bad<Type>|Exception", Message = "boom" },
+            LineNumber = failing.LineNumber,
+            SourceRelativePath = "tests/a|b)<x>.cs",
+        };
+        suite.ArtifactUrl = "javascript:alert(1)";
+
+        var markdown = AggregatedSummaryWriter.Render([suite], collapsible: true, serverUrl: "https://github.com");
+        var lines = markdown.Split('\n');
+
+        var row = lines.Single(l => l.Contains("Divides("));
+        await Assert.That(row).IsEqualTo(
+            "| `CalculatorTests.Divides(\"a\\|b c ### Heading </details><!-- hidden 'tick'\")` " +
+            "[a&#124;b)&lt;x&gt;.cs:42](https://github.com/acme/repo/blob/abc123/tests/a%7Cb%29%3Cx%3E.cs#L42) | `A.Tests` | 20ms |");
+        await Assert.That(lines).DoesNotContain(l => l.StartsWith("###", StringComparison.Ordinal) && l.Contains("Heading"));
+        await Assert.That(markdown).Contains("<summary>Bad&lt;Type&gt;&#124;Exception (1 test)</summary>");
+        await Assert.That(markdown).DoesNotContain("javascript:");
+        await Assert.That(markdown).DoesNotContain("[View]");
+    }
+
+    [Test]
+    [Arguments("javascript:alert(1)", null)]
+    [Arguments("file:///etc/passwd", null)]
+    [Arguments("not a url", null)]
+    [Arguments("https://example.com/a b(c)", "https://example.com/a%20b%28c%29")]
+    [Arguments("http://example.com/", "http://example.com/")]
+    public async Task SafeUrl_Allows_Only_Http_Links(string input, string? expected)
+    {
+        await Assert.That(AggregatedSummaryWriter.SafeUrl(input)).IsEqualTo(expected);
+    }
+
+    [Test]
+    public async Task Code_Escapes_Pipes_Only_In_Table_Cells()
+    {
+        await Assert.That(AggregatedSummaryWriter.Code("T(\"a|b`c\")")).IsEqualTo("T(\"a\\|b'c\")");
+        await Assert.That(AggregatedSummaryWriter.Code("T(\"a|b`c\")", inTable: false)).IsEqualTo("T(\"a|b'c\")");
+    }
+
+    [Test]
+    public async Task Text_Encodes_Html_And_Table_Syntax()
+    {
+        await Assert.That(AggregatedSummaryWriter.Text("a|b\r\n<c>&[d]\u0085e"))
+            .IsEqualTo("a&#124;b &lt;c&gt;&amp;&#91;d&#93; e");
     }
 }
 
